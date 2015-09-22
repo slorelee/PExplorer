@@ -26,10 +26,6 @@
  //
 
 
-#include "utility/xmlstorage.h"
-
-using namespace XMLStorage;
-
 #include "taskbar/favorites.h"
 
 
@@ -264,8 +260,8 @@ extern struct ExplorerGlobals
 	void	read_persistent();
 	void	write_persistent();
 
-	XMLPos	get_cfg();
-	XMLPos	get_cfg(const char* path);
+	//XMLPos	get_cfg();
+	//XMLPos	get_cfg(const char* path);
 
 	HINSTANCE	_hInstance;
 	UINT		_cfStrFName;
@@ -292,7 +288,7 @@ extern struct ExplorerGlobals
 
 	Desktops	_desktops;
 
-	XMLDoc		_cfg;
+	//XMLDoc		_cfg;
 	String		_cfg_dir;
 	String		_cfg_path;
 

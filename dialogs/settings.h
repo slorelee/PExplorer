@@ -72,7 +72,7 @@ struct TaskbarSettingsDlg : public PropSheetPageDlg
 	virtual int Notify(int id, NMHDR* pnmh);
 
 protected:
-	XMLDoc	_cfg_org;
+
 };
 
 

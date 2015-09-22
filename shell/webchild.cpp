@@ -26,7 +26,11 @@
  //
 
 
+
 #include <precomp.h>
+#include <Windows.h>
+#include <comdef.h>
+#include <comutil.h>
 
 #include "../resource.h"
 

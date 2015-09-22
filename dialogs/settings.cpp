@@ -104,7 +104,11 @@ int DesktopSettingsDlg::Notify(int id, NMHDR* pnmh)
 {
 	switch(pnmh->code) {
 	  case PSN_QUERYINITIALFOCUS:
+#ifdef _WIN64
+		SetWindowLongPtr(_hwnd, DWLP_MSGRESULT, (LPARAM)GetDlgItem(_hwnd, IDC_ICON_ALIGN_0+_alignment_cur));
+#else
 		SetWindowLongPtr(_hwnd, DWL_MSGRESULT, (LPARAM)GetDlgItem(_hwnd, IDC_ICON_ALIGN_0+_alignment_cur));
+#endif
 		break;
 
 	  case PSN_APPLY:
@@ -156,24 +160,21 @@ int	DesktopSettingsDlg::Command(int id, int code)
 
 
 TaskbarSettingsDlg::TaskbarSettingsDlg(HWND hwnd)
- :	super(hwnd),
-	_cfg_org(g_Globals._cfg)
+ :	super(hwnd)
 {
-	XMLPos options = g_Globals.get_cfg("desktopbar/options");
+	//XMLPos options = g_Globals.get_cfg("desktopbar/options");
 
- 	CheckDlgButton(hwnd, ID_SHOW_CLOCK, XMLBool(options, "show-clock", true)? BST_CHECKED: BST_UNCHECKED);
-	CheckDlgButton(hwnd, ID_HIDE_INACTIVE_ICONS, XMLBool(options, "hide-inactive", true)? BST_CHECKED: BST_UNCHECKED);
+ 	//CheckDlgButton(hwnd, ID_SHOW_CLOCK, XMLBool(options, "show-clock", true)? BST_CHECKED: BST_UNCHECKED);
+	//CheckDlgButton(hwnd, ID_HIDE_INACTIVE_ICONS, XMLBool(options, "hide-inactive", true)? BST_CHECKED: BST_UNCHECKED);
 }
 
 int TaskbarSettingsDlg::Notify(int id, NMHDR* pnmh)
 {
 	switch(pnmh->code) {
 	  case PSN_APPLY:
-		_cfg_org = g_Globals._cfg;
 		break;
 
 	  case PSN_RESET:
-		g_Globals._cfg = _cfg_org;
 		SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
 		break;
 
@@ -186,28 +187,28 @@ int TaskbarSettingsDlg::Notify(int id, NMHDR* pnmh)
 
 int	TaskbarSettingsDlg::Command(int id, int code)
 {
-	switch(id) {
-	  case ID_CONFIG_NOTIFYAREA:
-		Dialog::DoModal(IDD_NOTIFYAREA, WINDOW_CREATOR(TrayNotifyDlg), _hwnd);
-		break;
+	//switch(id) {
+	//  case ID_CONFIG_NOTIFYAREA:
+	//	Dialog::DoModal(IDD_NOTIFYAREA, WINDOW_CREATOR(TrayNotifyDlg), _hwnd);
+	//	break;
 
-	  case ID_SHOW_CLOCK: {
-		XMLBoolRef boolRef1(XMLPos(g_Globals.get_cfg("desktopbar/options")), "show-clock", true);
-		boolRef1.toggle();
-		SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
-		PropSheet_Changed(GetParent(_hwnd), _hwnd);
-		break;}
+	//  case ID_SHOW_CLOCK: {
+	//	XMLBoolRef boolRef1(XMLPos(g_Globals.get_cfg("desktopbar/options")), "show-clock", true);
+	//	boolRef1.toggle();
+	//	SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
+	//	PropSheet_Changed(GetParent(_hwnd), _hwnd);
+	//	break;}
 
-	  case ID_HIDE_INACTIVE_ICONS: {
-		XMLBoolRef boolRef2(XMLPos(g_Globals.get_cfg("notify-icons/options")), "hide-inactive", true);
-        boolRef2.toggle();
-		SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
-		PropSheet_Changed(GetParent(_hwnd), _hwnd);
-		break;}
+	//  case ID_HIDE_INACTIVE_ICONS: {
+	//	XMLBoolRef boolRef2(XMLPos(g_Globals.get_cfg("notify-icons/options")), "hide-inactive", true);
+ //       boolRef2.toggle();
+	//	SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
+	//	PropSheet_Changed(GetParent(_hwnd), _hwnd);
+	//	break;}
 
-	  default:
-		return 1;
-	}
+	//  default:
+	//	return 1;
+	//}
 
 	return 0;
 }
@@ -236,15 +237,15 @@ MdiSdiDlg::MdiSdiDlg(HWND hwnd)
 {
 	CenterWindow(hwnd);
 
-	XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
-	bool mdi = XMLBool(explorer_options, "mdi", true);
-	bool separateFolders = XMLBool(explorer_options, "separate-folders", true);
+	//XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
+	//bool mdi = XMLBool(explorer_options, "mdi", true);
+	//bool separateFolders = XMLBool(explorer_options, "separate-folders", true);
 
-	int id = mdi? IDC_MDI: IDC_SDI;
-	CheckDlgButton(hwnd, id, BST_CHECKED);
-	SetFocus(GetDlgItem(hwnd, id));
+	//int id = mdi? IDC_MDI: IDC_SDI;
+	//CheckDlgButton(hwnd, id, BST_CHECKED);
+	//SetFocus(GetDlgItem(hwnd, id));
 
-	CheckDlgButton(hwnd, IDC_SEPARATE_SUBFOLDERS, separateFolders?BST_CHECKED:BST_UNCHECKED);
+	//CheckDlgButton(hwnd, IDC_SEPARATE_SUBFOLDERS, separateFolders?BST_CHECKED:BST_UNCHECKED);
 }
 
 int	MdiSdiDlg::Command(int id, int code)
@@ -252,13 +253,13 @@ int	MdiSdiDlg::Command(int id, int code)
 	if (code == BN_CLICKED) {
 		switch(id) {
 		  case IDOK: {
-			bool mdi = IsDlgButtonChecked(_hwnd, IDC_MDI)==BST_CHECKED;
-			bool separateFolders = IsDlgButtonChecked(_hwnd, IDC_SEPARATE_SUBFOLDERS)==BST_CHECKED;
+			//bool mdi = IsDlgButtonChecked(_hwnd, IDC_MDI)==BST_CHECKED;
+			//bool separateFolders = IsDlgButtonChecked(_hwnd, IDC_SEPARATE_SUBFOLDERS)==BST_CHECKED;
 
-			XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
+			//XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
 
-			XMLBoolRef(explorer_options, "mdi") = mdi;
-			XMLBoolRef(explorer_options, "separate-folders") = separateFolders;
+			//XMLBoolRef(explorer_options, "mdi") = mdi;
+			//XMLBoolRef(explorer_options, "separate-folders") = separateFolders;
 		  } // fall through
 
 		  case IDCANCEL:

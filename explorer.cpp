@@ -28,7 +28,7 @@
  //
 
 
-#include <precomp.h>    // <precomp.h> instead of "precomp.h" because the ROS build system needs this to find the precompiled header file (*.gch) in the output directory tree
+#include "precomp.h"
 
 #include "resource.h"
 
@@ -96,15 +96,15 @@ void ExplorerGlobals::read_persistent()
     _cfg_dir.printf(TEXT("%s\\ReactOS"), (LPCTSTR)SpecialFolderFSPath(CSIDL_APPDATA,0));
     _cfg_path.printf(TEXT("%s\\ros-explorer-cfg.xml"), _cfg_dir.c_str());
 
-    if (!_cfg.read_file(_cfg_path)) {
-        if (!_cfg._errors.empty()) {
-            MessageBox(_hwndDesktop,
-                       _cfg._errors.str(),
-                       TEXT("ROS Explorer - reading user settings"),
-                       MB_OK);
-        }
-        _cfg.read_file(TEXT("explorer-cfg-template.xml"));
-    }
+    //if (!_cfg.read_file(_cfg_path)) {
+    //    if (!_cfg._errors.empty()) {
+    //        MessageBox(_hwndDesktop,
+    //                   _cfg._errors.str(),
+    //                   TEXT("ROS Explorer - reading user settings"),
+    //                   MB_OK);
+    //    }
+    //    _cfg.read_file(TEXT("explorer-cfg-template.xml"));
+    //}
 
      // read bookmarks
     _favorites_path.printf(TEXT("%s\\ros-explorer-bookmarks.xml"), _cfg_dir.c_str());
@@ -119,30 +119,28 @@ void ExplorerGlobals::write_persistent()
 {
      // write configuration file
     RecursiveCreateDirectory(_cfg_dir);
-
-    _cfg.write_file(_cfg_path);
     _favorites.write(_favorites_path);
 }
 
 
-XMLPos ExplorerGlobals::get_cfg()
-{
-    XMLPos cfg_pos(&_cfg);
-
-    cfg_pos.smart_create("explorer-cfg");
-
-    return cfg_pos;
-}
-
-XMLPos ExplorerGlobals::get_cfg(const char* path)
-{
-    XMLPos cfg_pos(&_cfg);
-
-    cfg_pos.smart_create("explorer-cfg");
-    cfg_pos.create_relative(path);
-
-    return cfg_pos;
-}
+//XMLPos ExplorerGlobals::get_cfg()
+//{
+//    XMLPos cfg_pos(&_cfg);
+//
+//    cfg_pos.smart_create("explorer-cfg");
+//
+//    return cfg_pos;
+//}
+//
+//XMLPos ExplorerGlobals::get_cfg(const char* path)
+//{
+//    XMLPos cfg_pos(&_cfg);
+//
+//    cfg_pos.smart_create("explorer-cfg");
+//    cfg_pos.create_relative(path);
+//
+//    return cfg_pos;
+//}
 
 
 void _log_(LPCTSTR txt)
@@ -825,10 +823,10 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
 
         if((SelectOpt == TRUE) && (PathFileExists(option)))
         {
-            WCHAR szDir[MAX_PATH];
+            TCHAR szDir[MAX_PATH];
 
-            _wsplitpath(option, szPath, szDir, NULL, NULL);
-            wcscat(szPath, szDir);
+            _tsplitpath(option, szPath, szDir, NULL, NULL);
+            _tcscat(szPath, szDir);
             PathRemoveBackslash(szPath);
             _path = szPath;
             SelectOpt = FALSE;
@@ -1187,7 +1185,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (_tcsstr(ext_options,TEXT("-break"))) {
         LOG(TEXT("debugger breakpoint"));
 #ifdef _MSC_VER
-        __asm int 3
+        DebugBreak();
 #else
         asm("int3");
 #endif

@@ -93,10 +93,10 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
 		if (SUCCEEDED(hr))
 			if (attribs & SFGAO_FOLDER) {
 				try {
-					XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
+					//XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
 
-					bool mdi = XMLBool(explorer_options, "mdi", true);
-					bool separateFolders = XMLBool(explorer_options, "separate-folders", false);
+					bool mdi = true; //XMLBool(explorer_options, "mdi", true);
+					bool separateFolders = false; //XMLBool(explorer_options, "separate-folders", false);
 
 					ShellPath pidl_abs = ShellPath(pidl).create_absolute_pidl(parent_pidl);
 					LOG(FmtString(TEXT("MainFrameBase::OpenShellFolders(): pidl_abs=%s"), (LPCTSTR)FileSysShellPath(pidl_abs)));

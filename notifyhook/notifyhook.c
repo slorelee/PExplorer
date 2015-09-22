@@ -25,7 +25,7 @@
  // Martin Fuchs, 17.03.2004
  //
 
-
+#include <Windows.h>
 #include "../utility/utility.h"
 
 #include "notifyhook.h"

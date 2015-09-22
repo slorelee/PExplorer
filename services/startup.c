@@ -56,8 +56,6 @@
 #include <windows.h>
 #include <ctype.h>
 
-EXTERN_C HRESULT WINAPI SHCreateSessionKey(REGSAM samDesired, PHKEY phKey);
-
 /**
  * Performs the rename operations dictated in %SystemRoot%\Wininit.ini.
  * Returns FALSE if there was an error, or otherwise if all is ok.
@@ -434,8 +432,6 @@ int startup(int argc, const char *argv[])
     /* First, set the current directory to SystemRoot */
     TCHAR gen_path[MAX_PATH];
     DWORD res;
-    HKEY hSessionKey, hKey;
-    HRESULT hr;
 
     res = GetWindowsDirectory(gen_path, sizeof(gen_path));
 
@@ -452,25 +448,6 @@ int startup(int argc, const char *argv[])
         wprintf(L"Cannot set the dir to %s (%ld)\n", gen_path, GetLastError());
 
         return 100;
-    }
-
-    hr = SHCreateSessionKey(KEY_WRITE, &hSessionKey);
-    if (SUCCEEDED(hr))
-    {
-        LONG Error;
-        DWORD dwDisp;
-
-        Error = RegCreateKeyEx(hSessionKey, L"StartupHasBeenRun", 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp);
-        RegCloseKey(hSessionKey);
-        if (Error == ERROR_SUCCESS)
-        {
-            RegCloseKey(hKey);
-            if (dwDisp == REG_OPENED_EXISTING_KEY)
-            {
-                /* Startup programs has already been run */
-                return 0;
-            }
-        }
     }
 
     if (argc > 1)

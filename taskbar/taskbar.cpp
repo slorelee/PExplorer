@@ -46,6 +46,10 @@ DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("sh
 #define RSH_REGISTER_TASKMAN	3
 */
 
+#ifdef _WIN64
+#define GCL_HICON GCLP_HICON
+#define GCL_HICONSM GCLP_HICONSM
+#endif
 
 TaskBarEntry::TaskBarEntry()
 {
@@ -328,13 +332,13 @@ HICON get_window_icon_small(HWND hwnd)
 {
 	HICON hIcon = 0;
 
-	SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL2, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+	SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL2, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (!hIcon)
 		hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICONSM);
@@ -343,7 +347,7 @@ HICON get_window_icon_small(HWND hwnd)
 		hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICON);
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_QUERYDRAGICON, 0, 0, 0, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_QUERYDRAGICON, 0, 0, 0, 1000, (PDWORD_PTR)&hIcon);
 
 	return hIcon;
 }
@@ -352,13 +356,13 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
 {
 	HICON hIcon = 0;
 
-	SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+	SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL2, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL2, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_GETICON, ICON_SMALL, 0, SMTO_ABORTIFHUNG, 1000, (PDWORD_PTR)&hIcon);
 
 	if (allow_from_class) {
 		if (!hIcon)
@@ -369,7 +373,7 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
 	}
 
 	if (!hIcon)
-		SendMessageTimeout(hwnd, WM_QUERYDRAGICON, 0, 0, 0, 1000, (LPDWORD)&hIcon);
+		SendMessageTimeout(hwnd, WM_QUERYDRAGICON, 0, 0, 0, 1000, (PDWORD_PTR)&hIcon);
 
 	return hIcon;
 }

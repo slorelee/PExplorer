@@ -40,8 +40,8 @@ struct Bookmark
 	int		_icon_idx;
 
 	bool	read_url(LPCTSTR path);
-	bool	read(const_XMLPos& pos);
-	void	write(XMLPos& pos) const;
+	//bool	read(const_XMLPos& pos);
+	//void	write(XMLPos& pos) const;
 };
 
 struct BookmarkFolder;
@@ -77,8 +77,8 @@ struct BookmarkList : public list<BookmarkNode>
 {
 	void	import_IE_favorites(struct ShellDirectory& dir, HWND hwnd);
 
-	void	read(const_XMLPos& pos);
-	void	write(XMLPos& pos) const;
+	//void	read(const_XMLPos& pos);
+	//void	write(XMLPos& pos) const;
 
 	void	fill_tree(HWND hwnd, HTREEITEM parent, HIMAGELIST, HDC hdc_wnd) const;
 };
@@ -89,8 +89,8 @@ struct BookmarkFolder
 	String	_description;
 	BookmarkList _bookmarks;
 
-	void	read(const_XMLPos& pos);
-	void	write(XMLPos& pos) const;
+	//void	read(const_XMLPos& pos);
+	//void	write(XMLPos& pos) const;
 };
 
 struct Favorites : public BookmarkList

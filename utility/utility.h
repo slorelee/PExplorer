@@ -131,7 +131,7 @@ extern void _log_(LPCTSTR txt);
 #define	A2nU(s, d, l) MultiByteToWideChar(CP_ACP, 0, s, l, d, l)
 
 
-#ifdef __WINE__
+#ifdef _WINE_
 #ifdef UNICODE
 extern void _wsplitpath(const WCHAR* path, WCHAR* drv, WCHAR* dir, WCHAR* name, WCHAR* ext);
 #else

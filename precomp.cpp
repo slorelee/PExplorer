@@ -25,4 +25,5 @@
  // Martin Fuchs, 17.05.2004
  //
 
+#include <windows.h>
 #include "precomp.h"

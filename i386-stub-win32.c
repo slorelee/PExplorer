@@ -91,7 +91,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include <Windows.h>
 #include "utility/utility.h"	// for strcpy_s()
 
 /************************************************************************
@@ -451,11 +451,10 @@ _returnFromException ()
 
 
 #ifdef _MSC_VER //MF
-#define BREAKPOINT() __asm int 3;
+#define BREAKPOINT() DebugBreak();
 #else
 #define BREAKPOINT() asm("   int $3");
 #endif
-
 
 #ifdef WIN32 //MF
 
@@ -467,7 +466,7 @@ void handle_exception(int exceptionVector);
 void win32_exception_handler(EXCEPTION_POINTERS* exc_info)
 {
   PCONTEXT ctx = exc_info->ContextRecord;
-
+#ifndef _WIN64
   registers[EAX] = ctx->Eax;
   registers[ECX] = ctx->Ecx;
   registers[EDX] = ctx->Edx;
@@ -477,7 +476,18 @@ void win32_exception_handler(EXCEPTION_POINTERS* exc_info)
   registers[ESI] = ctx->Esi;
   registers[EDI] = ctx->Edi;
    registers[PC] = ctx->Eip;
-   registers[PS] = ctx->EFlags;
+#else
+  registers[EAX] = ctx->Rax;
+  registers[ECX] = ctx->Rcx;
+  registers[EDX] = ctx->Rdx;
+  registers[EBX] = ctx->Rbx;
+  registers[ESP] = ctx->Rsp;
+  registers[EBP] = ctx->Rbp;
+  registers[ESI] = ctx->Rsi;
+  registers[EDI] = ctx->Rdi;
+   registers[PC] = ctx->Rip;
+#endif
+  registers[PS] = ctx->EFlags;
   registers[CS] = ctx->SegCs;
   registers[SS] = ctx->SegSs;
   registers[DS] = ctx->SegDs;
@@ -487,6 +497,7 @@ void win32_exception_handler(EXCEPTION_POINTERS* exc_info)
 
   handle_exception(exc_info->ExceptionRecord->ExceptionCode & 0xFFFF);
 
+#ifndef _WIN64
   ctx->Eax = registers[EAX];
   ctx->Ecx = registers[ECX];
   ctx->Edx = registers[EDX];
@@ -495,8 +506,19 @@ void win32_exception_handler(EXCEPTION_POINTERS* exc_info)
   ctx->Ebp = registers[EBP];
   ctx->Esi = registers[ESI];
   ctx->Edi = registers[EDI];
-   ctx->Eip = registers[PC];
-   ctx->EFlags = registers[PS];
+  ctx->Eip = registers[PC];
+#else
+  ctx->Rax = registers[EAX];
+  ctx->Rcx = registers[ECX];
+  ctx->Rdx = registers[EDX];
+  ctx->Rbx = registers[EBX];
+  ctx->Rsp = registers[ESP];
+  ctx->Rbp = registers[EBP];
+  ctx->Rsi = registers[ESI];
+  ctx->Rdi = registers[EDI];
+  ctx->Rip = registers[PC];
+#endif
+  ctx->EFlags = registers[PS];
   ctx->SegCs = registers[CS];
   ctx->SegSs = registers[SS];
   ctx->SegDs = registers[DS];
@@ -1107,8 +1129,11 @@ LONG WINAPI exc_protection_handler(EXCEPTION_POINTERS* exc_info)
 						if (mem_fault_routine)
 								mem_fault_routine();
 				}
-
+#ifndef _WIN64
 				++exc_info->ContextRecord->Eip;
+#else
+				++exc_info->ContextRecord->Rip;
+#endif
 		}
 
 		return EXCEPTION_CONTINUE_EXECUTION;
@@ -1125,7 +1150,11 @@ LONG WINAPI exc_handler(EXCEPTION_POINTERS* exc_info)
 				 // step over initial breakpoint
 				if (s_initial_breakpoint) {
 						s_initial_breakpoint = 0;
+#ifndef _WIN64
 						++exc_info->ContextRecord->Eip;
+#else
+						++exc_info->ContextRecord->Rip;
+#endif
 				}
 
 				SetUnhandledExceptionFilter(exc_protection_handler);

@@ -263,7 +263,11 @@ BackgroundWindow::BackgroundWindow(HWND hwnd)
 {
 	 // set background brush for the short moment of displaying the
 	 // background color while moving foreground windows
+#ifdef _WIN64
+	SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, COLOR_BACKGROUND+1);
+#else
 	SetClassLongPtr(hwnd, GCL_HBRBACKGROUND, COLOR_BACKGROUND+1);
+#endif
 
 	_display_version = RegGetDWORDValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("PaintDesktopVersion"), 1);
 }

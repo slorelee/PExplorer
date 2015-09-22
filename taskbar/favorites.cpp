@@ -53,144 +53,144 @@ String DecodeURLString(const char* s)
  /// read .URL file
 bool Bookmark::read_url(LPCTSTR path)
 {
-	char line[BUFFER_LEN];
+	//char line[BUFFER_LEN];
 
-	tifstream in(path);
+	//tifstream in(path);
 
-	while(in.good()) {
-		in.getline(line, BUFFER_LEN);
+	//while(in.good()) {
+	//	in.getline(line, BUFFER_LEN);
 
-		const char* p = line;
-		while(isspace(*p))
-			++p;
+	//	const char* p = line;
+	//	while(isspace(*p))
+	//		++p;
 
-		const char* keyword = p;
-		const char* eq = strchr(p, '=');
+	//	const char* keyword = p;
+	//	const char* eq = strchr(p, '=');
 
-		if (eq) {
-			const char* cont = eq + 1;
-			while(isspace(*cont))
-				++cont;
+	//	if (eq) {
+	//		const char* cont = eq + 1;
+	//		while(isspace(*cont))
+	//			++cont;
 
-			if (!_strnicmp(keyword, "URL", 3))
-				_url = DecodeURLString(cont);
-			else if (!_strnicmp(keyword, "IconFile", 8))
-				_icon_path = DecodeURLString(cont);
-		}
-	}
+	//		if (!_strnicmp(keyword, "URL", 3))
+	//			_url = DecodeURLString(cont);
+	//		else if (!_strnicmp(keyword, "IconFile", 8))
+	//			_icon_path = DecodeURLString(cont);
+	//	}
+	//}
 
 	return true;
 }
 
  /// convert XBEL bookmark node
-bool Bookmark::read(const_XMLPos& pos)
-{
-	_url = pos.get("href").c_str();
-
-	if (pos.go_down("title")) {
-		_name = pos->get_content();
-		pos.back();
-	}
-
-	if (pos.go_down("desc")) {
-		_description = pos->get_content();
-		pos.back();
-	}
-
-	if (pos.go_down("info")) {
-		const_XMLChildrenFilter metadata(pos, "metadata");
-
-		for(const_XMLChildrenFilter::const_iterator it=metadata.begin(); it!=metadata.end(); ++it) {
-			const XMLNode& node = **it;
-			const_XMLPos sub_pos(&node);
-
-			if (node.get("owner") == "ros-explorer") {
-				if (sub_pos.go_down("icon")) {
-					_icon_path = sub_pos.get("path").c_str();
-					_icon_idx = XS_toi(sub_pos.get("index"));
-
-					sub_pos.back();	// </icon>
-				}
-			}
-		}
-
-		pos.back();	// </metadata>
-		pos.back();	// </info>
-	}
-
-	return !_url.empty();	// _url is mandatory.
-}
-
- /// write XBEL bookmark node
-void Bookmark::write(XMLPos& pos) const
-{
-	pos.create("bookmark");
-
-	pos["href"] = _url.c_str();
-
-	if (!_name.empty()) {
-		pos.create("title");
-		pos->set_content(_name);
-		pos.back();
-	}
-
-	if (!_description.empty()) {
-		pos.create("desc");
-		pos->set_content(_description);
-		pos.back();
-	}
-
-	if (!_icon_path.empty()) {
-		pos.create("info");
-		pos.create("metadata");
-		pos["owner"] = "ros-explorer";
-		pos.create("icon");
-		pos["path"] = _icon_path.c_str();
-		pos["index"].printf(XS_TEXT("%d"), _icon_idx);
-		pos.back();	// </icon>
-		pos.back();	// </metadata>
-		pos.back();	// </info>
-	}
-
-	pos.back();
-}
+//bool Bookmark::read(const_XMLPos& pos)
+//{
+//	_url = pos.get("href").c_str();
+//
+//	if (pos.go_down("title")) {
+//		_name = pos->get_content();
+//		pos.back();
+//	}
+//
+//	if (pos.go_down("desc")) {
+//		_description = pos->get_content();
+//		pos.back();
+//	}
+//
+//	if (pos.go_down("info")) {
+//		const_XMLChildrenFilter metadata(pos, "metadata");
+//
+//		for(const_XMLChildrenFilter::const_iterator it=metadata.begin(); it!=metadata.end(); ++it) {
+//			const XMLNode& node = **it;
+//			const_XMLPos sub_pos(&node);
+//
+//			if (node.get("owner") == "ros-explorer") {
+//				if (sub_pos.go_down("icon")) {
+//					_icon_path = sub_pos.get("path").c_str();
+//					_icon_idx = XS_toi(sub_pos.get("index"));
+//
+//					sub_pos.back();	// </icon>
+//				}
+//			}
+//		}
+//
+//		pos.back();	// </metadata>
+//		pos.back();	// </info>
+//	}
+//
+//	return !_url.empty();	// _url is mandatory.
+//}
+//
+// /// write XBEL bookmark node
+//void Bookmark::write(XMLPos& pos) const
+//{
+//	pos.create("bookmark");
+//
+//	pos["href"] = _url.c_str();
+//
+//	if (!_name.empty()) {
+//		pos.create("title");
+//		pos->set_content(_name);
+//		pos.back();
+//	}
+//
+//	if (!_description.empty()) {
+//		pos.create("desc");
+//		pos->set_content(_description);
+//		pos.back();
+//	}
+//
+//	if (!_icon_path.empty()) {
+//		pos.create("info");
+//		pos.create("metadata");
+//		pos["owner"] = "ros-explorer";
+//		pos.create("icon");
+//		pos["path"] = _icon_path.c_str();
+//		pos["index"].printf(XS_TEXT("%d"), _icon_idx);
+//		pos.back();	// </icon>
+//		pos.back();	// </metadata>
+//		pos.back();	// </info>
+//	}
+//
+//	pos.back();
+//}
 
 
  /// read bookmark folder from XBEL formated XML tree
-void BookmarkFolder::read(const_XMLPos& pos)
-{
-	if (pos.go_down("title")) {
-		_name = pos->get_content();
-		pos.back();
-	}
-
-	if (pos.go_down("desc")) {
-		_description = pos->get_content();
-		pos.back();
-	}
-
-	_bookmarks.read(pos);
-}
-
- /// write bookmark folder content from XBEL formated XML tree
-void BookmarkFolder::write(XMLPos& pos) const
-{
-	pos.create("folder");
-
-	if (!_name.empty()) {
-		pos.create("title");
-		pos->set_content(_name);
-		pos.back();
-	}
-
-	if (!_description.empty()) {
-		pos.create("desc");
-		pos->set_content(_description);
-		pos.back();
-	}
-
-	_bookmarks.write(pos);
-}
+//void BookmarkFolder::read(const_XMLPos& pos)
+//{
+//	if (pos.go_down("title")) {
+//		_name = pos->get_content();
+//		pos.back();
+//	}
+//
+//	if (pos.go_down("desc")) {
+//		_description = pos->get_content();
+//		pos.back();
+//	}
+//
+//	_bookmarks.read(pos);
+//}
+//
+// /// write bookmark folder content from XBEL formated XML tree
+//void BookmarkFolder::write(XMLPos& pos) const
+//{
+//	pos.create("folder");
+//
+//	if (!_name.empty()) {
+//		pos.create("title");
+//		pos->set_content(_name);
+//		pos.back();
+//	}
+//
+//	if (!_description.empty()) {
+//		pos.create("desc");
+//		pos->set_content(_description);
+//		pos.back();
+//	}
+//
+//	_bookmarks.write(pos);
+//}
 
 
 BookmarkNode::BookmarkNode()
@@ -278,49 +278,49 @@ void BookmarkNode::clear()
 
 
  /// read bookmark list from XBEL formated XML tree
-void BookmarkList::read(const_XMLPos& pos)
-{
-	const XMLNode::Children& children = pos->get_children();
-
-	for(XMLNode::Children::const_iterator it=children.begin(); it!=children.end(); ++it) {
-		const XMLNode& node = **it;
-		const_XMLPos sub_pos(&node);
-
-		if (node == "folder") {
-			BookmarkFolder folder;
-
-			folder.read(sub_pos);
-
-			push_back(folder);
-		} else if (node == "bookmark") {
-			Bookmark bookmark;
-
-			if (bookmark.read(sub_pos))
-				push_back(bookmark);
-		}
-	}
-}
-
- /// write bookmark list into XBEL formated XML tree
-void BookmarkList::write(XMLPos& pos) const
-{
-	for(const_iterator it=begin(); it!=end(); ++it) {
-		const BookmarkNode& node = *it;
-
-		if (node._type == BookmarkNode::BMNT_FOLDER) {
-			const BookmarkFolder& folder = *node._pfolder;
-
-			folder.write(pos);
-
-			pos.back();
-		} else if (node._type == BookmarkNode::BMNT_BOOKMARK) {
-			const Bookmark& bookmark = *node._pbookmark;
-
-			if (!bookmark._url.empty())
-				bookmark.write(pos);
-		}
-	}
-}
+//void BookmarkList::read(const_XMLPos& pos)
+//{
+//	const XMLNode::Children& children = pos->get_children();
+//
+//	for(XMLNode::Children::const_iterator it=children.begin(); it!=children.end(); ++it) {
+//		const XMLNode& node = **it;
+//		const_XMLPos sub_pos(&node);
+//
+//		if (node == "folder") {
+//			BookmarkFolder folder;
+//
+//			folder.read(sub_pos);
+//
+//			push_back(folder);
+//		} else if (node == "bookmark") {
+//			Bookmark bookmark;
+//
+//			if (bookmark.read(sub_pos))
+//				push_back(bookmark);
+//		}
+//	}
+//}
+//
+// /// write bookmark list into XBEL formated XML tree
+//void BookmarkList::write(XMLPos& pos) const
+//{
+//	for(const_iterator it=begin(); it!=end(); ++it) {
+//		const BookmarkNode& node = *it;
+//
+//		if (node._type == BookmarkNode::BMNT_FOLDER) {
+//			const BookmarkFolder& folder = *node._pfolder;
+//
+//			folder.write(pos);
+//
+//			pos.back();
+//		} else if (node._type == BookmarkNode::BMNT_BOOKMARK) {
+//			const Bookmark& bookmark = *node._pbookmark;
+//
+//			if (!bookmark._url.empty())
+//				bookmark.write(pos);
+//		}
+//	}
+//}
 
 
  /// fill treeview control with bookmark tree content
@@ -389,7 +389,7 @@ void BookmarkList::import_IE_favorites(ShellDirectory& dir, HWND hwnd)
 		if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 			BookmarkFolder new_folder;
 
-			new_folder._name = DecodeXMLString(name);
+			//new_folder._name = DecodeXMLString(name);
 
 			if (entry->_etype == ET_SHELL) {
 				ShellDirectory new_dir(dir._folder, static_cast<ShellEntry*>(entry)->_pidl, hwnd);
@@ -404,7 +404,7 @@ void BookmarkList::import_IE_favorites(ShellDirectory& dir, HWND hwnd)
 		} else {
 			Bookmark bookmark;
 
-			bookmark._name = DecodeXMLString(name);
+			//bookmark._name = DecodeXMLString(name);
 
 			entry->get_path(path, COUNTOF(path));
 			_tsplitpath_s(path, NULL, 0, NULL, 0, NULL, 0, ext, COUNTOF(ext));
@@ -424,22 +424,22 @@ void BookmarkList::import_IE_favorites(ShellDirectory& dir, HWND hwnd)
  /// read XBEL bookmark file
 bool Favorites::read(LPCTSTR path)
 {
-	XMLDoc xbel;
+	//XMLDoc xbel;
 
-	if (!xbel.read_file(path)) {
-		if (!xbel._errors.empty())
-			MessageBox(g_Globals._hwndDesktop, xbel._errors.str(),
-						TEXT("ROS Explorer - reading bookmark file"), MB_OK);
-	}
+	//if (!xbel.read_file(path)) {
+	//	if (!xbel._errors.empty())
+	//		MessageBox(g_Globals._hwndDesktop, xbel._errors.str(),
+	//					TEXT("ROS Explorer - reading bookmark file"), MB_OK);
+	//}
 
-	const_XMLPos pos(&xbel);
+	//const_XMLPos pos(&xbel);
 
-	if (!pos.go_down("xbel"))
-		return false;
+	//if (!pos.go_down("xbel"))
+	//	return false;
 
-	super::read(pos);
+	//super::read(pos);
 
-	pos.back();
+	//pos.back();
 
 	return true;
 }
@@ -447,18 +447,18 @@ bool Favorites::read(LPCTSTR path)
  /// write XBEL bookmark file
 void Favorites::write(LPCTSTR path) const
 {
-	XMLDoc xbel;
+	//XMLDoc xbel;
 
-	XMLPos pos(&xbel);
-	pos.create("xbel");
-	super::write(pos);
-	pos.back();
+	//XMLPos pos(&xbel);
+	//pos.create("xbel");
+	//super::write(pos);
+	//pos.back();
 
-	xbel._format._doctype._name = "xbel";
-	xbel._format._doctype._public = "+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML";
-	xbel._format._doctype._system = "http://www.python.org/topics/xml/dtds/xbel-1.0.dtd";
+	//xbel._format._doctype._name = "xbel";
+	//xbel._format._doctype._public = "+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML";
+	//xbel._format._doctype._system = "http://www.python.org/topics/xml/dtds/xbel-1.0.dtd";
 
-	xbel.write_file(path);
+	//xbel.write_file(path);
 }
 
  /// import Internet Explorer bookmarks from Favorites folder

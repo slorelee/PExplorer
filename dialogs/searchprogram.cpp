@@ -27,7 +27,7 @@
  // Martin Fuchs, 02.10.2003
  //
 
-
+#include <stdlib.h>
 #include <precomp.h>
 
 #include "../resource.h"

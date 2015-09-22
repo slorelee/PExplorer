@@ -1980,9 +1980,7 @@ int StartMenuHandler::Command(int id, int code)
 		CloseStartMenu(id);
 #ifndef ROSSHELL
 #ifndef _NO_MDI
-		XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
-		bool mdi = XMLBool(explorer_options, "mdi", true);
-
+		bool mdi = true;
 		if (mdi)
 			MDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}"), 0);
 		else
@@ -2002,9 +2000,7 @@ int StartMenuHandler::Command(int id, int code)
 
 #ifndef ROSSHELL
 #ifndef _NO_MDI
-		XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
-		bool mdi = XMLBool(explorer_options, "mdi", true);
-
+		bool mdi = true;
 		if (mdi)
 			MDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}\\::{2227A280-3AEA-1069-A2DE-08002B30309D}"), 0);
 		else
@@ -2043,9 +2039,7 @@ int StartMenuHandler::Command(int id, int code)
 		CloseStartMenu(id);
 #ifndef ROSSHELL
 #ifndef _NO_MDI
-		XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
-		bool mdi = XMLBool(explorer_options, "mdi", true);
-
+		bool mdi = true;
 		if (mdi)
 			MDIMainFrame::Create(SHELLPATH_NET_CONNECTIONS, 0);
 		else
