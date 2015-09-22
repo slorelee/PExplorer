@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -41,7 +41,7 @@ extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine=NULL);
 extern void explorer_about(HWND hwndParent);
 
  // test for already running desktop instance
-extern BOOL IsAnyDesktopRunning();
+extern BOOL IsAnyDesktopRunning(void);
 
  // show shutdown dialog
 extern void ShowExitWindowsDialog(HWND hwndOwner);

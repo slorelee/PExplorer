@@ -17,7 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
-LANGUAGE LANG_BULGARIAN, SUBLANG_NEUTRAL
+LANGUAGE LANG_BULGARIAN, SUBLANG_DEFAULT
 #pragma code_page(1251)
 #endif //_WIN32
 
@@ -282,11 +282,11 @@ STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "За изследователя на РеактОС"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "Изследовател на РеактОС",IDC_ROS_EXPLORER,91,13,104,11
+    LTEXT           "Изследователят на РеактОС",IDC_ROS_EXPLORER,91,13,104,11
     LTEXT           "в 0.9",IDC_VERSION_TXT,91,27,104,8
     LTEXT           "(c) 2003-2005 Martin Fuchs",IDC_STATIC,91,42,104,8
     LTEXT           "",IDC_WIN_VERSION,91,58,98,22
-    LTEXT           "http://www.foxplanet.de/explorer/",IDC_WWW,17,84,129,
+    LTEXT           "http://www.sky.franken.de/explorer/",IDC_WWW,17,84,129,
                     8
     CONTROL         "&Добре",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,
                     154,90,38,12
@@ -326,7 +326,7 @@ END
 
 STRINGTABLE DISCARDABLE
 BEGIN
-    IDS_TITLE               "Изследовател на РеактОС"
+    IDS_TITLE               "Изследователят на РеактОС"
     IDS_START               "Пуск"
     IDS_LOGOFF              "Изход..."
     IDS_SHUTDOWN            "Изключване..."

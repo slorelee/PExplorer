@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -202,6 +202,10 @@ LRESULT TaskBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 	  case PM_GET_LAST_ACTIVE:
 		return (LRESULT)(HWND)_last_foreground_wnd;
 
+	  case WM_SYSCOLORCHANGE:
+		SendMessage(_htoolbar, WM_SYSCOLORCHANGE, 0, 0);
+		break;
+
 	  default: def:
 		if (nmsg == WM_SHELLHOOK) {
 			switch(wparam) {
@@ -333,10 +337,10 @@ HICON get_window_icon_small(HWND hwnd)
 		SendMessageTimeout(hwnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 1000, (LPDWORD)&hIcon);
 
 	if (!hIcon)
-		hIcon = (HICON)GetClassLong(hwnd, GCL_HICONSM);
+		hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICONSM);
 
 	if (!hIcon)
-		hIcon = (HICON)GetClassLong(hwnd, GCL_HICON);
+		hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICON);
 
 	if (!hIcon)
 		SendMessageTimeout(hwnd, WM_QUERYDRAGICON, 0, 0, 0, 1000, (LPDWORD)&hIcon);
@@ -358,10 +362,10 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
 
 	if (allow_from_class) {
 		if (!hIcon)
-			hIcon = (HICON)GetClassLong(hwnd, GCL_HICON);
+			hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICON);
 
 		if (!hIcon)
-			hIcon = (HICON)GetClassLong(hwnd, GCL_HICONSM);
+			hIcon = (HICON)GetClassLongPtr(hwnd, GCL_HICONSM);
 	}
 
 	if (!hIcon)
@@ -512,33 +516,39 @@ void TaskBar::Refresh()
 		for(set<int>::reverse_iterator it=btn_idx_to_delete.rbegin(); it!=btn_idx_to_delete.rend(); ++it) {
 			int idx = *it;
 
-			SendMessage(_htoolbar, TB_DELETEBUTTON, idx, 0);
+			if (!SendMessage(_htoolbar, TB_DELETEBUTTON, idx, 0))
+				MessageBoxW(NULL, L"failed to delete button", NULL, MB_OK);
 
-			for(TaskBarMap::iterator it=_map.begin(); it!=_map.end(); ++it) {
-				TaskBarEntry& entry = it->second;
+			
+			for(TaskBarMap::iterator it2=_map.begin(); it2!=_map.end(); ++it2) {
+				TaskBarEntry& entry = it2->second;
 
 				 // adjust button indexes
 				if (entry._btn_idx > idx) {
 					--entry._btn_idx;
+#if 0
 					--entry._bmp_idx;
-
+					
 					TBBUTTONINFO info;
 
 					info.cbSize = sizeof(TBBUTTONINFO);
 					info.dwMask = TBIF_IMAGE;
 					info.iImage = entry._bmp_idx;
 
-					SendMessage(_htoolbar, TB_SETBUTTONINFO, entry._id, (LPARAM)&info);
+					if (!SendMessage(_htoolbar, TB_SETBUTTONINFO, entry._id, (LPARAM)&info))
+						MessageBoxW(NULL, L"failed to set button info", NULL, MB_OK);
+#endif
 				}
 			}
+			
 		}
 
 		for(set<HBITMAP>::iterator it=hbmp_to_delete.begin(); it!=hbmp_to_delete.end(); ++it) {
 			HBITMAP hbmp = *it;
-
+#if 0
 			TBREPLACEBITMAP tbrepl = {0, (UINT_PTR)hbmp, 0, 0};
 			SendMessage(_htoolbar, TB_REPLACEBITMAP, 0, (LPARAM)&tbrepl);
-
+#endif
 			DeleteObject(hbmp);
 
 			for(TaskBarMap::iterator it=_map.begin(); it!=_map.end(); ++it)

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -58,8 +58,31 @@ ShellBrowser::ShellBrowser(HWND hwnd, HWND hwndFrame, HWND left_hwnd, WindowHand
 
 	_cur_dir = NULL;
 
-	_himl = ImageList_Create(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), ILC_MASK|ILC_COLOR24, 2, 0);
-	ImageList_SetBkColor(_himl, GetSysColor(COLOR_WINDOW));
+    HDC hDC = GetDC(NULL);
+    if (hDC)
+    {
+        INT bpp = GetDeviceCaps(hDC, BITSPIXEL);
+        ReleaseDC(NULL, hDC);
+
+        DWORD ilMask;
+        if (bpp <= 4)
+            ilMask = ILC_COLOR4;
+        else if (bpp <= 8)
+            ilMask = ILC_COLOR8;
+        else if (bpp <= 16)
+            ilMask = ILC_COLOR16;
+        else if (bpp <= 24)
+            ilMask = ILC_COLOR24;
+        else if (bpp <= 32)
+            ilMask = ILC_COLOR32;
+        else
+            ilMask = ILC_COLOR;
+
+        ilMask |= ILC_MASK;
+
+        _himl = ImageList_Create(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), ilMask, 2, 0);
+        ImageList_SetBkColor(_himl, GetSysColor(COLOR_WINDOW));
+    }
 }
 
 ShellBrowser::~ShellBrowser()
@@ -576,6 +599,27 @@ bool ShellBrowser::jump_to_pidl(LPCITEMIDLIST pidl)
 	return false;
 }
 
+bool ShellBrowser::TranslateAccelerator(LPMSG lpmsg)
+{
+    HWND hwnd;
+
+    /* TranslateAccelerator is called for all explorer windows that are open 
+       so we have to decide if this is the correct recipient */
+    hwnd = lpmsg->hwnd;
+
+    while(hwnd)
+    {
+        if(hwnd == _hwnd)
+            break;
+
+        hwnd = GetParent(hwnd);
+    }
+
+    if (hwnd)
+        return _pShellView->TranslateAccelerator(lpmsg) == S_OK;
+
+    return false;
+}
 
 bool ShellBrowser::select_folder(Entry* entry, bool expand)
 {
@@ -631,8 +675,12 @@ MDIShellBrowserChild::MDIShellBrowserChild(HWND hwnd, const ShellChildWndInfo& i
 
 MDIShellBrowserChild* MDIShellBrowserChild::create(const ShellChildWndInfo& info)
 {
-	ChildWindow* child = ChildWindow::create(info, info._pos.rcNormalPosition,
-		WINDOW_CREATOR_INFO(MDIShellBrowserChild,ShellChildWndInfo), CLASSNAME_CHILDWND, NULL, info._pos.showCmd==SW_SHOWMAXIMIZED? WS_MAXIMIZE: 0);
+	ChildWindow* child = ChildWindow::create(info, 
+		                                     info._pos.rcNormalPosition,
+		                                     WINDOW_CREATOR_INFO(MDIShellBrowserChild,ShellChildWndInfo), 
+											 CLASSNAME_CHILDWND, 
+											 NULL, 
+											 WS_CLIPCHILDREN | (info._pos.showCmd==SW_SHOWMAXIMIZED? WS_MAXIMIZE: 0));
 
 	return static_cast<MDIShellBrowserChild*>(child);
 }
@@ -673,6 +721,15 @@ LRESULT MDIShellBrowserChild::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 			return super::WndProc(nmsg, wparam, lparam);
 		}
 		return TRUE;}
+
+	  case WM_SYSCOLORCHANGE:
+		/* Forward WM_SYSCOLORCHANGE to common controls */
+		SendMessage(_left_hwnd, WM_SYSCOLORCHANGE, 0, 0);
+		SendMessage(_right_hwnd, WM_SYSCOLORCHANGE, 0, 0);
+		break;
+
+	  case PM_TRANSLATE_MSG:
+		return _shellBrowser->TranslateAccelerator((MSG*)lparam);
 
 	  default:
 		return super::WndProc(nmsg, wparam, lparam);

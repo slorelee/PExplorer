@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -54,7 +54,6 @@
 #define	IDW_EXTRABAR			0x102
 #define	IDW_DRIVEBAR			0x103
 #define	IDW_ADDRESSBAR			0x104
-#define	IDW_COMMANDBAR			0x105
 #define	IDW_SIDEBAR				0x106
 #define	IDW_FIRST_CHILD			0xC000	/*0x200*/
 
@@ -111,6 +110,7 @@ struct ExplorerCmd
 	bool	IsValidPath() const;
 
 	String	_path;
+	WCHAR	szPath[MAX_PATH];
 	int		_flags;	// OPEN_WINDOW_MODE
 	int		_cmdShow;
 	bool	_mdi;

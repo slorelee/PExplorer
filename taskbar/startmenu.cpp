@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -1607,8 +1607,6 @@ static void CalculateStartPos(HWND hwndOwner, RECT& rect, int icon_size)
 #ifndef _LIGHT_STARTMENU
 	rect.top += STARTMENU_LINE_HEIGHT(icon_size);
 #endif
-
-	AdjustWindowRectEx(&rect, WS_POPUP|WS_THICKFRAME|WS_CLIPCHILDREN|WS_VISIBLE, FALSE, 0);
 }
 
 HWND StartMenuRoot::Create(HWND hwndOwner, int icon_size)
@@ -1694,6 +1692,10 @@ void StartMenuRoot::TrackStartmenu()
 	}
 }
 
+int StartMenuRoot::Command(int id, int code)
+{
+	return super::Command(id, code);
+}
 
 LRESULT	StartMenuRoot::Init(LPCREATESTRUCT pcs)
 {
@@ -1870,6 +1872,11 @@ void StartMenuRoot::CloseStartMenu(int id)
 	ShowWindow(_hwnd, SW_HIDE);
 }
 
+bool StartMenuRoot::IsStartMenuVisible() const
+{
+    return IsWindowVisible(_hwnd) != FALSE;
+}
+
 void StartMenuRoot::ProcessKey(int vk)
 {
 	switch(vk) {
@@ -1945,7 +1952,8 @@ int StartMenuHandler::Command(int id, int code)
 
 #ifndef __REACTOS__
 	  case IDC_TERMINATE:
-		DestroyWindow(GetParent(_hwnd));
+		DestroyWindow(g_Globals._hwndDesktopBar);
+		DestroyWindow(g_Globals._hwndDesktop);
 		break;
 #endif
 
@@ -2031,26 +2039,29 @@ int StartMenuHandler::Command(int id, int code)
 #endif
 		break;
 
-	  case IDC_CONNECTIONS:
+		case IDC_CONNECTIONS:{
+		CloseStartMenu(id);
 #ifndef ROSSHELL
-#ifdef __REACTOS__	// to be removed when RAS will be implemented
-		MessageBox(0, TEXT("RAS folder not yet implemented in SHELL32"), ResString(IDS_TITLE), MB_OK);
-#else
-		CreateSubmenu(id, CSIDL_CONNECTIONS, ResString(IDS_CONNECTIONS));
-		//CloseStartMenu(id);
-		//MainFrame::Create(SpecialFolderPath(CSIDL_CONNECTIONS, _hwnd), OWM_PIDL);
+#ifndef _NO_MDI
+		XMLPos explorer_options = g_Globals.get_cfg("general/explorer");
+		bool mdi = XMLBool(explorer_options, "mdi", true);
+
+		if (mdi)
+			MDIMainFrame::Create(SHELLPATH_NET_CONNECTIONS, 0);
+		else
 #endif
+			SDIMainFrame::Create(SHELLPATH_NET_CONNECTIONS, 0);
 #else
 		launch_file(_hwnd, SHELLPATH_NET_CONNECTIONS);
 #endif
-		break;
+		break;}
 
 
 	// browse menu
 
 	  case IDC_NETWORK:
 #ifdef __REACTOS__	///@todo to be removed when network browsing will be implemented in shell namespace
-		MessageBox(0, TEXT("network not yet implemented"), ResString(IDS_TITLE), MB_OK);
+		MessageBox(0, TEXT("not yet implemented"), ResString(IDS_TITLE), MB_OK);
 #else
 		CreateSubmenu(id, CSIDL_NETWORK, ResString(IDS_NETWORK));
 #endif
@@ -2112,14 +2123,37 @@ void StartMenuHandler::ShowSearchComputer()
 		MessageBox(0, TEXT("SHFindComputer() not yet implemented in SHELL32"), ResString(IDS_TITLE), MB_OK);
 }
 
-void StartMenuHandler::ShowLaunchDialog(HWND hwndOwner)
+struct RunDialogThread : public Thread
+{
+	int	Run();
+};
+
+int RunDialogThread::Run()
 {
 	static DynamicFct<RUNFILEDLG> RunFileDlg(TEXT("SHELL32"), 61);
 
+	// RunFileDlg needs owner window to properly position dialog
+	// that window will be disabled so we can't use DesktopBar
+	RECT rect = {0};
+#ifndef TASKBAR_AT_TOP
+	rect.top = GetSystemMetrics(SM_CYSCREEN) - DESKTOPBARBAR_HEIGHT;
+#endif
+	rect.right = GetSystemMetrics(SM_CXSCREEN);
+	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT;
+	Static dlgOwner(0, 0, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, 0, 0);
+
 	 // Show "Run..." dialog
 	if (RunFileDlg) {
-		(*RunFileDlg)(hwndOwner, 0, NULL, NULL, NULL, RFF_CALCDIRECTORY);
+		(*RunFileDlg)(dlgOwner, 0, NULL, NULL, NULL, RFF_CALCDIRECTORY);
 	}
+	DestroyWindow(dlgOwner);
+	return 0;
+}
+
+void StartMenuHandler::ShowLaunchDialog(HWND hwndOwner)
+{
+	RunDialogThread * rdt = new RunDialogThread();
+	rdt->Start();
 }
 
 void StartMenuHandler::ShowLogoffDialog(HWND hwndOwner)
@@ -2161,13 +2195,14 @@ void SettingsMenu::AddEntries()
 {
 	super::AddEntries();
 
-#if defined(ROSSHELL) || defined(__REACTOS__)	// __REACTOS__ to be removed when printer/network will be implemented
+#if defined(ROSSHELL) || defined(__REACTOS__)	// __REACTOS__ to be removed when printers will be implemented
 //TODO	AddButton(ResString(IDS_PRINTERS),			ICID_PRINTER, false, IDC_PRINTERS_MENU);
-	AddButton(ResString(IDS_CONNECTIONS),		ICID_NETWORK, false, IDC_CONNECTIONS);
 #else
 //TODO	AddButton(ResString(IDS_PRINTERS),			ICID_PRINTER, true, IDC_PRINTERS_MENU);
-	AddButton(ResString(IDS_CONNECTIONS),		ICID_NETCONNS, false, IDC_CONNECTIONS);
 #endif
+
+	AddButton(ResString(IDS_CONNECTIONS),		ICID_NETCONNS, false, IDC_CONNECTIONS);
+
 	AddButton(ResString(IDS_ADMIN),				ICID_ADMIN, true, IDC_ADMIN);
 
 #ifndef __MINGW32__	// SHRestricted() missing in MinGW (as of 29.10.2003)

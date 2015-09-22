@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -36,7 +36,7 @@ struct ShellEntry : public Entry
 	virtual ShellPath	create_absolute_pidl() const;
 	virtual HRESULT		GetUIObjectOf(HWND hWnd, REFIID riid, LPVOID* ppvOut);
 	virtual BOOL		launch_entry(HWND hwnd, UINT nCmdShow=SW_SHOWNORMAL);
-	virtual HRESULT		do_context_menu(HWND hwnd, LPPOINT pptScreen, CtxMenuInterfaces& cm_ifs);
+	virtual HRESULT		do_context_menu(HWND hwnd, const POINT& pptScreen, CtxMenuInterfaces& cm_ifs);
 	virtual ShellFolder	get_shell_folder() const;
 
 	IShellFolder*		get_parent_folder() const;

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -172,7 +172,11 @@ bool ShellDirectory::get_path(PTSTR path, size_t path_count) const
 
 	SFGAOF attribs = SFGAO_FILESYSTEM;
 
-	if (FAILED(const_cast<ShellFolder&>(_folder)->GetAttributesOf(1, (LPCITEMIDLIST*)&_pidl, &attribs)))
+	// Split pidl into current and parent folder PIDLs
+	ShellPath pidlParent, pidlFolder;
+	_pidl.split(pidlParent, pidlFolder);
+
+	if (FAILED(const_cast<ShellFolder&>(_folder)->GetAttributesOf(1, (LPCITEMIDLIST*)&pidlFolder, &attribs)))
 		return false;
 
 	if (!(attribs & SFGAO_FILESYSTEM))
@@ -217,14 +221,14 @@ BOOL ShellEntry::launch_entry(HWND hwnd, UINT nCmdShow)
 }
 
 
-HRESULT ShellEntry::do_context_menu(HWND hwnd, LPPOINT pptScreen, CtxMenuInterfaces& cm_ifs)
+HRESULT ShellEntry::do_context_menu(HWND hwnd, const POINT& pptScreen, CtxMenuInterfaces& cm_ifs)
 {
 	ShellDirectory* dir = static_cast<ShellDirectory*>(_up);
 
 	ShellFolder folder = dir? dir->_folder: GetDesktopFolder();
 	LPCITEMIDLIST pidl = _pidl;
 
-	return ShellFolderContextMenu(folder, hwnd, 1, &pidl, pptScreen->x, pptScreen->y, cm_ifs);
+	return ShellFolderContextMenu(folder, hwnd, 1, &pidl, pptScreen.x, pptScreen.y, cm_ifs);
 }
 
 
@@ -366,8 +370,7 @@ void ShellDirectory::read_directory(int scan_flags)
 		TCHAR path[MAX_PATH];
 		HRESULT hr_next = S_OK;
 
-		if (enumerator)
-		  do {
+		do {
 #define FETCH_ITEM_COUNT	32
 			LPITEMIDLIST pidls[FETCH_ITEM_COUNT];
 			ULONG cnt = 0;

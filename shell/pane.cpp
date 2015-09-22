@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -42,7 +42,7 @@ enum IMAGE {
 #define IMAGE_HEIGHT		13
 
 
-static const LPTSTR g_pos_names[COLUMNS] = {
+static const TCHAR* g_pos_names[COLUMNS] = {
 	TEXT(""),			/* symbol */
 	TEXT("Name"),
 	TEXT("Type"),
@@ -141,7 +141,7 @@ bool Pane::create_header(HWND hparent, int id)
 	hdi.mask = HDI_TEXT|HDI_WIDTH|HDI_FORMAT;
 
 	for(int idx=0; idx<COLUMNS; idx++) {
-		hdi.pszText = g_pos_names[idx];
+		hdi.pszText = (TCHAR*)g_pos_names[idx];
 		hdi.fmt = HDF_STRING | g_pos_align[idx];
 		hdi.cxy = _widths[idx];
 		Header_InsertItem(hwnd, idx, &hdi);
@@ -376,14 +376,14 @@ void Pane::draw_item(LPDRAWITEMSTRUCT dis, Entry* entry, int calcWidthCol)
 #ifndef _LEFT_FILES
 							bool following_child = (up->_next->_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=0;	// a directory?
 
-							if (!following_child) {
+							if (!following_child)
+							{
 								for(Entry*n=up->_next; n; n=n->_next)
 									if (n->_down) {	// any file with NTFS sub-streams?
 										following_child = true;
 										break;
 									}
 							}
-
 							if (following_child)
 #endif
 							{
@@ -403,14 +403,14 @@ void Pane::draw_item(LPDRAWITEMSTRUCT dis, Entry* entry, int calcWidthCol)
 #ifndef _LEFT_FILES
 					bool following_child = (entry->_next->_data.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=0;	// a directory?
 
-					if (!following_child) {
+					if (!following_child)
+					{
 						for(Entry*n=entry->_next; n; n=n->_next)
 							if (n->_down) {	// any file with NTFS sub-streams?
 								following_child = true;
 								break;
 							}
 					}
-
 					if (following_child)
 #endif
 						LineTo(dis->hDC, x, dis->rcItem.bottom);
@@ -702,7 +702,10 @@ void Pane::set_header()
 	item.mask = HDI_WIDTH;
 	item.cxy = 0;
 
-	for(; x+_widths[i]<scroll_pos && i<COLUMNS; i++) {
+	for(; i<COLUMNS; i++) {
+		if (x + _widths[i] >= scroll_pos)
+			break;
+
 		x += _widths[i];
 		Header_SetItem(_hwndHeader, i, &item);
 	}
@@ -774,8 +777,8 @@ void Pane::calc_single_width(int col)
 
 	x = _positions[col] + cx;
 
-	for(; col<COLUMNS; ) {
-		_positions[++col] = x;
+	for(; col<COLUMNS; col++) {
+		_positions[col+1] = x;
 		x += _widths[col];
 	}
 

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -39,7 +39,7 @@ WindowClass::WindowClass(LPCTSTR classname, UINT style_, WNDPROC wndproc)
 	style = style_;
 	hInstance = g_Globals._hInstance;
 	hCursor = LoadCursor(0, IDC_ARROW);
-
+	this->hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
 	lpszClassName = classname;
 	lpfnWndProc = wndproc;
 
@@ -591,6 +591,14 @@ void Window::unregister_pretranslate(HWND hwnd)
 
 BOOL Window::pretranslate_msg(LPMSG pmsg)
 {
+    if ((pmsg->message != WM_KEYDOWN) &&
+        (pmsg->message != WM_SYSKEYDOWN) &&
+        (pmsg->message != WM_SYSCHAR) &&
+        (pmsg->message != WM_CHAR))
+    {
+        return FALSE;
+    }
+
 	for(WindowSet::const_iterator it=Window::s_pretranslate_windows.begin(); it!=s_pretranslate_windows.end(); ++it)
 		if (SendMessage(*it, PM_TRANSLATE_MSG, 0, (LPARAM)pmsg))
 			return TRUE;
@@ -732,7 +740,7 @@ INT_PTR CALLBACK Window::DialogProc(HWND hwnd, UINT nmsg, WPARAM wparam, LPARAM 
 			return TRUE;	// message has been processed
 
 		  case WM_NOTIFYFORMAT:
-			SetWindowLong(hwnd, DWLP_MSGRESULT, NFR_CURRENT);	// set return value NFR_CURRENT
+			SetWindowLongPtr(hwnd, DWLP_MSGRESULT, NFR_CURRENT);	// set return value NFR_CURRENT
 			return TRUE;	// message has been processed
 
 		  case WM_NCDESTROY:
@@ -1418,7 +1426,7 @@ INT_PTR CALLBACK PropSheetPageDlg::DialogProc(HWND hwnd, UINT nmsg, WPARAM wpara
 			return TRUE;	// message has been processed
 
 		  case WM_NOTIFYFORMAT:
-			SetWindowLong(hwnd, DWLP_MSGRESULT, NFR_CURRENT);	// set return value NFR_CURRENT
+			SetWindowLongPtr(hwnd, DWLP_MSGRESULT, NFR_CURRENT);	// set return value NFR_CURRENT
 			return TRUE;	// message has been processed
 
 		  case WM_NCDESTROY:

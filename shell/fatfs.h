@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -118,13 +118,13 @@ struct BootSector32 {
 };
 
 
-struct ftime {
+struct filetime {
 	WORD	sec2	: 5;
 	WORD	min 	: 6;
 	WORD	hour	: 5;
 };
 
-struct fdate {
+struct filedate {
 	WORD	day 	: 5;
 	WORD	month	: 4;
 	WORD	year	: 7;
@@ -150,15 +150,15 @@ struct DEntry_E {
 	char			ext[3];
 	char			attr;
 	char			rsrvd[10];
-	struct ftime	time;
-	struct fdate	date;
+	struct filetime	time;
+	struct filedate	date;
 	WORD			fclus;
 	DWORD 			size;
 };
 
 union DEntry {
 	DEntry_E E;
-	BYTE B[8+3+1+10+sizeof(struct ftime)+sizeof(struct fdate)+sizeof(WORD)+sizeof(DWORD)];
+	BYTE B[8+3+1+10+sizeof(struct filetime)+sizeof(struct filedate)+sizeof(WORD)+sizeof(DWORD)];
 };
 
 #pragma pack(pop)

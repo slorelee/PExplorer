@@ -1,7 +1,7 @@
 
 For information on how to compile and install the ReactOS Explorer please look at the FAQ web page:
 
-http://www.foxplanet.de/explorer/
+http://www.sky.franken.de/explorer/
 
 
 

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -39,8 +39,8 @@
 extern "C" {
 #endif
 
-DECL_NOTIFYHOOK UINT InstallNotifyHook();
-DECL_NOTIFYHOOK void DeinstallNotifyHook();
+DECL_NOTIFYHOOK UINT InstallNotifyHook(void);
+DECL_NOTIFYHOOK void DeinstallNotifyHook(void);
 
 DECL_NOTIFYHOOK void GetWindowModulePath(HWND hwnd);
 DECL_NOTIFYHOOK int GetWindowModulePathCopyData(LPARAM lparam, HWND* phwnd, LPSTR buffer, int size);

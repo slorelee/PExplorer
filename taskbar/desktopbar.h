@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -63,6 +63,12 @@
 
 #define	IDC_FIRST_MENU			0x3000
 
+// hotkeys
+#define IDHK_EXPLORER 0
+#define IDHK_RUN 1
+#define IDHK_DESKTOP 2
+#define IDHK_LOGOFF 3
+#define IDHK_STARTMENU 4
 
  /// desktop bar window, also known as "system tray"
 struct DesktopBar : public
@@ -98,7 +104,7 @@ protected:
 	void	ControlResize(WPARAM wparam, LPARAM lparam);
 	void	RegisterHotkeys();
 	void	ProcessHotKey(int id_hotkey);
-	void	ShowStartMenu();
+	void	ShowOrHideStartMenu();
 	LRESULT	ProcessCopyData(COPYDATASTRUCT* pcd);
 
 	WindowHandle _hwndTaskBar;

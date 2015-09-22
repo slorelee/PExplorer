@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /* Based on the Wine "bootup" handler application
@@ -55,6 +55,8 @@
 #include <stdio.h>
 #include <windows.h>
 #include <ctype.h>
+
+EXTERN_C HRESULT WINAPI SHCreateSessionKey(REGSAM samDesired, PHKEY phKey);
 
 /**
  * Performs the rename operations dictated in %SystemRoot%\Wininit.ini.
@@ -241,6 +243,9 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
     STARTUPINFOW si;
     PROCESS_INFORMATION info;
     DWORD exit_code=0;
+    WCHAR szCmdLineExp[MAX_PATH+1]= L"\0";
+
+    ExpandEnvironmentStringsW(cmdline, szCmdLineExp, sizeof(szCmdLineExp) / sizeof(WCHAR));
 
     memset(&si, 0, sizeof(si));
     si.cb=sizeof(si);
@@ -251,7 +256,7 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
     }
     memset(&info, 0, sizeof(info));
 
-    if (!CreateProcessW(NULL, cmdline, NULL, NULL, FALSE, 0, NULL, dir, &si, &info))
+    if (!CreateProcessW(NULL, szCmdLineExp, NULL, NULL, FALSE, 0, NULL, dir, &si, &info))
     {
         printf("Failed to run command (%ld)\n", GetLastError());
 
@@ -259,7 +264,7 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
     }
 
     printf("Successfully ran command\n"); //%s - Created process handle %p\n",
-               //wine_dbgstr_w(cmdline), info.hProcess);
+               //wine_dbgstr_w(szCmdLineExp), info.hProcess);
 
     if (wait)
     {   /* wait for the process to exit */
@@ -267,6 +272,7 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
         GetExitCodeProcess(info.hProcess, &exit_code);
     }
 
+    CloseHandle(info.hThread);
     CloseHandle(info.hProcess);
 
     return exit_code;
@@ -369,6 +375,9 @@ static BOOL ProcessRunKeys(HKEY hkRoot, LPCWSTR szKeyName, BOOL bDelete,
             continue;
         }
 
+        /* safe mode - force to run if prefixed with asterisk */
+        if (GetSystemMetrics(SM_CLEANBOOT) && (szValue[0] != L'*')) continue;
+
         if (bDelete && (res=RegDeleteValueW(hkRun, szValue))!=ERROR_SUCCESS)
         {
             printf("Couldn't delete value - %ld, %ld. Running command anyways.\n", i, res);
@@ -425,6 +434,8 @@ int startup(int argc, const char *argv[])
     /* First, set the current directory to SystemRoot */
     TCHAR gen_path[MAX_PATH];
     DWORD res;
+    HKEY hSessionKey, hKey;
+    HRESULT hr;
 
     res = GetWindowsDirectory(gen_path, sizeof(gen_path));
 
@@ -436,13 +447,6 @@ int startup(int argc, const char *argv[])
 		return 100;
     }
 
-    if (res>=sizeof(gen_path))
-    {
-		printf("Windows path too long (%ld)\n", res);
-
-		return 100;
-    }
-
     if (!SetCurrentDirectory(gen_path))
     {
         wprintf(L"Cannot set the dir to %s (%ld)\n", gen_path, GetLastError());
@@ -450,39 +454,66 @@ int startup(int argc, const char *argv[])
         return 100;
     }
 
-    if (argc>1)
+    hr = SHCreateSessionKey(KEY_WRITE, &hSessionKey);
+    if (SUCCEEDED(hr))
+    {
+        LONG Error;
+        DWORD dwDisp;
+
+        Error = RegCreateKeyEx(hSessionKey, L"StartupHasBeenRun", 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp);
+        RegCloseKey(hSessionKey);
+        if (Error == ERROR_SUCCESS)
+        {
+            RegCloseKey(hKey);
+            if (dwDisp == REG_OPENED_EXISTING_KEY)
+            {
+                /* Startup programs has already been run */
+                return 0;
+            }
+        }
+    }
+
+    if (argc > 1)
     {
         switch(argv[1][0])
         {
         case 'r': /* Restart */
-            ops=SETUP;
+            ops = SETUP;
             break;
         case 's': /* Full start */
-            ops=SESSION_START;
+            ops = SESSION_START;
             break;
         default:
-            ops=DEFAULT;
+            ops = DEFAULT;
             break;
         }
     } else
-        ops=DEFAULT;
+        ops = DEFAULT;
+
+    /* do not run certain items in Safe Mode */
+    if(GetSystemMetrics(SM_CLEANBOOT)) ops.startup = FALSE;
 
     /* Perform the ops by order, stopping if one fails, skipping if necessary */
     /* Shachar: Sorry for the perl syntax */
-    res=(ops.ntonly || !ops.preboot || wininit()) &&
-        (ops.w9xonly || !ops.preboot || pendingRename()) &&
-        (ops.ntonly || !ops.prelogin ||
-         ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICESONCE], TRUE, FALSE)) &&
-        (ops.ntonly || !ops.prelogin || !ops.startup ||
-         ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICES], FALSE, FALSE)) &&
-        (!ops.postlogin ||
-         ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNONCE], TRUE, TRUE)) &&
-        (!ops.postlogin || !ops.startup ||
-         ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUN], FALSE, FALSE)) &&
-        (!ops.postlogin || !ops.startup ||
-         ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUN], FALSE, FALSE));
+    res = TRUE;
+    if (res && !ops.ntonly && ops.preboot)
+         res = wininit();
+    if (res && !ops.w9xonly && ops.preboot)
+         res = pendingRename();
+    if (res && !ops.ntonly && ops.prelogin)
+         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICESONCE], TRUE, FALSE);
+    if (res && !ops.ntonly && ops.prelogin && ops.startup)
+         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICES], FALSE, FALSE);
+    if (res && ops.postlogin)
+         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNONCE], TRUE, TRUE);
+    if (res && ops.postlogin && ops.startup)
+         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
+    if (res && ops.postlogin && ops.startup)
+         res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
+    if (res && ops.postlogin && ops.startup)
+         res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUNONCE], TRUE, FALSE);
 
     printf("Operation done\n");
 
-    return res?0:101;
+    return res ? 0 : 101;
 }

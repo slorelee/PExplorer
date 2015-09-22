@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -150,8 +150,8 @@ void FATDirectory::read_directory(int scan_flags)
 			w32fd.nFileSizeLow = e.size;
 
 			 // convert date/time attribute into FILETIME
-			const fdate& date = e.date;
-			const ftime& time = e.time;
+			const filedate& date = e.date;
+			const filetime& time = e.time;
 			SYSTEMTIME stime;
 			FILETIME ftime;
 

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -24,6 +24,37 @@
  //
  // Martin Fuchs, 23.07.2003
  //
+
+ // standard windows headers
+#define WIN32_LEAN_AND_MEAN
+#define WIN32_EXTRA_LEAN
+#define WIN32_NO_STATUS
+#define _INC_WINDOWS
+#define COM_NO_WINDOWS_H
+#include <stdarg.h>
+#include <windef.h>
+#include <winbase.h>
+#include <winuser.h>
+
+//#include <undocuser.h>
+
+ // Unicode support
+#if defined(UNICODE) && !defined(_UNICODE)
+#define	_UNICODE
+#endif
+#include <tchar.h>
+
+#include <windowsx.h>	// for SelectBrush(), ListBox_SetSel(), SubclassWindow(), ...
+#include <commctrl.h>
+
+#include <objbase.h>
+//#include <oleauto.h>	// for VARIANT
+
+//#include <malloc.h>		// for alloca()
+#include <assert.h>
+//#include <stdlib.h>		// for _MAX_DIR, ...
+#include <stdio.h>		// for sprintf()
+//#include <time.h>
 
 #ifdef __cplusplus
 
@@ -37,32 +68,6 @@
 using namespace std;
 
 #endif /* __cplusplus */
-
-
- // standard windows headers
-#define WIN32_LEAN_AND_MEAN
-#define WIN32_EXTRA_LEAN
-#include <windows.h>
-
- // Unicode support
-#if defined(UNICODE) && !defined(_UNICODE)
-#define	_UNICODE
-#endif
-#include <tchar.h>
-
-#include <windowsx.h>	// for SelectBrush(), ListBox_SetSel(), SubclassWindow(), ...
-#include <commctrl.h>
-
-#ifndef _MSC_VER
-#include <objbase.h>
-#endif
-#include <oleauto.h>	// for VARIANT
-
-#include <malloc.h>		// for alloca()
-#include <assert.h>
-#include <stdlib.h>		// for _MAX_DIR, ...
-#include <stdio.h>		// for sprintf()
-#include <time.h>
 
 #ifndef _MAX_PATH
 #define _MAX_DRIVE	3
@@ -144,9 +149,9 @@ extern void _splitpath(const CHAR* path, CHAR* drv, CHAR* dir, CHAR* name, CHAR*
 #endif
 
 
-#define	SetDlgCtrlID(hwnd, id) SetWindowLong(hwnd, GWL_ID, id)
-#define	SetWindowStyle(hwnd, val) (DWORD)SetWindowLong(hwnd, GWL_STYLE, val)
-#define	SetWindowExStyle(h, val) (DWORD)SetWindowLong(hwnd, GWL_EXSTYLE, val)
+#define	SetDlgCtrlID(hwnd, id) SetWindowLongPtr(hwnd, GWL_ID, id)
+#define	SetWindowStyle(hwnd, val) (DWORD)SetWindowLongPtr(hwnd, GWL_STYLE, val)
+#define	SetWindowExStyle(h, val) (DWORD)SetWindowLongPtr(hwnd, GWL_EXSTYLE, val)
 #define	Window_SetIcon(hwnd, type, hicon) (HICON)SendMessage(hwnd, WM_SETICON, type, (LPARAM)(hicon))
 
 
@@ -184,7 +189,8 @@ BOOL exists_path(LPCTSTR path);
 
 
  // secure CRT functions
-#ifdef __STDC_WANT_SECURE_LIB__	// for VS 2005: _MSC_VER>=1400
+//@@ _MS_VER: temporarily needed for the ReactOS build environment
+#if defined(__STDC_WANT_SECURE_LIB__) && defined(_MS_VER)	// for VS 2005: _MSC_VER>=1400
 
 #define _stprintf_s1 _stprintf_s
 #define _stprintf_s2 _stprintf_s
@@ -192,11 +198,22 @@ BOOL exists_path(LPCTSTR path);
 #else	// __STDC_WANT_SECURE_LIB__
 
 #define strcpy_s(d, l, s) strcpy(d, s)
-#define _tcscpy_s(d, l, s) _tcscpy(d, s)
+#define wcscpy_s(d, l, s) wcscpy(d, s)
 #define wcsncpy_s(d, l, s, n) wcsncpy(d, s, n)
+
+#if defined(_tcscpy) && !defined(_tcscpy_s)
+#define _tcscpy_s(d, l, s) _tcscpy(d, s)
+#endif
+
+#if defined(_tsplitpath) && !defined(_tsplitpath_s)
+#define _tsplitpath_s(f, d,dl, p,pl, n,nl, e,el) _tsplitpath(f, d, p, n, e)
+#else
+#define _wsplitpath_s(f, d,dl, p,pl, n,nl, e,el) _wsplitpath(f, d, p, n, e)
+#define _splitpath_s(f, d,dl, p,pl, n,nl, e,el) _splitpath(f, d, p, n, e)
+#endif
+
 #define _stprintf_s1(b, l, f, p1) _stprintf(b, f, p1)
 #define _stprintf_s2(b, l, f, p1,p2) _stprintf(b, f, p1,p2)
-#define _tsplitpath_s(f, d,dl, p,pl, n,nl, e,el) _tsplitpath(f, d, p, n, e)
 
 #endif	// __STDC_WANT_SECURE_LIB__
 

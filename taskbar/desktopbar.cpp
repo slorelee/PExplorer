@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -93,6 +93,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	 // create start button
 	ResString start_str(IDS_START);
 	WindowCanvas canvas(_hwnd);
+	FontSelection font(canvas, GetStockFont(ANSI_VAR_FONT));
 	RECT rect = {0, 0};
 	DrawText(canvas, start_str, -1, &rect, DT_SINGLELINE|DT_CALCRECT);
 	int start_btn_width = rect.right+16+8;
@@ -101,13 +102,14 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 	 // create "Start" button
 	HWND hwndStart = Button(_hwnd, start_str, 1, 1, start_btn_width, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	SetWindowFont(hwndStart, GetStockFont(ANSI_VAR_FONT), FALSE);
 	new StartButton(hwndStart);
 
 	/* Save the handle to the window, needed for push-state handling */
 	_hwndStartButton = hwndStart;
 
 	 // disable double clicks
-	SetClassLong(hwndStart, GCL_STYLE, GetClassLong(hwndStart, GCL_STYLE) & ~CS_DBLCLKS);
+	SetClassLongPtr(hwndStart, GCL_STYLE, GetClassLongPtr(hwndStart, GCL_STYLE) & ~CS_DBLCLKS);
 
 	 // create task bar
 	_hwndTaskBar = TaskBar::Create(_hwnd);
@@ -138,20 +140,17 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 	rbBand.cbSize = sizeof(REBARBANDINFO);
 	rbBand.fMask  = RBBIM_TEXT|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
-#ifndef RBBS_HIDETITLE // missing in MinGW headers as of 25.02.2004
-#define RBBS_HIDETITLE	0x400
-#endif
 	rbBand.cyChild = REBARBAND_HEIGHT;
 	rbBand.cyMaxChild = (ULONG)-1;
 	rbBand.cyMinChild = REBARBAND_HEIGHT;
 	rbBand.cyIntegral = REBARBAND_HEIGHT + 3;	//@@ OK?
-	rbBand.cxMinChild = rbBand.cyIntegral * 3;
 	rbBand.fStyle = RBBS_VARIABLEHEIGHT|RBBS_GRIPPERALWAYS|RBBS_HIDETITLE;
 
 	TCHAR QuickLaunchBand[] = _T("Quicklaunch");
 	rbBand.lpText = QuickLaunchBand;
 	rbBand.hwndChild = _hwndQuickLaunch;
-	rbBand.cx = 250;
+	rbBand.cx = 100;
+	rbBand.cxMinChild = 100;
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
@@ -159,6 +158,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.lpText = TaskbarBand;
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
+	rbBand.cxMinChild = 50;
 	rbBand.wID = IDW_TASKTOOLBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 #endif
@@ -167,7 +167,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	RegisterHotkeys();
 
 	 // prepare Startmenu, but hide it for now
-	_startMenuRoot = GET_WINDOW(StartMenuRoot, StartMenuRoot::Create(_hwnd, STARTMENUROOT_ICON_SIZE));
+	_startMenuRoot = GET_WINDOW(StartMenuRoot, StartMenuRoot::Create(_hwndStartButton, STARTMENUROOT_ICON_SIZE));
 	_startMenuRoot->_hwndStartButton = _hwndStartButton;
 
 	return 0;
@@ -242,7 +242,11 @@ LRESULT	StartButton::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 void DesktopBar::RegisterHotkeys()
 {
 	 // register hotkey WIN+E opening explorer
-	RegisterHotKey(_hwnd, 0, MOD_WIN, 'E');
+	RegisterHotKey(_hwnd, IDHK_EXPLORER, MOD_WIN, 'E');
+	RegisterHotKey(_hwnd, IDHK_RUN, MOD_WIN, 'R');
+	RegisterHotKey(_hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
+	RegisterHotKey(_hwnd, IDHK_LOGOFF, MOD_WIN, 'L');
+	RegisterHotKey(_hwnd, IDHK_STARTMENU, MOD_CONTROL, VK_ESCAPE);
 
 		///@todo register all common hotkeys
 }
@@ -250,9 +254,25 @@ void DesktopBar::RegisterHotkeys()
 void DesktopBar::ProcessHotKey(int id_hotkey)
 {
 	switch(id_hotkey) {
-	  case 0:	explorer_show_frame(SW_SHOWNORMAL);
-		break;
+		case IDHK_EXPLORER:
+			explorer_show_frame(SW_SHOWNORMAL);
+			break;
 
+		case IDHK_RUN:
+			_startMenuRoot->Command(IDC_LAUNCH, 0);
+			break;
+
+		case IDHK_LOGOFF:
+			_startMenuRoot->Command(IDC_LOGOFF, 0);
+			break;
+
+		case IDHK_DESKTOP:
+			g_Globals._desktops.ToggleMinimize();
+			break;
+
+		case IDHK_STARTMENU:
+			ShowOrHideStartMenu();
+			break;
 		///@todo implement all common hotkeys
 	}
 }
@@ -287,7 +307,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 			else
 				return 0;			// disable any other resizing
 		} else if (wparam == SC_TASKLIST)
-			ShowStartMenu();
+			ShowOrHideStartMenu();
 		goto def;
 
 	  case WM_SIZE:
@@ -341,6 +361,15 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
 	  case PM_GET_NOTIFYAREA:
 		return (LRESULT)(HWND)_hwndNotify;
+
+	  case WM_SYSCOLORCHANGE:
+		/* Forward WM_SYSCOLORCHANGE to common controls */
+#ifndef _NO_REBAR
+		SendMessage(_hwndrebar, WM_SYSCOLORCHANGE, 0, 0);
+#endif
+		SendMessage(_hwndQuickLaunch, WM_SYSCOLORCHANGE, 0, 0);
+		SendMessage(_hwndTaskBar, WM_SYSCOLORCHANGE, 0, 0);
+		break;
 
 	  default: def:
 		return super::WndProc(nmsg, wparam, lparam);
@@ -402,7 +431,7 @@ int DesktopBar::Command(int id, int code)
 {
 	switch(id) {
 	  case IDC_START:
-		ShowStartMenu();
+		ShowOrHideStartMenu();
 		break;
 
 	  case ID_ABOUT_EXPLORER:
@@ -426,9 +455,7 @@ int DesktopBar::Command(int id, int code)
 		break;
 
 	  case ID_SWITCH_DESKTOP_1:
-	  case ID_SWITCH_DESKTOP_1+1:
-	  case ID_SWITCH_DESKTOP_1+2:
-	  case ID_SWITCH_DESKTOP_1+3: {
+	  case ID_SWITCH_DESKTOP_1+1: {
 		int desktop_idx = id - ID_SWITCH_DESKTOP_1;
 
 		g_Globals._desktops.SwitchToDesktop(desktop_idx);
@@ -458,7 +485,7 @@ int DesktopBar::Command(int id, int code)
 }
 
 
-void DesktopBar::ShowStartMenu()
+void DesktopBar::ShowOrHideStartMenu()
 {
 	if (_startMenuRoot)
 	{
@@ -466,7 +493,10 @@ void DesktopBar::ShowStartMenu()
 		if (!Button_GetState(_hwndStartButton))
 			Button_SetState(_hwndStartButton, TRUE);
 
- 		_startMenuRoot->TrackStartmenu();
+        if (_startMenuRoot->IsStartMenuVisible())
+            _startMenuRoot->CloseStartMenu();
+        else
+            _startMenuRoot->TrackStartmenu();
 
 		// StartMenu was closed, release button state
 		Button_SetState(_hwndStartButton, false);

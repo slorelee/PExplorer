@@ -460,7 +460,7 @@ _returnFromException ()
 #ifdef WIN32 //MF
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+//#include <windows.h>
 
 void handle_exception(int exceptionVector);
 
@@ -547,7 +547,7 @@ getpacket (void)
 	  count = 0;
 
 	  /* now, read until a # or end of buffer is found */
-	  while (count < BUFMAX)
+	  while (count < BUFMAX - 1)
 		{
 		  ch = getDebugChar ();
 		  if (ch == '$')
@@ -836,7 +836,6 @@ handle_exception (int exceptionVector)
   int sigval, stepping;
   int addr, length;
   char *ptr;
-  int newPC;
 
 #ifndef WIN32 //MF
   gdb_i386vector = exceptionVector;
@@ -977,8 +976,6 @@ handle_exception (int exceptionVector)
 		  /* try to read optional parameter, pc unchanged if no parm */
 		  if (hexToInt (&ptr, &addr))
 			registers[PC] = addr;
-
-		  newPC = registers[PC];
 
 		  /* clear the trace bit */
 		  registers[PS] &= 0xfffffeff;
@@ -1160,7 +1157,7 @@ void disable_debugging()
 		}
 }
 
-
+#define _INC_WINDOWS
 #include <winsock.h>
 #ifdef _MSC_VER
 #pragma comment(lib, "wsock32")

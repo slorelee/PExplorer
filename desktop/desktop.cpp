@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -235,8 +235,12 @@ void Desktops::ToggleMinimize()
 	if (minimized.empty()) {
 		EnumWindows(MinimizeDesktopEnumFct, (LPARAM)&minimized);
 	} else {
-		for(list<MinimizeStruct>::const_iterator it=minimized.begin(); it!=minimized.end(); ++it)
+		const list<MinimizeStruct>& cminimized = minimized;
+		for(list<MinimizeStruct>::const_reverse_iterator it=cminimized.rbegin(); 
+															it!=cminimized.rend(); ++it) {
 			ShowWindowAsync(it->first, it->second&WS_MAXIMIZE? SW_MAXIMIZE: SW_RESTORE);
+			Sleep(20);
+		}
 
 		minimized.clear();
 	}
@@ -259,7 +263,7 @@ BackgroundWindow::BackgroundWindow(HWND hwnd)
 {
 	 // set background brush for the short moment of displaying the
 	 // background color while moving foreground windows
-	SetClassLong(hwnd, GCL_HBRBACKGROUND, COLOR_BACKGROUND+1);
+	SetClassLongPtr(hwnd, GCL_HBRBACKGROUND, COLOR_BACKGROUND+1);
 
 	_display_version = RegGetDWORDValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("PaintDesktopVersion"), 1);
 }
@@ -435,6 +439,12 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		explorer_show_frame(SW_SHOWNORMAL);
 		break;
 
+      case WM_DISPLAYCHANGE:
+        MoveWindow(_hwnd, 0, 0, LOWORD(lparam), HIWORD(lparam), TRUE);
+        MoveWindow(g_Globals._hwndShellView, 0, 0, LOWORD(lparam), HIWORD(lparam), TRUE);
+        MoveWindow(_desktopBar, 0, HIWORD(lparam) - DESKTOPBARBAR_HEIGHT, LOWORD(lparam), DESKTOPBARBAR_HEIGHT, TRUE);
+        break;
+
 	  case WM_GETISHELLBROWSER:
 		return (LRESULT)static_cast<IShellBrowser*>(this);
 
@@ -458,12 +468,37 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		goto def;
 
 	  case WM_SYSCOLORCHANGE:
-		 // redraw background window
-		InvalidateRect(g_Globals._hwndShellView, NULL, TRUE);
+		// redraw background window - it's done by system
+		//InvalidateRect(g_Globals._hwndShellView, NULL, TRUE);
 
-		 // forward message to shell view window to redraw icon backgrounds
-		SendMessage(g_Globals._hwndShellView, WM_SYSCOLORCHANGE, wparam, lparam);
+		// forward message to common controls
+		SendMessage(g_Globals._hwndShellView, WM_SYSCOLORCHANGE, 0, 0);
+		SendMessage(_desktopBar, WM_SYSCOLORCHANGE, 0, 0);
 		break;
+
+      case WM_SETTINGCHANGE:
+        SendMessage(g_Globals._hwndShellView, nmsg, wparam, lparam);
+        break;
+
+      case PM_TRANSLATE_MSG:
+      {
+            /* TranslateAccelerator is called for all explorer windows that are open 
+               so we have to decide if this is the correct recipient */
+            LPMSG lpmsg = (LPMSG)lparam;
+            HWND hwnd = lpmsg->hwnd;
+
+            while(hwnd)
+            {
+                if(hwnd == _hwnd)
+                    break;
+
+                hwnd = GetParent(hwnd);
+            }
+
+            if (hwnd)
+                return _pShellView->TranslateAccelerator(lpmsg) == S_OK;
+            return false;
+      }
 
 	  default: def:
 		return super::WndProc(nmsg, wparam, lparam);
@@ -490,8 +525,6 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView* pShellView)
 {
 	_hwndListView = GetNextWindow(hwnd, GW_CHILD);
 
-	SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
-
 	 // work around for Windows NT, Win 98, ...
 	 // Without this the desktop has mysteriously only a size of 800x600 pixels.
 	ClientRect rect(hwnd);
@@ -500,30 +533,34 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView* pShellView)
 	 // subclass background window
 	new BackgroundWindow(_hwndListView);
 
-	_icon_algo = 1;	// default icon arrangement
+	_icon_algo = 0;	// default icon arrangement
 
-	PositionIcons();
 	InitDragDrop();
 }
+
+
+DesktopShellView::~DesktopShellView()
+{
+	if (FAILED(RevokeDragDrop(_hwnd)))
+		assert(0);
+}
+
 
 bool DesktopShellView::InitDragDrop()
 {
 	CONTEXT("DesktopShellView::InitDragDrop()");
 
-	_pDropTarget = new DesktopDropTarget(_hwnd);
+	DesktopDropTarget * pDropTarget = new DesktopDropTarget(_hwnd);
 
-	if (!_pDropTarget)
+	if (!pDropTarget)
 		return false;
 
-	_pDropTarget->AddRef();
+	pDropTarget->AddRef();
 
-	if (FAILED(RegisterDragDrop(_hwnd, _pDropTarget))) {
-		_pDropTarget->Release();
-		_pDropTarget = NULL;
+	if (FAILED(RegisterDragDrop(_hwnd, pDropTarget))) {
+		pDropTarget->Release();
 		return false;
 	}
-	else
-		_pDropTarget->Release();
 
 	FORMATETC ftetc;
 
@@ -532,7 +569,8 @@ bool DesktopShellView::InitDragDrop()
 	ftetc.tymed = TYMED_HGLOBAL;
 	ftetc.cfFormat = CF_HDROP;
 
-	_pDropTarget->AddSuportedFormat(ftetc);
+	pDropTarget->AddSuportedFormat(ftetc);
+	pDropTarget->Release();
 
 	return true;
 }
@@ -724,6 +762,9 @@ void DesktopShellView::PositionIcons(int dir)
 
 	RECT work_area;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
+
+	/* disable default allignment */
+	SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
 
 	const POINTS& dir1 = s_align_dir1[_icon_algo];
 	const POINTS& dir2 = s_align_dir2[_icon_algo];

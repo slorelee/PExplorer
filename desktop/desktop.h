@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -48,9 +48,9 @@ protected:
 
 
  /// Implementation of the Explorer desktop window
-struct DesktopWindow : public Window, public IShellBrowserImpl
+struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl
 {
-	typedef Window super;
+	typedef PreTranslateWindow super;
 
 	DesktopWindow(HWND hwnd);
 	~DesktopWindow();
@@ -141,7 +141,8 @@ public:
         /* [out][in] */ DWORD __RPC_FAR *pdwEffect)
 	{
 		TVHITTESTINFO hit;
-		hit.pt = (POINT&)pt;
+		hit.pt.x = pt.x;
+		hit.pt.y = pt.y;
 		ScreenToClient(m_hTargetWnd, &hit.pt);
 		hit.flags = TVHT_ONITEM;
 
@@ -170,6 +171,7 @@ struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow>
 	typedef ExtContextMenuHandlerT<SubclassedWindow> super;
 
 	DesktopShellView(HWND hwnd, IShellView* pShellView);
+	~DesktopShellView();
 
 	bool	InitDragDrop();
 
@@ -186,7 +188,6 @@ protected:
 
 	void	refresh();
 
-	DesktopDropTarget* _pDropTarget;
 	HWND	_hwndListView;
 	int		_icon_algo;
 };

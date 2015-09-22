@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -369,6 +369,9 @@ struct StartMenuRoot : public StartMenuHandler
 
 	static HWND Create(HWND hwndDesktopBar, int icon_size);
 	void	TrackStartmenu();
+	void	CloseStartMenu(int id=0);
+	bool    IsStartMenuVisible() const;
+	int	Command(int id, int code);
 
 	HWND	_hwndStartButton;
 
@@ -382,7 +385,7 @@ protected:
 	virtual void ProcessKey(int vk);
 
 	void	Paint(PaintCanvas& canvas);
-	void	CloseStartMenu(int id=0);
+	
 
 	void	ReadLogoSize();
 	UINT	GetLogoResId();
