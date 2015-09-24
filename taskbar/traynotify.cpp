@@ -149,24 +149,25 @@ bool NotifyInfo::modify(void* pnid)
     bool changes = false;
     ULONG32 size = ((NOTIFYICONDATA *)pnid)->cbSize;
     if (IS_NID_ANSI_SIZE_X86(size)) {
-        changes = modify((X86_NOTIFYICONDATAA *)pnid);
+        changes = _modify((X86_NOTIFYICONDATAA *)pnid);
     } else if (IS_NID_UNICODE_SIZE_X86(size)) {
-        changes = modify((X86_NOTIFYICONDATAW *)pnid);
+        changes = _modify((X86_NOTIFYICONDATAW *)pnid);
     } else if (IS_NID_ANSI_SIZE_X64(size)) {
-        changes = modify((X64_NOTIFYICONDATAA *)pnid);
+        changes = _modify((X64_NOTIFYICONDATAA *)pnid);
     } else if (IS_NID_UNICODE_SIZE_X64(size)) {
-        changes = modify((X64_NOTIFYICONDATAW *)pnid);
+        changes = _modify((X64_NOTIFYICONDATAW *)pnid);
     }
 
     return set_title() || changes;
 
 }
 
-bool NotifyInfo::modify(X86_NOTIFYICONDATAA* pnid)
+template<typename NID_T>
+bool NotifyInfo::_modify(NID_T *pnid)
 {
     bool changes = false;
 
-    if (_hWnd != (HWND)pnid->hWnd || _uID!=pnid->uID) {
+    if (_hWnd != (HWND)pnid->hWnd || _uID != pnid->uID) {
         _hWnd = (HWND)pnid->hWnd;
         _uID = pnid->uID;
 
@@ -204,206 +205,10 @@ bool NotifyInfo::modify(X86_NOTIFYICONDATAA* pnid)
 
     // store tool tip text
     if (pnid->uFlags & NIF_TIP) {
-        String new_text;
-        LPCSTR txt = (LPCSTR)pnid->szTip;
         int max_len = 128;
+        String new_text(pnid->szTip, max_len);
 
-        int l = 0;
-        for(int l=0; l<max_len; ++l)
-            if (!txt[l])
-                break;
-
-        new_text.assign(txt, l);
-
-        if (new_text != _tipText) {
-            _tipText = new_text;
-            changes = true;
-        }
-    }
-
-    return changes;
-}
-
-bool NotifyInfo::modify(X86_NOTIFYICONDATAW* pnid)
-{
-    bool changes = false;
-    if (_hWnd != (HWND)pnid->hWnd || _uID!=pnid->uID) {
-        _hWnd = (HWND)pnid->hWnd;
-        _uID = pnid->uID;
-
-        changes = true;
-    }
-
-    if (pnid->uFlags & NIF_MESSAGE) {
-        if (_uCallbackMessage != pnid->uCallbackMessage) {
-            _uCallbackMessage = pnid->uCallbackMessage;
-            changes = true;
-        }
-    }
-
-    if (pnid->uFlags & NIF_ICON) {
-        // Some applications destroy the icon immediatelly after completing the
-        // NIM_ADD/MODIFY message, so we have to make a copy of it.
-        if (_hIcon)
-            DestroyIcon(_hIcon);
-
-        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0);
-
-        changes = true;	///@todo compare icon
-    }
-
-#ifdef NIF_STATE	// as of 21.08.2003 missing in MinGW headers
-    if (pnid->uFlags & NIF_STATE) {
-        DWORD new_state = (_dwState&~pnid->dwStateMask) | (pnid->dwState&pnid->dwStateMask);
-
-        if (_dwState != new_state) {
-            _dwState = new_state;
-            changes = true;
-        }
-    }
-#endif
-
-    // store tool tip text
-    if (pnid->uFlags & NIF_TIP) {
-        String new_text;
-
-        // UNICODE version of NOTIFYICONDATA structure
-        LPCWSTR txt = (LPCWSTR)pnid->szTip;
-        int max_len = 128; //Windows 2000 later
-
-        // get tooltip string length
-        int l = 0;
-        for(; l<max_len; ++l)
-            if (!txt[l])
-                break;
-
-        new_text.assign(txt, l);
-
-        if (new_text != _tipText) {
-            _tipText = new_text;
-            changes = true;
-        }
-    }
-
-    return changes;
-}
-
-bool NotifyInfo::modify(X64_NOTIFYICONDATAA* pnid)
-{
-    bool changes = false;
-
-    if (_hWnd != (HWND)pnid->hWnd || _uID!=pnid->uID) {
-        _hWnd = (HWND)pnid->hWnd;
-        _uID = pnid->uID;
-
-        changes = true;
-    }
-
-    if (pnid->uFlags & NIF_MESSAGE) {
-        if (_uCallbackMessage != pnid->uCallbackMessage) {
-            _uCallbackMessage = pnid->uCallbackMessage;
-            changes = true;
-        }
-    }
-
-    if (pnid->uFlags & NIF_ICON) {
-        // Some applications destroy the icon immediatelly after completing the
-        // NIM_ADD/MODIFY message, so we have to make a copy of it.
-        if (_hIcon)
-            DestroyIcon(_hIcon);
-
-        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0);
-
-        changes = true;	///@todo compare icon
-    }
-
-#ifdef NIF_STATE	// as of 21.08.2003 missing in MinGW headers
-    if (pnid->uFlags & NIF_STATE) {
-        DWORD new_state = (_dwState&~pnid->dwStateMask) | (pnid->dwState&pnid->dwStateMask);
-
-        if (_dwState != new_state) {
-            _dwState = new_state;
-            changes = true;
-        }
-    }
-#endif
-
-    // store tool tip text
-    if (pnid->uFlags & NIF_TIP) {
-        String new_text;
-        LPCSTR txt = (LPCSTR)pnid->szTip;
-        int max_len = 128;
-
-        int l = 0;
-        for(int l=0; l<max_len; ++l)
-            if (!txt[l])
-                break;
-
-        new_text.assign(txt, l);
-
-        if (new_text != _tipText) {
-            _tipText = new_text;
-            changes = true;
-        }
-    }
-
-    return changes;
-}
-
-bool NotifyInfo::modify(X64_NOTIFYICONDATAW* pnid)
-{
-    bool changes = false;
-    if (_hWnd != (HWND)pnid->hWnd || _uID!=pnid->uID) {
-        _hWnd = (HWND)pnid->hWnd;
-        _uID = pnid->uID;
-
-        changes = true;
-    }
-
-    if (pnid->uFlags & NIF_MESSAGE) {
-        if (_uCallbackMessage != pnid->uCallbackMessage) {
-            _uCallbackMessage = pnid->uCallbackMessage;
-            changes = true;
-        }
-    }
-
-    if (pnid->uFlags & NIF_ICON) {
-        // Some applications destroy the icon immediatelly after completing the
-        // NIM_ADD/MODIFY message, so we have to make a copy of it.
-        if (_hIcon)
-            DestroyIcon(_hIcon);
-
-        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0);
-
-        changes = true;	///@todo compare icon
-    }
-
-#ifdef NIF_STATE	// as of 21.08.2003 missing in MinGW headers
-    if (pnid->uFlags & NIF_STATE) {
-        DWORD new_state = (_dwState&~pnid->dwStateMask) | (pnid->dwState&pnid->dwStateMask);
-
-        if (_dwState != new_state) {
-            _dwState = new_state;
-            changes = true;
-        }
-    }
-#endif
-
-    // store tool tip text
-    if (pnid->uFlags & NIF_TIP) {
-        String new_text;
-
-        // UNICODE version of NOTIFYICONDATA structure
-        LPCWSTR txt = (LPCWSTR)pnid->szTip;
-        int max_len = 128; //Windows 2000 later
-
-        // get tooltip string length
-        int l = 0;
-        for(; l<max_len; ++l)
-            if (!txt[l])
-                break;
-
-        new_text.assign(txt, l);
+        //new_text.assign(txt, l);
 
         if (new_text != _tipText) {
             _tipText = new_text;
@@ -737,16 +542,10 @@ void NotifyArea::CancelModes()
 		PostMessage(it->_hWnd, WM_CANCELMODE, 0, 0);
 }
 
-LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pnid)
+static UINT GET_NID_uID(NOTIFYICONDATA* pnid)
 {
-    bool changes = false;
-
-    switch(notify_code) {
-    case NIM_ADD:
-    case NIM_MODIFY:{
-        // special handling for windows Task Manager
         UINT32 uid = 0;
-        ULONG32 size = ((NOTIFYICONDATA *)pnid)->cbSize;
+        DWORD size = ((NOTIFYICONDATA *)pnid)->cbSize;
         if (IS_NID_ANSI_SIZE_X86(size)) {
             uid = ((X86_NOTIFYICONDATAA *)pnid)->uID;
         } else if (IS_NID_UNICODE_SIZE_X86(size)) {
@@ -756,8 +555,20 @@ LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pni
         } else if (IS_NID_UNICODE_SIZE_X64(size)) {
             uid = ((X64_NOTIFYICONDATAW *)pnid)->uID;
         }
+        return (UINT)uid;
+}
+
+LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pnid)
+{
+    bool changes = false;
+
+    switch(notify_code) {
+    case NIM_ADD:
+    case NIM_MODIFY:{
+        // special handling for windows Task Manager
+        UINT uid = GET_NID_uID(pnid);
         if ((INT32)uid < 0) { // handle Task Manager's uIDs - 0xffffffff~0xfffffff4
-            OutputDebugString(FmtString("Task - %d %d 0x%x\r\n", (INT16)uid,(INT32)uid, uid));
+            //OutputDebugString(FmtString("Task - %d %d 0x%x\r\n", (INT16)uid,(INT32)uid, uid));
             return TRUE;
         }
 
@@ -783,17 +594,10 @@ LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pni
     }
     break;
     case NIM_DELETE: {
-        HICON nid_icon = (HICON)0;
         NotifyIconMap::iterator found = _icon_map.find(pnid);
-
         if (found != _icon_map.end()) {
-            if (IS_NID_UNICODE_SIZE(((NOTIFYICONDATA *)pnid)->cbSize)) {
-                nid_icon = found->second._hIcon;
-            } else {
-                nid_icon = found->second._hIcon;
-            }
-            if (nid_icon)
-                DestroyIcon(nid_icon);
+            if (found->second._hIcon)
+                DestroyIcon(found->second._hIcon);
             _icon_map.erase(found);
             UpdateIcons();
             return TRUE;
