@@ -149,7 +149,7 @@ struct NotifyInfo : public NotifyIconIndex, public NotifyIconConfig
 typedef map<NotifyIconIndex, NotifyInfo> NotifyIconMap;
 typedef set<NotifyInfo> NotifyIconSet;
 
-
+#ifdef USE_NOTIFYHOOK
 struct NotifyHook
 {
 	NotifyHook();
@@ -161,7 +161,7 @@ struct NotifyHook
 protected:
 	const UINT WM_GETMODULEPATH;
 };
-
+#endif
 
  /// tray notification area aka "tray"
 struct NotifyArea : public Window
@@ -180,7 +180,10 @@ protected:
 	int		_clock_width;
 
 	ToolTip	_tooltip;
+
+#ifdef USE_NOTIFYHOOK
 	NotifyHook _hook;
+#endif
 
 	bool	_show_hidden;
 	bool	_hide_inactive;

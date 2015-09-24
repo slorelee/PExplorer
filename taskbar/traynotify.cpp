@@ -32,7 +32,7 @@
 
 #include "traynotify.h"
 
-
+#ifdef USE_NOTIFYHOOK
 #include "../notifyhook/notifyhook.h"
 
 NotifyHook::NotifyHook()
@@ -62,6 +62,7 @@ bool NotifyHook::ModulePathCopyData(LPARAM lparam, HWND* phwnd, String& path)
 	} else
 		return false;
 }
+#endif //USE_NOTIFYHOOK
 
 const int PF_NOTIFYICONDATAA_V1_SIZE = FIELD_OFFSET(X86_NOTIFYICONDATAA, szTip[64]);
 const int PF_NOTIFYICONDATAW_V1_SIZE = FIELD_OFFSET(X86_NOTIFYICONDATAW, szTip[64]);
@@ -424,6 +425,7 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		}
 		break;}
 
+#ifdef USE_NOTIFYHOOK
 	  case WM_COPYDATA: {	// receive NotifyHook answers
 		String path;
 		HWND hwnd;
@@ -431,6 +433,7 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		if (_hook.ModulePathCopyData(lparam, &hwnd, path))
 			_window_modules[hwnd] = path;
 		break;}
+#endif
 
 	  default:
 		if (nmsg>=WM_MOUSEFIRST && nmsg<=WM_MOUSELAST) {
@@ -843,8 +846,10 @@ bool NotifyArea::DetermineHideState(NotifyInfo& entry)
 		 // request module path for new windows (We will get an asynchronous answer by a WM_COPYDATA message.)
 		if (!modulePath.empty())
 			entry._modulePath = modulePath;
+#ifdef USE_NOTIFYHOOK
 		else
 			_hook.GetModulePath(entry._hWnd, _hwnd);
+#endif
 	}
 
 	for(NotifyIconCfgList::const_iterator it=_cfg.begin(); it!=_cfg.end(); ++it) {
