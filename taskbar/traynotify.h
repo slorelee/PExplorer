@@ -43,6 +43,89 @@
 #define	PM_GETMODULEPATH_CB		(WM_APP+0x21)
 #define	PM_GET_NOTIFYAREA		(WM_APP+0x22)
 
+typedef struct _X86_NOTIFYICONDATAA {
+    ULONG32 cbSize;
+    INT32 hWnd;
+    UINT32 uID;
+    UINT32 uFlags;
+    UINT32 uCallbackMessage;
+    UINT32 hIcon;
+    CHAR   szTip[128];
+    ULONG32 dwState;
+    ULONG32 dwStateMask;
+    CHAR   szInfo[256];
+    union {
+        UINT32  uTimeout;
+        UINT32  uVersion;  // used with NIM_SETVERSION, values 0, 3 and 4
+    } DUMMYUNIONNAME;
+    CHAR   szInfoTitle[64];
+    ULONG32 dwInfoFlags;
+    GUID guidItem;
+    INT32 hBalloonIcon;
+} X86_NOTIFYICONDATAA;
+
+typedef struct _X86_NOTIFYICONDATAW {
+    ULONG32 cbSize;
+    INT32 hWnd;
+    UINT32 uID;
+    UINT32 uFlags;
+    UINT32 uCallbackMessage;
+    INT32 hIcon;
+    WCHAR  szTip[128];
+    ULONG32 dwState;
+    ULONG32 dwStateMask;
+    WCHAR  szInfo[256];
+    union {
+        UINT32  uTimeout;
+        UINT32  uVersion;  // used with NIM_SETVERSION, values 0, 3 and 4
+    } DUMMYUNIONNAME;
+    WCHAR  szInfoTitle[64];
+    ULONG32 dwInfoFlags;
+    GUID guidItem;
+    INT32 hBalloonIcon;
+} X86_NOTIFYICONDATAW;
+
+typedef struct _X64_NOTIFYICONDATAA {
+    ULONG32 cbSize;
+    INT64 hWnd;
+    UINT32 uID;
+    UINT32 uFlags;
+    UINT32 uCallbackMessage;
+    INT64 hIcon;
+    CHAR   szTip[128];
+    ULONG32 dwState;
+    ULONG32 dwStateMask;
+    CHAR   szInfo[256];
+    union {
+        UINT32  uTimeout;
+        UINT32  uVersion;  // used with NIM_SETVERSION, values 0, 3 and 4
+    } DUMMYUNIONNAME;
+    CHAR   szInfoTitle[64];
+    ULONG32 dwInfoFlags;
+    GUID guidItem;
+    INT64 hBalloonIcon;
+} X64_NOTIFYICONDATAA;
+
+typedef struct _X64_NOTIFYICONDATAW {
+    ULONG32 cbSize;
+    INT64 hWnd;
+    UINT32 uID;
+    UINT32 uFlags;
+    UINT32 uCallbackMessage;
+    INT64 hIcon;
+    WCHAR  szTip[128];
+    ULONG32 dwState;
+    ULONG32 dwStateMask;
+    WCHAR  szInfo[256];
+    union {
+        UINT32  uTimeout;
+        UINT32  uVersion;  // used with NIM_SETVERSION, values 0, 3 and 4
+    } DUMMYUNIONNAME;
+    WCHAR  szInfoTitle[64];
+    ULONG32 dwInfoFlags;
+    GUID guidItem;
+    INT64 hBalloonIcon;
+} X64_NOTIFYICONDATAW;
 
  /// NotifyIconIndex is used for maintaining the order of notification icons.
 struct NotifyIconIndex
@@ -54,7 +137,7 @@ struct NotifyIconIndex
 		{return a._hWnd<b._hWnd || (a._hWnd==b._hWnd && a._uID<b._uID);}
 
 	HWND	_hWnd;
-	UINT	_uID;
+	UINT32	_uID;
 
 protected:
 	NotifyIconIndex();
@@ -98,8 +181,12 @@ struct NotifyInfo : public NotifyIconIndex, public NotifyIconConfig
 	friend bool operator<(const NotifyInfo& a, const NotifyInfo& b)
 		{return a._idx < b._idx;}
 
-	bool	modify(NOTIFYICONDATA* pnid);
-
+	bool	modify(void* pnid);
+	bool	modify(X86_NOTIFYICONDATAA* pnid);
+	bool	modify(X86_NOTIFYICONDATAW* pnid);
+	bool	modify(X64_NOTIFYICONDATAA* pnid);
+	bool	modify(X64_NOTIFYICONDATAW* pnid);
+	bool	set_title();
 	int		_idx;	// display index
 	HICON	_hIcon;
 	DWORD	_dwState;
