@@ -103,6 +103,39 @@ const int PF_NOTIFYICONDATAW_V4_SIZE = sizeof(X86_NOTIFYICONDATAW);
 #define IS_NID_UNICODE_SIZE(data) ((IS_NID_UNICODE_SIZE_X86(data)) || (IS_NID_UNICODE_SIZE_X64(data)))
 #define IS_NID_ANSI_SIZE(data) ((IS_NID_ANSI_SIZE_X86(data)) || (IS_NID_ANSI_SIZE_X64(data)))
 
+
+static UINT GET_NID_uID(NOTIFYICONDATA* pnid)
+{
+        UINT32 uid = 0;
+        DWORD size = ((NOTIFYICONDATA *)pnid)->cbSize;
+        if (IS_NID_ANSI_SIZE_X86(size)) {
+            uid = ((X86_NOTIFYICONDATAA *)pnid)->uID;
+        } else if (IS_NID_UNICODE_SIZE_X86(size)) {
+            uid = ((X86_NOTIFYICONDATAW *)pnid)->uID;
+        } else if (IS_NID_ANSI_SIZE_X64(size)) {
+            uid = ((X64_NOTIFYICONDATAA *)pnid)->uID;
+        } else if (IS_NID_UNICODE_SIZE_X64(size)) {
+            uid = ((X64_NOTIFYICONDATAW *)pnid)->uID;
+        }
+        return (UINT)uid;
+}
+
+static UINT GET_NID_uVersion(NOTIFYICONDATA* pnid)
+{
+        UINT32 uversion = 0;
+        DWORD size = ((NOTIFYICONDATA *)pnid)->cbSize;
+        if (IS_NID_ANSI_SIZE_X86(size)) {
+            uversion = ((X86_NOTIFYICONDATAA *)pnid)->UNION_MEMBER(uVersion);
+        } else if (IS_NID_UNICODE_SIZE_X86(size)) {
+            uversion = ((X86_NOTIFYICONDATAW *)pnid)->UNION_MEMBER(uVersion);
+        } else if (IS_NID_ANSI_SIZE_X64(size)) {
+            uversion = ((X64_NOTIFYICONDATAA *)pnid)->UNION_MEMBER(uVersion);
+        } else if (IS_NID_UNICODE_SIZE_X64(size)) {
+            uversion = ((X64_NOTIFYICONDATAW *)pnid)->UNION_MEMBER(uVersion);
+        }
+        return (UINT)uversion;
+}
+
 NotifyIconIndex::NotifyIconIndex(NOTIFYICONDATA* pnid)
 {
     ULONG32 size = ((NOTIFYICONDATA *)pnid)->cbSize;
@@ -542,22 +575,6 @@ void NotifyArea::CancelModes()
 		PostMessage(it->_hWnd, WM_CANCELMODE, 0, 0);
 }
 
-static UINT GET_NID_uID(NOTIFYICONDATA* pnid)
-{
-        UINT32 uid = 0;
-        DWORD size = ((NOTIFYICONDATA *)pnid)->cbSize;
-        if (IS_NID_ANSI_SIZE_X86(size)) {
-            uid = ((X86_NOTIFYICONDATAA *)pnid)->uID;
-        } else if (IS_NID_UNICODE_SIZE_X86(size)) {
-            uid = ((X86_NOTIFYICONDATAW *)pnid)->uID;
-        } else if (IS_NID_ANSI_SIZE_X64(size)) {
-            uid = ((X64_NOTIFYICONDATAA *)pnid)->uID;
-        } else if (IS_NID_UNICODE_SIZE_X64(size)) {
-            uid = ((X64_NOTIFYICONDATAW *)pnid)->uID;
-        }
-        return (UINT)uid;
-}
-
 LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pnid)
 {
     bool changes = false;
@@ -613,11 +630,7 @@ LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA* pni
         NotifyIconMap::iterator found = _icon_map.find(pnid);
 
         if (found != _icon_map.end()) {
-            if (IS_NID_UNICODE_SIZE(((NOTIFYICONDATA *)pnid)->cbSize)) {
-                found->second._version = ((NOTIFYICONDATAW *)pnid)->UNION_MEMBER(uVersion);
-            } else {
-                found->second._version = pnid->UNION_MEMBER(uVersion);
-            }
+            found->second._version = GET_NID_uVersion(pnid);
             return TRUE;
         } else
             return FALSE;
