@@ -134,7 +134,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 	SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(TASKBUTTONWIDTH_MAX,TASKBUTTONWIDTH_MAX));
 	//SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
 	//SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
-	//SetWindowFont(_htoolbar, GetStockFont(ANSI_VAR_FONT), FALSE);
+	//SetWindowFont(_htoolbar, GetStockFont(SYSTEM_FONT), FALSE);
 	//SendMessage(_htoolbar, TB_SETPADDING, 0, MAKELPARAM(8,8));
 
 #ifndef __MINGW32__	// TBMETRICS missing in MinGW (as of 20.09.2005)

@@ -1201,7 +1201,7 @@ HWND ClockWindow::Create(HWND hwndParent)
 	ClientRect clnt(hwndParent);
 
 	WindowCanvas canvas(hwndParent);
-	FontSelection font(canvas, GetStockFont(ANSI_VAR_FONT));
+	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
 
 	RECT rect = {0, 0, 0, 0};
 	TCHAR buffer[16];
@@ -1283,7 +1283,7 @@ void ClockWindow::Paint()
 	FillRect(canvas, &canvas.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
 
 	BkMode bkmode(canvas, TRANSPARENT);
-	FontSelection font(canvas, GetStockFont(ANSI_VAR_FONT));
+	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
 
 	DrawText(canvas, _time, -1, ClientRect(_hwnd), DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX);
 }
