@@ -69,14 +69,14 @@ HWND DesktopBar::Create()
 
 	RECT rect;
 
-	rect.left = -2; // hide left border
+	rect.left = -6; // hide left border
 #ifdef TASKBAR_AT_TOP
-	rect.top = -2;	// hide top border
+	rect.top = -6;	// hide top border
 #else
-	rect.top = GetSystemMetrics(SM_CYSCREEN) - DESKTOPBARBAR_HEIGHT;
+	rect.top = GetSystemMetrics(SM_CYSCREEN) - DESKTOPBARBAR_HEIGHT - 10;
 #endif
-	rect.right = GetSystemMetrics(SM_CXSCREEN) + 2;
-	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT + 2;
+	rect.right = GetSystemMetrics(SM_CXSCREEN) + 6;
+	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT + 10;
 
 	return Window::Create(WINDOW_CREATOR(DesktopBar), WS_EX_PALETTEWINDOW,
 							wcDesktopBar, TITLE_EXPLORERBAR,
