@@ -1032,8 +1032,13 @@ void PictureButton::DrawItem(LPDRAWITEMSTRUCT dis)
 	if (dis->itemState & (ODS_DISABLED|ODS_GRAYED))
 		DrawGrayText(dis->hDC, &textRect, title, dt_flags);
 	else {
-		TextColor lcColor(dis->hDC, GetSysColor(COLOR_BTNTEXT));
-		DrawText(dis->hDC, title, -1, &textRect, dt_flags);
+		if (_flat) {
+			TextColor lcColor(dis->hDC, RGB(255, 255, 255)); //todo:add a paramter for text color.
+			DrawText(dis->hDC, title, -1, &textRect, dt_flags);
+		} else {
+			TextColor lcColor(dis->hDC, GetSysColor(COLOR_BTNTEXT));
+			DrawText(dis->hDC, title, -1, &textRect, dt_flags);
+		}
 	}
 
 	if (dis->itemState & ODS_FOCUS) {

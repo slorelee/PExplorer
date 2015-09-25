@@ -118,8 +118,8 @@ void QuickLaunchBar::AddShortcuts()
 	ShellFolder desktop_folder;
 	WindowCanvas canvas(_hwnd);
 
-	COLORREF bk_color = GetSysColor(COLOR_BTNFACE);
-	HBRUSH bk_brush = GetSysColorBrush(COLOR_BTNFACE);
+	COLORREF bk_color = RGB(0, 0, 0);
+	HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
 	int icon_num = 0;
 	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas), ResString(IDS_MINIMIZE_ALL), NULL);

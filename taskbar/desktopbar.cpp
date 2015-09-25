@@ -66,6 +66,7 @@ DesktopBar::~DesktopBar()
 HWND DesktopBar::Create()
 {
 	static BtnWindowClass wcDesktopBar(CLASSNAME_EXPLORERBAR);
+	wcDesktopBar.hbrBackground = TASKBAR_BRUSH();
 
 	RECT rect;
 
@@ -177,7 +178,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 
 StartButton::StartButton(HWND hwnd)
- :	PictureButton(hwnd, SmallIcon(IDI_STARTMENU), GetSysColorBrush(COLOR_BTNFACE))
+ :	PictureButton(hwnd, SmallIcon(IDI_STARTMENU), TASKBAR_BRUSH(), true)
 {
 }
 

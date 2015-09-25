@@ -366,7 +366,7 @@ LRESULT NotifyArea::Init(LPCREATESTRUCT pcs)
 HWND NotifyArea::Create(HWND hwndParent)
 {
 	static BtnWindowClass wcTrayNotify(CLASSNAME_TRAYNOTIFY, CS_DBLCLKS);
-
+	wcTrayNotify.hbrBackground = TASKBAR_BRUSH();
 	ClientRect clnt(hwndParent);
 
 	return Window::Create(WINDOW_CREATOR(NotifyArea), WS_EX_STATICEDGE,
@@ -701,7 +701,7 @@ void NotifyArea::Paint()
 	BufferedPaintCanvas canvas(_hwnd);
 
 	 // first fill with the background color
-	FillRect(canvas, &canvas.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
+	FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
 
 	 // draw icons
 	int x = NOTIFYICON_X;
@@ -1269,7 +1269,7 @@ ClockWindow::ClockWindow(HWND hwnd)
 HWND ClockWindow::Create(HWND hwndParent)
 {
 	static BtnWindowClass wcClock(CLASSNAME_CLOCKWINDOW, CS_DBLCLKS);
-
+	wcClock.hbrBackground = TASKBAR_BRUSH();
 	ClientRect clnt(hwndParent);
 
 	WindowCanvas canvas(hwndParent);
@@ -1352,10 +1352,10 @@ void ClockWindow::Paint()
 {
 	PaintCanvas canvas(_hwnd);
 
-	FillRect(canvas, &canvas.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
+	FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
 
 	BkMode bkmode(canvas, TRANSPARENT);
 	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
-
+	SetTextColor(canvas, RGB(255, 255, 255));
 	DrawText(canvas, _time, -1, ClientRect(_hwnd), DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX);
 }

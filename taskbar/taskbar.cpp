@@ -113,10 +113,11 @@ HWND TaskBar::Create(HWND hwndParent)
 	ClientRect clnt(hwndParent);
 
 	int taskbar_pos = 80;	// This start position will be adjusted in DesktopBar::Resize().
-
+	static BtnWindowClass wcTaskBar(CLASSNAME_TASKBAR);
+	wcTaskBar.hbrBackground = TASKBAR_BRUSH();
 	return Window::Create(WINDOW_CREATOR(TaskBar), 0,
-							BtnWindowClass(CLASSNAME_TASKBAR), TITLE_TASKBAR,
-							WS_CHILD|WS_VISIBLE | CCS_TOP|CCS_NODIVIDER|CCS_NORESIZE,
+							wcTaskBar, TITLE_TASKBAR,
+							WS_CHILD|WS_VISIBLE|CCS_TOP|CCS_NODIVIDER|CCS_NORESIZE,
 							taskbar_pos, 0, clnt.right-taskbar_pos-(NOTIFYAREA_WIDTH_DEF+1), clnt.bottom, hwndParent);
 }
 
@@ -412,7 +413,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 			}
 
 			if (hIcon) {
-				hbmp = create_bitmap_from_icon(hIcon, GetSysColorBrush(COLOR_BTNFACE), WindowCanvas(pThis->_htoolbar));
+				hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar));
 				if (delete_icon)
 					DestroyIcon(hIcon); // some icons can be freed, some not - so ignore any error return of DestroyIcon()
 			} else

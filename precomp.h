@@ -47,3 +47,7 @@
 
 #include "globals.h"
 #include "externals.h"
+
+#define DEFWINBRUSH() GetSysColorBrush(COLOR_BTNFACE)
+#define BLACKBRUSH() CreateSolidBrush(RGB(0, 0, 0))
+#define TASKBAR_BRUSH() BLACKBRUSH()
