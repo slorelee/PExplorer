@@ -395,30 +395,15 @@ DesktopShellView::~DesktopShellView()
 bool DesktopShellView::InitDragDrop()
 {
 	CONTEXT("DesktopShellView::InitDragDrop()");
-
-	DesktopDropTarget * pDropTarget = new DesktopDropTarget(_hwnd);
-
-	if (!pDropTarget)
-		return false;
-
-	pDropTarget->AddRef();
-
-	if (FAILED(RegisterDragDrop(_hwnd, pDropTarget))) {
-		pDropTarget->Release();
-		return false;
+	IDropTarget* dt;
+	HRESULT hr = _pShellView->QueryInterface(IID_IDropTarget, (void**)&dt);
+	if (SUCCEEDED(hr))
+	{
+		RevokeDragDrop(_hwndListView); // just in case
+		RegisterDragDrop(_hwndListView, dt);
+		return true;
 	}
-
-	FORMATETC ftetc;
-
-	ftetc.dwAspect = DVASPECT_CONTENT;
-	ftetc.lindex = -1;
-	ftetc.tymed = TYMED_HGLOBAL;
-	ftetc.cfFormat = CF_HDROP;
-
-	pDropTarget->AddSuportedFormat(ftetc);
-	pDropTarget->Release();
-
-	return true;
+	return false;
 }
 
 LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
