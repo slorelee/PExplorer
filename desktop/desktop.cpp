@@ -38,118 +38,6 @@ static BOOL (WINAPI*SetShellWindow)(HWND);
 static BOOL (WINAPI*SetShellWindowEx)(HWND, HWND);
 
 
-#ifdef _USE_HDESK
-
-Desktop::Desktop(HDESK hdesktop/*, HWINSTA hwinsta*/)
- :	_hdesktop(hdesktop)
-//	_hwinsta(hwinsta)
-{
-}
-
-Desktop::~Desktop()
-{
-	if (_hdesktop)
-		CloseDesktop(_hdesktop);
-
-//	if (_hwinsta)
-//		CloseWindowStation(_hwinsta);
-
-	if (_pThread.get()) {
-		_pThread->Stop();
-		_pThread.release();
-	}
-}
-
-#endif
-
-
-Desktops::Desktops()
- :	_current_desktop(0)
-{
-}
-
-Desktops::~Desktops()
-{
-	 // show all hidden windows
-	for(iterator it_dsk=begin(); it_dsk!=end(); ++it_dsk)
-		for(WindowSet::iterator it=it_dsk->_windows.begin(); it!=it_dsk->_windows.end(); ++it)
-			ShowWindowAsync(*it, SW_SHOW);
-}
-
-void Desktops::init()
-{
-	resize(DESKTOP_COUNT);
-
-#ifdef _USE_HDESK
-	DesktopPtr& desktop = (*this)[0];
-
-	desktop = DesktopPtr(new Desktop(OpenInputDesktop(0, FALSE, DESKTOP_SWITCHDESKTOP)));
-#endif
-}
-
-#ifdef _USE_HDESK
-
-void Desktops::SwitchToDesktop(int idx)
-{
-	if (_current_desktop == idx)
-		return;
-
-	DesktopPtr& desktop = (*this)[idx];
-
-	DesktopThread* pThread = NULL;
-
-	if (desktop.get()) {
-		if (desktop->_hdesktop)
-			if (!SwitchDesktop(desktop->_hdesktop))
-				return;
-	} else {
-		FmtString desktop_name(TEXT("Desktop %d"), idx);
-
-		SECURITY_ATTRIBUTES saAttr = {sizeof(SECURITY_ATTRIBUTES), 0, TRUE};
-/*
-		HWINSTA hwinsta = CreateWindowStation(TEXT("ExplorerWinStation"), 0, GENERIC_ALL, &saAttr);
-
-		if (!SetProcessWindowStation(hwinsta))
-			return;
-*/
-		HDESK hdesktop = CreateDesktop(desktop_name, NULL, NULL, 0, GENERIC_ALL, &saAttr);
-		if (!hdesktop)
-			return;
-
-		desktop = DesktopPtr(new Desktop(hdesktop/*, hwinsta*/));
-
-		pThread = new DesktopThread(*desktop);
-	}
-
-	_current_desktop = idx;
-
-	if (pThread) {
-		desktop->_pThread = DesktopThreadPtr(pThread);
-		pThread->Start();
-	}
-}
-
-int DesktopThread::Run()
-{
-	if (!SetThreadDesktop(_desktop._hdesktop))
-		return -1;
-
-	HDESK hDesk_old = OpenInputDesktop(0, FALSE, DESKTOP_SWITCHDESKTOP);
-
-	if (!SwitchDesktop(_desktop._hdesktop))
-		return -1;
-
-	if (!_desktop._hwndDesktop)
-		_desktop._hwndDesktop = DesktopWindow::Create();
-
-	int ret = Window::MessageLoop();
-
-	SwitchDesktop(hDesk_old);
-
-	return ret;
-}
-
-#else // _USE_HDESK
 
 static BOOL CALLBACK SwitchDesktopEnumFct(HWND hwnd, LPARAM lparam)
 {
@@ -161,52 +49,6 @@ static BOOL CALLBACK SwitchDesktopEnumFct(HWND hwnd, LPARAM lparam)
 
 	return TRUE;
 }
-
-void Desktops::SwitchToDesktop(int idx)
-{
-	if (_current_desktop == idx)
-		return;
-
-	Desktop& old_desktop = (*this)[_current_desktop];
-	WindowSet& windows = old_desktop._windows;
-	Desktop& desktop = (*this)[idx];
-
-	windows.clear();
-
-	 // collect window handles of all other desktops
-	WindowSet other_wnds;
-	for(const_iterator it1=begin(); it1!=end(); ++it1)
-		for(WindowSet::const_iterator it2=it1->_windows.begin(); it2!=it1->_windows.end(); ++it2)
-			other_wnds.insert(*it2);
-
-	 // save currently visible application windows
-	EnumWindows(SwitchDesktopEnumFct, (LPARAM)&windows);
-
-	old_desktop._hwndForeground = (HWND)SendMessage(g_Globals._hwndDesktopBar, PM_GET_LAST_ACTIVE, 0, 0);
-
-	 // hide all windows of the previous desktop
-	for(WindowSet::iterator it=windows.begin(); it!=windows.end(); ++it)
-		ShowWindowAsync(*it, SW_HIDE);
-
-	 // show all windows of the new desktop
-	for(WindowSet::iterator it=desktop._windows.begin(); it!=desktop._windows.end(); ++it)
-		ShowWindowAsync(*it, SW_SHOW);
-
-	if (desktop._hwndForeground)
-		SetForegroundWindow(desktop._hwndForeground);
-
-	 // remove the window handles of the other desktops from what we found on the previous desktop
-	for(WindowSet::const_iterator it=other_wnds.begin(); it!=other_wnds.end(); ++it)
-		windows.erase(*it);
-
-	 // We don't need to store the window handles of what's now visible the now current desktop.
-	desktop._windows.clear();
-
-	_current_desktop = idx;
-}
-
-#endif // _USE_HDESK
-
 
 static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
 {
@@ -228,9 +70,9 @@ static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
 }
 
  /// minimize/restore all windows on the desktop
-void Desktops::ToggleMinimize()
+void Desktop::ToggleMinimize()
 {
-	list<MinimizeStruct>& minimized = (*this)[_current_desktop]._minimized;
+	list<MinimizeStruct>& minimized = _minimized;
 
 	if (minimized.empty()) {
 		EnumWindows(MinimizeDesktopEnumFct, (LPARAM)&minimized);

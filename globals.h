@@ -183,40 +183,7 @@ extern HICON get_window_icon_small(HWND hwnd);
 extern HICON get_window_icon_big(HWND hwnd, bool allow_from_class=true);
 
 
- /// desktop management
-#ifdef _USE_HDESK
 
-typedef auto_ptr<struct DesktopThread> DesktopThreadPtr;
-
-struct Desktop
-{
-	HDESK	_hdesktop;
-//	HWINSTA	_hwinsta;
-	DesktopThreadPtr _pThread;
-	WindowHandle _hwndDesktop;
-
-	Desktop(HDESK hdesktop=0/*, HWINSTA hwinsta=0*/);
-	~Desktop();
-};
-
-typedef auto_ptr<Desktop> DesktopPtr;
-typedef DesktopPtr DesktopRef;
-
- /// Thread class for additional desktops
-struct DesktopThread : public Thread
-{
-	DesktopThread(Desktop& desktop)
-	 :	_desktop(desktop)
-	{
-	}
-
-	int	Run();
-
-protected:
-	Desktop&	_desktop;
-};
-
-#else
 
 typedef pair<HWND, DWORD> MinimizeStruct;
 
@@ -225,30 +192,9 @@ struct Desktop
 	set<HWND> _windows;
 	WindowHandle _hwndForeground;
 	list<MinimizeStruct> _minimized;
+	void ToggleMinimize();
 };
 typedef Desktop DesktopRef;
-
-#endif
-
-
-#define	DESKTOP_COUNT	2
-
-struct Desktops : public vector<DesktopRef>
-{
-	Desktops();
-	~Desktops();
-
-	void	init();
-	void	SwitchToDesktop(int idx);
-	void	ToggleMinimize();
-
-#ifdef _USE_HDESK
-	DesktopRef& get_current_Desktop() {return (*this)[_current_desktop];}
-#endif
-
-	int		_current_desktop;
-};
-
 
  /// structure containing global variables of Explorer
 extern struct ExplorerGlobals
@@ -286,7 +232,7 @@ extern struct ExplorerGlobals
 	HWND		_hwndShellView;
 	HWND		_hwndDesktop;
 
-	Desktops	_desktops;
+	Desktop		_desktop;
 
 	//XMLDoc		_cfg;
 	String		_cfg_dir;

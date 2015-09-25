@@ -127,33 +127,6 @@ void QuickLaunchBar::AddShortcuts()
 	TBBUTTON sep = {0, -1, TBSTATE_ENABLED, BTNS_SEP, {0, 0}, 0, 0};
 	SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
 
-	int cur_desktop = g_Globals._desktops._current_desktop;
-	ResString desktop_fmt(IDS_DESKTOP_NUM);
-
-	HDC hdc = CreateCompatibleDC(canvas);
-	DWORD size = SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0);
-	int cx = LOWORD(size);
-	int cy = HIWORD(size);
-	RECT rect = {0, 0, cx, cy};
-	RECT textRect = {0, 0, cx-7, cy-7};
-
-	for(int i=0; i<DESKTOP_COUNT; ++i) {
-		HBITMAP hbmp = CreateCompatibleBitmap(canvas, cx, cy);
-		HBITMAP hbmp_old = SelectBitmap(hdc, hbmp);
-
-		FontSelection font(hdc, GetStockFont(SYSTEM_FONT));
-		FmtString num_txt(TEXT("%d"), i+1);
-		TextColor color(hdc, RGB(64,64,64));
-		BkMode mode(hdc, TRANSPARENT);
-		FillRect(hdc, &rect, GetSysColorBrush(COLOR_BTNFACE));
-		DrawText(hdc, num_txt, num_txt.length(), &textRect, DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-
-		SelectBitmap(hdc, hbmp_old);
-
-		AddButton(ID_SWITCH_DESKTOP_1+i, hbmp, FmtString(desktop_fmt, i+1), NULL, cur_desktop==i?TBSTATE_ENABLED|TBSTATE_PRESSED:TBSTATE_ENABLED);
-	}
-	DeleteDC(hdc);
-
 	for(Entry*entry=_dir->_down; entry; entry=entry->_next) {
 		 // hide files like "desktop.ini"
 		if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
@@ -194,15 +167,6 @@ void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry* entry,
 	SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&btn);
 }
 
-void QuickLaunchBar::UpdateDesktopButtons(int desktop_idx)
-{
-	for(int i=0; i<DESKTOP_COUNT; ++i) {
-		TBBUTTONINFO tbi = {sizeof(TBBUTTONINFO), TBIF_STATE, 0, 0, desktop_idx==i? TBSTATE_ENABLED|TBSTATE_PRESSED: TBSTATE_ENABLED};
-
-		SendMessage(_hwnd, TB_SETBUTTONINFO, ID_SWITCH_DESKTOP_1+i, (LPARAM)&tbi);
-	}
-}
-
 LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
 	switch(nmsg) {
@@ -229,11 +193,6 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		}
 
 		return max_cx;}
-
-	  case PM_UPDATE_DESKTOP:
-		UpdateDesktopButtons(wparam);
-		break;
-
 	  case WM_CONTEXTMENU: {
 		TBBUTTON btn;
 		QuickLaunchMap::iterator it;

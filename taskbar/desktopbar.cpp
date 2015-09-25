@@ -267,7 +267,7 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
 			break;
 
 		case IDHK_DESKTOP:
-			g_Globals._desktops.ToggleMinimize();
+			g_Globals._desktop.ToggleMinimize();
 			break;
 
 		case IDHK_STARTMENU:
@@ -443,7 +443,7 @@ int DesktopBar::Command(int id, int code)
 		break;
 
 	  case ID_MINIMIZE_ALL:
-		g_Globals._desktops.ToggleMinimize();
+		g_Globals._desktop.ToggleMinimize();
 		break;
 
 	  case ID_EXPLORE:
@@ -453,16 +453,6 @@ int DesktopBar::Command(int id, int code)
 	  case ID_TASKMGR:
 		launch_file(_hwnd, TEXT("taskmgr.exe"), SW_SHOWNORMAL);
 		break;
-
-	  case ID_SWITCH_DESKTOP_1:
-	  case ID_SWITCH_DESKTOP_1+1: {
-		int desktop_idx = id - ID_SWITCH_DESKTOP_1;
-
-		g_Globals._desktops.SwitchToDesktop(desktop_idx);
-
-		if (_hwndQuickLaunch)
-			PostMessage(_hwndQuickLaunch, PM_UPDATE_DESKTOP, desktop_idx, 0);
-		break;}
 
 #ifdef __REACTOS__
 	  case ID_TRAY_VOLUME:

@@ -1211,8 +1211,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (startup_desktop) {
         WaitCursor wait;
 
-        g_Globals._desktops.init();
-
         g_Globals._hwndDesktop = DesktopWindow::Create();
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
