@@ -107,7 +107,7 @@ void QuickLaunchBar::AddShortcuts()
 
 		_dir->smart_scan(SORT_NAME);
 
-		 // immediatelly extract the shortcut icons
+		// immediatelly extract the shortcut icons
 		for(Entry*entry=_dir->_down; entry; entry=entry->_next)
 			entry->_icon_id = entry->safe_extract_icon(ICF_NORMAL);
 	} catch(COMException&) {
@@ -121,22 +121,25 @@ void QuickLaunchBar::AddShortcuts()
 	COLORREF bk_color = GetSysColor(COLOR_BTNFACE);
 	HBRUSH bk_brush = GetSysColorBrush(COLOR_BTNFACE);
 
+	int icon_num = 0;
 	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas), ResString(IDS_MINIMIZE_ALL), NULL);
 	AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas), ResString(IDS_TITLE), NULL);
+	icon_num += 2;
 
-	TBBUTTON sep = {0, -1, TBSTATE_ENABLED, BTNS_SEP, {0, 0}, 0, 0};
+	TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP,{ 0, 0 }, 0, 0 };
 	SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
 
-	for(Entry*entry=_dir->_down; entry; entry=entry->_next) {
-		 // hide files like "desktop.ini"
+	for (Entry*entry = _dir->_down; entry; entry = entry->_next) {
+		// hide files like "desktop.ini"
 		if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
 			continue;
 
-		 // hide subfolders
+		// hide subfolders
 		if (!(entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			HBITMAP hbmp = g_Globals._icon_cache.get_icon(entry->_icon_id).create_bitmap(bk_color, bk_brush, canvas);
 
 			AddButton(_next_id++, hbmp, entry->_display_name, entry);	//entry->_etype==ET_SHELL? desktop_folder.get_name(static_cast<ShellEntry*>(entry)->_pidl): entry->_display_name);
+			icon_num++;
 		}
 	}
 
@@ -144,6 +147,26 @@ void QuickLaunchBar::AddShortcuts()
 	_size = _entries.size() * _btn_dist;
 
 	SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
+
+	//adjust QuickLaunchBar width
+	static LONG cx = -1;
+	if (cx == -1) {
+		ICONINFO ici;
+		GetIconInfo(g_Globals._icon_cache.get_icon(ICID_MINIMIZE).get_hicon(), &ici);
+		BITMAP bm;
+		GetObject(ici.hbmColor, sizeof(BITMAP), &bm);
+		cx = bm.bmWidth;
+		DeleteObject(ici.hbmColor);
+		DeleteObject(ici.hbmMask);
+	} else {
+		cx = GetSystemMetrics(SM_CXSMICON);
+	}
+	REBARBANDINFO rbBand;
+	rbBand.cbSize = sizeof(REBARBANDINFO);
+	rbBand.wID = IDW_QUICKLAUNCHBAR;
+	rbBand.fMask = RBBIM_ID | RBBIM_SIZE;
+	rbBand.cx = (cx + 1) * icon_num + (GetSystemMetrics(SM_CXSMICON) / 2);
+	SendMessage(GetParent(_hwnd), RB_SETBANDINFO, (WPARAM)0, (LPARAM)&rbBand);
 }
 
 void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry* entry, int flags)

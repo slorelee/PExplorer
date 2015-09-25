@@ -148,6 +148,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 	TCHAR QuickLaunchBand[] = _T("Quicklaunch");
 	rbBand.lpText = QuickLaunchBand;
+	rbBand.cch = sizeof(QuickLaunchBand);
 	rbBand.hwndChild = _hwndQuickLaunch;
 	rbBand.cx = 100;
 	rbBand.cxMinChild = 100;
@@ -156,6 +157,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 	TCHAR TaskbarBand[] = _T("Taskbar");
 	rbBand.lpText = TaskbarBand;
+	rbBand.cch = sizeof(TaskbarBand);
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
 	rbBand.cxMinChild = 50;
