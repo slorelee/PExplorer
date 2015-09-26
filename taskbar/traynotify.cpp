@@ -899,7 +899,7 @@ TrayNotifyDlg::TrayNotifyDlg(HWND hwnd)
 		_show_hidden_org = _pNotifyArea->_show_hidden;
 	}
 
-	SetWindowIcon(hwnd, IDI_REACTOS);
+	SetWindowIcon(hwnd, IDI_PEXLORER);
 
 	_haccel = LoadAccelerators(g_Globals._hInstance, MAKEINTRESOURCE(IDA_TRAYNOTIFY));
 

@@ -887,12 +887,12 @@ struct ExplorerAboutDlg : public
     ExplorerAboutDlg(HWND hwnd)
      :    super(hwnd)
     {
-        SetWindowIcon(hwnd, IDI_REACTOS);
+        SetWindowIcon(hwnd, IDI_PEXLORER);
 
         new FlatButton(hwnd, IDOK);
 
         _hfont = CreateFont(20, 0, 0, 0, FW_BOLD, TRUE, 0, 0, 0, 0, 0, 0, 0, TEXT("Sans Serif"));
-        new ColorStatic(hwnd, IDC_ROS_EXPLORER, RGB(32,32,128), 0, _hfont);
+        new ColorStatic(hwnd, IDC_PE_EXPLORER, RGB(32,32,128), 0, _hfont);
 
         new HyperlinkCtrl(hwnd, IDC_WWW);
 
@@ -929,7 +929,7 @@ struct ExplorerAboutDlg : public
     {
         PaintCanvas canvas(_hwnd);
 
-        HICON hicon = (HICON) LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(IDI_REACTOS_BIG), IMAGE_ICON, 0, 0, LR_SHARED);
+        HICON hicon = (HICON) LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(IDI_PEXLORER_BIG), IMAGE_ICON, 0, 0, LR_SHARED);
 
         DrawIconEx(canvas, 20, 10, hicon, 0, 0, 0, 0, DI_NORMAL);
     }

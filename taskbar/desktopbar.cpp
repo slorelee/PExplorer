@@ -47,7 +47,7 @@ DesktopBar::DesktopBar(HWND hwnd)
 	WM_TASKBARCREATED(RegisterWindowMessage(WINMSG_TASKBARCREATED))
 #endif
 {
-	SetWindowIcon(hwnd, IDI_REACTOS);
+	SetWindowIcon(hwnd, IDI_PEXLORER);
 
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &_work_area_org, 0);
 }

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by explorer_intres.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 explorer-en.rc 使用
 //
 #define IDS_TITLE                       1
 #define MANIFEST_RESOURCE_ID            1
@@ -79,7 +79,7 @@
 #define IDA_TRAYNOTIFY                  134
 #define IDI_FLOATING                    135
 #define IDD_ABOUT_EXPLORER              135
-#define IDI_REACTOS_BIG                 137
+#define IDI_PEXLORER_BIG                137
 #define IDI_DOCUMENTS                   138
 #define IDI_CONFIG                      139
 #define IDI_FAVORITES                   140
@@ -91,7 +91,7 @@
 #define IDI_SEARCH_DOC                  146
 #define IDI_PRINTER                     147
 #define IDI_NETWORK                     148
-#define IDI_REACTOS                     149
+#define IDI_PEXLORER                    149
 #define IDM_DESKTOPBAR                  150
 #define IDM_VOLUME                      151
 #define IDM_NOTIFYAREA                  152
@@ -136,7 +136,7 @@
 #define ID_VIEW_TOOL_BAR                508
 #define ID_VIEW_EXTRA_BAR               509
 #define ID_VIEW_SIDE_BAR                510
-#define IDC_ROS_EXPLORER                1000
+#define IDC_PE_EXPLORER                 1000
 #define IDC_ICON_ALIGN_0                1002
 #define IDC_ICON_ALIGN_1                1003
 #define IDC_NOTIFY_ICONS                1003
@@ -227,10 +227,10 @@
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        169
+#define _APS_NEXT_RESOURCE_VALUE        171
 #define _APS_NEXT_COMMAND_VALUE         40024
 #define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
