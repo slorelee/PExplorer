@@ -25,12 +25,10 @@
  // Martin Fuchs, 09.08.2003
  //
 
-
 #define	PM_SET_ICON_ALGORITHM	(WM_APP+0x19)
 #define	PM_GET_ICON_ALGORITHM	(WM_APP+0x1A)
-#define	PM_DISPLAY_VERSION		(WM_APP+0x24)
 
-
+/*
  /// subclassed background window behind the visible desktop window
 struct BackgroundWindow : public SubclassedWindow
 {
@@ -45,7 +43,7 @@ protected:
 
 	int		_display_version;
 };
-
+*/
 
  /// Implementation of the Explorer desktop window
 struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl
@@ -109,6 +107,8 @@ protected:
 	int		Notify(int id, NMHDR* pnmh);
 
 	bool	DoContextMenu(int x, int y);
+	LRESULT LoadWallpaper(BOOL fInitial);
+	void	DrawDesktopBkgnd(HDC hdc);
 	HRESULT DoDesktopContextMenu(int x, int y);
 	void	PositionIcons(int dir=1);
 
@@ -116,4 +116,9 @@ protected:
 
 	HWND	_hwndListView;
 	int		_icon_algo;
+
+	HBRUSH _hbrWallp = NULL;
+	DWORD _fTileWallp = 1;
+	RECT _rcWp;
+	TCHAR _szBMPName[MAX_PATH + 1];
 };

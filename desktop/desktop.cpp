@@ -99,7 +99,7 @@ BOOL IsAnyDesktopRunning()
 	return GetShellWindow() != 0;
 }
 
-
+/*
 BackgroundWindow::BackgroundWindow(HWND hwnd)
  :	super(hwnd)
 {
@@ -114,6 +114,7 @@ BackgroundWindow::BackgroundWindow(HWND hwnd)
 	_display_version = RegGetDWORDValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("PaintDesktopVersion"), 1);
 }
 
+
 LRESULT BackgroundWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
 	switch(nmsg) {
@@ -122,8 +123,8 @@ LRESULT BackgroundWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		return TRUE;
 
 	  case WM_MBUTTONDBLCLK:
-		/* Imagelist icons are missing if MainFrame::Create() is called directly from here!
-		explorer_show_frame(SW_SHOWNORMAL); */
+		// Imagelist icons are missing if MainFrame::Create() is called directly from here!
+		// explorer_show_frame(SW_SHOWNORMAL);
 		PostMessage(g_Globals._hwndDesktop, nmsg, wparam, lparam);
 		break;
 
@@ -149,14 +150,15 @@ LRESULT BackgroundWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 void BackgroundWindow::DrawDesktopBkgnd(HDC hdc)
 {
 	PaintDesktop(hdc);
+	return;
 
-/* special solid background
+	//special solid background
 	HBRUSH bkgndBrush = CreateSolidBrush(RGB(0,32,160));	// dark blue
 	FillRect(hdc, &rect, bkgndBrush);
 	DeleteBrush(bkgndBrush);
-*/
-}
 
+}
+*/
 
 DesktopWindow::DesktopWindow(HWND hwnd)
  :	super(hwnd)
@@ -176,6 +178,7 @@ HWND DesktopWindow::Create()
 	static IconWindowClass wcDesktop(TEXT("Progman"), IDI_PEXLORER, CS_DBLCLKS);
 	/* (disabled because of small ugly temporary artefacts when hiding start menu)
 	wcDesktop.hbrBackground = (HBRUSH)(COLOR_BACKGROUND+1); */
+	wcDesktop.hbrBackground = WINXPBLUEBRUSH();
 
 	int width = GetSystemMetrics(SM_CXSCREEN);
 	int height = GetSystemMetrics(SM_CYSCREEN);
@@ -364,31 +367,42 @@ HRESULT DesktopWindow::OnDefaultCommand(LPIDA pida)
 	return E_NOTIMPL;
 }
 
+#define ICON_ALGORITHM_DEF 0
+#define ID_TIMER_ADJUST_ICONPOSITION 815
 
 DesktopShellView::DesktopShellView(HWND hwnd, IShellView* pShellView)
  :	super(hwnd),
 	_pShellView(pShellView)
 {
 	_hwndListView = GetNextWindow(hwnd, GW_CHILD);
-
+	/* disable default allignment */
+	SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
+	ShowWindow(_hwndListView, SW_HIDE);
 	 // work around for Windows NT, Win 98, ...
 	 // Without this the desktop has mysteriously only a size of 800x600 pixels.
 	ClientRect rect(hwnd);
 	MoveWindow(_hwndListView, 0, 0, rect.right, rect.bottom, TRUE);
 
 	 // subclass background window
-	new BackgroundWindow(_hwndListView);
+	//new BackgroundWindow(_hwndListView);
 
-	_icon_algo = 0;	// default icon arrangement
-
+	
+	//refresh();
 	InitDragDrop();
+	LoadWallpaper(TRUE);
+
+	_icon_algo = ICON_ALGORITHM_DEF;	// default icon arrangement
+	SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
+
 }
 
 
 DesktopShellView::~DesktopShellView()
 {
-	if (FAILED(RevokeDragDrop(_hwnd)))
-		assert(0);
+	if (_hbrWallp) {
+		DeleteObject(_hbrWallp);
+		_hbrWallp = NULL;
+	}
 }
 
 
@@ -406,9 +420,122 @@ bool DesktopShellView::InitDragDrop()
 	return false;
 }
 
+
+void DesktopShellView::refresh()
+{
+	_pShellView->Refresh();
+}
+
+static HBRUSH WINAPI
+SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
+{
+	HBRUSH hbrush = NULL;
+	BITMAPFILEHEADER bmfh;
+	HANDLE hFile;
+	DWORD dwFileSize, dwRead;
+	BITMAPINFOHEADER *pbmih;
+
+
+	hFile = CreateFile(szFileName, GENERIC_READ, FILE_SHARE_READ,
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		return NULL;
+	}
+
+	dwFileSize = GetFileSize(hFile, NULL);
+	ReadFile(hFile, (LPVOID)&bmfh, sizeof(BITMAPFILEHEADER), &dwRead, NULL);
+
+	if (bmfh.bfType == MAKEWORD('B', 'M') &&
+		(pbmih = (BITMAPINFOHEADER *)VirtualAlloc(
+			NULL,
+			(dwFileSize - dwRead),
+			MEM_COMMIT | MEM_RESERVE,
+			PAGE_READWRITE))) {
+
+		ReadFile(hFile, (LPVOID)pbmih, (dwFileSize - dwRead), &dwRead, NULL);
+
+		if (hbrush = CreateDIBPatternBrushPt(pbmih, DIB_RGB_COLORS)) {
+			*pnWidth = pbmih->biWidth;
+			*pnHeight = pbmih->biHeight;
+		}
+
+		VirtualFree(pbmih, 0, MEM_RELEASE);
+	}
+
+	CloseHandle(hFile);
+	return hbrush;
+}
+
+LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
+{
+	DWORD dwSize, dwType, lRet, fTile = 0;
+	TCHAR szTemp[MAX_PATH + 1] = TEXT("%SystemRoot%\\wallpaper.bmp");
+	int x, y;
+
+	//TODO:load config
+	_fTileWallp = 1;
+	ExpandEnvironmentStrings(szTemp, _szBMPName, MAX_PATH);
+
+	// need to repaint whole thing, so invalidate entire desktop window
+	//InvalidateRect(_hwnd, NULL, TRUE);
+	if (_hbrWallp)
+		DeleteObject(_hbrWallp);
+
+	_hbrWallp = SHLoadDIBitmapBrush(_szBMPName, &x, &y);
+
+	if (!_fTileWallp) {
+		_rcWp.left = max(0, (GetSystemMetrics(SM_CXSCREEN) - x) / 2);
+		_rcWp.top = max(0, (GetSystemMetrics(SM_CYSCREEN) - y) / 2);
+		_rcWp.right = _rcWp.left + x;
+		_rcWp.bottom = _rcWp.top + y;
+	}
+
+	return TRUE;
+}
+
+void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
+{
+	static int first_draw = 1;
+	if (!first_draw) {
+		PaintDesktop(hdc);
+		return;
+	}
+
+	RECT rc;
+	GetClipBox(hdc, &rc);
+	if (_hbrWallp && _fTileWallp) {
+		SetBrushOrgEx(hdc, 0 - rc.left, 0 - rc.top, NULL);
+		FillRect(hdc, &rc, _hbrWallp);
+	} else {
+		HBRUSH hBkBrush = WINXPBLUEBRUSH();
+		if (!_hbrWallp) {
+			FillRect(hdc, &rc, hBkBrush);
+		} else {
+			FillRect(hdc, &rc, hBkBrush);
+			SetBrushOrgEx(hdc, _rcWp.top, _rcWp.left, NULL);
+			FillRect(hdc, &_rcWp, _hbrWallp);
+		}
+		DeleteObject(hBkBrush);
+	}
+}
+
 LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
-	switch(nmsg) {
+	switch (nmsg) {
+	  case WM_TIMER: {
+		  UINT tid = (WPARAM)wparam;
+		  if (tid == ID_TIMER_ADJUST_ICONPOSITION) {
+			  KillTimer(_hwnd, tid);
+			  if (_hwndListView) {
+				  PositionIcons();
+				  return 0;
+			  }
+		  }
+		  return super::WndProc(nmsg, wparam, lparam);
+	  }
+	  case WM_ERASEBKGND:
+		  DrawDesktopBkgnd((HDC)wparam);
+		  break;
 	  case WM_CONTEXTMENU:
 		if (!DoContextMenu(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)))
 			DoDesktopContextMenu(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
@@ -422,9 +549,11 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 	  case PM_GET_ICON_ALGORITHM:
 		return _icon_algo;
 
-	  case PM_DISPLAY_VERSION:
-		return SendMessage(_hwndListView, nmsg, wparam, lparam);
-
+	  case WM_MBUTTONDBLCLK:
+		  /* Imagelist icons are missing if MainFrame::Create() is called directly from here!
+		  explorer_show_frame(SW_SHOWNORMAL); */
+		  PostMessage(g_Globals._hwndDesktop, nmsg, wparam, lparam);
+		  break;
 	  default:
 		return super::WndProc(nmsg, wparam, lparam);
 	}
@@ -476,9 +605,9 @@ bool DesktopShellView::DoContextMenu(int x, int y)
 
 	selection->Release();
 
-	if (SUCCEEDED(hr))
-		refresh();
-	else
+	if (SUCCEEDED(hr)) {
+		//refresh();
+	} else
 		CHECKERROR(hr);
 
 	return true;
@@ -496,7 +625,7 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 		HMENU hmenu = CreatePopupMenu();
 
 		if (hmenu) {
-			hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST-1, CMF_NORMAL|CMF_EXPLORE);
+			hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST-1, CMF_NORMAL|CMF_EXPLORE|CMF_EXTENDEDVERBS);
 
 			if (SUCCEEDED(hr)) {
 				AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
@@ -594,9 +723,6 @@ void DesktopShellView::PositionIcons(int dir)
 	RECT work_area;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
 
-	/* disable default allignment */
-	SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
-
 	const POINTS& dir1 = s_align_dir1[_icon_algo];
 	const POINTS& dir2 = s_align_dir2[_icon_algo];
 	const POINTS& start_pos = s_align_start[_icon_algo];
@@ -624,6 +750,7 @@ void DesktopShellView::PositionIcons(int dir)
 	int y = start_y;
 
 	int all = ListView_GetItemCount(_hwndListView);
+	if (all == 0) return; //no icon
 	int i1, i2;
 
 	if (dir > 0) {
@@ -721,10 +848,6 @@ void DesktopShellView::PositionIcons(int dir)
 
 		ListView_SetItemPosition32(_hwndListView, it->second, pos.second, pos.first);
 	}
-}
-
-
-void DesktopShellView::refresh()
-{
-	///@todo
+	//ListView_RedrawItems(_hwndListView, 0,all - 1);
+	//UpdateWindow(_hwndListView);
 }
