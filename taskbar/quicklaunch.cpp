@@ -81,8 +81,7 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
 								WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
 								CCS_TOP|CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_NORESIZE|
 								TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE|TBSTYLE_FLAT,
-								IDW_QUICKLAUNCHBAR, 0, 0, 0, NULL, 0, 0, 0, 16, 16, sizeof(TBBUTTON));
-
+								IDW_QUICKLAUNCHBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 	if (hwnd)
 		new QuickLaunchBar(hwnd);
 
@@ -109,7 +108,7 @@ void QuickLaunchBar::AddShortcuts()
 
 		// immediatelly extract the shortcut icons
 		for(Entry*entry=_dir->_down; entry; entry=entry->_next)
-			entry->_icon_id = entry->safe_extract_icon(ICF_NORMAL);
+			entry->_icon_id = entry->safe_extract_icon(ICF_LARGE);
 	} catch(COMException&) {
 		return;
 	}
@@ -122,8 +121,8 @@ void QuickLaunchBar::AddShortcuts()
 	HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
 	int icon_num = 0;
-	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas), ResString(IDS_MINIMIZE_ALL), NULL);
-	AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas), ResString(IDS_TITLE), NULL);
+	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE), ResString(IDS_MINIMIZE_ALL), NULL);
+	AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE), ResString(IDS_TITLE), NULL);
 	icon_num += 2;
 
 	TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP,{ 0, 0 }, 0, 0 };
@@ -136,7 +135,7 @@ void QuickLaunchBar::AddShortcuts()
 
 		// hide subfolders
 		if (!(entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			HBITMAP hbmp = g_Globals._icon_cache.get_icon(entry->_icon_id).create_bitmap(bk_color, bk_brush, canvas);
+			HBITMAP hbmp = g_Globals._icon_cache.get_icon(entry->_icon_id).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE);
 
 			AddButton(_next_id++, hbmp, entry->_display_name, entry);	//entry->_etype==ET_SHELL? desktop_folder.get_name(static_cast<ShellEntry*>(entry)->_pidl): entry->_display_name);
 			icon_num++;
@@ -165,7 +164,7 @@ void QuickLaunchBar::AddShortcuts()
 	rbBand.cbSize = sizeof(REBARBANDINFO);
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	rbBand.fMask = RBBIM_ID | RBBIM_SIZE;
-	rbBand.cx = (cx + 1) * icon_num + (GetSystemMetrics(SM_CXSMICON) / 2);
+	rbBand.cx = (cx + 1) * icon_num + TASKBAR_ICON_SIZE * 2;
 	SendMessage(GetParent(_hwnd), RB_SETBANDINFO, (WPARAM)0, (LPARAM)&rbBand);
 }
 

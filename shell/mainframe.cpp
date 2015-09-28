@@ -453,7 +453,7 @@ int MainFrameBase::Command(int id, int code)
 		break;
 
 	  case ID_EXPLORER_FAQ:
-		launch_file(_hwnd, TEXT("http://www.sky.franken.de/explorer/"), SW_SHOW);
+		launch_file(_hwnd, TEXT("https://github.com/slorelee/PExlorer"), SW_SHOW);
 		break;
 
 	  default:
@@ -1160,12 +1160,12 @@ int MDIMainFrame::Command(int id, int code)
 #ifdef _DEBUG
 		create_webchildwindow(WebChildWndInfo(_hmdiclient, TEXT("http://localhost")));
 #else
-		create_webchildwindow(WebChildWndInfo(_hmdiclient, TEXT("http://www.reactos.org")));
+		create_webchildwindow(WebChildWndInfo(_hmdiclient, TEXT("https://github.com/slorelee/PExlorer")));
 #endif
 		break;
 
 	  case ID_EXPLORER_FAQ:
-		create_webchildwindow(WebChildWndInfo(_hmdiclient, TEXT("http://www.sky.franken.de/explorer/")));
+		create_webchildwindow(WebChildWndInfo(_hmdiclient, TEXT("https://github.com/slorelee/PExlorer")));
 		break;
 
 	  case ID_VIEW_SDI:

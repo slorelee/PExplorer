@@ -289,7 +289,7 @@ void Icon::draw(HDC hdc, int x, int y, int cx, int cy, COLORREF bk_color, HBRUSH
         DrawIconEx(hdc, x, y, _hicon, cx, cy, 0, bk_brush, DI_NORMAL);
 }
 
-HBITMAP    Icon::create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd) const
+HBITMAP    Icon::create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd, int icon_size) const
 {
     if (_itype == IT_SYSCACHE) {
         HIMAGELIST himl = g_Globals._icon_cache.get_sys_imagelist();
@@ -306,7 +306,7 @@ HBITMAP    Icon::create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd) 
 
         return hbmp;
     } else
-        return create_bitmap_from_icon(_hicon, hbrBkgnd, hdc_wnd);
+        return create_bitmap_from_icon(_hicon, hbrBkgnd, hdc_wnd, icon_size);
 }
 
 
@@ -336,10 +336,10 @@ int Icon::add_to_imagelist(HIMAGELIST himl, HDC hdc_wnd, COLORREF bk_color, HBRU
     return ret;
 }
 
-HBITMAP create_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd/*, int icon_size*/)
+HBITMAP create_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd, int icon_size)
 {
-    int cx = ICON_SIZE_SMALL;
-    int cy = ICON_SIZE_SMALL;
+    int cx = icon_size;
+    int cy = icon_size;
     HBITMAP hbmp = CreateCompatibleBitmap(hdc_wnd, cx, cy);
 
     MemCanvas canvas;
@@ -409,6 +409,7 @@ void IconCache::init()
     _icons[ICID_COMPUTER]    = Icon(ICID_COMPUTER,    IDI_COMPUTER,    icon_size);
     _icons[ICID_LOGOFF]     = Icon(ICID_LOGOFF,     IDI_LOGOFF,        icon_size);
     _icons[ICID_SHUTDOWN]    = Icon(ICID_SHUTDOWN,    IDI_SHUTDOWN,    icon_size);
+    _icons[ICID_TERMINATE] = Icon(ICID_TERMINATE, IDI_TERMINATE, icon_size);
     _icons[ICID_RESTART]    = Icon(ICID_RESTART,    IDI_RESTART,    icon_size);
     _icons[ICID_BOOKMARK]    = Icon(ICID_BOOKMARK,    IDI_DOT_TRANS,    icon_size);
     _icons[ICID_MINIMIZE]    = Icon(ICID_MINIMIZE,    IDI_MINIMIZE,    icon_size);
@@ -685,6 +686,11 @@ ResIcon::ResIcon(UINT nid)
 SmallIcon::SmallIcon(UINT nid)
 {
     _hicon = (HICON)LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(nid), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_SHARED);
+}
+
+SizeIcon::SizeIcon(UINT nid, int size)
+{
+	_hicon = (HICON)LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(nid), IMAGE_ICON, size, size, LR_SHARED);
 }
 
 ResIconEx::ResIconEx(UINT nid, int w, int h)

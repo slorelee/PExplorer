@@ -1781,7 +1781,7 @@ LRESULT	StartMenuRoot::Init(LPCREATESTRUCT pcs)
 		AddButton(ResString(IDS_SHUTDOWN),	ICID_SHUTDOWN, false, IDC_SHUTDOWN);
 
 #ifndef __REACTOS__
-	AddButton(ResString(IDS_TERMINATE),	ICID_LOGOFF, false, IDC_TERMINATE);
+	AddButton(ResString(IDS_TERMINATE), ICID_TERMINATE, false, IDC_TERMINATE);
 #endif
 
 

@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// 非特定语言 resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -41,6 +41,7 @@ IDB_ICON_ALIGN_9        BITMAP                  "res/icoalig9.bmp"
 IDB_ICON_ALIGN_10       BITMAP                  "res/icoali10.bmp"
 IDB_MDI                 BITMAP                  "res/mdi.bmp"
 IDB_SDI                 BITMAP                  "res/sdi.bmp"
+IDB_TB_SH_DEF_16        BITMAP                  "res/tbshdef.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -127,6 +128,7 @@ IDI_EXPLORER            ICON                    "res/explorer.ico"
 IDI_STARTMENU           ICON                    "res/startmenu.ico"
 IDI_LOGOFF              ICON                    "res/logoff.ico"
 IDI_SHUTDOWN            ICON                    "res/shutdown.ico"
+IDI_TERMINATE           ICON                    "res/terminate.ico"
 IDI_RESTART             ICON                    "res/restart.ico"
 IDI_ARROW               ICON                    "res/arrow.ico"
 IDI_ARROW_SELECTED      ICON                    "res/arrowsel.ico"
@@ -159,12 +161,12 @@ IDI_DESKSETTING         ICON                    "res/desktop-settings.ico"
 IDI_NETCONNS            ICON                    "res/network-conns.ico"
 IDI_ADMIN               ICON                    "res/administration.ico"
 IDI_RECENT              ICON                    "res/recent-documents.ico"
-#endif    // Neutral resources
+#endif    // 非特定语言 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// 英语(美国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -208,7 +210,7 @@ BEGIN
     END
 END
 
-#endif    // English (United States) resources
+#endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -228,9 +230,9 @@ STRINGTABLE DISCARDABLE
 BEGIN
 IDS_VERSION_STR ""
 #ifdef UNICODE
-IDS_EXPLORER_VERSION_STR "ROS Explorer%0s"
+IDS_EXPLORER_VERSION_STR "PExlorer%0s"
 #else
-IDS_EXPLORER_VERSION_STR "ROS Explorer Ansi%0s"
+IDS_EXPLORER_VERSION_STR "PExlorer Ansi%0s"
 #endif
 END
 #endif

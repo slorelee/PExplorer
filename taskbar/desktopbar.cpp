@@ -62,7 +62,7 @@ DesktopBar::~DesktopBar()
 	PostQuitMessage(0);
 }
 
-
+#define DESKTOPBAR_TOP GetSystemMetrics(SM_CYSCREEN) - DESKTOPBARBAR_HEIGHT
 HWND DesktopBar::Create()
 {
 	static BtnWindowClass wcDesktopBar(CLASSNAME_EXPLORERBAR);
@@ -74,14 +74,14 @@ HWND DesktopBar::Create()
 #ifdef TASKBAR_AT_TOP
 	rect.top = -6;	// hide top border
 #else
-	rect.top = GetSystemMetrics(SM_CYSCREEN) - DESKTOPBARBAR_HEIGHT - 10;
+	rect.top = DESKTOPBAR_TOP;
 #endif
 	rect.right = GetSystemMetrics(SM_CXSCREEN) + 6;
-	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT + 10;
+	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT;
 
 	return Window::Create(WINDOW_CREATOR(DesktopBar), WS_EX_PALETTEWINDOW,
 							wcDesktopBar, TITLE_EXPLORERBAR,
-							WS_POPUP|WS_THICKFRAME|WS_CLIPCHILDREN|WS_VISIBLE,
+							WS_POPUP|WS_CLIPCHILDREN|WS_VISIBLE,
 							rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, 0);
 }
 
@@ -91,18 +91,20 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	if (super::Init(pcs))
 		return 1;
 
-	 // create start button
+	// create start button
+	/*
 	ResString start_str(IDS_START);
 	WindowCanvas canvas(_hwnd);
 	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
 	RECT rect = {0, 0};
 	DrawText(canvas, start_str, -1, &rect, DT_SINGLELINE|DT_CALCRECT);
-	int start_btn_width = rect.right+16+8;
+	*/
+	_deskbar_pos_y = DESKTOPBAR_TOP;
+	int start_btn_width = TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 2); // rect.right+16+8
 
-	_taskbar_pos = start_btn_width + 6;
-
+	_taskbar_pos = start_btn_width - 1;
 	 // create "Start" button
-	HWND hwndStart = Button(_hwnd, start_str, 1, 1, start_btn_width, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	HWND hwndStart = Button(_hwnd, TEXT(""), 6 + 3, 1, start_btn_width, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
 	SetWindowFont(hwndStart, GetStockFont(SYSTEM_FONT), FALSE);
 	new StartButton(hwndStart);
 
@@ -135,17 +137,17 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 					WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
 					RBS_VARHEIGHT|RBS_AUTOSIZE|RBS_DBLCLKTOGGLE|	//|RBS_REGISTERDROP
 					CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_TOP,
-					0, 0, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
+					0, 1, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
 
 	REBARBANDINFO rbBand;
 
 	rbBand.cbSize = sizeof(REBARBANDINFO);
-	rbBand.fMask  = RBBIM_TEXT|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
-	rbBand.cyChild = REBARBAND_HEIGHT;
+	rbBand.fMask  = RBBIM_BACKGROUND|RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
+	rbBand.cyChild = REBARBAND_HEIGHT - 5;
 	rbBand.cyMaxChild = (ULONG)-1;
 	rbBand.cyMinChild = REBARBAND_HEIGHT;
-	rbBand.cyIntegral = REBARBAND_HEIGHT + 3;	//@@ OK?
-	rbBand.fStyle = RBBS_VARIABLEHEIGHT|RBBS_GRIPPERALWAYS|RBBS_HIDETITLE;
+	rbBand.cyIntegral = REBARBAND_HEIGHT;	//@@ OK?
+	rbBand.fStyle = RBBS_NOGRIPPER|RBBS_FIXEDBMP|RBBS_HIDETITLE; //RBBS_GRIPPERALWAYS RBBS_NOGRIPPER
 
 	TCHAR QuickLaunchBand[] = _T("Quicklaunch");
 	rbBand.lpText = QuickLaunchBand;
@@ -153,6 +155,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.hwndChild = _hwndQuickLaunch;
 	rbBand.cx = 100;
 	rbBand.cxMinChild = 100;
+	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
@@ -162,6 +165,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
 	rbBand.cxMinChild = 50;
+	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_TASKTOOLBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 #endif
@@ -178,7 +182,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 
 StartButton::StartButton(HWND hwnd)
- :	PictureButton(hwnd, SmallIcon(IDI_STARTMENU), TASKBAR_BRUSH(), true)
+ :	PictureButton(hwnd, SizeIcon(IDI_STARTMENU, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), true)
 {
 }
 
@@ -285,6 +289,13 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
 	switch(nmsg) {
 	  case WM_NCHITTEST: {
+#ifndef TASKBAR_AT_TOP
+		POINTS pts = MAKEPOINTS(lparam);
+		RECT rc;
+		GetWindowRect(_hwnd, &rc);
+		if (pts.y <= rc.top + 16)
+			return HTTOP;
+#endif
 		LRESULT res = super::WndProc(nmsg, wparam, lparam);
 
 		if (res>=HTSIZEFIRST && res<=HTSIZELAST) {
@@ -405,7 +416,7 @@ void DesktopBar::Resize(int cx, int cy)
 	///@todo general children resizing algorithm
 	int quicklaunch_width = SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
 	int notifyarea_width = SendMessage(_hwndNotify, PM_GET_WIDTH, 0, 0);
-
+	_log_(FmtString("Resize - %d,%d\r\n", cx, cy));
 	HDWP hdwp = BeginDeferWindowPos(3);
 
 	if (_hwndrebar)
@@ -415,7 +426,7 @@ void DesktopBar::Resize(int cx, int cy)
 			DeferWindowPos(hdwp, _hwndQuickLaunch, 0, _taskbar_pos, 1, quicklaunch_width, cy-2, SWP_NOZORDER|SWP_NOACTIVATE);
 
 		if (_hwndTaskBar)
-			DeferWindowPos(hdwp, _hwndTaskBar, 0, _taskbar_pos+quicklaunch_width, 0, cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1), cy, SWP_NOZORDER|SWP_NOACTIVATE);
+			DeferWindowPos(hdwp, _hwndTaskBar, 0, _taskbar_pos+quicklaunch_width, 1, cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1), cy-2, SWP_NOZORDER|SWP_NOACTIVATE);
 	}
 
 	if (_hwndNotify)
@@ -533,11 +544,11 @@ void DesktopBar::ControlResize(WPARAM wparam, LPARAM lparam)
 		break;
 
 	  case WMSZ_TOP:	// Taskbar is at the bottom of the screen
-		dragRect->top = screenHeight - (((screenHeight - dragRect->top) + DESKTOPBARBAR_HEIGHT/2) / DESKTOPBARBAR_HEIGHT) * DESKTOPBARBAR_HEIGHT;
+		dragRect->top = screenHeight - ((screenHeight - dragRect->top) / DESKTOPBARBAR_HEIGHT) * DESKTOPBARBAR_HEIGHT;
 		if (dragRect->top < screenHeight / 2)
-			dragRect->top = screenHeight - (screenHeight/2 / DESKTOPBARBAR_HEIGHT * DESKTOPBARBAR_HEIGHT);
-		else if (dragRect->top > screenHeight - 5)
-			dragRect->top = screenHeight - 5;
+			dragRect->top = screenHeight - ((screenHeight / 2 / DESKTOPBARBAR_HEIGHT) * DESKTOPBARBAR_HEIGHT);
+		else if (dragRect->top > screenHeight - DESKTOPBARBAR_HEIGHT)
+			dragRect->top = screenHeight - DESKTOPBARBAR_HEIGHT;
 		break;
 
 	  case WMSZ_RIGHT:	///@todo Taskbar is at the left of the screen

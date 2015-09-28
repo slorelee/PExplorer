@@ -718,22 +718,20 @@ struct PictureButton : public OwnerdrawnButton
 {
 	typedef OwnerdrawnButton super;
 
-	PictureButton(HWND hwnd, HICON hIcon, HBRUSH hbrush=GetSysColorBrush(COLOR_BTNFACE), bool flat=false)
-	 :	super(hwnd), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
+	PictureButton(HWND hwnd, HICON hIcon, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
+		: super(hwnd), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
 	{
-		_cx = 16;
-		_cy = 16;
+		initIconSize();
 	}
 
-	PictureButton(HWND hparent, int id, HICON hIcon, HBRUSH hbrush=GetSysColorBrush(COLOR_BTNFACE), bool flat=false)
-	 :	super(GetDlgItem(hparent, id)), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
+	PictureButton(HWND hparent, int id, HICON hIcon, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
+		: super(GetDlgItem(hparent, id)), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
 	{
-		_cx = 16;
-		_cy = 16;
+		initIconSize();
 	}
 
-	PictureButton(HWND hwnd, HBITMAP hBmp, HBRUSH hbrush=GetSysColorBrush(COLOR_BTNFACE), bool flat=false)
-	 :	super(hwnd), _hIcon(0), _hBmp(hBmp), _hBrush(hbrush), _flat(flat)
+	PictureButton(HWND hwnd, HBITMAP hBmp, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
+		: super(hwnd), _hIcon(0), _hBmp(hBmp), _hBrush(hbrush), _flat(flat)
 	{
 		BITMAP bmp;
 		GetObject(hBmp, sizeof(bmp), &bmp);
@@ -741,8 +739,8 @@ struct PictureButton : public OwnerdrawnButton
 		_cy = bmp.bmHeight;
 	}
 
-	PictureButton(HWND hparent, int id, HBITMAP hBmp, HBRUSH hbrush=GetSysColorBrush(COLOR_BTNFACE), bool flat=false)
-	 :	super(GetDlgItem(hparent, id)), _hIcon(0), _hBmp(hBmp), _hBrush(hbrush), _flat(flat)
+	PictureButton(HWND hparent, int id, HBITMAP hBmp, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
+		: super(GetDlgItem(hparent, id)), _hIcon(0), _hBmp(hBmp), _hBrush(hbrush), _flat(flat)
 	{
 		BITMAP bmp;
 		GetObject(hBmp, sizeof(bmp), &bmp);
@@ -751,6 +749,16 @@ struct PictureButton : public OwnerdrawnButton
 	}
 
 protected:
+	void initIconSize(){
+		ICONINFO ici;
+		GetIconInfo(_hIcon, &ici);
+		BITMAP bm;
+		GetObject(ici.hbmColor, sizeof(BITMAP), &bm);
+		_cx = bm.bmWidth;
+		_cy = bm.bmHeight;
+		DeleteObject(ici.hbmColor);
+		DeleteObject(ici.hbmMask);
+	}
 	virtual void DrawItem(LPDRAWITEMSTRUCT dis);
 
 	HICON	_hIcon;

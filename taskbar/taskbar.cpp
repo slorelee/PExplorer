@@ -51,6 +51,8 @@ DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("sh
 #define GCL_HICONSM GCLP_HICONSM
 #endif
 
+#define	REBARBAND_HEIGHT		48
+
 TaskBarEntry::TaskBarEntry()
 {
 	_id = 0;
@@ -118,7 +120,7 @@ HWND TaskBar::Create(HWND hwndParent)
 	return Window::Create(WINDOW_CREATOR(TaskBar), 0,
 							wcTaskBar, TITLE_TASKBAR,
 							WS_CHILD|WS_VISIBLE|CCS_TOP|CCS_NODIVIDER|CCS_NORESIZE,
-							taskbar_pos, 0, clnt.right-taskbar_pos-(NOTIFYAREA_WIDTH_DEF+1), clnt.bottom, hwndParent);
+							taskbar_pos, clnt.top+1, clnt.right-taskbar_pos-(NOTIFYAREA_WIDTH_DEF+1), clnt.bottom-2, hwndParent);
 }
 
 LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
@@ -129,10 +131,13 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 	/* FIXME: There's an internal padding for non-flat toolbar. Get rid of it somehow. */
 	_htoolbar = CreateToolbarEx(_hwnd,
 								WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
-								CCS_TOP|CCS_NODIVIDER|TBSTYLE_LIST|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE,//|TBSTYLE_AUTOSIZE
-								IDW_TASKTOOLBAR, 0, 0, 0, NULL, 0, 0, 0, 16, 16, sizeof(TBBUTTON));
+								CCS_TOP|CCS_NODIVIDER|TBSTYLE_LIST|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE,//|TBSTYLE_FLAT,//|TBSTYLE_AUTOSIZE
+								IDW_TASKTOOLBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 
 	SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(TASKBUTTONWIDTH_MAX,TASKBUTTONWIDTH_MAX));
+	//RECT rc;
+	//GetWindowRect(_htoolbar, &rc);
+	//MoveWindow(_htoolbar, rc.left, rc.top, rc.right - rc.left, 48, TRUE);
 	//SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
 	//SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
 	//SetWindowFont(_htoolbar, GetStockFont(SYSTEM_FONT), FALSE);
@@ -147,7 +152,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 	metrics.cxBarPad = 0;
 	metrics.cyBarPad = 0;
 	metrics.cxButtonSpacing = 3;
-	metrics.cyButtonSpacing = 3;
+	metrics.cyButtonSpacing = 0;
 
 	SendMessage(_htoolbar, TB_SETMETRICS, 0, (LPARAM)&metrics);
 #endif
@@ -404,7 +409,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 				found->second._id = pThis->_next_id++;
 		} else {
 			HBITMAP hbmp;
-			HICON hIcon = get_window_icon_small(hwnd);
+			HICON hIcon = get_window_icon_big(hwnd);
 			BOOL delete_icon = FALSE;
 
 			if (!hIcon) {
@@ -413,7 +418,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 			}
 
 			if (hIcon) {
-				hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar));
+				hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar), TASKBAR_ICON_SIZE);
 				if (delete_icon)
 					DestroyIcon(hIcon); // some icons can be freed, some not - so ignore any error return of DestroyIcon()
 			} else
@@ -592,7 +597,7 @@ void TaskBar::ResizeButtons()
 		if (btn_width != _last_btn_width) {
 			_last_btn_width = btn_width;
 
-			SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(btn_width,btn_width));
+			SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(btn_width, btn_width));
 			SendMessage(_htoolbar, TB_AUTOSIZE, 0, 0);
 		}
 	}

@@ -27,6 +27,7 @@
 
 
 #include <precomp.h>
+#include <time.h>
 
 #include "../resource.h"
 
@@ -369,7 +370,7 @@ HWND NotifyArea::Create(HWND hwndParent)
 	wcTrayNotify.hbrBackground = TASKBAR_BRUSH();
 	ClientRect clnt(hwndParent);
 
-	return Window::Create(WINDOW_CREATOR(NotifyArea), WS_EX_STATICEDGE,
+	return Window::Create(WINDOW_CREATOR(NotifyArea), 0,
 							wcTrayNotify, TITLE_TRAYNOTIFY, WS_CHILD|WS_VISIBLE|WS_CLIPCHILDREN,
 							clnt.right-(NOTIFYAREA_WIDTH_DEF+1), 1, NOTIFYAREA_WIDTH_DEF, clnt.bottom-2, hwndParent);
 }
@@ -708,8 +709,8 @@ void NotifyArea::Paint()
 	int y = NOTIFYICON_Y;
 
 	if (_show_button) {
-		static SmallIcon leftArrowIcon(IDI_NOTIFY_L);
-		static SmallIcon rightArrowIcon(IDI_NOTIFY_R);
+		static SizeIcon leftArrowIcon(IDI_NOTIFY_L, TASKBAR_ICON_SIZE);
+		static SizeIcon rightArrowIcon(IDI_NOTIFY_R, TASKBAR_ICON_SIZE);
 
 		DrawIconEx(canvas, x, y, _show_hidden?rightArrowIcon:leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 		x += NOTIFYICON_DIST;
@@ -1276,20 +1277,23 @@ HWND ClockWindow::Create(HWND hwndParent)
 	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
 
 	RECT rect = {0, 0, 0, 0};
-	TCHAR buffer[16];
+	TCHAR buffer[32];
 	// Arbitrary high time so that the created clock window is big enough
 	SYSTEMTIME st = { 1601, 1, 0, 1, 23, 59, 59, 999 };
 
 	if (!GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &st, NULL, buffer, sizeof(buffer)/sizeof(TCHAR)))
-		_tcscpy(buffer, TEXT("00:00"));
+	  _tcscpy(buffer, TEXT("    00:00  \r\n2015/08/15"));
+	else {
+		_tcscat(buffer, TEXT("\r\n2015 / 08/15"));
+	}
 
 	// Calculate the rectangle needed to draw the time (without actually drawing it)
-	DrawText(canvas, buffer, -1, &rect, DT_SINGLELINE|DT_NOPREFIX|DT_CALCRECT);
+	DrawText(canvas, buffer, -1, &rect, DT_NOPREFIX|DT_CALCRECT);
 	int clockwindowWidth = rect.right-rect.left + 4;
 
 	return Window::Create(WINDOW_CREATOR(ClockWindow), 0,
 							wcClock, NULL, WS_CHILD|WS_VISIBLE,
-							clnt.right-(clockwindowWidth), 1, clockwindowWidth, clnt.bottom-2, hwndParent);
+							clnt.right-(clockwindowWidth), clnt.top + 10, clockwindowWidth, clnt.bottom-2, hwndParent);
 }
 
 LRESULT ClockWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
@@ -1337,13 +1341,22 @@ void ClockWindow::TimerTick()
 
 bool ClockWindow::FormatTime()
 {
-	TCHAR buffer[16];
+	TCHAR time_buff[16];
 
-	if (GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL, buffer, sizeof(buffer)/sizeof(TCHAR)))
+	if (GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL, time_buff, sizeof(time_buff) / sizeof(TCHAR))) {
+		time_t t = time(0);
+		TCHAR buffer[64] = TEXT("    ");
+		TCHAR date_buffer[16];
+
+		strftime(date_buffer, sizeof(date_buffer), "%Y/%m/%d", localtime(&t));
+		_tcscat(buffer, time_buff);
+		_tcscat(buffer, "\r\n");
+		_tcscat(buffer, date_buffer);
 		if (_tcscmp(buffer, _time)) {
 			_tcscpy(_time, buffer);
 			return true;	// The text to display has changed.
 		}
+	}
 
 	return false;	// no change
 }
@@ -1357,5 +1370,7 @@ void ClockWindow::Paint()
 	BkMode bkmode(canvas, TRANSPARENT);
 	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
 	SetTextColor(canvas, RGB(255, 255, 255));
-	DrawText(canvas, _time, -1, ClientRect(_hwnd), DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX);
+	RECT rc = ClientRect(_hwnd);
+	rc.top += 5;
+	DrawText(canvas, _time, -1, &rc, DT_VCENTER|DT_NOPREFIX);
 }

@@ -32,9 +32,9 @@
 #define	CLASSNAME_CLOCKWINDOW	TEXT("TrayClockWClass")
 
 #define	NOTIFYAREA_WIDTH_DEF	100
-#define	NOTIFYICON_DIST			20
 #define	NOTIFYAREA_SPACE		10
-#define	NOTIFYICON_SIZE			16
+#define	NOTIFYICON_SIZE			32
+#define	NOTIFYICON_DIST			NOTIFYICON_SIZE + NOTIFYICON_SIZE / 4
 #define	NOTIFYICON_X			2
 #define	NOTIFYICON_Y			3
 
@@ -292,6 +292,6 @@ protected:
 	bool	FormatTime();
 	void	Paint();
 
-	TCHAR	_time[16];
+	TCHAR	_time[32];
 	ToolTip	_tooltip;
 };

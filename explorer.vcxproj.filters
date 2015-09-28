@@ -361,6 +361,9 @@
     <Image Include="res\winefile.ico">
       <Filter>res</Filter>
     </Image>
+    <Image Include="res\terminate.ico" />
+    <Image Include="res\pexlorer-big.ico" />
+    <Image Include="res\pexlorer.ico" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">

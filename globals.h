@@ -76,18 +76,30 @@ enum ICON_ID {
 	ICID_NETWORK,
 	ICID_COMPUTER,
 	ICID_LOGOFF,
-    ICID_SHUTDOWN,
-    ICID_RESTART,
+	ICID_SHUTDOWN,
+	ICID_RESTART,
+	ICID_TERMINATE,
 	ICID_BOOKMARK,
-    ICID_MINIMIZE,
-    ICID_CONTROLPAN,
-    ICID_DESKSETTING,
-    ICID_NETCONNS,
-    ICID_ADMIN,
-    ICID_RECENT,
+	ICID_MINIMIZE,
+	ICID_CONTROLPAN,
+	ICID_DESKSETTING,
+	ICID_NETCONNS,
+	ICID_ADMIN,
+	ICID_RECENT,
 
 	ICID_DYNAMIC
 };
+
+
+#define ICON_SIZE_SMALL		16	// GetSystemMetrics(SM_CXSMICON)
+#define ICON_SIZE_MIDDLE	24	// special size for start menu root icons
+#define ICON_SIZE_LARGE		32	// GetSystemMetrics(SM_CXICON)
+
+#define STARTMENUROOT_ICON_SIZE		ICON_SIZE_LARGE	// ICON_SIZE_LARGE
+#define TASKBAR_ICON_SIZE ICON_SIZE_LARGE
+
+#define ICON_SIZE_FROM_ICF(flags)	(flags&ICF_LARGE? ICON_SIZE_LARGE: flags&ICF_MIDDLE? ICON_SIZE_MIDDLE: ICON_SIZE_SMALL)
+#define ICF_FROM_ICON_SIZE(size)	(size>=ICON_SIZE_LARGE? ICF_LARGE: size>=ICON_SIZE_MIDDLE? ICF_MIDDLE: (ICONCACHE_FLAGS)0)
 
 struct Icon {
 	Icon();
@@ -99,7 +111,7 @@ struct Icon {
 	operator ICON_ID() const {return _id;}
 
 	void	draw(HDC hdc, int x, int y, int cx, int cy, COLORREF bk_color, HBRUSH bk_brush) const;
-	HBITMAP	create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd) const;
+	HBITMAP	create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd, int icon_size = ICON_SIZE_SMALL) const;
 	int		add_to_imagelist(HIMAGELIST himl, HDC hdc_wnd, COLORREF bk_color=GetSysColor(COLOR_WINDOW), HBRUSH bk_brush=GetSysColorBrush(COLOR_WINDOW)) const;
 
 	int		get_sysiml_idx() const {return _itype==IT_SYSCACHE? _sys_idx: -1;}
@@ -161,19 +173,8 @@ protected:
 	HIMAGELIST _himlSys_small;
 };
 
-
-#define ICON_SIZE_SMALL		16	// GetSystemMetrics(SM_CXSMICON)
-#define ICON_SIZE_MIDDLE	24	// special size for start menu root icons
-#define ICON_SIZE_LARGE		32	// GetSystemMetrics(SM_CXICON)
-
-#define STARTMENUROOT_ICON_SIZE		ICON_SIZE_MIDDLE	// ICON_SIZE_LARGE
-
-#define ICON_SIZE_FROM_ICF(flags)	(flags&ICF_LARGE? ICON_SIZE_LARGE: flags&ICF_MIDDLE? ICON_SIZE_MIDDLE: ICON_SIZE_SMALL)
-#define ICF_FROM_ICON_SIZE(size)	(size>=ICON_SIZE_LARGE? ICF_LARGE: size>=ICON_SIZE_MIDDLE? ICF_MIDDLE: (ICONCACHE_FLAGS)0)
-
-
  /// create a bitmap from an icon
-extern HBITMAP create_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd/*, int icon_size*/);
+extern HBITMAP create_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd, int icon_size = ICON_SIZE_SMALL);
 
  /// add icon with alpha channel to imagelist using the specified background color
 extern int ImageList_AddAlphaIcon(HIMAGELIST himl, HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd);
@@ -266,6 +267,17 @@ struct SmallIcon
 	SmallIcon(UINT nid);
 
 	operator HICON() const {return _hicon;}
+
+protected:
+	HICON	_hicon;
+};
+
+
+struct SizeIcon
+{
+	SizeIcon(UINT nid, int size);
+
+	operator HICON() const { return _hicon; }
 
 protected:
 	HICON	_hicon;
