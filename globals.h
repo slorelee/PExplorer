@@ -241,6 +241,7 @@ extern struct ExplorerGlobals
 
 	Favorites	_favorites;
 	String		_favorites_path;
+	String		_modulepath;
 } g_Globals;
 
 

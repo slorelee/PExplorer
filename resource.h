@@ -55,7 +55,8 @@
 #define IDI_COMPUTER                    100
 #define IDI_EXPLORER                    101
 #define IDB_TB_SH_DEF_16                101
-#define IDI_STARTMENU                   102
+#define IDI_STARTMENU_W                 210
+#define IDI_STARTMENU_B                 211
 #define IDB_TOOLBAR                     103
 #define IDA_EXPLORER                    104
 #define ID_ACTIVATE                     105
@@ -119,8 +120,10 @@
 #define IDI_DOT_RED                     165
 #define IDI_ARROW_UP                    166
 #define IDI_ARROW_DOWN                  167
-#define IDI_NOTIFY_L                    168
-#define IDI_NOTIFY_R                    169
+#define IDI_NOTIFY_L_W                  200
+#define IDI_NOTIFY_R_W                  201
+#define IDI_NOTIFY_L_B                  202
+#define IDI_NOTIFY_R_B                  203
 #define IDB_MDI                         170
 #define IDB_SDI                         171
 #define IDI_MINIMIZE                    172

@@ -398,7 +398,7 @@ FileChildWindow* FileChildWindow::create(const FileChildWndInfo& info)
 
 	if (!child->_left_hwnd && !child->_right_hwnd) {
 		SendMessage(info._hmdiclient, WM_MDIDESTROY, (WPARAM)child->_hwnd, 0);
-		MessageBox(info._hmdiclient, TEXT("Error opening child window"), TEXT("ROS Explorer"), MB_OK);
+		MessageBox(info._hmdiclient, TEXT("Error opening child window"), TEXT("PExlorer"), MB_OK);
 	}
 
 	return child;

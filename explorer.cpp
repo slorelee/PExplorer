@@ -100,7 +100,7 @@ void ExplorerGlobals::read_persistent()
     //    if (!_cfg._errors.empty()) {
     //        MessageBox(_hwndDesktop,
     //                   _cfg._errors.str(),
-    //                   TEXT("ROS Explorer - reading user settings"),
+    //                   TEXT("PExlorer - reading user settings"),
     //                   MB_OK);
     //    }
     //    _cfg.read_file(TEXT("explorer-cfg-template.xml"));
@@ -1067,9 +1067,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             ++lpCmdLine;
     }
 
-     // command line option "-install" to replace previous shell application with ROS Explorer
+    // command line option "-install" to replace previous shell application with PExlorer
     if (_tcsstr(ext_options,TEXT("-install"))) {
-        // install ROS Explorer into the registry
+        // install PExlorer into the registry
         TCHAR path[MAX_PATH];
 
         int l = GetModuleFileName(0, path, COUNTOF(path));
@@ -1205,7 +1205,17 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     g_Globals.init(hInstance);
-
+	TCHAR szFile[MAX_PATH + 1] = { 0 };
+	String str = TEXT("");
+	DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
+	if (dwRet != 0) {
+		str = TEXT(szFile);
+		int nPos = str.rfind(TEXT('\\'));
+		if (nPos != -1) {
+			str = str.substr(0, nPos);
+		}
+	}
+	g_Globals._modulepath = str;
     // initialize COM and OLE before creating the desktop window
     OleInit usingCOM;
 
@@ -1236,7 +1246,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             "-nodesktop    disable desktop mode\r\n"
             "-explorer        display cabinet window regardless of enabled desktop mode\r\n"
             "\r\n"
-            "-install        replace previous shell application with ROS Explorer\r\n"
+            "-install        replace previous shell application with PExlorer\r\n"
             "\r\n"
             "-noautostart    disable autostarts\r\n"
             "-autostart    enable autostarts regardless of debug build\r\n"
@@ -1245,7 +1255,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             "\r\n"
             "-debug        activate GDB remote debugging stub\r\n"
             "-break        activate debugger breakpoint\r\n",
-            "ROS Explorer - command line options", MB_OK);
+            "PExlorer - command line options", MB_OK);
     }
 
     Thread* pSSOThread = NULL;

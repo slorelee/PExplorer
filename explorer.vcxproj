@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,27 +21,29 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BFBAE588-8C68-4303-9BF6-C830087D8F25}</ProjectGuid>
     <RootNamespace>explorer</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>PExlorer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -420,6 +422,8 @@
     <Image Include="res\network.ico" />
     <Image Include="res\notify_l.ico" />
     <Image Include="res\notify_r.ico" />
+    <Image Include="res\pexlorer-big.ico" />
+    <Image Include="res\pexlorer.ico" />
     <Image Include="res\printer.ico" />
     <Image Include="res\reactos.ico" />
     <Image Include="res\recent-documents.ico" />
@@ -431,21 +435,17 @@
     <Image Include="res\shutdown.ico" />
     <Image Include="res\speaker.ico" />
     <Image Include="res\startmenu.ico" />
+    <Image Include="res\terminate.ico" />
     <Image Include="res\toolbar.bmp" />
     <Image Include="res\winefile.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="explorer-en.rc" />
+    <ResourceCompile Include="explorer-zh.rc" />
     <ResourceCompile Include="explorer_intres.rc" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="explorer.exe.manifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="notifyhook\notifyhook.vcxproj">
-      <Project>{f28b575d-7dba-44de-aaef-fa0d065e5162}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

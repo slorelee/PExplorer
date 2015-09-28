@@ -102,9 +102,9 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	_deskbar_pos_y = DESKTOPBAR_TOP;
 	int start_btn_width = TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 2); // rect.right+16+8
 
-	_taskbar_pos = start_btn_width - 1;
+	_taskbar_pos = start_btn_width + 6 + 3;
 	 // create "Start" button
-	HWND hwndStart = Button(_hwnd, TEXT(""), 6 + 3, 1, start_btn_width, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	HWND hwndStart = Button(_hwnd, TEXT(""), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
 	SetWindowFont(hwndStart, GetStockFont(SYSTEM_FONT), FALSE);
 	new StartButton(hwndStart);
 
@@ -142,12 +142,12 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	REBARBANDINFO rbBand;
 
 	rbBand.cbSize = sizeof(REBARBANDINFO);
-	rbBand.fMask  = RBBIM_BACKGROUND|RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
+	rbBand.fMask  = RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE; //RBBIM_BACKGROUND
 	rbBand.cyChild = REBARBAND_HEIGHT - 5;
 	rbBand.cyMaxChild = (ULONG)-1;
 	rbBand.cyMinChild = REBARBAND_HEIGHT;
 	rbBand.cyIntegral = REBARBAND_HEIGHT;	//@@ OK?
-	rbBand.fStyle = RBBS_NOGRIPPER|RBBS_FIXEDBMP|RBBS_HIDETITLE; //RBBS_GRIPPERALWAYS RBBS_NOGRIPPER
+	rbBand.fStyle = RBBS_GRIPPERALWAYS|RBBS_FIXEDBMP|RBBS_HIDETITLE; //RBBS_GRIPPERALWAYS RBBS_NOGRIPPER
 
 	TCHAR QuickLaunchBand[] = _T("Quicklaunch");
 	rbBand.lpText = QuickLaunchBand;
@@ -155,7 +155,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.hwndChild = _hwndQuickLaunch;
 	rbBand.cx = 100;
 	rbBand.cxMinChild = 100;
-	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+	//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
@@ -165,7 +165,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
 	rbBand.cxMinChild = 50;
-	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+	//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_TASKTOOLBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 #endif
@@ -182,7 +182,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 
 StartButton::StartButton(HWND hwnd)
- :	PictureButton(hwnd, SizeIcon(IDI_STARTMENU, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), true)
+ :	PictureButton(hwnd, SizeIcon(IDI_STARTMENU_B, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), true)
 {
 }
 
@@ -293,7 +293,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 		POINTS pts = MAKEPOINTS(lparam);
 		RECT rc;
 		GetWindowRect(_hwnd, &rc);
-		if (pts.y <= rc.top + 16)
+		if (pts.y <= rc.top + 8)
 			return HTTOP;
 #endif
 		LRESULT res = super::WndProc(nmsg, wparam, lparam);
@@ -443,42 +443,46 @@ void DesktopBar::Resize(int cx, int cy)
 
 int DesktopBar::Command(int id, int code)
 {
-	switch(id) {
-	  case IDC_START:
+	switch (id) {
+	case IDC_START:
 		ShowOrHideStartMenu();
 		break;
 
-	  case ID_ABOUT_EXPLORER:
+	case ID_ABOUT_EXPLORER:
 		explorer_about(g_Globals._hwndDesktop);
 		break;
 
-	  case ID_DESKTOPBAR_SETTINGS:
+	case ID_DESKTOPBAR_SETTINGS:
 		ExplorerPropertySheet(g_Globals._hwndDesktop);
 		break;
 
-	  case ID_MINIMIZE_ALL:
+	case ID_MINIMIZE_ALL:
 		g_Globals._desktop.ToggleMinimize();
 		break;
 
-	  case ID_EXPLORE:
-		explorer_show_frame(SW_SHOWNORMAL);
+	case ID_EXPLORE: {
+		const TCHAR *mp = g_Globals._modulepath.c_str();
+		String explorer_path;
+		explorer_path = FmtString(TEXT("%s\\explorer.exe"), mp);
+		launch_file(_hwnd, explorer_path, SW_SHOW);
+		//explorer_show_frame(SW_SHOWNORMAL);
 		break;
-
-	  case ID_TASKMGR:
+	}
+	case ID_TASKMGR:
 		launch_file(_hwnd, TEXT("taskmgr.exe"), SW_SHOWNORMAL);
 		break;
 
 #ifdef __REACTOS__
-	  case ID_TRAY_VOLUME:
+	case ID_TRAY_VOLUME:
 		launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL);	// launch volume control application
 		break;
 
-	  case ID_VOLUME_PROPERTIES:
+	case ID_VOLUME_PROPERTIES:
 		launch_cpanel(_hwnd, TEXT("mmsys.cpl"));
 		break;
 #endif
 
-	  default:
+	default:
 		if (_hwndQuickLaunch)
 			return SendMessage(_hwndQuickLaunch, WM_COMMAND, MAKEWPARAM(id,code), 0);
 		else

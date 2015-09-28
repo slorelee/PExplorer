@@ -50,7 +50,8 @@
 
 #define DEFWINBRUSH() GetSysColorBrush(COLOR_BTNFACE)
 #define BLACKBRUSH() CreateSolidBrush(RGB(0, 0, 0))
-#define TASKBAR_BRUSH() BLACKBRUSH()
+#define TASKBAR_BRUSH() DEFWINBRUSH()
+#define CLOCK_TEXT_COLOR() RGB(0, 0, 0)
 
 #define COLOR_LIGHTGREEN() RGB(200, 235, 205)
 #define WINXPBLUEBRUSH() CreateSolidBrush(RGB(0, 78, 192))

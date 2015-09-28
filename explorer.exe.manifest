@@ -3,10 +3,10 @@
 <assemblyIdentity
     version="1.0.0.0"
     processorArchitecture="*"
-    name="ReactOS.Explorer"
+    name="PExlorer"
     type="win32"
 />
-<description>ROS Explorer</description>
+<description>PExlorer</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity

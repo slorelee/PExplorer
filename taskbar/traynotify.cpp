@@ -709,8 +709,8 @@ void NotifyArea::Paint()
 	int y = NOTIFYICON_Y;
 
 	if (_show_button) {
-		static SizeIcon leftArrowIcon(IDI_NOTIFY_L, TASKBAR_ICON_SIZE);
-		static SizeIcon rightArrowIcon(IDI_NOTIFY_R, TASKBAR_ICON_SIZE);
+		static SizeIcon leftArrowIcon(IDI_NOTIFY_L_B, TASKBAR_ICON_SIZE);
+		static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, TASKBAR_ICON_SIZE);
 
 		DrawIconEx(canvas, x, y, _show_hidden?rightArrowIcon:leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 		x += NOTIFYICON_DIST;
@@ -1289,7 +1289,7 @@ HWND ClockWindow::Create(HWND hwndParent)
 
 	// Calculate the rectangle needed to draw the time (without actually drawing it)
 	DrawText(canvas, buffer, -1, &rect, DT_NOPREFIX|DT_CALCRECT);
-	int clockwindowWidth = rect.right-rect.left + 4;
+	int clockwindowWidth = NOTIFYAREA_WIDTH_DEF;//rect.right - rect.left + 4;
 
 	return Window::Create(WINDOW_CREATOR(ClockWindow), 0,
 							wcClock, NULL, WS_CHILD|WS_VISIBLE,
@@ -1369,7 +1369,7 @@ void ClockWindow::Paint()
 
 	BkMode bkmode(canvas, TRANSPARENT);
 	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
-	SetTextColor(canvas, RGB(255, 255, 255));
+	SetTextColor(canvas, CLOCK_TEXT_COLOR());
 	RECT rc = ClientRect(_hwnd);
 	rc.top += 5;
 	DrawText(canvas, _time, -1, &rc, DT_VCENTER|DT_NOPREFIX);

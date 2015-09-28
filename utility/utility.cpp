@@ -104,20 +104,20 @@ void display_error(HWND hwnd, DWORD error)	//@@ CONTEXT mit ausgeben -> display_
 		LOG(FmtString(TEXT("display_error(%#x): %s"), error, msg));
 
 		SetLastError(0);
-		MessageBox(hwnd, msg, TEXT("ROS Explorer"), MB_OK);
+		MessageBox(hwnd, msg, TEXT("PExlorer"), MB_OK);
 
 		if (GetLastError() == ERROR_INVALID_WINDOW_HANDLE)
-			MessageBox(0, msg, TEXT("ROS Explorer"), MB_OK);
+			MessageBox(0, msg, TEXT("PExlorer"), MB_OK);
 	} else {
 		LOG(FmtString(TEXT("Unknown Error %#x"), error));
 
 		FmtString msg(TEXT("Unknown Error %#x"), error);
 
 		SetLastError(0);
-		MessageBox(hwnd, msg, TEXT("ROS Explorer"), MB_OK);
+		MessageBox(hwnd, msg, TEXT("PExlorer"), MB_OK);
 
 		if (GetLastError() == ERROR_INVALID_WINDOW_HANDLE)
-			MessageBox(0, msg, TEXT("ROS Explorer"), MB_OK);
+			MessageBox(0, msg, TEXT("PExlorer"), MB_OK);
 	}
 
 	LocalFree(msg);
