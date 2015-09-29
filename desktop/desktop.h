@@ -117,8 +117,8 @@ protected:
 	HWND	_hwndListView;
 	int		_icon_algo;
 
-	HBRUSH _hbrWallp = NULL;
-	DWORD _fTileWallp = 1;
+	HBRUSH _hbrWallp;
+	DWORD _fTileWallp;
 	RECT _rcWp;
 	TCHAR _szBMPName[MAX_PATH + 1];
 };

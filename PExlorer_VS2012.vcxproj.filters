@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Manifest Include="explorer.exe.manifest" />
+    <Manifest Include="PExlorer.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
@@ -94,7 +94,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="notifyhook\notifyhook.h" />
     <ClInclude Include="explorer.h" />
     <ClInclude Include="externals.h" />
     <ClInclude Include="globals.h" />
@@ -316,22 +315,10 @@
     <Image Include="res\network.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\notify_l.ico">
-      <Filter>res</Filter>
-    </Image>
-    <Image Include="res\notify_r.ico">
-      <Filter>res</Filter>
-    </Image>
     <Image Include="res\printer.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\reactos.ico">
-      <Filter>res</Filter>
-    </Image>
     <Image Include="res\restart.ico">
-      <Filter>res</Filter>
-    </Image>
-    <Image Include="res\ros-big.ico">
       <Filter>res</Filter>
     </Image>
     <Image Include="res\sdi.bmp">
@@ -349,21 +336,42 @@
     <Image Include="res\speaker.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\startmenu.ico">
-      <Filter>res</Filter>
-    </Image>
     <Image Include="res\toolbar.bmp">
       <Filter>res</Filter>
     </Image>
     <Image Include="res\recent-documents.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\winefile.ico">
+    <Image Include="res\notify_l_b.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\terminate.ico" />
-    <Image Include="res\pexlorer-big.ico" />
-    <Image Include="res\pexlorer.ico" />
+    <Image Include="res\notify_l_w.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\notify_r_b.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\notify_r_w.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\startmenu_b.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\startmenu_w.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\tbshdef.bmp">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\terminate.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\pexlorer-big.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\pexlorer.ico">
+      <Filter>res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">

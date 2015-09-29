@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// ∑«Ãÿ∂®”Ô—‘ resources
+// ∑«Ãÿ∂®”ÅE‘ resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -164,12 +164,12 @@ IDI_DESKSETTING         ICON                    "res/desktop-settings.ico"
 IDI_NETCONNS            ICON                    "res/network-conns.ico"
 IDI_ADMIN               ICON                    "res/administration.ico"
 IDI_RECENT              ICON                    "res/recent-documents.ico"
-#endif    // ∑«Ãÿ∂®”Ô—‘ resources
+#endif    // ∑«Ãÿ∂®”ÅE‘ resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// ”¢”Ô(√¿π˙) resources
+// ”¢”ÅE√¿πÅE resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -213,7 +213,7 @@ BEGIN
     END
 END
 
-#endif    // ”¢”Ô(√¿π˙) resources
+#endif    // ”¢”ÅE√¿πÅE resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -240,7 +240,7 @@ IDS_EXPLORER_VERSION_STR "PExlorer Ansi%0s"
 END
 #endif
 #ifndef _DEBUG
-CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "explorer.exe.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "PExlorer.exe.manifest"
 #endif
 
 #ifdef LANGUAGE_EN_US
