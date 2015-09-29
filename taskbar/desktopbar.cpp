@@ -416,7 +416,7 @@ void DesktopBar::Resize(int cx, int cy)
 	///@todo general children resizing algorithm
 	int quicklaunch_width = SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
 	int notifyarea_width = SendMessage(_hwndNotify, PM_GET_WIDTH, 0, 0);
-	_log_(FmtString("Resize - %d,%d\r\n", cx, cy));
+	//_log_(FmtString("Resize - %d,%d\r\n", cx, cy));
 	HDWP hdwp = BeginDeferWindowPos(3);
 
 	if (_hwndrebar)

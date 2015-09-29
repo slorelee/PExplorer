@@ -149,9 +149,10 @@ TaskbarSettingsDlg::TaskbarSettingsDlg(HWND hwnd)
  :	super(hwnd)
 {
 	//XMLPos options = g_Globals.get_cfg("desktopbar/options");
-
- 	//CheckDlgButton(hwnd, ID_SHOW_CLOCK, XMLBool(options, "show-clock", true)? BST_CHECKED: BST_UNCHECKED);
-	//CheckDlgButton(hwnd, ID_HIDE_INACTIVE_ICONS, XMLBool(options, "hide-inactive", true)? BST_CHECKED: BST_UNCHECKED);
+	//XMLBool(options, "show-clock", true)
+	//XMLBool(options, "hide-inactive", true)
+	CheckDlgButton(hwnd, ID_SHOW_CLOCK, true? BST_CHECKED: BST_UNCHECKED);
+	CheckDlgButton(hwnd, ID_HIDE_INACTIVE_ICONS, true? BST_CHECKED: BST_UNCHECKED);
 }
 
 int TaskbarSettingsDlg::Notify(int id, NMHDR* pnmh)
@@ -173,28 +174,26 @@ int TaskbarSettingsDlg::Notify(int id, NMHDR* pnmh)
 
 int	TaskbarSettingsDlg::Command(int id, int code)
 {
-	//switch(id) {
-	//  case ID_CONFIG_NOTIFYAREA:
-	//	Dialog::DoModal(IDD_NOTIFYAREA, WINDOW_CREATOR(TrayNotifyDlg), _hwnd);
-	//	break;
+	switch(id) {
+	  case ID_CONFIG_NOTIFYAREA:
+		Dialog::DoModal(IDD_NOTIFYAREA, WINDOW_CREATOR(TrayNotifyDlg), _hwnd);
+		break;
 
-	//  case ID_SHOW_CLOCK: {
-	//	XMLBoolRef boolRef1(XMLPos(g_Globals.get_cfg("desktopbar/options")), "show-clock", true);
-	//	boolRef1.toggle();
-	//	SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
-	//	PropSheet_Changed(GetParent(_hwnd), _hwnd);
-	//	break;}
+	  case ID_SHOW_CLOCK: {
+		//((g_Globals.get_cfg("desktopbar/options")), "show-clock", true);
+		SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
+		PropSheet_Changed(GetParent(_hwnd), _hwnd);
+		break;}
 
-	//  case ID_HIDE_INACTIVE_ICONS: {
-	//	XMLBoolRef boolRef2(XMLPos(g_Globals.get_cfg("notify-icons/options")), "hide-inactive", true);
- //       boolRef2.toggle();
-	//	SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
-	//	PropSheet_Changed(GetParent(_hwnd), _hwnd);
-	//	break;}
+	  case ID_HIDE_INACTIVE_ICONS: {
+		//((g_Globals.get_cfg("notify-icons/options")), "hide-inactive", true);
+		SendMessage(g_Globals._hwndDesktopBar, PM_REFRESH_CONFIG, 0, 0);
+		PropSheet_Changed(GetParent(_hwnd), _hwnd);
+		break;}
 
-	//  default:
-	//	return 1;
-	//}
+	  default:
+		return 1;
+	}
 
 	return 0;
 }

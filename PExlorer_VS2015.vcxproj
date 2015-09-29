@@ -20,14 +20,14 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BFBAE588-8C68-4303-9BF6-C830087D8F25}</ProjectGuid>
-    <RootNamespace>explorer</RootNamespace>
+    <RootNamespace>PExlorer</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>PExlorer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -37,7 +37,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -197,7 +197,7 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -244,7 +244,7 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -351,7 +351,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="taskbar\desktopbar.h" />
     <ClInclude Include="taskbar\favorites.h" />
-    <ClInclude Include="notifyhook\notifyhook.h" />
     <ClInclude Include="taskbar\quicklaunch.h" />
     <ClInclude Include="taskbar\startmenu.h" />
     <ClInclude Include="taskbar\taskbar.h" />
@@ -420,24 +419,25 @@
     <Image Include="res\minimize.ico" />
     <Image Include="res\network-conns.ico" />
     <Image Include="res\network.ico" />
-    <Image Include="res\notify_l.ico" />
-    <Image Include="res\notify_r.ico" />
+    <Image Include="res\notify_l_b.ico" />
+    <Image Include="res\notify_l_w.ico" />
+    <Image Include="res\notify_r_b.ico" />
+    <Image Include="res\notify_r_w.ico" />
     <Image Include="res\pexlorer-big.ico" />
     <Image Include="res\pexlorer.ico" />
     <Image Include="res\printer.ico" />
-    <Image Include="res\reactos.ico" />
     <Image Include="res\recent-documents.ico" />
     <Image Include="res\restart.ico" />
-    <Image Include="res\ros-big.ico" />
     <Image Include="res\sdi.bmp" />
     <Image Include="res\search-doc.ico" />
     <Image Include="res\search.ico" />
     <Image Include="res\shutdown.ico" />
     <Image Include="res\speaker.ico" />
-    <Image Include="res\startmenu.ico" />
+    <Image Include="res\startmenu_b.ico" />
+    <Image Include="res\startmenu_w.ico" />
+    <Image Include="res\tbshdef.bmp" />
     <Image Include="res\terminate.ico" />
     <Image Include="res\toolbar.bmp" />
-    <Image Include="res\winefile.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="explorer-en.rc" />

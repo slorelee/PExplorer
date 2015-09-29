@@ -51,8 +51,6 @@ DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("sh
 #define GCL_HICONSM GCLP_HICONSM
 #endif
 
-#define	REBARBAND_HEIGHT		48
-
 TaskBarEntry::TaskBarEntry()
 {
 	_id = 0;

@@ -48,6 +48,9 @@
 #include "globals.h"
 #include "externals.h"
 
+#define	DESKTOPBARBAR_HEIGHT	42 //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
+#define	REBARBAND_HEIGHT		(DESKTOPBARBAR_HEIGHT - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))
+
 #define DEFWINBRUSH() GetSysColorBrush(COLOR_BTNFACE)
 #define BLACKBRUSH() CreateSolidBrush(RGB(0, 0, 0))
 #define TASKBAR_BRUSH() DEFWINBRUSH()
@@ -56,3 +59,11 @@
 #define COLOR_LIGHTGREEN() RGB(200, 235, 205)
 #define WINXPBLUEBRUSH() CreateSolidBrush(RGB(0, 78, 192))
 #define LIGHTGREENBRUSH() CreateSolidBrush(COLOR_LIGHTGREEN())
+
+#define	NOTIFYAREA_WIDTH_DEF	100
+#define	NOTIFYAREA_SPACE		10
+#define	NOTIFYICON_SIZE			16
+#define	NOTIFYICON_DIST			NOTIFYICON_SIZE + NOTIFYICON_SIZE / 4
+#define	NOTIFYICON_X			2
+#define	NOTIFYICON_Y			3
+#define NOTIFY_HINT_Y (DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2)

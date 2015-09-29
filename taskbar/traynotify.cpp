@@ -222,7 +222,7 @@ bool NotifyInfo::_modify(NID_T *pnid)
         if (_hIcon)
             DestroyIcon(_hIcon);
 
-        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0);
+        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, 16, 16, 0);
 
         changes = true;	///@todo compare icon
     }
@@ -500,7 +500,7 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 				if (_show_button)
 					if (nmsg == WM_LBUTTONDOWN)
 						if (pt.x>=NOTIFYICON_X && pt.x<NOTIFYICON_X+NOTIFYICON_SIZE &&
-							pt.y>=NOTIFYICON_Y && pt.y<NOTIFYICON_Y+NOTIFYICON_SIZE)
+							pt.y>=NOTIFYICON_Y && pt.y<NOTIFYICON_Y+NOTIFY_HINT_Y)
 							PostMessage(_hwnd, WM_COMMAND, MAKEWPARAM(ID_SHOW_HIDDEN_ICONS,0), 0);
 		}
 
@@ -548,7 +548,7 @@ int NotifyArea::Notify(int id, NMHDR* pnmh)
 
 		if (_show_button &&
 			pt.x>=NOTIFYICON_X && pt.x<NOTIFYICON_X+NOTIFYICON_SIZE &&
-			pt.y>=NOTIFYICON_Y && pt.y<NOTIFYICON_Y+NOTIFYICON_SIZE)
+			pt.y>=NOTIFYICON_Y && pt.y<NOTIFYICON_Y+NOTIFY_HINT_Y)
 		{
 			static ResString sShowIcons(IDS_SHOW_HIDDEN_ICONS);
 			static ResString sHideIcons(IDS_HIDE_ICONS);
@@ -660,7 +660,7 @@ void NotifyArea::UpdateIcons()
 
 	 // sync tooltip areas to current icon number
 	if (_sorted_icons.size() != _last_icon_count) {
-		RECT rect = {NOTIFYICON_X, NOTIFYICON_Y, NOTIFYICON_X+NOTIFYICON_SIZE, NOTIFYICON_Y+NOTIFYICON_SIZE};
+		RECT rect = {NOTIFYICON_X, NOTIFYICON_Y, NOTIFYICON_X+NOTIFYICON_SIZE, NOTIFYICON_Y+NOTIFY_HINT_Y};
 
 		UINT tt_idx = 0;
 
@@ -712,7 +712,7 @@ void NotifyArea::Paint()
 		static SizeIcon leftArrowIcon(IDI_NOTIFY_L_B, TASKBAR_ICON_SIZE);
 		static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, TASKBAR_ICON_SIZE);
 
-		DrawIconEx(canvas, x, y, _show_hidden?rightArrowIcon:leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
+		DrawIconEx(canvas, x, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, _show_hidden?rightArrowIcon:leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 		x += NOTIFYICON_DIST;
 	}
 
@@ -731,7 +731,7 @@ void NotifyArea::Paint()
 			AlphaBlend(canvas, x, y, NOTIFYICON_SIZE, NOTIFYICON_SIZE, mem_dc, 0, 0, NOTIFYICON_SIZE, NOTIFYICON_SIZE, blend);
 		} else
 #endif
-			DrawIconEx(canvas, x, y, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
+			DrawIconEx(canvas, x, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 
 		x += NOTIFYICON_DIST;
 	}
@@ -791,7 +791,7 @@ void NotifyArea::Refresh(bool update)
  /// search for a icon at a given client coordinate position
 NotifyIconSet::iterator NotifyArea::IconHitTest(const POINT& pos)
 {
-	if (pos.y<NOTIFYICON_Y || pos.y>=NOTIFYICON_Y+NOTIFYICON_SIZE)
+	if (pos.y<NOTIFYICON_Y || pos.y>=NOTIFYICON_Y+NOTIFY_HINT_Y)
 		return _sorted_icons.end();
 
 	NotifyIconSet::iterator it = _sorted_icons.begin();

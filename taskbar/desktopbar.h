@@ -29,11 +29,6 @@
 #define	CLASSNAME_EXPLORERBAR	TEXT("Shell_TrayWnd")
 #define	TITLE_EXPLORERBAR		TEXT("")	// use an empty window title, so windows taskmanager does not show the window in its application list
 
-
-#define	DESKTOPBARBAR_HEIGHT	42 //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
-#define	REBARBAND_HEIGHT		(DESKTOPBARBAR_HEIGHT - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))
-
-
 #define	IDC_START				0x1000
 #define	IDC_LOGOFF				0x1001
 #define	IDC_SHUTDOWN			0x1002

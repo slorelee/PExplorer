@@ -164,7 +164,7 @@ void QuickLaunchBar::AddShortcuts()
 	rbBand.cbSize = sizeof(REBARBANDINFO);
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	rbBand.fMask = RBBIM_ID | RBBIM_SIZE;
-	rbBand.cx = (cx + 1) * icon_num + TASKBAR_ICON_SIZE * 2;
+	rbBand.cx = (cx + 3) * icon_num + TASKBAR_ICON_SIZE * 2;
 	SendMessage(GetParent(_hwnd), RB_SETBANDINFO, (WPARAM)0, (LPARAM)&rbBand);
 }
 
