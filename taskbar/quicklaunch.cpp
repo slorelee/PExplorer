@@ -82,6 +82,7 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
 								CCS_TOP|CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_NORESIZE|
 								TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE|TBSTYLE_FLAT,
 								IDW_QUICKLAUNCHBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
+
 	if (hwnd)
 		new QuickLaunchBar(hwnd);
 
@@ -120,10 +121,8 @@ void QuickLaunchBar::AddShortcuts()
 	COLORREF bk_color = RGB(0, 0, 0);
 	HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
-	int icon_num = 0;
 	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE), ResString(IDS_MINIMIZE_ALL), NULL);
 	AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE), ResString(IDS_TITLE), NULL);
-	icon_num += 2;
 
 	TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP,{ 0, 0 }, 0, 0 };
 	SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
@@ -138,34 +137,20 @@ void QuickLaunchBar::AddShortcuts()
 			HBITMAP hbmp = g_Globals._icon_cache.get_icon(entry->_icon_id).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE);
 
 			AddButton(_next_id++, hbmp, entry->_display_name, entry);	//entry->_etype==ET_SHELL? desktop_folder.get_name(static_cast<ShellEntry*>(entry)->_pidl): entry->_display_name);
-			icon_num++;
 		}
 	}
 
 	_btn_dist = LOWORD(SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0));
-	_size = _entries.size() * _btn_dist;
-
-	SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
+	_size = _entries.size() * (_btn_dist + 1) + TASKBAR_ICON_SIZE / 2;
 
 	//adjust QuickLaunchBar width
-	static LONG cx = -1;
-	if (cx == -1) {
-		ICONINFO ici;
-		GetIconInfo(g_Globals._icon_cache.get_icon(ICID_MINIMIZE).get_hicon(), &ici);
-		BITMAP bm;
-		GetObject(ici.hbmColor, sizeof(BITMAP), &bm);
-		cx = bm.bmWidth;
-		DeleteObject(ici.hbmColor);
-		DeleteObject(ici.hbmMask);
-	} else {
-		cx = GetSystemMetrics(SM_CXSMICON);
-	}
 	REBARBANDINFO rbBand;
 	rbBand.cbSize = sizeof(REBARBANDINFO);
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	rbBand.fMask = RBBIM_ID | RBBIM_SIZE;
-	rbBand.cx = (cx + 3) * icon_num + TASKBAR_ICON_SIZE * 2;
+	rbBand.cx = _size;
 	SendMessage(GetParent(_hwnd), RB_SETBANDINFO, (WPARAM)0, (LPARAM)&rbBand);
+	SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
 }
 
 void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry* entry, int flags)
