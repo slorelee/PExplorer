@@ -469,12 +469,14 @@ SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
 LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 {
 	DWORD dwSize, dwType, lRet, fTile = 0;
-	TCHAR szTemp[MAX_PATH + 1] = TEXT("%SystemRoot%\\wallpaper.bmp");
+	const TCHAR *mp = g_Globals._modulepath.c_str();
+	String wallpaper_path;
+	wallpaper_path = FmtString(TEXT("%s\\wallpaper.bmp"), mp);
 	int x, y;
 
 	//TODO:load config
 	_fTileWallp = 1;
-	ExpandEnvironmentStrings(szTemp, _szBMPName, MAX_PATH);
+	ExpandEnvironmentStrings(wallpaper_path, _szBMPName, MAX_PATH);
 
 	// need to repaint whole thing, so invalidate entire desktop window
 	//InvalidateRect(_hwnd, NULL, TRUE);
