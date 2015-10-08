@@ -97,7 +97,7 @@ protected:
 
 	void	Resize(int cx, int cy);
 	void	ControlResize(WPARAM wparam, LPARAM lparam);
-	void	RegisterHotkeys();
+	void	RegisterHotkeys(BOOL unreg = FALSE);
 	void	ProcessHotKey(int id_hotkey);
 	void	ShowOrHideStartMenu();
 	LRESULT	ProcessCopyData(COPYDATASTRUCT* pcd);

@@ -54,6 +54,7 @@ DesktopBar::DesktopBar(HWND hwnd)
 
 DesktopBar::~DesktopBar()
 {
+	RegisterHotkeys(TRUE);
 	 // restore work area to the previous size
 	SystemParametersInfo(SPI_SETWORKAREA, 0, &_work_area_org, 0);
 	PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
@@ -244,17 +245,20 @@ LRESULT	StartButton::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 	return 0;
 }
 
+#define AUTOREGISTERHOTKEY(unreg, hwnd, id,fsModifiers, vk)\
+  if (!unreg) RegisterHotKey(hwnd, id,fsModifiers, vk);\
+  else UnregisterHotKey(hwnd, id);
 
-void DesktopBar::RegisterHotkeys()
+void DesktopBar::RegisterHotkeys(BOOL unreg)
 {
 	 // register hotkey WIN+E opening explorer
-	RegisterHotKey(_hwnd, IDHK_EXPLORER, MOD_WIN, 'E');
-	RegisterHotKey(_hwnd, IDHK_RUN, MOD_WIN, 'R');
-	RegisterHotKey(_hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
-	RegisterHotKey(_hwnd, IDHK_LOGOFF, MOD_WIN, 'L');
-	RegisterHotKey(_hwnd, IDHK_STARTMENU, MOD_CONTROL, VK_ESCAPE);
+	AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_EXPLORER, MOD_WIN, 'E');
+	AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_RUN, MOD_WIN, 'R');
+	AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
+	AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_LOGOFF, MOD_WIN, 'L');
+	AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_STARTMENU, MOD_CONTROL, VK_ESCAPE);
 
-		///@todo register all common hotkeys
+	///@todo register all common hotkeys
 }
 
 void DesktopBar::ProcessHotKey(int id_hotkey)
