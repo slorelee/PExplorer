@@ -125,8 +125,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 
 	 // notify all top level windows about the successfully created desktop bar
-	 //@@ Use SendMessage() instead of PostMessage() to avoid problems with delayed created shell service objects?
-	PostMessage(HWND_BROADCAST, WM_TASKBARCREATED, 0, 0);
+	SendNotifyMessage(HWND_BROADCAST, WM_TASKBARCREATED, 0, 0);
 
 
 	_hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
