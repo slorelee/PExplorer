@@ -252,22 +252,22 @@ int TaskBar::Command(int id, int code)
 
 int TaskBar::Notify(int id, NMHDR* pnmh)
 {
-	if (pnmh->hwndFrom == _htoolbar)
-		switch(pnmh->code) {
-		  case NM_RCLICK: {
+	if (pnmh->hwndFrom == _htoolbar) {
+		switch (pnmh->code) {
+		case NM_RCLICK: {
 			TBBUTTONINFO btninfo;
 			TaskBarMap::iterator it;
 			Point pt(GetMessagePos());
 			ScreenToClient(_htoolbar, &pt);
 
 			btninfo.cbSize = sizeof(TBBUTTONINFO);
-			btninfo.dwMask = TBIF_BYINDEX|TBIF_COMMAND;
+			btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
 
 			int idx = SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
 
-			if (idx>=0 &&
-				SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo)!=-1 &&
-				(it=_map.find_id(btninfo.idCommand))!=_map.end()) {
+			if (idx >= 0 &&
+				SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1 &&
+				(it = _map.find_id(btninfo.idCommand)) != _map.end()) {
 				//TaskBarEntry& entry = it->second;
 
 				ActivateApp(it, false, false);	// don't restore minimized windows on right button click
@@ -280,11 +280,25 @@ int TaskBar::Notify(int id, NMHDR* pnmh)
 					ShowAppSystemMenu(it);
 			}
 			break;}
-
-		  default:
+		case NM_CUSTOMDRAW: {
+			LPNMTBCUSTOMDRAW lptbcd = (LPNMTBCUSTOMDRAW)pnmh;
+			switch (lptbcd->nmcd.dwDrawStage) {
+			case CDDS_PREPAINT:
+				return CDRF_NOTIFYITEMDRAW;
+			case CDDS_ITEMPREPAINT: {
+				lptbcd->clrText = RGB(0, 0, 0);
+#define CDRF_USECDCOLORS 0x00800000
+				return CDRF_USECDCOLORS; //Windows vista later
+				return CDRF_DODEFAULT;
+			}
+			default:
+				return CDRF_DODEFAULT;
+			}
+		}
+		default:
 			return super::Notify(id, pnmh);
 		}
-
+	}
 	return 0;
 }
 
