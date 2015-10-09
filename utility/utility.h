@@ -25,6 +25,8 @@
  // Martin Fuchs, 23.07.2003
  //
 
+#pragma once
+
  // standard windows headers
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN

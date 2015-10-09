@@ -340,6 +340,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="vendor\json.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeaderFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utility\dragdropimpl.h" />
@@ -375,6 +380,7 @@
     <ClInclude Include="globals.h" />
     <ClInclude Include="precomp.h" />
     <ClInclude Include="services\shellservices.h" />
+    <ClInclude Include="vendor\json.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\action.ico" />

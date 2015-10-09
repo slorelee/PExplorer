@@ -89,6 +89,32 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
     _icon_cache.init();
 }
 
+void ExplorerGlobals::load_config()
+{
+	TCHAR szFile[MAX_PATH + 1] = { 0 };
+	String str = TEXT("");
+	DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
+	if (dwRet != 0) {
+		str = TEXT(szFile);
+		int nPos = str.rfind(TEXT('\\'));
+		if (nPos != -1) {
+			str = str.substr(0, nPos);
+		}
+	}
+	JVAR("JVAR_MODULEPATH") = str;
+
+	//default jcfg
+	string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"Wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
+		TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,122,204],\"textcolor\":\"0xffffff\",")
+		TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
+		TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
+	json::Object def_config = json::Deserialize(def_jcfg).ToObject();
+	_jcfg = json::Deserialize(def_jcfg).ToObject();
+	//_log_(def_config[TEXT("JS_DESKTOP")][("wallpaper")].ToString().c_str());
+	//json::Value jv = JCFG2("JS_DESKTOP", "Wallpaper");
+	//if (jv.GetType() != json::StringVal) jv = def_config[TEXT("JS_DESKTOP")][("wallpaper")];
+	//_log_(def_config["a"]["b"]["c"].ToString().c_str());
+}
 
 void ExplorerGlobals::read_persistent()
 {
@@ -1205,17 +1231,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     g_Globals.init(hInstance);
-	TCHAR szFile[MAX_PATH + 1] = { 0 };
-	String str = TEXT("");
-	DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
-	if (dwRet != 0) {
-		str = TEXT(szFile);
-		int nPos = str.rfind(TEXT('\\'));
-		if (nPos != -1) {
-			str = str.substr(0, nPos);
-		}
-	}
-	g_Globals._modulepath = str;
+
     // initialize COM and OLE before creating the desktop window
     OleInit usingCOM;
 
@@ -1223,6 +1239,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     CommonControlInit usingCmnCtrl;
 
     g_Globals.read_persistent();
+    g_Globals.load_config();
 
     if (startup_desktop) {
         WaitCursor wait;
@@ -1282,7 +1299,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
 
     // write configuration file
-    g_Globals.write_persistent();
+    //g_Globals.write_persistent();
 
     if (pSSOThread) {
         pSSOThread->Stop();

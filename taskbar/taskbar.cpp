@@ -127,10 +127,13 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 		return 1;
 
 	/* FIXME: There's an internal padding for non-flat toolbar. Get rid of it somehow. */
-	_htoolbar = CreateToolbarEx(_hwnd,
-								WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
-								CCS_TOP|CCS_NODIVIDER|TBSTYLE_LIST|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE,//|TBSTYLE_FLAT,//|TBSTYLE_AUTOSIZE
-								IDW_TASKTOOLBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
+	DWORD ws = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_TOP |
+			   CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE;
+	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+		ws |= TBSTYLE_FLAT;
+	}
+	_htoolbar = CreateToolbarEx(_hwnd, ws /* |TBSTYLE_AUTOSIZE */, IDW_TASKTOOLBAR, 0, 0, 0, NULL,
+								0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 
 	SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(TASKBUTTONWIDTH_MAX,TASKBUTTONWIDTH_MAX));
 	//RECT rc;
@@ -286,7 +289,7 @@ int TaskBar::Notify(int id, NMHDR* pnmh)
 			case CDDS_PREPAINT:
 				return CDRF_NOTIFYITEMDRAW;
 			case CDDS_ITEMPREPAINT: {
-				lptbcd->clrText = RGB(0, 0, 0);
+				lptbcd->clrText = TASKBAR_TEXTCOLOR();
 #define CDRF_USECDCOLORS 0x00800000
 				return CDRF_USECDCOLORS; //Windows vista later
 				return CDRF_DODEFAULT;

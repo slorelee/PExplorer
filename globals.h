@@ -25,7 +25,7 @@
  // Martin Fuchs, 23.07.2003
  //
 
-
+#include "vendor/json.h"
 #include "taskbar/favorites.h"
 
 
@@ -207,8 +207,7 @@ extern struct ExplorerGlobals
 	void	read_persistent();
 	void	write_persistent();
 
-	//XMLPos	get_cfg();
-	//XMLPos	get_cfg(const char* path);
+	void	load_config();
 
 	HINSTANCE	_hInstance;
 	UINT		_cfStrFName;
@@ -235,15 +234,24 @@ extern struct ExplorerGlobals
 
 	Desktop		_desktop;
 
-	//XMLDoc		_cfg;
 	String		_cfg_dir;
 	String		_cfg_path;
 
 	Favorites	_favorites;
 	String		_favorites_path;
-	String		_modulepath;
+
+	json::Object	_JVARMap;
+	json::Object	_jcfg;
 } g_Globals;
 
+#define JVAR(key) (g_Globals._JVARMap[TEXT(key)])
+#define JCFG1(key1) (g_Globals._jcfg[TEXT(key1)])
+#define JCFG2(key1, key2) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)])
+#define JCFG3(key1, key2, key3) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)][TEXT(key3)])
+#define JCFG(n, ...) JCFG##n(__VA_ARGS__)
+#define TASKBAR_BRUSH() (CreateSolidBrush(JValueToColor(JCFG2("JS_TASKBAR","bkcolor"))))
+#define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR","textcolor")))
+#define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
 
  /// convenient loading of string resources
 struct ResString : public String

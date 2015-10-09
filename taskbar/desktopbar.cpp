@@ -136,13 +136,18 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	_hwndrebar = CreateWindowEx(WS_EX_TOOLWINDOW, REBARCLASSNAME, NULL,
 					WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
 					RBS_VARHEIGHT|RBS_AUTOSIZE|RBS_DBLCLKTOGGLE|	//|RBS_REGISTERDROP
-					CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_TOP,
+					CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_TOP| TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE,
 					0, 1, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
 
-	REBARBANDINFO rbBand;
 
+	DeleteObject((HBRUSH)SetClassLong(_hwndrebar, GCLP_HBRBACKGROUND,(LONG)CreateSolidBrush(RGB(0,122,204))));
+
+	REBARBANDINFO rbBand;
 	rbBand.cbSize = sizeof(REBARBANDINFO);
-	rbBand.fMask  = RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE; //RBBIM_BACKGROUND
+	rbBand.fMask = RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
+	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+		//rbBand.fMask |= RBBIM_BACKGROUND;
+	}
 	rbBand.cyChild = REBARBAND_HEIGHT - 5;
 	rbBand.cyMaxChild = (ULONG)-1;
 	rbBand.cyMinChild = REBARBAND_HEIGHT;
@@ -155,17 +160,18 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	rbBand.hwndChild = _hwndQuickLaunch;
 	rbBand.cx = 100;
 	rbBand.cxMinChild = 100;
-	//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
 	TCHAR TaskbarBand[] = TEXT("Taskbar");
+	//rbBand.fMask &= ~RBBIM_BACKGROUND;
 	rbBand.lpText = TaskbarBand;
 	rbBand.cch = sizeof(TaskbarBand);
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
 	rbBand.cxMinChild = 50;
-	//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_TASKTOOLBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 #endif
@@ -464,7 +470,7 @@ int DesktopBar::Command(int id, int code)
 		break;
 
 	case ID_EXPLORE: {
-		const TCHAR *mp = g_Globals._modulepath.c_str();
+		const TCHAR *mp = g_Globals._JVARMap[TEXT("JVAR_MODULEPATH")].ToString().c_str();
 		String explorer_path;
 		explorer_path = FmtString(TEXT("%s\\explorer.exe"), mp);
 		launch_file(_hwnd, explorer_path, SW_SHOW);
