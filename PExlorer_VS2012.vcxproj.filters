@@ -91,6 +91,9 @@
     <ClCompile Include="shell\winfs.cpp">
       <Filter>shell</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\json.cpp">
+      <Filter>vendor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="utility\treedroptarget.h">
       <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\json.h">
+      <Filter>vendor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -394,6 +400,9 @@
     </Filter>
     <Filter Include="dialogs">
       <UniqueIdentifier>{b0a4513d-65eb-44c7-a72d-ec5cafd30903}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{2b39a04d-e818-4c51-b95b-10048f65df5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
