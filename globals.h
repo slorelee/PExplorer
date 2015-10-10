@@ -99,7 +99,7 @@ enum ICON_ID {
 #define TASKBAR_ICON_SIZE ICON_SIZE_LARGE
 
 #define ICON_SIZE_FROM_ICF(flags)	(flags&ICF_LARGE? ICON_SIZE_LARGE: flags&ICF_MIDDLE? ICON_SIZE_MIDDLE: ICON_SIZE_SMALL)
-#define ICF_FROM_ICON_SIZE(size)	(size>=ICON_SIZE_LARGE? ICF_LARGE: size>=ICON_SIZE_MIDDLE? ICF_MIDDLE: (ICONCACHE_FLAGS)0)
+#define ICF_FROM_ICON_SIZE(size)	(size>=ICON_SIZE_LARGE? ICF_LARGE: size>=ICON_SIZE_MIDDLE? ICF_MIDDLE: ICF_SMALL)
 
 struct Icon {
 	Icon();
@@ -138,10 +138,10 @@ struct IconCache {
 	virtual ~IconCache();
 	void	init();
 
-	const Icon&	extract(LPCTSTR path, ICONCACHE_FLAGS flags=ICF_NORMAL);
-	const Icon&	extract(LPCTSTR path, int icon_idx, ICONCACHE_FLAGS flags=ICF_HICON);
-	const Icon&	extract(IExtractIcon* pExtract, LPCTSTR path, int icon_idx, ICONCACHE_FLAGS flags=ICF_HICON);
-	const Icon&	extract(LPCITEMIDLIST pidl, ICONCACHE_FLAGS flags=ICF_NORMAL);
+	const Icon&	extract(LPCTSTR path, UINT flags=ICF_NORMAL);
+	const Icon&	extract(LPCTSTR path, int icon_idx, UINT flags=ICF_HICON);
+	const Icon&	extract(IExtractIcon* pExtract, LPCTSTR path, int icon_idx, UINT flags=ICF_HICON);
+	const Icon&	extract(LPCITEMIDLIST pidl, UINT flags=ICF_NORMAL);
 
 	const Icon&	add(HICON hIcon, ICON_TYPE type=IT_DYNAMIC);
 	const Icon&	add(int sys_idx/*, ICON_TYPE type=IT_SYSCACHE*/);
@@ -248,10 +248,14 @@ extern struct ExplorerGlobals
 #define JCFG1(key1) (g_Globals._jcfg[TEXT(key1)])
 #define JCFG2(key1, key2) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)])
 #define JCFG3(key1, key2, key3) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)][TEXT(key3)])
-#define JCFG(n, ...) JCFG##n(__VA_ARGS__)
-#define TASKBAR_BRUSH() (CreateSolidBrush(JValueToColor(JCFG2("JS_TASKBAR","bkcolor"))))
-#define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR","textcolor")))
+//#define JCFG(n, ...) JCFG##n(__VA_ARGS__)
+
+#define TASKBAR_BKCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "bkcolor")))
+#define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "textcolor")))
+#define TASKBAR_BRUSH() (CreateSolidBrush(TASKBAR_BKCOLOR()))
 #define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
+
+#define JCFG_QL(n, ...) (JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))
 
  /// convenient loading of string resources
 struct ResString : public String

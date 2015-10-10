@@ -102,14 +102,16 @@ void ExplorerGlobals::load_config()
 		}
 	}
 	JVAR("JVAR_MODULEPATH") = str;
-
+	_tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 	//default jcfg
 	string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"Wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
-		TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,122,204],\"textcolor\":\"0xffffff\",")
+		TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
 		TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
+		TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
+		TEXT("\"JS_QUICKLAUNCH\":{\"lock\":false},")
 		TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
 	json::Object def_config = json::Deserialize(def_jcfg).ToObject();
-	_jcfg = json::Deserialize(def_jcfg).ToObject();
+    _jcfg = def_config;//json::Deserialize(def_jcfg).ToObject();
 	//_log_(def_config[TEXT("JS_DESKTOP")][("wallpaper")].ToString().c_str());
 	//json::Value jv = JCFG2("JS_DESKTOP", "Wallpaper");
 	//if (jv.GetType() != json::StringVal) jv = def_config[TEXT("JS_DESKTOP")][("wallpaper")];
@@ -447,7 +449,7 @@ void IconCache::init()
 }
 
 
-const Icon& IconCache::extract(LPCTSTR path, ICONCACHE_FLAGS flags)
+const Icon& IconCache::extract(LPCTSTR path, UINT flags)
 {
     // search for matching icon with unchanged flags in the cache
     CacheKey mapkey(path, flags);
@@ -477,6 +479,28 @@ const Icon& IconCache::extract(LPCTSTR path, ICONCACHE_FLAGS flags)
     SHFILEINFO sfi;
 
     int shgfi_flags = 0;
+
+    if (flags & ICF_NOLINKOVERLAY) {
+        shgfi_flags = SHGFI_SYSICONINDEX;
+        if (flags & ICF_LARGE) {
+            shgfi_flags |= SHGFI_LARGEICON;
+        }
+        else {
+            shgfi_flags |= SHGFI_SMALLICON;
+        }
+        HIMAGELIST himl = (HIMAGELIST)SHGetFileInfo(path, 0, &sfi, sizeof(sfi), shgfi_flags);
+        if (himl) {
+            HICON hicon = ImageList_GetIcon(himl, sfi.iIcon, ILD_NORMAL);
+            const Icon& icon = add(hicon, IT_CACHED);
+
+            ///@todo limit cache size
+            _pathCache[mapkey_hicon] = icon;
+
+            return icon;
+        }
+    }
+
+    shgfi_flags = 0;
 
     if (flags & ICF_OPEN)
         shgfi_flags |= SHGFI_OPENICON;
@@ -522,7 +546,7 @@ const Icon& IconCache::extract(LPCTSTR path, ICONCACHE_FLAGS flags)
     return _icons[ICID_NONE];
 }
 
-const Icon& IconCache::extract(LPCTSTR path, int icon_idx, ICONCACHE_FLAGS flags)
+const Icon& IconCache::extract(LPCTSTR path, int icon_idx, UINT flags)
 {
     IdxCacheKey key(path, make_pair(icon_idx, (flags|ICF_HICON)&~ICF_SYSCACHE));
 
@@ -549,7 +573,7 @@ const Icon& IconCache::extract(LPCTSTR path, int icon_idx, ICONCACHE_FLAGS flags
     }
 }
 
-const Icon& IconCache::extract(IExtractIcon* pExtract, LPCTSTR path, int icon_idx, ICONCACHE_FLAGS flags)
+const Icon& IconCache::extract(IExtractIcon* pExtract, LPCTSTR path, int icon_idx, UINT flags)
 {
     HICON hIconLarge = 0;
     HICON hIcon;
@@ -575,7 +599,7 @@ const Icon& IconCache::extract(IExtractIcon* pExtract, LPCTSTR path, int icon_id
     return _icons[ICID_NONE];
 }
 
-const Icon& IconCache::extract(LPCITEMIDLIST pidl, ICONCACHE_FLAGS flags)
+const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
 {
      // search for matching icon with unchanged flags in the cache
     PidlCacheKey mapkey(pidl, flags);

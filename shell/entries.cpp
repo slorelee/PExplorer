@@ -362,7 +362,7 @@ void Entry::smart_scan(SORT_ORDER sortOrder, int scan_flags)
 
 
 
-int Entry::extract_icon(ICONCACHE_FLAGS flags)
+int Entry::extract_icon(UINT flags)
 {
 	TCHAR path[MAX_PATH];
 
@@ -428,7 +428,7 @@ int Entry::extract_icon(ICONCACHE_FLAGS flags)
 	return icon_id;
 }
 
-int Entry::safe_extract_icon(ICONCACHE_FLAGS flags)
+int Entry::safe_extract_icon(UINT flags)
 {
 	try {
 		return extract_icon(flags);

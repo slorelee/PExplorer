@@ -54,12 +54,13 @@ DesktopBar::DesktopBar(HWND hwnd)
 
 DesktopBar::~DesktopBar()
 {
+	if (_hbmQuickLaunchBack) DeleteObject(_hbmQuickLaunchBack);
 	RegisterHotkeys(TRUE);
-	 // restore work area to the previous size
+	// restore work area to the previous size
 	SystemParametersInfo(SPI_SETWORKAREA, 0, &_work_area_org, 0);
 	PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
 
-	 // exit application after destroying desktop window
+	// exit application after destroying desktop window
 	PostQuitMessage(0);
 }
 
@@ -86,6 +87,27 @@ HWND DesktopBar::Create()
 							rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, 0);
 }
 
+static HBITMAP
+CreateSolidBitmap(HDC hdc, int width, int height, COLORREF cref)
+{
+    // Create compatible memory DC and bitmap, and a solid brush
+    MemCanvas canvas;
+    HBITMAP hbmp = CreateCompatibleBitmap(hdc, width, height);
+    HBRUSH hbrushFill = CreateSolidBrush(cref);
+    BitmapSelection sel(canvas, hbmp);
+
+    // Fill the whole area with solid color
+    RECT rect = { 0, 0, width, height };
+    FillRect(canvas, &rect, hbrushFill);
+
+    // Delete brush
+    DeleteObject(hbrushFill);
+
+    // Set preferred dimensions
+    SetBitmapDimensionEx(hbmp, width, height, NULL);
+
+    return hbmp;
+}
 
 LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 {
@@ -93,29 +115,32 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 		return 1;
 
 	// create start button
-	/*
-	ResString start_str(IDS_START);
+	string start_str(JCFG2("JS_STARTMENU", "text").ToString());
 	WindowCanvas canvas(_hwnd);
-	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
+	FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
 	RECT rect = {0, 0};
-	DrawText(canvas, start_str, -1, &rect, DT_SINGLELINE|DT_CALCRECT);
-	*/
+	DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE|DT_CALCRECT);
+
 	_deskbar_pos_y = DESKTOPBAR_TOP;
-	int start_btn_width = TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 2); // rect.right+16+8
+	int start_btn_width = rect.right + TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 2); // rect.right+16+8
 
 	_taskbar_pos = start_btn_width + 6 + 3;
-	 // create "Start" button
-	HWND hwndStart = Button(_hwnd, TEXT(""), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
-	SetWindowFont(hwndStart, GetStockFont(SYSTEM_FONT), FALSE);
-	new StartButton(hwndStart);
+	// create "Start" button
+	HWND hwndStart = Button(_hwnd, start_str.c_str(), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
+	UINT idStartIcon = IDI_STARTMENU_B;
+	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+		idStartIcon = IDI_STARTMENU_W;
+	}
+	new StartButton(hwndStart, idStartIcon, TASKBAR_TEXTCOLOR(), true);
 
 	/* Save the handle to the window, needed for push-state handling */
 	_hwndStartButton = hwndStart;
 
-	 // disable double clicks
+	// disable double clicks
 	SetClassLongPtr(hwndStart, GCL_STYLE, GetClassLongPtr(hwndStart, GCL_STYLE) & ~CS_DBLCLKS);
 
-	 // create task bar
+	// create task bar
 	_hwndTaskBar = TaskBar::Create(_hwnd);
 
 #ifndef __MINGW32__ // SHRestricted() missing in MinGW (as of 29.10.2003)
@@ -135,43 +160,47 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 #ifndef _NO_REBAR
 	_hwndrebar = CreateWindowEx(WS_EX_TOOLWINDOW, REBARCLASSNAME, NULL,
 					WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
-					RBS_VARHEIGHT|RBS_AUTOSIZE|RBS_DBLCLKTOGGLE|	//|RBS_REGISTERDROP
-					CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_TOP| TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE,
+					RBS_VARHEIGHT|RBS_AUTOSIZE|RBS_DBLCLKTOGGLE|RBS_REGISTERDROP|
+					CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_TOP|TBSTYLE_LIST|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE,
 					0, 1, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
-
-
-	DeleteObject((HBRUSH)SetClassLong(_hwndrebar, GCLP_HBRBACKGROUND,(LONG)CreateSolidBrush(RGB(0,122,204))));
 
 	REBARBANDINFO rbBand;
 	rbBand.cbSize = sizeof(REBARBANDINFO);
 	rbBand.fMask = RBBIM_TEXT|RBBS_FIXEDBMP|RBBIM_STYLE|RBBIM_CHILD|RBBIM_CHILDSIZE|RBBIM_SIZE|RBBIM_ID|RBBIM_IDEALSIZE;
-	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
-		//rbBand.fMask |= RBBIM_BACKGROUND;
+	{
+		rbBand.fMask |= RBBIM_COLORS|RBBIM_BACKGROUND;
+		rbBand.clrBack = 0;
+		HDC hdc = GetDC(_hwnd);
+		_hbmQuickLaunchBack = CreateSolidBitmap(hdc, 768, 16, TASKBAR_BKCOLOR());
+		rbBand.hbmBack = _hbmQuickLaunchBack;
+		//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	}
 	rbBand.cyChild = REBARBAND_HEIGHT - 5;
 	rbBand.cyMaxChild = (ULONG)-1;
 	rbBand.cyMinChild = REBARBAND_HEIGHT;
 	rbBand.cyIntegral = REBARBAND_HEIGHT + 3;	//@@ OK?
-	rbBand.fStyle = RBBS_VARIABLEHEIGHT|RBBS_GRIPPERALWAYS|RBBS_FIXEDBMP|RBBS_HIDETITLE; //RBBS_GRIPPERALWAYS RBBS_NOGRIPPER
-
+	rbBand.fStyle = RBBS_VARIABLEHEIGHT|RBBS_FIXEDBMP|RBBS_HIDETITLE;
+    if (JCFG_QL(2, "lock").ToBool() == TRUE) {
+		rbBand.fStyle |= RBBS_NOGRIPPER;
+    } else {
+		rbBand.fStyle |= RBBS_GRIPPERALWAYS;
+	}
 	TCHAR QuickLaunchBand[] = TEXT("Quicklaunch");
 	rbBand.lpText = QuickLaunchBand;
 	rbBand.cch = sizeof(QuickLaunchBand);
 	rbBand.hwndChild = _hwndQuickLaunch;
 	rbBand.cx = 100;
 	rbBand.cxMinChild = 100;
-	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+	//rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_QUICKLAUNCHBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
 	TCHAR TaskbarBand[] = TEXT("Taskbar");
-	//rbBand.fMask &= ~RBBIM_BACKGROUND;
 	rbBand.lpText = TaskbarBand;
 	rbBand.cch = sizeof(TaskbarBand);
 	rbBand.hwndChild = _hwndTaskBar;
 	rbBand.cx = 200;	//pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
 	rbBand.cxMinChild = 50;
-	rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
 	rbBand.wID = IDW_TASKTOOLBAR;
 	SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 #endif
@@ -187,8 +216,8 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 }
 
 
-StartButton::StartButton(HWND hwnd)
- :	PictureButton(hwnd, SizeIcon(IDI_STARTMENU_B, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), true)
+StartButton::StartButton(HWND hwnd, UINT nid, COLORREF textcolor, bool flat)
+ :	PictureButton(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), textcolor, flat)
 {
 }
 

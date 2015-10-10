@@ -27,7 +27,7 @@
 
 
 #include <precomp.h>
-
+#include <Uxtheme.h>
 #include "../resource.h"	// for ID_GO_BACK, ...
 
 
@@ -1013,8 +1013,14 @@ void PictureButton::DrawItem(LPDRAWITEMSTRUCT dis)
 
 		if (style & BS_FLAT)	// Only with BS_FLAT set, there will be drawn a frame without highlight.
 			DrawEdge(dis->hDC, &dis->rcItem, EDGE_RAISED, BF_RECT|BF_FLAT);
-	} else
-		DrawFrameControl(dis->hDC, &dis->rcItem, DFC_BUTTON, state);
+	} else {
+		FillRect(dis->hDC, &dis->rcItem, _hBrush);
+		HTHEME hTheme = OpenThemeData(_hwnd, L"Button");
+		if (hTheme)
+			DrawThemeBackground(hTheme, dis->hDC, DFC_BUTTON, state, &dis->rcItem, NULL);
+		else
+			DrawFrameControl(dis->hDC, &dis->rcItem, DFC_BUTTON, state);
+	}
 
 	if (_hIcon)
 		DrawIconEx(dis->hDC, imagePos.x, imagePos.y, _hIcon, _cx, _cy, 0, _hBrush, DI_NORMAL);
@@ -1032,13 +1038,12 @@ void PictureButton::DrawItem(LPDRAWITEMSTRUCT dis)
 	if (dis->itemState & (ODS_DISABLED|ODS_GRAYED))
 		DrawGrayText(dis->hDC, &textRect, title, dt_flags);
 	else {
-		if (_flat) {
-			TextColor lcColor(dis->hDC, RGB(255, 255, 255)); //todo:add a paramter for text color.
-			DrawText(dis->hDC, title, -1, &textRect, dt_flags);
-		} else {
-			TextColor lcColor(dis->hDC, GetSysColor(COLOR_BTNTEXT));
-			DrawText(dis->hDC, title, -1, &textRect, dt_flags);
+		COLORREF textcolor = _textColor;
+		if (textcolor == -1) {
+			textcolor = GetSysColor(COLOR_BTNTEXT);
 		}
+		TextColor lcColor(dis->hDC, textcolor);
+		DrawText(dis->hDC, title, -1, &textRect, dt_flags);
 	}
 
 	if (dis->itemState & ODS_FOCUS) {

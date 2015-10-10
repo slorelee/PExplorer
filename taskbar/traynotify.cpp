@@ -709,9 +709,16 @@ void NotifyArea::Paint()
 	int y = NOTIFYICON_Y;
 
 	if (_show_button) {
+		static int initIcon = 0;
 		static SizeIcon leftArrowIcon(IDI_NOTIFY_L_B, TASKBAR_ICON_SIZE);
 		static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, TASKBAR_ICON_SIZE);
-
+		if (initIcon == 0) {
+			initIcon = 1;
+			if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+				leftArrowIcon = SizeIcon(IDI_NOTIFY_L_W, TASKBAR_ICON_SIZE);
+				rightArrowIcon = SizeIcon(IDI_NOTIFY_R_W, TASKBAR_ICON_SIZE);
+			}
+		}
 		DrawIconEx(canvas, x, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, _show_hidden?rightArrowIcon:leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 		x += NOTIFYICON_DIST;
 	}
@@ -1274,7 +1281,7 @@ HWND ClockWindow::Create(HWND hwndParent)
 	ClientRect clnt(hwndParent);
 
 	WindowCanvas canvas(hwndParent);
-	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
+	FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
 
 	RECT rect = {0, 0, 0, 0};
 	TCHAR buffer[32];
@@ -1282,9 +1289,9 @@ HWND ClockWindow::Create(HWND hwndParent)
 	SYSTEMTIME st = { 1601, 1, 0, 1, 23, 59, 59, 999 };
 
 	if (!GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &st, NULL, buffer, sizeof(buffer)/sizeof(TCHAR)))
-	  _tcscpy(buffer, TEXT("    00:00  \r\n2015/08/15"));
+	  _tcscpy(buffer, TEXT("   00:00\r\n2015/08/15"));
 	else {
-		_tcscat(buffer, TEXT("\r\n2015 / 08/15"));
+		_tcscat(buffer, TEXT("\r\n2015/08/15"));
 	}
 
 	// Calculate the rectangle needed to draw the time (without actually drawing it)
@@ -1341,24 +1348,26 @@ void ClockWindow::TimerTick()
 
 bool ClockWindow::FormatTime()
 {
-	TCHAR time_buff[16];
+    TCHAR buffer[64] = TEXT("   ");
+    TCHAR time_buff[16];
+    TCHAR date_buffer[64];
 
-	if (GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL, time_buff, sizeof(time_buff) / sizeof(TCHAR))) {
-		time_t t = time(0);
-		TCHAR buffer[64] = TEXT("    ");
-		TCHAR date_buffer[16];
+    if (!(GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL,
+        time_buff, sizeof(time_buff) / sizeof(TCHAR)))) return false;
 
-		strftime(date_buffer, sizeof(date_buffer), "%Y/%m/%d", localtime(&t));
-		_tcscat(buffer, time_buff);
-		_tcscat(buffer, "\r\n");
-		_tcscat(buffer, date_buffer);
-		if (_tcscmp(buffer, _time)) {
-			_tcscpy(_time, buffer);
-			return true;	// The text to display has changed.
-		}
-	}
+    _tcscat(buffer, time_buff);
 
-	return false;	// no change
+    if (!(GetDateFormat(LOCALE_USER_DEFAULT, DATE_SHORTDATE, NULL, NULL,
+        date_buffer, sizeof(date_buffer) / sizeof(TCHAR)))) return false;
+
+    _tcscat(buffer, "\r\n");
+    _tcscat(buffer, date_buffer);
+
+    if (_tcscmp(buffer, _time)) {
+        _tcscpy(_time, buffer);
+        return true;	// The text to display has changed.
+    }
+    return false; //no change
 }
 
 void ClockWindow::Paint()
@@ -1368,7 +1377,7 @@ void ClockWindow::Paint()
 	FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
 
 	BkMode bkmode(canvas, TRANSPARENT);
-	FontSelection font(canvas, GetStockFont(SYSTEM_FONT));
+	FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
 	SetTextColor(canvas, CLOCK_TEXT_COLOR());
 	RECT rc = ClientRect(_hwnd);
 	rc.top += 5;

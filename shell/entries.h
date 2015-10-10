@@ -65,12 +65,14 @@ enum SCAN_FLAGS {
 
 enum ICONCACHE_FLAGS {
 	ICF_NORMAL	 =  0,
+	ICF_SMALL	 =  0,
 	ICF_MIDDLE	 =  1,
 	ICF_LARGE	 =  2,
 	ICF_OPEN	 =  4,
 	ICF_OVERLAYS =  8,
 	ICF_HICON	 = 16,
-	ICF_SYSCACHE = 32
+	ICF_SYSCACHE = 32,
+	ICF_NOLINKOVERLAY = 1024
 };
 
 #ifndef SHGFI_ADDOVERLAYS // missing in MinGW (as of 28.12.2005)
@@ -116,8 +118,8 @@ public:
 	Entry*	read_tree(const void* path, SORT_ORDER sortOrder=SORT_NAME, int scan_flags=0);
 	void	sort_directory(SORT_ORDER sortOrder);
 	void	smart_scan(SORT_ORDER sortOrder=SORT_NAME, int scan_flags=0);
-	int		extract_icon(ICONCACHE_FLAGS flags=ICF_NORMAL);
-	int		safe_extract_icon(ICONCACHE_FLAGS flags=ICF_NORMAL);
+	int		extract_icon(UINT flags=ICF_NORMAL);
+	int		safe_extract_icon(UINT flags=ICF_NORMAL);
 
 	virtual void		read_directory(int scan_flags=0) {}
 	virtual const void*	get_next_path_component(const void*) const {return NULL;}

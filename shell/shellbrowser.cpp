@@ -248,11 +248,11 @@ void ShellBrowser::OnTreeGetDispInfo(int idCtrl, LPNMHDR pnmh)
 		if (lpdi->item.mask & (TVIF_IMAGE|TVIF_SELECTEDIMAGE)) {
 			if (lpdi->item.mask & TVIF_IMAGE)
 				lpdi->item.iImage = get_image_idx(
-						entry->safe_extract_icon((ICONCACHE_FLAGS)(ICF_HICON|ICF_OVERLAYS)));
+						entry->safe_extract_icon(ICF_HICON|ICF_OVERLAYS));
 
 			if (lpdi->item.mask & TVIF_SELECTEDIMAGE)
 				lpdi->item.iSelectedImage = get_image_idx(
-						entry->safe_extract_icon((ICONCACHE_FLAGS)(ICF_HICON|ICF_OVERLAYS|ICF_OPEN)));
+						entry->safe_extract_icon(ICF_HICON|ICF_OVERLAYS|ICF_OPEN));
 		}
 	}
 }

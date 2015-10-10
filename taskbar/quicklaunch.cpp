@@ -62,7 +62,7 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
 
 	SetWindowStyle(hwndToolTip, GetWindowStyle(hwndToolTip)|TTS_ALWAYSTIP);
 
-	 // delay refresh to some time later
+	// delay refresh to some time later
 	PostMessage(hwnd, PM_REFRESH, 0, 0);
 }
 
@@ -80,7 +80,7 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
 	HWND hwnd = CreateToolbarEx(hwndParent,
 								WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|
 								CCS_TOP|CCS_NODIVIDER|CCS_NOPARENTALIGN|CCS_NORESIZE|
-								TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE|TBSTYLE_FLAT|TBSTYLE_TRANSPARENT,
+								TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE|TBSTYLE_FLAT,
 								IDW_QUICKLAUNCHBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 
 	if (hwnd)
@@ -109,7 +109,7 @@ void QuickLaunchBar::AddShortcuts()
 
 		// immediatelly extract the shortcut icons
 		for(Entry*entry=_dir->_down; entry; entry=entry->_next)
-			entry->_icon_id = entry->safe_extract_icon(ICF_LARGE);
+			entry->_icon_id = entry->safe_extract_icon(ICF_LARGE|ICF_NOLINKOVERLAY);
 	} catch(COMException&) {
 		return;
 	}
@@ -118,7 +118,7 @@ void QuickLaunchBar::AddShortcuts()
 	ShellFolder desktop_folder;
 	WindowCanvas canvas(_hwnd);
 
-	COLORREF bk_color = RGB(0, 0, 0);
+	COLORREF bk_color = TASKBAR_TEXTCOLOR();
 	HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
 	AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE), ResString(IDS_MINIMIZE_ALL), NULL);

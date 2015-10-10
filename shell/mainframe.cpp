@@ -226,7 +226,7 @@ MainFrameBase::MainFrameBase(HWND hwnd)
 								g_Globals._hInstance,
 								0);
 
-	HFONT hFont = (HFONT)GetStockObject(SYSTEM_FONT);
+	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	SendMessageW(_haddrcombo, WM_SETFONT, (WPARAM)hFont, 0);
 
 

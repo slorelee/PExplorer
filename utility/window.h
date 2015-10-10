@@ -721,13 +721,20 @@ struct PictureButton : public OwnerdrawnButton
 	PictureButton(HWND hwnd, HICON hIcon, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
 		: super(hwnd), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
 	{
-		initIconSize();
+		init();
+	}
+
+	PictureButton(HWND hwnd, HICON hIcon, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), COLORREF textcolor = -1, bool flat = false)
+		 : super(hwnd), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
+	{
+		init();
+		_textColor = textcolor;
 	}
 
 	PictureButton(HWND hparent, int id, HICON hIcon, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
 		: super(GetDlgItem(hparent, id)), _hIcon(hIcon), _hBmp(0), _hBrush(hbrush), _flat(flat)
 	{
-		initIconSize();
+		init();
 	}
 
 	PictureButton(HWND hwnd, HBITMAP hBmp, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
@@ -737,6 +744,7 @@ struct PictureButton : public OwnerdrawnButton
 		GetObject(hBmp, sizeof(bmp), &bmp);
 		_cx = bmp.bmWidth;
 		_cy = bmp.bmHeight;
+		_textColor = -1;
 	}
 
 	PictureButton(HWND hparent, int id, HBITMAP hBmp, HBRUSH hbrush = GetSysColorBrush(COLOR_BTNFACE), bool flat = false)
@@ -746,9 +754,15 @@ struct PictureButton : public OwnerdrawnButton
 		GetObject(hBmp, sizeof(bmp), &bmp);
 		_cx = bmp.bmWidth;
 		_cy = bmp.bmHeight;
+		_textColor = -1;
 	}
 
 protected:
+	void init() {
+		_textColor = -1;
+		initIconSize();
+	}
+
 	void initIconSize(){
 		ICONINFO ici;
 		GetIconInfo(_hIcon, &ici);
@@ -768,6 +782,7 @@ protected:
 	int		_cx;
 	int		_cy;
 
+	COLORREF _textColor;
 	bool	_flat;
 };
 

@@ -111,6 +111,7 @@ protected:
 
 	struct StartMenuRoot* _startMenuRoot;
 
+	HBITMAP _hbmQuickLaunchBack;
 #ifdef __REACTOS__
 	TrayIcon	_trayIcon;
 
@@ -128,7 +129,7 @@ struct StartButton : public PictureButton
 {
 	typedef PictureButton super;
 
-	StartButton(HWND hwnd);
+	StartButton(HWND hwnd, UINT nid, COLORREF textcolor = -1, bool flat = false);
 
 protected:
 	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);

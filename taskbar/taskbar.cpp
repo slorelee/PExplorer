@@ -128,10 +128,8 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 
 	/* FIXME: There's an internal padding for non-flat toolbar. Get rid of it somehow. */
 	DWORD ws = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_TOP |
-			   CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE;
-	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
-		ws |= TBSTYLE_FLAT;
-	}
+			   CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT;
+
 	_htoolbar = CreateToolbarEx(_hwnd, ws /* |TBSTYLE_AUTOSIZE */, IDW_TASKTOOLBAR, 0, 0, 0, NULL,
 								0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 
@@ -141,7 +139,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 	//MoveWindow(_htoolbar, rc.left, rc.top, rc.right - rc.left, 48, TRUE);
 	//SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
 	//SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
-	//SetWindowFont(_htoolbar, GetStockFont(SYSTEM_FONT), FALSE);
+	//SetWindowFont(_htoolbar, GetStockFont(DEFAULT_GUI_FONT), FALSE);
 	//SendMessage(_htoolbar, TB_SETPADDING, 0, MAKELPARAM(8,8));
 
 #ifndef __MINGW32__	// TBMETRICS missing in MinGW (as of 20.09.2005)
