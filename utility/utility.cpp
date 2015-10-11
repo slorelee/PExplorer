@@ -535,17 +535,3 @@ bool SplitFileSysURL(LPCTSTR url, String& dir_out, String& fname_out)
 		return false;
 }
 
-#include "..\vendor\json.h"
-COLORREF JValueToColor(json::Value val)
-{
-	if (val.GetType() == json::ArrayVal) {
-		json::Array arr_rgb = val.ToArray();
-		return RGB(arr_rgb[0].ToInt(), arr_rgb[1].ToInt(), arr_rgb[2].ToInt());
-	} else if (val.GetType() == json::StringVal) {
-		string color_str = val.ToString();
-		return std::stol(color_str, nullptr, 0);
-	} else if (val.GetType() == json::IntVal) {
-		return (COLORREF)val.ToInt();
-	}
-	return 0;
-}

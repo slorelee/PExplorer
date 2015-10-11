@@ -281,6 +281,12 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="jconfig\jcfg.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="utility\dragdropimpl.cpp" />
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
@@ -348,6 +354,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="jconfig\jcfg.h" />
     <ClInclude Include="utility\dragdropimpl.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />

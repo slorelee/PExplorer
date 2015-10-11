@@ -49,7 +49,7 @@
 #include "externals.h"
 
 #include "vendor\json.h"
-extern COLORREF JValueToColor(json::Value val);
+#include "jconfig\jcfg.h"
 
 #define	DESKTOPBARBAR_HEIGHT	42 //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
 #define	REBARBAND_HEIGHT		(DESKTOPBARBAR_HEIGHT - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))

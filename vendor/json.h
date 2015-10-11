@@ -315,6 +315,7 @@ namespace json
 
 			// Removes all values and resets the state back to default
 			void Clear();
+			void Remove(const std::string& key) { mValues.erase(key);};
 
 			size_t size() const {return mValues.size();}
 
@@ -439,6 +440,7 @@ namespace json
 			double 				ToDouble() const;
 			bool 				ToBool() const;
 			const std::string&	ToString() const;
+			Object* 			RefObject();
 			Object 				ToObject() const;
 			Array 				ToArray() const;
 

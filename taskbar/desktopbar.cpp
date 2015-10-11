@@ -499,7 +499,7 @@ int DesktopBar::Command(int id, int code)
 		break;
 
 	case ID_EXPLORE: {
-		const TCHAR *mp = g_Globals._JVARMap[TEXT("JVAR_MODULEPATH")].ToString().c_str();
+		const TCHAR *mp = g_JVARMap[TEXT("JVAR_MODULEPATH")].ToString().c_str();
 		String explorer_path;
 		explorer_path = FmtString(TEXT("%s\\explorer.exe"), mp);
 		launch_file(_hwnd, explorer_path, SW_SHOW);

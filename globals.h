@@ -27,7 +27,7 @@
 
 #include "vendor/json.h"
 #include "taskbar/favorites.h"
-
+#include "jconfig\jcfg.h"
 
  /// management of file types
 struct FileTypeInfo {
@@ -240,22 +240,7 @@ extern struct ExplorerGlobals
 	Favorites	_favorites;
 	String		_favorites_path;
 
-	json::Object	_JVARMap;
-	json::Object	_jcfg;
 } g_Globals;
-
-#define JVAR(key) (g_Globals._JVARMap[TEXT(key)])
-#define JCFG1(key1) (g_Globals._jcfg[TEXT(key1)])
-#define JCFG2(key1, key2) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)])
-#define JCFG3(key1, key2, key3) (g_Globals._jcfg[TEXT(key1)][TEXT(key2)][TEXT(key3)])
-//#define JCFG(n, ...) JCFG##n(__VA_ARGS__)
-
-#define TASKBAR_BKCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "bkcolor")))
-#define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "textcolor")))
-#define TASKBAR_BRUSH() (CreateSolidBrush(TASKBAR_BKCOLOR()))
-#define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
-
-#define JCFG_QL(n, ...) (JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))
 
  /// convenient loading of string resources
 struct ResString : public String

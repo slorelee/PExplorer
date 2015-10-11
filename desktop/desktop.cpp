@@ -178,7 +178,7 @@ HWND DesktopWindow::Create()
 	static IconWindowClass wcDesktop(TEXT("Progman"), IDI_PEXLORER, CS_DBLCLKS);
 	/* (disabled because of small ugly temporary artefacts when hiding start menu)
 	wcDesktop.hbrBackground = (HBRUSH)(COLOR_BACKGROUND+1); */
-	wcDesktop.hbrBackground = WINXPBLUEBRUSH();
+	wcDesktop.hbrBackground = CreateSolidBrush(DESKTOP_BKCOLOR());
 
 	int width = GetSystemMetrics(SM_CXSCREEN);
 	int height = GetSystemMetrics(SM_CYSCREEN);
@@ -495,19 +495,13 @@ LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 
 void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
 {
-	static int first_draw = 1;
-	if (!first_draw) {
-		PaintDesktop(hdc);
-		return;
-	}
-
 	RECT rc;
 	GetClipBox(hdc, &rc);
 	if (_hbrWallp && _fTileWallp) {
 		SetBrushOrgEx(hdc, 0 - rc.left, 0 - rc.top, NULL);
 		FillRect(hdc, &rc, _hbrWallp);
 	} else {
-		HBRUSH hBkBrush = WINXPBLUEBRUSH();
+		HBRUSH hBkBrush = CreateSolidBrush(DESKTOP_BKCOLOR());
 		if (!_hbrWallp) {
 			FillRect(hdc, &rc, hBkBrush);
 		} else {

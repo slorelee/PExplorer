@@ -94,6 +94,9 @@
     <ClCompile Include="vendor\json.cpp">
       <Filter>vendor</Filter>
     </ClCompile>
+    <ClCompile Include="jconfig\jcfg.cpp">
+      <Filter>jconfig</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -187,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="vendor\json.h">
       <Filter>vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="jconfig\jcfg.h">
+      <Filter>jconfig</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

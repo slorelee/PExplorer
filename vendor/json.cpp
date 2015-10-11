@@ -232,6 +232,14 @@ const std::string& Value::ToString() const
 	return mStringVal;
 }
 
+Object* Value::RefObject()
+{
+    if (mValueType != ObjectVal)
+        throw std::runtime_error("json mValueType==ObjectVal required");
+
+    return &mObjectVal;
+}
+
 Object Value::ToObject() const	
 {
 	if (mValueType != ObjectVal)

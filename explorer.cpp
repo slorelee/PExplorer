@@ -44,7 +44,7 @@
 //#include "dialogs/settings.h"    // for MdiSdiDlg
 
 #include "services/shellservices.h"
-
+#include "jconfig\jcfg.h"
 
 extern "C" int initialize_gdb_stub();    // start up GDB stub
 
@@ -91,31 +91,21 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
 
 void ExplorerGlobals::load_config()
 {
-	TCHAR szFile[MAX_PATH + 1] = { 0 };
-	String str = TEXT("");
-	DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
-	if (dwRet != 0) {
-		str = TEXT(szFile);
-		int nPos = str.rfind(TEXT('\\'));
-		if (nPos != -1) {
-			str = str.substr(0, nPos);
-		}
-	}
-	JVAR("JVAR_MODULEPATH") = str;
-	_tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
-	//default jcfg
-	string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"Wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
-		TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
-		TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
-		TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
-		TEXT("\"JS_QUICKLAUNCH\":{\"lock\":false},")
-		TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
-	json::Object def_config = json::Deserialize(def_jcfg).ToObject();
-    _jcfg = def_config;//json::Deserialize(def_jcfg).ToObject();
-	//_log_(def_config[TEXT("JS_DESKTOP")][("wallpaper")].ToString().c_str());
-	//json::Value jv = JCFG2("JS_DESKTOP", "Wallpaper");
-	//if (jv.GetType() != json::StringVal) jv = def_config[TEXT("JS_DESKTOP")][("wallpaper")];
-	//_log_(def_config["a"]["b"]["c"].ToString().c_str());
+    TCHAR szFile[MAX_PATH + 1] = { 0 };
+    String str = TEXT("");
+    DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
+    if (dwRet != 0) {
+        str = TEXT(szFile);
+        int nPos = str.rfind(TEXT('\\'));
+        if (nPos != -1) {
+            str = str.substr(0, nPos);
+        }
+    }
+    JVAR("JVAR_MODULEPATH") = str;
+    _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
+
+    String cfgfile = str + TEXT("\\PExlorer.jcfg");
+    Load_JCfg(cfgfile);
 }
 
 void ExplorerGlobals::read_persistent()
