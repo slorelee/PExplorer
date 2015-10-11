@@ -412,6 +412,13 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 		if (!GetWindowText(hwnd, title, BUFFER_LEN))
 			title[0] = '\0';
 
+		//do not show 'Windows Shell Experience Host' Window
+		//TODO:check not only titlename but processname
+		String str_title = title;
+		if (str_title.find(TEXT("Windows Shell Experience ")) != string::npos) {
+			return FALSE;
+		}
+
 		TaskBarMap::iterator found = pThis->_map.find(hwnd);
 		int last_id = 0;
 
