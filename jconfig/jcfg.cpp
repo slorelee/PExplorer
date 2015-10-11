@@ -4,6 +4,7 @@
 #include <sstream>
 #include <windows.h>
 #include "..\vendor\json.h"
+#include "jcfg.h"
 
 using namespace std;
 using namespace json;
@@ -15,7 +16,7 @@ Object	g_JVARMap;
 Object	g_JCfg;
 
 //default jcfg data
-const string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"Wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
+const string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
 TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
 TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
 TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
@@ -201,4 +202,17 @@ JValueToColor(Value val)
       return (COLORREF)val.ToInt();
     }
     return 0;
+}
+
+int
+JCfg_GetDesktopBarHeight() {
+    static int height = -1;
+    if (height == -1) {
+        height = 40;
+        Value v = JCFG2("JS_TASKBAR", "height");
+        if (v.GetType() == IntVal) {
+            height = v;
+        }
+    }
+    return height;
 }

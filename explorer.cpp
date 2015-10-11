@@ -104,7 +104,11 @@ void ExplorerGlobals::load_config()
     JVAR("JVAR_MODULEPATH") = str;
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
+#ifdef _DEBUG
+    String cfgfile = TEXT("PExlorer.jcfg");
+#else
     String cfgfile = str + TEXT("\\PExlorer.jcfg");
+#endif
     Load_JCfg(cfgfile);
 }
 

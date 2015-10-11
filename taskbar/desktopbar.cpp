@@ -72,13 +72,13 @@ HWND DesktopBar::Create()
 
 	RECT rect;
 
-	rect.left = -6; // hide left border
+	rect.left = 0;
 #ifdef TASKBAR_AT_TOP
-	rect.top = -6;	// hide top border
+	rect.top = 0;
 #else
 	rect.top = DESKTOPBAR_TOP;
 #endif
-	rect.right = GetSystemMetrics(SM_CXSCREEN) + 6;
+	rect.right = GetSystemMetrics(SM_CXSCREEN);
 	rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT;
 
 	return Window::Create(WINDOW_CREATOR(DesktopBar), WS_EX_PALETTEWINDOW,

@@ -469,7 +469,7 @@ SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
 LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 {
 	DWORD dwSize, dwType, lRet, fTile = 0;
-	String wallpaper_path =JCFG2("JS_DESKTOP", "Wallpaper").ToString();
+	String wallpaper_path =JCFG2("JS_DESKTOP", "wallpaper").ToString();
 	int x, y;
 
 	//TODO:load config

@@ -51,11 +51,7 @@
 #include "vendor\json.h"
 #include "jconfig\jcfg.h"
 
-#define	DESKTOPBARBAR_HEIGHT	42 //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
-#define	REBARBAND_HEIGHT		(DESKTOPBARBAR_HEIGHT - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))
-
 #define DEFWINBRUSH() GetSysColorBrush(COLOR_BTNFACE)
-#define BLACKBRUSH() CreateSolidBrush(RGB(0, 0, 0))
 //#define TASKBAR_BRUSH() DEFWINBRUSH()
 
 #define COLOR_LIGHTGREEN() RGB(200, 235, 205)
