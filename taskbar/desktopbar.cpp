@@ -126,7 +126,12 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 	_taskbar_pos = start_btn_width + 6 + 3;
 	// create "Start" button
-	HWND hwndStart = Button(_hwnd, start_str.c_str(), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	static WNDCLASS wc;
+	GetClassInfo(NULL, TEXT("BUTTON"), &wc);
+	wc.lpszClassName = TEXT("start");
+	wc.hInstance = NULL;
+	RegisterClass(&wc);
+	HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
 	SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
 	UINT idStartIcon = IDI_STARTMENU_B;
 	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {

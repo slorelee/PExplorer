@@ -575,6 +575,11 @@ struct Button : public WindowHandle
 			int id, DWORD flags=WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON, DWORD exStyle=0);
 };
 
+struct SWButton : public WindowHandle
+{
+	SWButton(HWND parent, LPCTSTR text, int left, int top, int width, int height,
+			int id, DWORD flags=WS_VISIBLE|WS_CHILD|BS_PUSHBUTTON, DWORD exStyle=0);
+};
 
  /**
 	This class constructs static controls.
