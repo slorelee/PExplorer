@@ -122,16 +122,16 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 	DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE|DT_CALCRECT);
 
 	_deskbar_pos_y = DESKTOPBAR_TOP;
-	int start_btn_width = rect.right + TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 2); // rect.right+16+8
+    int start_btn_width = rect.right + TASKBAR_ICON_SIZE +(TASKBAR_ICON_SIZE / 4); // rect.right+16+8
 
-	_taskbar_pos = start_btn_width + 6 + 3;
+	_taskbar_pos = start_btn_width + 1;
 	// create "Start" button
 	static WNDCLASS wc;
 	GetClassInfo(NULL, TEXT("BUTTON"), &wc);
 	wc.lpszClassName = TEXT("start");
 	wc.hInstance = NULL;
 	RegisterClass(&wc);
-	HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 6 + 3 + 2, 1, start_btn_width - 2, REBARBAND_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
+	HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 0, 0, start_btn_width, DESKTOPBARBAR_HEIGHT, IDC_START, WS_VISIBLE|WS_CHILD|BS_OWNERDRAW);
 	SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
 	UINT idStartIcon = IDI_STARTMENU_B;
 	if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
@@ -473,7 +473,7 @@ void DesktopBar::Resize(int cx, int cy)
 	}
 
 	if (_hwndNotify)
-		DeferWindowPos(hdwp, _hwndNotify, 0, cx-(notifyarea_width+1), 1, notifyarea_width, cy-2, SWP_NOZORDER|SWP_NOACTIVATE);
+		DeferWindowPos(hdwp, _hwndNotify, 0, cx-(notifyarea_width+3), 1, notifyarea_width, cy-2, SWP_NOZORDER|SWP_NOACTIVATE);
 
 	EndDeferWindowPos(hdwp);
 

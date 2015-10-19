@@ -1289,18 +1289,18 @@ HWND ClockWindow::Create(HWND hwndParent)
 	SYSTEMTIME st = { 1601, 1, 0, 1, 23, 59, 59, 999 };
 
 	if (!GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &st, NULL, buffer, sizeof(buffer)/sizeof(TCHAR)))
-	  _tcscpy(buffer, TEXT("   00:00\r\n2015/08/15"));
+	  _tcscpy(buffer, TEXT("00:00\r\n2015/08/15"));
 	else {
 		_tcscat(buffer, TEXT("\r\n2015/08/15"));
 	}
 
 	// Calculate the rectangle needed to draw the time (without actually drawing it)
 	DrawText(canvas, buffer, -1, &rect, DT_NOPREFIX|DT_CALCRECT);
-	int clockwindowWidth = NOTIFYAREA_WIDTH_DEF;//rect.right - rect.left + 4;
+	int clockwindowWidth = rect.right - rect.left + 20;
 
 	return Window::Create(WINDOW_CREATOR(ClockWindow), 0,
 							wcClock, NULL, WS_CHILD|WS_VISIBLE,
-							clnt.right-(clockwindowWidth), clnt.top + 10, clockwindowWidth, clnt.bottom-2, hwndParent);
+							clnt.right - clockwindowWidth, clnt.top + 1, clockwindowWidth, clnt.bottom - 2, hwndParent);
 }
 
 LRESULT ClockWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
@@ -1348,7 +1348,7 @@ void ClockWindow::TimerTick()
 
 bool ClockWindow::FormatTime()
 {
-    TCHAR buffer[64] = TEXT("   ");
+    TCHAR buffer[64] = TEXT("");
     TCHAR time_buff[16];
     TCHAR date_buffer[64];
 
@@ -1372,14 +1372,21 @@ bool ClockWindow::FormatTime()
 
 void ClockWindow::Paint()
 {
-	PaintCanvas canvas(_hwnd);
+    static bool inited = false;
+    static RECT rc;
+    PaintCanvas canvas(_hwnd);
 
-	FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
+    FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
 
-	BkMode bkmode(canvas, TRANSPARENT);
-	FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
-	SetTextColor(canvas, CLOCK_TEXT_COLOR());
-	RECT rc = ClientRect(_hwnd);
-	rc.top += 5;
-	DrawText(canvas, _time, -1, &rc, DT_VCENTER|DT_NOPREFIX);
+    BkMode bkmode(canvas, TRANSPARENT);
+    FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
+    SetTextColor(canvas, CLOCK_TEXT_COLOR());
+    if (!inited) {
+        inited = true;
+        rc = ClientRect(_hwnd);
+        RECT rc_text = { 0, 0 };
+        DrawText(canvas, _time, -1, &rc_text, DT_CENTER | DT_NOPREFIX | DT_CALCRECT);
+        rc.top += (rc.bottom - rc_text.bottom) / 2;
+    }
+    DrawText(canvas, _time, -1, &rc, DT_CENTER | DT_NOPREFIX);
 }

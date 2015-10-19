@@ -8,6 +8,9 @@ using namespace json;
 extern Object	g_JVARMap;
 extern Object	g_JCfg;
 
+extern int g_JCfg_taskbar_iconsize;
+extern int g_JCfg_taskbar_startmenu_iconsize;
+
 extern Object Load_JCfg(string filename);
 extern COLORREF JValueToColor(Value val);
 
@@ -32,3 +35,6 @@ extern int JCfg_GetDesktopBarHeight();
 
 #define	DESKTOPBARBAR_HEIGHT	JCfg_GetDesktopBarHeight() //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
 #define	REBARBAND_HEIGHT		((DESKTOPBARBAR_HEIGHT) - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))
+
+#define STARTMENUROOT_ICON_SIZE		g_JCfg_taskbar_startmenu_iconsize
+#define TASKBAR_ICON_SIZE			g_JCfg_taskbar_iconsize

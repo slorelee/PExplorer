@@ -15,6 +15,10 @@ using namespace json;
 Object	g_JVARMap;
 Object	g_JCfg;
 
+#define DEF_TASKBARHEIGHT 40
+int g_JCfg_taskbar_iconsize = 32;
+int g_JCfg_taskbar_startmenu_iconsize = 32;
+
 //default jcfg data
 const string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
 TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
@@ -208,11 +212,29 @@ int
 JCfg_GetDesktopBarHeight() {
     static int height = -1;
     if (height == -1) {
-        height = 40;
+        height = DEF_TASKBARHEIGHT;
         Value v = JCFG2("JS_TASKBAR", "height");
         if (v.GetType() == IntVal) {
             height = v;
         }
     }
     return height;
+}
+
+bool
+JCfg_GetDesktopBarUseSmallIcon() {
+    static bool inited = false;
+    bool usesmallicon = false;
+    if (!inited) {
+        inited = true;
+        Value v = JCFG2("JS_TASKBAR", "usesmallicon");
+        if (v.GetType() == BoolVal) {
+            usesmallicon = v;
+        }
+        if (usesmallicon) {
+            g_JCfg_taskbar_iconsize = 16;
+            g_JCfg_taskbar_startmenu_iconsize = 16;
+        }
+    }
+    return usesmallicon;
 }
