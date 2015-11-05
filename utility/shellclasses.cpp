@@ -542,7 +542,7 @@ HRESULT ShellFolderContextMenu(IShellFolder* shell_folder, HWND hwndParent, int 
 		HMENU hmenu = CreatePopupMenu();
 
 		if (hmenu) {
-			hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, CMF_NORMAL|CMF_EXPLORE);
+			hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, CMF_NORMAL|CMF_EXPLORE|CMF_EXTENDEDVERBS);
 
 			if (SUCCEEDED(hr)) {
 				UINT idCmd = TrackPopupMenu(hmenu, TPM_LEFTALIGN|TPM_RETURNCMD|TPM_RIGHTBUTTON, x, y, 0, hwndParent, NULL);
@@ -550,19 +550,17 @@ HRESULT ShellFolderContextMenu(IShellFolder* shell_folder, HWND hwndParent, int 
 				cm_ifs.reset();
 
 				if (idCmd) {
-				  CMINVOKECOMMANDINFO cmi;
+					CMINVOKECOMMANDINFO cmi = { 0 };
+					cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
+					cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+					if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
+					if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
+					cmi.hwnd = hwndParent;
+					cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+					cmi.nShow = SW_SHOWNORMAL;
 
-				  cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-				  cmi.fMask = 0;
-				  cmi.hwnd = hwndParent;
-				  cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
-				  cmi.lpParameters = NULL;
-				  cmi.lpDirectory = NULL;
-				  cmi.nShow = SW_SHOWNORMAL;
-				  cmi.dwHotKey = 0;
-				  cmi.hIcon = 0;
-
-				  hr = pcm->InvokeCommand(&cmi);
+					hr = pcm->InvokeCommand(&cmi);
+					if (hr == COPYENGINE_E_USER_CANCELLED) hr = S_OK;
 				}
 			} else
 				cm_ifs.reset();

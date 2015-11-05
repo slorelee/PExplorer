@@ -611,7 +611,7 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 {
 	IContextMenu* pcm;
 
-	HRESULT hr = DesktopFolder()->GetUIObjectOf(_hwnd, 0, NULL, IID_IContextMenu, NULL, (LPVOID*)&pcm);
+	HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID*)&pcm);
 
 	if (SUCCEEDED(hr)) {
 		pcm = _cm_ifs.query_interfaces(pcm);
@@ -622,6 +622,7 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 			hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST-1, CMF_NORMAL|CMF_EXPLORE|CMF_EXTENDEDVERBS);
 
 			if (SUCCEEDED(hr)) {
+				SetMenuDefaultItem(hmenu, -1, FALSE);
 				AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
 				AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST-1, ResString(IDS_ABOUT_EXPLORER));
 
@@ -632,19 +633,16 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 				if (idCmd == FCIDM_SHVIEWLAST-1) {
 					explorer_about(_hwnd);
 				} else if (idCmd) {
-				  CMINVOKECOMMANDINFO cmi;
+					CMINVOKECOMMANDINFO cmi = { 0 };
+					cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
+					cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+					if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
+					if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
+					cmi.hwnd = _hwnd;
+					cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+					cmi.nShow = SW_SHOWNORMAL;
 
-				  cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-				  cmi.fMask = 0;
-				  cmi.hwnd = _hwnd;
-				  cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
-				  cmi.lpParameters = NULL;
-				  cmi.lpDirectory = NULL;
-				  cmi.nShow = SW_SHOWNORMAL;
-				  cmi.dwHotKey = 0;
-				  cmi.hIcon = 0;
-
-				  hr = pcm->InvokeCommand(&cmi);
+					hr = pcm->InvokeCommand(&cmi);
 				}
 			} else
 				_cm_ifs.reset();
