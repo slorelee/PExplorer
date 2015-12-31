@@ -17,88 +17,83 @@
  */
 
 
- //
- // Explorer and Desktop clone
- //
- // favorites.h
- //
- // Martin Fuchs, 04.04.2004
- //
+//
+// Explorer and Desktop clone
+//
+// favorites.h
+//
+// Martin Fuchs, 04.04.2004
+//
 
 
-extern String DecodeURLString(const char* s);
+extern String DecodeURLString(const char *s);
 
 
-struct Bookmark
-{
-	Bookmark() : _icon_idx(0) {}
+struct Bookmark {
+    Bookmark() : _icon_idx(0) {}
 
-	String	_name;
-	String	_description;
-	String	_url;
-	String	_icon_path;
-	int		_icon_idx;
+    String  _name;
+    String  _description;
+    String  _url;
+    String  _icon_path;
+    int     _icon_idx;
 
-	bool	read_url(LPCTSTR path);
-	//bool	read(const_XMLPos& pos);
-	//void	write(XMLPos& pos) const;
+    bool    read_url(LPCTSTR path);
+    //bool  read(const_XMLPos& pos);
+    //void  write(XMLPos& pos) const;
 };
 
 struct BookmarkFolder;
 
-struct BookmarkNode
-{
-	BookmarkNode();
-	BookmarkNode(const Bookmark& bm);
-	BookmarkNode(const BookmarkFolder& bmf);
-	BookmarkNode(const BookmarkNode& other);
+struct BookmarkNode {
+    BookmarkNode();
+    BookmarkNode(const Bookmark &bm);
+    BookmarkNode(const BookmarkFolder &bmf);
+    BookmarkNode(const BookmarkNode &other);
 
-	~BookmarkNode();
+    ~BookmarkNode();
 
-	BookmarkNode& operator=(const Bookmark& bm);
-	BookmarkNode& operator=(const BookmarkFolder& bmf);
-	BookmarkNode& operator=(const BookmarkNode& other);
+    BookmarkNode &operator=(const Bookmark &bm);
+    BookmarkNode &operator=(const BookmarkFolder &bmf);
+    BookmarkNode &operator=(const BookmarkNode &other);
 
-	void	clear();
+    void    clear();
 
-	enum BOOKMARKNODE_TYPE {
-		BMNT_NONE, BMNT_BOOKMARK, BMNT_FOLDER
-	};
+    enum BOOKMARKNODE_TYPE {
+        BMNT_NONE, BMNT_BOOKMARK, BMNT_FOLDER
+    };
 
-	BOOKMARKNODE_TYPE	_type;
+    BOOKMARKNODE_TYPE   _type;
 
-	union {
-		Bookmark*		_pbookmark;
-		BookmarkFolder* _pfolder;
-	};
+    union {
+        Bookmark       *_pbookmark;
+        BookmarkFolder *_pfolder;
+    };
 };
 
-struct BookmarkList : public list<BookmarkNode>
-{
-	void	import_IE_favorites(struct ShellDirectory& dir, HWND hwnd);
+struct BookmarkList : public list<BookmarkNode> {
+    void    import_IE_favorites(struct ShellDirectory &dir, HWND hwnd);
 
-	//void	read(const_XMLPos& pos);
-	//void	write(XMLPos& pos) const;
+    //void  read(const_XMLPos& pos);
+    //void  write(XMLPos& pos) const;
 
-	void	fill_tree(HWND hwnd, HTREEITEM parent, HIMAGELIST, HDC hdc_wnd) const;
+    void    fill_tree(HWND hwnd, HTREEITEM parent, HIMAGELIST, HDC hdc_wnd) const;
 };
 
-struct BookmarkFolder
-{
-	String	_name;
-	String	_description;
-	BookmarkList _bookmarks;
+struct BookmarkFolder {
+    String  _name;
+    String  _description;
+    BookmarkList _bookmarks;
 
-	//void	read(const_XMLPos& pos);
-	//void	write(XMLPos& pos) const;
+    //void  read(const_XMLPos& pos);
+    //void  write(XMLPos& pos) const;
 };
 
-struct Favorites : public BookmarkList
-{
-	typedef BookmarkList super;
+struct Favorites : public BookmarkList {
+    typedef BookmarkList super;
 
-	bool	read(LPCTSTR path);
-	void	write(LPCTSTR path) const;
+    bool    read(LPCTSTR path);
+    void    write(LPCTSTR path) const;
 
-	bool	import_IE_favorites(HWND hwnd);
+    bool    import_IE_favorites(HWND hwnd);
 };

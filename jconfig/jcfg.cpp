@@ -12,8 +12,8 @@ using namespace json;
 #define JCFG_MERGEFLAG_NONE 0
 #define JCFG_MERGEFLAG_OVERWRITE 1
 
-Object	g_JVARMap;
-Object	g_JCfg;
+Object  g_JVARMap;
+Object  g_JCfg;
 
 #define DEF_TASKBARHEIGHT 40
 int g_JCfg_taskbar_iconsize = 32;
@@ -21,11 +21,11 @@ int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
 const string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
-TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
-TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
-TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
-TEXT("\"JS_QUICKLAUNCH\":{\"lock\":false},")
-TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
+                        TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
+                        TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
+                        TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
+                        TEXT("\"JS_QUICKLAUNCH\":{\"lock\":false},")
+                        TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
 
 std::string
 ReadTextFile(string filename)
@@ -42,19 +42,19 @@ ReadTextFile(string filename)
     StringCodeChange(s1.c_str(), CP_ACP, s2, CP_UTF8);
 */
 inline void
-StringCodeChange(LPCTSTR src, UINT _srcCode, string& dest, UINT _destCode)
+StringCodeChange(LPCTSTR src, UINT _srcCode, string &dest, UINT _destCode)
 {
-    int len = MultiByteToWideChar(_srcCode , 0, src, -1, NULL, 0); 
-    WCHAR* srcTemp = new WCHAR[len]; 
-    MultiByteToWideChar(_srcCode , 0, src, -1, srcTemp, len); 
-    len = WideCharToMultiByte(_destCode, 0, srcTemp, -1, NULL, 0, NULL, NULL); 
-      char* destTemp = new char[len]; 
-      WideCharToMultiByte(_destCode, 0, srcTemp, -1, destTemp, len, NULL, NULL); 
+    int len = MultiByteToWideChar(_srcCode , 0, src, -1, NULL, 0);
+    WCHAR *srcTemp = new WCHAR[len];
+    MultiByteToWideChar(_srcCode , 0, src, -1, srcTemp, len);
+    len = WideCharToMultiByte(_destCode, 0, srcTemp, -1, NULL, 0, NULL, NULL);
+    char *destTemp = new char[len];
+    WideCharToMultiByte(_destCode, 0, srcTemp, -1, destTemp, len, NULL, NULL);
 
     dest = destTemp;
 
-    delete []srcTemp; 
-    delete []destTemp; 
+    delete []srcTemp;
+    delete []destTemp;
 }
 
 void Merge_JCfg(Object *dst, Object *src, UINT flags)
@@ -75,7 +75,8 @@ void Merge_JCfg(Object *dst, Object *src, UINT flags)
 }
 
 static Object
-GetKeyAliasNameList(Object *jcfg) {
+GetKeyAliasNameList(Object *jcfg)
+{
     Object KeyAliasList;
     if (jcfg->HasKey(TEXT("JS_JMACRO")) == false) return Object();
     Value jmacro_val = (*jcfg)[TEXT("JS_JMACRO")];
@@ -111,13 +112,14 @@ ReplaceKeyAliasName(Object *src, const Object *alias)
             removelist.push_back(it->first);
         }
     }
-    for (int i = 0;i < removelist.size(); i++) {
+    for (int i = 0; i < removelist.size(); i++) {
         src->Remove(removelist[i]);
     }
 }
 
 static void
-Update_KeyName(Object *jcfg) {
+Update_KeyName(Object *jcfg)
+{
     Object KeyAliasList = GetKeyAliasNameList(jcfg);
     ReplaceKeyAliasName(jcfg, &KeyAliasList);
     return;
@@ -139,20 +141,20 @@ Load_JCfg(string filename)
 }
 
 inline void
-string_replace(string&s1, const string&s2, const string&s3)
+string_replace(string &s1, const string &s2, const string &s3)
 {
     string::size_type pos = 0;
     string::size_type a = s2.size();
     string::size_type b = s3.size();
-    while ((pos = s1.find(s2, pos)) != string::npos)
-    {
+    while ((pos = s1.find(s2, pos)) != string::npos) {
         s1.replace(pos, a, s3);
         pos += b;
     }
 }
 
 void
-ExpendJString(Value *v) {
+ExpendJString(Value *v)
+{
     string val = v->ToString();
     if (val.length() < 3) return;
     if (val[0] != TEXT('#')) return;
@@ -167,7 +169,8 @@ ExpendJString(Value *v) {
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1) {
+JCfg_GetValue(Object *jcfg, string key1)
+{
     Value v = (*jcfg)[key1];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -176,7 +179,8 @@ JCfg_GetValue(Object *jcfg, string key1) {
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2) {
+JCfg_GetValue(Object *jcfg, string key1, string key2)
+{
     Value v = (*jcfg)[key1][key2];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -185,7 +189,8 @@ JCfg_GetValue(Object *jcfg, string key1, string key2) {
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2, string key3) {
+JCfg_GetValue(Object *jcfg, string key1, string key2, string key3)
+{
     Value v = (*jcfg)[key1][key2][key3];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -197,19 +202,20 @@ COLORREF
 JValueToColor(Value val)
 {
     if (val.GetType() == ArrayVal) {
-      Array arr_rgb = val.ToArray();
-      return RGB(arr_rgb[0].ToInt(), arr_rgb[1].ToInt(), arr_rgb[2].ToInt());
+        Array arr_rgb = val.ToArray();
+        return RGB(arr_rgb[0].ToInt(), arr_rgb[1].ToInt(), arr_rgb[2].ToInt());
     } else if (val.GetType() == StringVal) {
-      string color_str = val.ToString();
-      return std::stol(color_str, nullptr, 0);
+        string color_str = val.ToString();
+        return std::stol(color_str, nullptr, 0);
     } else if (val.GetType() == IntVal) {
-      return (COLORREF)val.ToInt();
+        return (COLORREF)val.ToInt();
     }
     return 0;
 }
 
 int
-JCfg_GetDesktopBarHeight() {
+JCfg_GetDesktopBarHeight()
+{
     static int height = -1;
     if (height == -1) {
         height = DEF_TASKBARHEIGHT;
@@ -222,7 +228,8 @@ JCfg_GetDesktopBarHeight() {
 }
 
 bool
-JCfg_GetDesktopBarUseSmallIcon() {
+JCfg_GetDesktopBarUseSmallIcon()
+{
     static bool inited = false;
     bool usesmallicon = false;
     if (!inited) {

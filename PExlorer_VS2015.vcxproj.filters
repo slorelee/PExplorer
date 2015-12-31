@@ -79,9 +79,6 @@
     <ClCompile Include="taskbar\traynotify.cpp">
       <Filter>taskbar</Filter>
     </ClCompile>
-    <ClCompile Include="shell\unixfs.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="utility\utility.cpp">
       <Filter>utility</Filter>
     </ClCompile>
@@ -172,9 +169,6 @@
     </ClInclude>
     <ClInclude Include="taskbar\traynotify.h">
       <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\unixfs.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="utility\utility.h">
       <Filter>utility</Filter>

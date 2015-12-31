@@ -17,122 +17,115 @@
  */
 
 
- //
- // Explorer clone
- //
- // filechild.h
- //
- // Martin Fuchs, 23.07.2003
- //
+//
+// Explorer clone
+//
+// filechild.h
+//
+// Martin Fuchs, 23.07.2003
+//
 
 
- /// information structure for creation of FileChildWindow
-struct FileChildWndInfo : public ChildWndInfo
-{
-	typedef ChildWndInfo super;
+/// information structure for creation of FileChildWindow
+struct FileChildWndInfo : public ChildWndInfo {
+    typedef ChildWndInfo super;
 
-	FileChildWndInfo(HWND hmdiclient, LPCTSTR path, ENTRY_TYPE etype=ET_UNKNOWN);
+    FileChildWndInfo(HWND hmdiclient, LPCTSTR path, ENTRY_TYPE etype = ET_UNKNOWN);
 
-	ENTRY_TYPE	_etype;
-	LPCTSTR		_path;
+    ENTRY_TYPE  _etype;
+    LPCTSTR     _path;
 
-	WINDOWPLACEMENT _pos;
-	int			_open_mode;	//OPEN_WINDOW_MODE
+    WINDOWPLACEMENT _pos;
+    int         _open_mode; //OPEN_WINDOW_MODE
 };
 
- /// information structure for creation of MDIShellBrowserChild
-struct ShellChildWndInfo : public FileChildWndInfo
-{
-	typedef FileChildWndInfo super;
+/// information structure for creation of MDIShellBrowserChild
+struct ShellChildWndInfo : public FileChildWndInfo {
+    typedef FileChildWndInfo super;
 
-	ShellChildWndInfo(HWND hmdiclient, LPCTSTR path, const ShellPath& root_shell_path);
+    ShellChildWndInfo(HWND hmdiclient, LPCTSTR path, const ShellPath &root_shell_path);
 
-	ShellPath	_shell_path;
-	ShellPath	_root_shell_path;
+    ShellPath   _shell_path;
+    ShellPath   _root_shell_path;
 };
 
- /// information structure for creation of FileChildWindow for NT object namespace
-struct NtObjChildWndInfo : public FileChildWndInfo
-{
-	typedef FileChildWndInfo super;
+/// information structure for creation of FileChildWindow for NT object namespace
+struct NtObjChildWndInfo : public FileChildWndInfo {
+    typedef FileChildWndInfo super;
 
-	NtObjChildWndInfo(HWND hmdiclient, LPCTSTR path);
+    NtObjChildWndInfo(HWND hmdiclient, LPCTSTR path);
 };
 
- /// information structure for creation of FileChildWindow for the Registry
-struct RegistryChildWndInfo : public FileChildWndInfo
-{
-	typedef FileChildWndInfo super;
+/// information structure for creation of FileChildWindow for the Registry
+struct RegistryChildWndInfo : public FileChildWndInfo {
+    typedef FileChildWndInfo super;
 
-	RegistryChildWndInfo(HWND hmdiclient, LPCTSTR path);
+    RegistryChildWndInfo(HWND hmdiclient, LPCTSTR path);
 };
 
- /// information structure for creation of FileChildWindow
-struct FATChildWndInfo : public FileChildWndInfo
-{
-	typedef FileChildWndInfo super;
+/// information structure for creation of FileChildWindow
+struct FATChildWndInfo : public FileChildWndInfo {
+    typedef FileChildWndInfo super;
 
-	FATChildWndInfo(HWND hmdiclient, LPCTSTR path);
+    FATChildWndInfo(HWND hmdiclient, LPCTSTR path);
 };
 
- /// information structure for creation of WebChildWindow
-struct WebChildWndInfo : public FileChildWndInfo
-{
-	typedef FileChildWndInfo super;
+/// information structure for creation of WebChildWindow
+struct WebChildWndInfo : public FileChildWndInfo {
+    typedef FileChildWndInfo super;
 
-	WebChildWndInfo(HWND hmdiclient, LPCTSTR url);
+    WebChildWndInfo(HWND hmdiclient, LPCTSTR url);
 };
 
 
- /// MDI child window displaying file lists
-struct FileChildWindow : public ExtContextMenuHandlerT<ChildWindow>
-{
-	typedef ExtContextMenuHandlerT<ChildWindow> super;
+/// MDI child window displaying file lists
+struct FileChildWindow : public ExtContextMenuHandlerT<ChildWindow> {
+    typedef ExtContextMenuHandlerT<ChildWindow> super;
 
-	FileChildWindow(HWND hwnd, const FileChildWndInfo& info);
+    FileChildWindow(HWND hwnd, const FileChildWndInfo &info);
 
-	static FileChildWindow* create(const FileChildWndInfo& info);
+    static FileChildWindow *create(const FileChildWndInfo &info);
 
 protected:
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	int		Command(int id, int code);
-	int		Notify(int id, NMHDR* pnmh);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Command(int id, int code);
+    int     Notify(int id, NMHDR *pnmh);
 
-	virtual void resize_children(int cx, int cy);
-	virtual String jump_to_int(LPCTSTR url);
+    virtual void resize_children(int cx, int cy);
+    virtual String jump_to_int(LPCTSTR url);
 
-	void	scan_entry(Entry* entry);
+    void    scan_entry(Entry *entry);
 
-	bool	expand_entry(Entry* dir);
-	static void collapse_entry(Pane* pane, Entry* dir);
+    bool    expand_entry(Entry *dir);
+    static void collapse_entry(Pane *pane, Entry *dir);
 
-	void	set_curdir(Entry* entry);
-	void	activate_entry(Pane* pane);
+    void    set_curdir(Entry *entry);
+    void    activate_entry(Pane *pane);
 
-	void	refresh();
+    void    refresh();
 
 protected:
-	Root	_root;
-	Pane*	_left;
-	Pane*	_right;
-	TCHAR	_path[MAX_PATH];
-	bool	_header_wdths_ok;
+    Root    _root;
+    Pane   *_left;
+    Pane   *_right;
+    TCHAR   _path[MAX_PATH];
+    bool    _header_wdths_ok;
 
 public:
-	const Root& get_root() const {return _root;}
+    const Root &get_root() const {return _root;}
 
-	void	set_focus_pane(Pane* pane)
-		{_focus_pane = pane==_right? 1: 0;}
+    void    set_focus_pane(Pane *pane)
+    {_focus_pane = pane == _right ? 1 : 0;}
 
-	void	switch_focus_pane()
-		{SetFocus(_focus_pane? *_left: *_right);}
+    void    switch_focus_pane()
+    {SetFocus(_focus_pane ? *_left : *_right);}
 };
 
 
- /// The "Execute..."-dialog lets the user enter a command line to launch.
-struct ExecuteDialog {	///@todo use class Dialog
-	TCHAR	cmd[MAX_PATH];
-	int		cmdshow;
+/// The "Execute..."-dialog lets the user enter a command line to launch.
+struct ExecuteDialog {  ///@todo use class Dialog
+    TCHAR   cmd[MAX_PATH];
+    int     cmdshow;
 
-	static INT_PTR CALLBACK WndProc(HWND hwnd, UINT nmsg, WPARAM wparam, LPARAM lparam);
+    static INT_PTR CALLBACK WndProc(HWND hwnd, UINT nmsg, WPARAM wparam, LPARAM lparam);
 };

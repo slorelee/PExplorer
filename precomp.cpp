@@ -17,13 +17,13 @@
  */
 
 
- //
- // Explorer clone - precompiled header support
- //
- // precomp.h
- //
- // Martin Fuchs, 17.05.2004
- //
+//
+// Explorer clone - precompiled header support
+//
+// precomp.h
+//
+// Martin Fuchs, 17.05.2004
+//
 
 #include <windows.h>
 #include "precomp.h"

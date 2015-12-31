@@ -17,17 +17,17 @@
  */
 
 
- //
- // Explorer clone
- //
- // utility.h
- //
- // Martin Fuchs, 23.07.2003
- //
+//
+// Explorer clone
+//
+// utility.h
+//
+// Martin Fuchs, 23.07.2003
+//
 
 #pragma once
 
- // standard windows headers
+// standard windows headers
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 #define WIN32_NO_STATUS
@@ -40,31 +40,31 @@
 
 //#include <undocuser.h>
 
- // Unicode support
+// Unicode support
 #if defined(UNICODE) && !defined(_UNICODE)
-#define	_UNICODE
+#define _UNICODE
 #endif
 #include <tchar.h>
 
-#include <windowsx.h>	// for SelectBrush(), ListBox_SetSel(), SubclassWindow(), ...
+#include <windowsx.h>   // for SelectBrush(), ListBox_SetSel(), SubclassWindow(), ...
 #include <commctrl.h>
 
 #include <objbase.h>
-//#include <oleauto.h>	// for VARIANT
+//#include <oleauto.h>  // for VARIANT
 
-//#include <malloc.h>		// for alloca()
+//#include <malloc.h>       // for alloca()
 #include <assert.h>
-//#include <stdlib.h>		// for _MAX_DIR, ...
-#include <stdio.h>		// for sprintf()
+//#include <stdlib.h>       // for _MAX_DIR, ...
+#include <stdio.h>      // for sprintf()
 //#include <time.h>
 
 #ifdef __cplusplus
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4786)	// disable warnings about too long debug information symbols
+#pragma warning(disable: 4786)  // disable warnings about too long debug information symbols
 #endif
 
- // STL headers for strings and streams
+// STL headers for strings and streams
 #include <string>
 #include <iostream>
 using namespace std;
@@ -72,14 +72,14 @@ using namespace std;
 #endif /* __cplusplus */
 
 #ifndef _MAX_PATH
-#define _MAX_DRIVE	3
-#define _MAX_FNAME	256
-#define _MAX_DIR	_MAX_FNAME
-#define _MAX_EXT	_MAX_FNAME
-#define _MAX_PATH	260
+#define _MAX_DRIVE  3
+#define _MAX_FNAME  256
+#define _MAX_DIR    _MAX_FNAME
+#define _MAX_EXT    _MAX_FNAME
+#define _MAX_PATH   260
 #endif
 
-#define	W_VER_NT 0	// constant for HIWORD(GetVersion())>>14
+#define W_VER_NT 0  // constant for HIWORD(GetVersion())>>14
 
 
 #ifdef __cplusplus
@@ -87,60 +87,60 @@ extern "C" {
 #endif
 
 
-#define	for if (0) {} else for
+#define for if (0) {} else for
 
 #ifdef _countof
 #define COUNTOF _countof
 #else
-#define	COUNTOF(x)	(sizeof(x)/sizeof(x[0]))
+#define COUNTOF(x)  (sizeof(x)/sizeof(x[0]))
 #endif
 
 
-#define	BUFFER_LEN				2048
+#define BUFFER_LEN              2048
 
 
 extern void _log_(LPCTSTR txt);
 
-#define	LOG(txt) _log_(txt)
+#define LOG(txt) _log_(txt)
 
 
 #ifdef _MSC_VER
-#define	LONGLONGARG TEXT("I64")
+#define LONGLONGARG TEXT("I64")
 #else
-#define	LONGLONGARG TEXT("L")
+#define LONGLONGARG TEXT("L")
 #endif
 
 
 #ifndef _tcsrchr
 #ifdef UNICODE
-#define	_tcsrchr wcsrchr
+#define _tcsrchr wcsrchr
 #else
-#define	_tcsrchr strrchr
+#define _tcsrchr strrchr
 #endif
 #endif
 
 #ifndef _stprintf
 #ifdef UNICODE
-#define	_stprintf wcsprintf
+#define _stprintf wcsprintf
 #else
-#define	_stprintf sprintf
+#define _stprintf sprintf
 #endif
 #endif
 
-#define	U2A(s, d, l) WideCharToMultiByte(CP_ACP, 0, s, -1, d, l, NULL, NULL)
-#define	U2nA(s, d, l) WideCharToMultiByte(CP_ACP, 0, s, l, d, l, NULL, NULL)
-#define	A2U(s, d, l) MultiByteToWideChar(CP_ACP, 0, s, -1, d, l)
-#define	A2nU(s, d, l) MultiByteToWideChar(CP_ACP, 0, s, l, d, l)
+#define U2A(s, d, l) WideCharToMultiByte(CP_ACP, 0, s, -1, d, l, NULL, NULL)
+#define U2nA(s, d, l) WideCharToMultiByte(CP_ACP, 0, s, l, d, l, NULL, NULL)
+#define A2U(s, d, l) MultiByteToWideChar(CP_ACP, 0, s, -1, d, l)
+#define A2nU(s, d, l) MultiByteToWideChar(CP_ACP, 0, s, l, d, l)
 
 
 #ifdef _WINE_
 #ifdef UNICODE
-extern void _wsplitpath(const WCHAR* path, WCHAR* drv, WCHAR* dir, WCHAR* name, WCHAR* ext);
+extern void _wsplitpath(const WCHAR *path, WCHAR *drv, WCHAR *dir, WCHAR *name, WCHAR *ext);
 #else
-extern void _splitpath(const CHAR* path, CHAR* drv, CHAR* dir, CHAR* name, CHAR* ext);
+extern void _splitpath(const CHAR *path, CHAR *drv, CHAR *dir, CHAR *name, CHAR *ext);
 #endif
-#define	_tcsnicmp strncasecmp
-#define	_tcsicoll strcasecmp
+#define _tcsnicmp strncasecmp
+#define _tcsicoll strcasecmp
 #endif
 
 #ifndef FILE_ATTRIBUTE_NOT_CONTENT_INDEXED
@@ -151,37 +151,37 @@ extern void _splitpath(const CHAR* path, CHAR* drv, CHAR* dir, CHAR* name, CHAR*
 #endif
 
 
-#define	SetDlgCtrlID(hwnd, id) SetWindowLongPtr(hwnd, GWL_ID, id)
-#define	SetWindowStyle(hwnd, val) (DWORD)SetWindowLongPtr(hwnd, GWL_STYLE, val)
-#define	SetWindowExStyle(h, val) (DWORD)SetWindowLongPtr(hwnd, GWL_EXSTYLE, val)
-#define	Window_SetIcon(hwnd, type, hicon) (HICON)SendMessage(hwnd, WM_SETICON, type, (LPARAM)(hicon))
+#define SetDlgCtrlID(hwnd, id) SetWindowLongPtr(hwnd, GWL_ID, id)
+#define SetWindowStyle(hwnd, val) (DWORD)SetWindowLongPtr(hwnd, GWL_STYLE, val)
+#define SetWindowExStyle(h, val) (DWORD)SetWindowLongPtr(hwnd, GWL_EXSTYLE, val)
+#define Window_SetIcon(hwnd, type, hicon) (HICON)SendMessage(hwnd, WM_SETICON, type, (LPARAM)(hicon))
 
 
- // center window in respect to its parent window
+// center window in respect to its parent window
 extern void CenterWindow(HWND hwnd);
 
- // move window into visibility
+// move window into visibility
 extern void MoveVisible(HWND hwnd);
 
- // display error message
+// display error message
 extern void display_error(HWND hwnd, DWORD error);
 
- // convert time_t to WIN32 FILETIME
-extern BOOL time_to_filetime(const time_t* t, FILETIME* ftime);
+// convert time_t to WIN32 FILETIME
+extern BOOL time_to_filetime(const time_t *t, FILETIME *ftime);
 
- // search for windows of a specific classname
+// search for windows of a specific classname
 extern int find_window_class(LPCTSTR classname);
 
- // create a directory with all missing parent directories
+// create a directory with all missing parent directories
 BOOL RecursiveCreateDirectory(LPCTSTR path_in);
 
- // read DWORD value from registry
+// read DWORD value from registry
 DWORD RegGetDWORDValue(HKEY root, LPCTSTR path, LPCTSTR valueName, DWORD def);
 
- // write DWORD value to registry
+// write DWORD value to registry
 BOOL RegSetDWORDValue(HKEY root, LPCTSTR path, LPCTSTR valueName, DWORD value);
 
- // test for existing directory
+// test for existing directory
 BOOL exists_path(LPCTSTR path);
 
 
@@ -190,14 +190,14 @@ BOOL exists_path(LPCTSTR path);
 #endif
 
 
- // secure CRT functions
+// secure CRT functions
 //@@ _MS_VER: temporarily needed for the ReactOS build environment
-#if defined(__STDC_WANT_SECURE_LIB__) && defined(_MS_VER)	// for VS 2005: _MSC_VER>=1400
+#if defined(__STDC_WANT_SECURE_LIB__) && defined(_MS_VER)   // for VS 2005: _MSC_VER>=1400
 
 #define _stprintf_s1 _stprintf_s
 #define _stprintf_s2 _stprintf_s
 
-#else	// __STDC_WANT_SECURE_LIB__
+#else   // __STDC_WANT_SECURE_LIB__
 
 #define strcpy_s(d, l, s) strcpy(d, s)
 #define wcscpy_s(d, l, s) wcscpy(d, s)
@@ -217,12 +217,12 @@ BOOL exists_path(LPCTSTR path);
 #define _stprintf_s1(b, l, f, p1) _stprintf(b, f, p1)
 #define _stprintf_s2(b, l, f, p1,p2) _stprintf(b, f, p1,p2)
 
-#endif	// __STDC_WANT_SECURE_LIB__
+#endif  // __STDC_WANT_SECURE_LIB__
 
 
 #ifdef __cplusplus
 
- // containers
+// containers
 #include <map>
 #include <set>
 #include <list>
@@ -231,873 +231,845 @@ BOOL exists_path(LPCTSTR path);
 
 
 /* not necessary with correct include file order for comdef.h ("<MS PSDK>\include" path first) */
-#if _MSC_VER>=1300	// VS.Net
+#if _MSC_VER>=1300  // VS.Net
 #define _NO_COMUTIL
 #endif
 
 
 #if defined(_MSC_VER) && !defined(_NO_COMUTIL)
 
- // COM utility headers
+// COM utility headers
 #include <comdef.h>
 using namespace _com_util;
 
-#endif	// _MSC_VER && !_NO_COMUTIL
+#endif  // _MSC_VER && !_NO_COMUTIL
 
 
- // launch a program or document file
-extern BOOL launch_file(HWND hwnd, LPCTSTR cmd, UINT nCmdShow=SW_SHOWNORMAL, LPCTSTR parameters=NULL);
+// launch a program or document file
+extern BOOL launch_file(HWND hwnd, LPCTSTR cmd, UINT nCmdShow = SW_SHOWNORMAL, LPCTSTR parameters = NULL);
 #ifdef UNICODE
-extern BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow=SW_SHOWNORMAL, LPCSTR parameters=NULL);
+extern BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow = SW_SHOWNORMAL, LPCSTR parameters = NULL);
 #else
-#define	launch_fileA launch_file
+#define launch_fileA launch_file
 #endif
 
- // call an DLL export like rundll32
+// call an DLL export like rundll32
 extern BOOL RunDLL(HWND hwnd, LPCTSTR dllname, LPCSTR procname, LPCTSTR cmdline, UINT nCmdShow);
 
- // launch control panel applet
+// launch control panel applet
 extern BOOL launch_cpanel(HWND hwnd, LPCTSTR applet);
 
 
- /// initialization of windows common controls
-struct CommonControlInit
-{
-	CommonControlInit(DWORD flags=ICC_LISTVIEW_CLASSES|ICC_TREEVIEW_CLASSES|ICC_BAR_CLASSES|ICC_PROGRESS_CLASS|ICC_COOL_CLASSES)
-	{
-		INITCOMMONCONTROLSEX icc = {sizeof(INITCOMMONCONTROLSEX), flags};
+/// initialization of windows common controls
+struct CommonControlInit {
+    CommonControlInit(DWORD flags = ICC_LISTVIEW_CLASSES | ICC_TREEVIEW_CLASSES | ICC_BAR_CLASSES | ICC_PROGRESS_CLASS | ICC_COOL_CLASSES)
+    {
+        INITCOMMONCONTROLSEX icc = {sizeof(INITCOMMONCONTROLSEX), flags};
 
-		InitCommonControlsEx(&icc);
-	}
+        InitCommonControlsEx(&icc);
+    }
 };
 
 
- /// wait cursor
+/// wait cursor
 
-struct WaitCursor	///@todo integrate with WM_SETCURSOR to enable multithreaded background tasks as program launching
-{
-	WaitCursor()
-	{
-		_old_cursor = SetCursor(LoadCursor(0, IDC_WAIT));
-	}
+struct WaitCursor { ///@todo integrate with WM_SETCURSOR to enable multithreaded background tasks as program launching
+    WaitCursor()
+    {
+        _old_cursor = SetCursor(LoadCursor(0, IDC_WAIT));
+    }
 
-	~WaitCursor()
-	{
-		SetCursor(_old_cursor);
-	}
+    ~WaitCursor()
+    {
+        SetCursor(_old_cursor);
+    }
 
 protected:
-	HCURSOR	_old_cursor;
+    HCURSOR _old_cursor;
 };
 
 
- /// base of all structures storing a window handle
-struct WindowHandle
-{
-	WindowHandle(HWND hwnd=0)
-	 :	_hwnd(hwnd) {}
+/// base of all structures storing a window handle
+struct WindowHandle {
+    WindowHandle(HWND hwnd = 0)
+        :  _hwnd(hwnd) {}
 
-	operator HWND() const {return _hwnd;}
-	HWND* operator&() {return &_hwnd;}
+    operator HWND() const {return _hwnd;}
+    HWND *operator&() {return &_hwnd;}
 
 protected:
-	HWND	_hwnd;
+    HWND    _hwnd;
 };
 
 
- /// locally hide a window
-struct HiddenWindow : public WindowHandle
-{
-	HiddenWindow(HWND hwnd)
-	 :	WindowHandle(IsWindowVisible(hwnd)? hwnd: 0)
-	{
-		if (_hwnd)
-			SetWindowPos(_hwnd, 0, 0, 0, 0, 0, SWP_HIDEWINDOW|SWP_NOREDRAW|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER);
-	}
+/// locally hide a window
+struct HiddenWindow : public WindowHandle {
+    HiddenWindow(HWND hwnd)
+        :  WindowHandle(IsWindowVisible(hwnd) ? hwnd : 0)
+    {
+        if (_hwnd)
+            SetWindowPos(_hwnd, 0, 0, 0, 0, 0, SWP_HIDEWINDOW | SWP_NOREDRAW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+    }
 
-	~HiddenWindow()
-	{
-		if (_hwnd)
-			SetWindowPos(_hwnd, 0, 0, 0, 0, 0, SWP_SHOWWINDOW|SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER);
-	}
+    ~HiddenWindow()
+    {
+        if (_hwnd)
+            SetWindowPos(_hwnd, 0, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+    }
 };
 
 
- /// critical section wrapper
+/// critical section wrapper
 
-struct CritSect : public CRITICAL_SECTION
-{
-	CritSect()
-	{
-		InitializeCriticalSection(this);
-	}
+struct CritSect : public CRITICAL_SECTION {
+    CritSect()
+    {
+        InitializeCriticalSection(this);
+    }
 
-	~CritSect()
-	{
-		DeleteCriticalSection(this);
-	}
+    ~CritSect()
+    {
+        DeleteCriticalSection(this);
+    }
 };
 
 
- /// Lock protects a code section utilizing a critical section
+/// Lock protects a code section utilizing a critical section
 
-struct Lock
-{
-	Lock(CritSect& crit_sect)
-	 :	_crit_sect(crit_sect)
-	{
-		EnterCriticalSection(&crit_sect);
-	}
+struct Lock {
+    Lock(CritSect &crit_sect)
+        :  _crit_sect(crit_sect)
+    {
+        EnterCriticalSection(&crit_sect);
+    }
 
-	~Lock()
-	{
-		LeaveCriticalSection(&_crit_sect);
-	}
+    ~Lock()
+    {
+        LeaveCriticalSection(&_crit_sect);
+    }
 
 protected:
-	CritSect&	_crit_sect;
+    CritSect   &_crit_sect;
 };
 
 
- /// Thread base class
+/// Thread base class
 
-struct Thread
-{
-	Thread()
-	 :	_alive(false),
-		_destroy(false)
-	{
-		_hThread = INVALID_HANDLE_VALUE;
-		_evtFinish = CreateEvent(NULL, TRUE, FALSE, NULL);
-	}
+struct Thread {
+    Thread()
+        :  _alive(false),
+           _destroy(false)
+    {
+        _hThread = INVALID_HANDLE_VALUE;
+        _evtFinish = CreateEvent(NULL, TRUE, FALSE, NULL);
+    }
 
-	virtual ~Thread()
-	{
-		Stop();
+    virtual ~Thread()
+    {
+        Stop();
 
-		CloseHandle(_evtFinish);
-		CloseHandle(_hThread);
+        CloseHandle(_evtFinish);
+        CloseHandle(_hThread);
 
-		if (_destroy)
-			delete this;
-	}
+        if (_destroy)
+            delete this;
+    }
 
-	void Start()
-	{
-		if (!_alive) {
-			_alive = true;
-			_hThread = CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
-		}
-	}
+    void Start()
+    {
+        if (!_alive) {
+            _alive = true;
+            _hThread = CreateThread(NULL, 0, ThreadProc, this, 0, NULL);
+        }
+    }
 
-	void Stop()
-	{
-		SetEvent(_evtFinish);
+    void Stop()
+    {
+        SetEvent(_evtFinish);
 
-		if (_alive) {
-			{
-			Lock lock(_crit_sect);
-			_alive = false;
-			}
+        if (_alive) {
+            {
+                Lock lock(_crit_sect);
+                _alive = false;
+            }
 
-			 // wait for finishing
-			WaitForSingleObject(_hThread, INFINITE);
-		}
-	}
+            // wait for finishing
+            WaitForSingleObject(_hThread, INFINITE);
+        }
+    }
 
-	virtual int Run() = 0;
+    virtual int Run() = 0;
 
-	bool	is_alive() const {return _alive;}
+    bool    is_alive() const {return _alive;}
 
-	CritSect _crit_sect;
+    CritSect _crit_sect;
 
 protected:
-	static DWORD WINAPI ThreadProc(void* para);
+    static DWORD WINAPI ThreadProc(void *para);
 
-	HANDLE	_hThread;
-	HANDLE	_evtFinish;
-	bool	_alive;
-	bool	_destroy;
+    HANDLE  _hThread;
+    HANDLE  _evtFinish;
+    bool    _alive;
+    bool    _destroy;
 };
 
 
- // window utilities
+// window utilities
 
- /// ClientRect retreives the client area rectangle of a window.
-struct ClientRect : public RECT
-{
-	ClientRect(HWND hwnd)
-	{
-		GetClientRect(hwnd, this);
-	}
+/// ClientRect retreives the client area rectangle of a window.
+struct ClientRect : public RECT {
+    ClientRect(HWND hwnd)
+    {
+        GetClientRect(hwnd, this);
+    }
 
-	operator LPRECT() {return this;}
+    operator LPRECT() {return this;}
 
-	POINT& pos() {return *(LPPOINT)this;}
+    POINT &pos() {return *(LPPOINT)this;}
 };
 
- /// ClientRect retreives the window rectangle of a window.
-struct WindowRect : public RECT
-{
-	WindowRect(HWND hwnd)
-	{
-		GetWindowRect(hwnd, this);
-	}
+/// ClientRect retreives the window rectangle of a window.
+struct WindowRect : public RECT {
+    WindowRect(HWND hwnd)
+    {
+        GetWindowRect(hwnd, this);
+    }
 
-	operator LPRECT() {return this;}
+    operator LPRECT() {return this;}
 
-	POINT& pos() {return *(LPPOINT)this;}
+    POINT &pos() {return *(LPPOINT)this;}
 };
 
- /// PointL encapsulates the POINT structure into a C++ object.
-struct Point : public POINT
-{
-	Point(LONG x_, LONG y_)
-	{
-		x = x_;
-		y = y_;
-	}
+/// PointL encapsulates the POINT structure into a C++ object.
+struct Point : public POINT {
+    Point(LONG x_, LONG y_)
+    {
+        x = x_;
+        y = y_;
+    }
 
-	 // constructor for being used in processing WM_MOUSEMOVE, WM_LBUTTONDOWN, ... messages
-	Point(LPARAM lparam)
-	{
-		x = GET_X_LPARAM(lparam);
-		y = GET_Y_LPARAM(lparam);
-	}
+    // constructor for being used in processing WM_MOUSEMOVE, WM_LBUTTONDOWN, ... messages
+    Point(LPARAM lparam)
+    {
+        x = GET_X_LPARAM(lparam);
+        y = GET_Y_LPARAM(lparam);
+    }
 
-	operator LPPOINT() {return this;}
+    operator LPPOINT() {return this;}
 };
 
 
- /// transform coordinates in a RECT from client to screen coordiantes
-inline void ClientToScreen(HWND hwnd, RECT* prect)
- {::ClientToScreen(hwnd,(LPPOINT)&prect->left); ::ClientToScreen(hwnd,(LPPOINT)&prect->right);}
+/// transform coordinates in a RECT from client to screen coordiantes
+inline void ClientToScreen(HWND hwnd, RECT *prect)
+{::ClientToScreen(hwnd, (LPPOINT)&prect->left); ::ClientToScreen(hwnd, (LPPOINT)&prect->right);}
 
- /// transform coordinates in a RECT from screen to client coordiantes
-inline void ScreenToClient(HWND hwnd, RECT* prect)
- {::ScreenToClient(hwnd,(LPPOINT)&prect->left); ::ScreenToClient(hwnd,(LPPOINT)&prect->right);}
+/// transform coordinates in a RECT from screen to client coordiantes
+inline void ScreenToClient(HWND hwnd, RECT *prect)
+{::ScreenToClient(hwnd, (LPPOINT)&prect->left); ::ScreenToClient(hwnd, (LPPOINT)&prect->right);}
 
 
- /// structure containing information about full screen display of the frame window
-struct FullScreenParameters
-{
-	FullScreenParameters()
-	 :	_mode(FALSE)
-	{
-	}
+/// structure containing information about full screen display of the frame window
+struct FullScreenParameters {
+    FullScreenParameters()
+        :  _mode(FALSE)
+    {
+    }
 
-	BOOL	_mode;
-	RECT	_orgPos;
-	BOOL	_wasZoomed;
+    BOOL    _mode;
+    RECT    _orgPos;
+    BOOL    _wasZoomed;
 };
 
 
- // drawing utilities
+// drawing utilities
 
- /// PaintCanvas is a encapsulation of device contexts managed by BeginPaint()/EndPaint().
-struct PaintCanvas : public PAINTSTRUCT
-{
-	PaintCanvas(HWND hwnd)
-	 :	_hwnd(hwnd)
-	{
-		BeginPaint(hwnd, this);
-	}
+/// PaintCanvas is a encapsulation of device contexts managed by BeginPaint()/EndPaint().
+struct PaintCanvas : public PAINTSTRUCT {
+    PaintCanvas(HWND hwnd)
+        :  _hwnd(hwnd)
+    {
+        BeginPaint(hwnd, this);
+    }
 
-	~PaintCanvas()
-	{
-		EndPaint(_hwnd, this);
-	}
+    ~PaintCanvas()
+    {
+        EndPaint(_hwnd, this);
+    }
 
-	operator HDC() const {return hdc;}
+    operator HDC() const {return hdc;}
 
 protected:
-	HWND	_hwnd;
+    HWND    _hwnd;
 };
 
- /// Canvas is a encapsulation of device contexts.
-struct Canvas
-{
-	Canvas(HDC hdc) : _hdc(hdc) {}
+/// Canvas is a encapsulation of device contexts.
+struct Canvas {
+    Canvas(HDC hdc) : _hdc(hdc) {}
 
-	operator HDC() {return _hdc;}
+    operator HDC() {return _hdc;}
 
 protected:
-	HDC _hdc;
+    HDC _hdc;
 };
 
- /// WindowCanvas is a encapsulation of client area device contexts.
-struct WindowCanvas : public Canvas
-{
-	WindowCanvas(HWND hwnd)
-	 :	Canvas(GetDC(hwnd)), _hwnd(hwnd) {}
+/// WindowCanvas is a encapsulation of client area device contexts.
+struct WindowCanvas : public Canvas {
+    WindowCanvas(HWND hwnd)
+        :  Canvas(GetDC(hwnd)), _hwnd(hwnd) {}
 
-	~WindowCanvas() {ReleaseDC(_hwnd, _hdc);}
+    ~WindowCanvas() {ReleaseDC(_hwnd, _hdc);}
 
 protected:
-	HWND	_hwnd;
+    HWND    _hwnd;
 };
 
 
- // double buffering classes
+// double buffering classes
 
- /// Memory Canvas creates and destroys memory devoce contexts.
-struct MemCanvas : public Canvas
-{
-	MemCanvas(HDC hdc=0)
-	 :	Canvas(CreateCompatibleDC(hdc)) {assert(_hdc);}
+/// Memory Canvas creates and destroys memory devoce contexts.
+struct MemCanvas : public Canvas {
+    MemCanvas(HDC hdc = 0)
+        :  Canvas(CreateCompatibleDC(hdc)) {assert(_hdc);}
 
-	~MemCanvas() {DeleteDC(_hdc);}
+    ~MemCanvas() {DeleteDC(_hdc);}
 };
 
- /// SelectedBitmap is used to localy select bitmaps into device contexts.
-struct SelectedBitmap
-{
-	SelectedBitmap(HDC hdc, HBITMAP hbmp)
-	 :	_hdc(hdc), _old_hbmp(SelectBitmap(hdc, hbmp)) {}
+/// SelectedBitmap is used to localy select bitmaps into device contexts.
+struct SelectedBitmap {
+    SelectedBitmap(HDC hdc, HBITMAP hbmp)
+        :  _hdc(hdc), _old_hbmp(SelectBitmap(hdc, hbmp)) {}
 
-	~SelectedBitmap() {DeleteObject(SelectBitmap(_hdc, _old_hbmp));}
+    ~SelectedBitmap() {DeleteObject(SelectBitmap(_hdc, _old_hbmp));}
 
 protected:
-	HDC		_hdc;
-	HBITMAP	_old_hbmp;
+    HDC     _hdc;
+    HBITMAP _old_hbmp;
 };
 
- /// BufferCanvas manages offscreen bitmaps selected into memory device contexts.
-struct BufferCanvas : public MemCanvas
-{
-	BufferCanvas(HDC hdc, int x, int y, int w, int h)
-	 :	MemCanvas(hdc), _hdctarg(hdc),
-		_x(x), _y(y), _w(w), _h(h),
-		_bmp(_hdc, CreateCompatibleBitmap(hdc, w, h)) {}
+/// BufferCanvas manages offscreen bitmaps selected into memory device contexts.
+struct BufferCanvas : public MemCanvas {
+    BufferCanvas(HDC hdc, int x, int y, int w, int h)
+        :  MemCanvas(hdc), _hdctarg(hdc),
+           _x(x), _y(y), _w(w), _h(h),
+           _bmp(_hdc, CreateCompatibleBitmap(hdc, w, h)) {}
 
-	BufferCanvas(HDC hdc, const RECT& rect)
-	 :	MemCanvas(hdc), _hdctarg(hdc),
-		_x(rect.left), _y(rect.top), _w(rect.right-rect.left), _h(rect.bottom-rect.top),
-		_bmp(_hdc, CreateCompatibleBitmap(hdc, _w, _h)) {}
+    BufferCanvas(HDC hdc, const RECT &rect)
+        :  MemCanvas(hdc), _hdctarg(hdc),
+           _x(rect.left), _y(rect.top), _w(rect.right - rect.left), _h(rect.bottom - rect.top),
+           _bmp(_hdc, CreateCompatibleBitmap(hdc, _w, _h)) {}
 
 protected:
-	HDC 	_hdctarg;
-	int 	_x, _y, _w, _h;
-	SelectedBitmap _bmp;
+    HDC     _hdctarg;
+    int     _x, _y, _w, _h;
+    SelectedBitmap _bmp;
 };
 
- /// BufferedCanvas enables double buffering for a device context.
-struct BufferedCanvas : public BufferCanvas
-{
-	BufferedCanvas(HDC hdc, int x, int y, int w, int h, DWORD mode=SRCCOPY)
-	 :	BufferCanvas(hdc, x, y, w, h), _mode(mode) {}
+/// BufferedCanvas enables double buffering for a device context.
+struct BufferedCanvas : public BufferCanvas {
+    BufferedCanvas(HDC hdc, int x, int y, int w, int h, DWORD mode = SRCCOPY)
+        :  BufferCanvas(hdc, x, y, w, h), _mode(mode) {}
 
-	BufferedCanvas(HDC hdc, const RECT& rect, DWORD mode=SRCCOPY)
-	 :	BufferCanvas(hdc, rect), _mode(mode) {}
+    BufferedCanvas(HDC hdc, const RECT &rect, DWORD mode = SRCCOPY)
+        :  BufferCanvas(hdc, rect), _mode(mode) {}
 
-	~BufferedCanvas() {BitBlt(_hdctarg, _x, _y, _w, _h, _hdc, 0, 0, _mode);}
+    ~BufferedCanvas() {BitBlt(_hdctarg, _x, _y, _w, _h, _hdc, 0, 0, _mode);}
 
-	DWORD	_mode;
+    DWORD   _mode;
 };
 
- /// BufferedPaintCanvas extends PaintCanvas for double buffering.
-struct BufferedPaintCanvas : public PaintCanvas, public BufferedCanvas
-{
-	BufferedPaintCanvas(HWND hwnd)
-	 :	PaintCanvas(hwnd),
-		BufferedCanvas(PAINTSTRUCT::hdc, 0, 0, rcPaint.right, rcPaint.bottom)
-	{
-	}
+/// BufferedPaintCanvas extends PaintCanvas for double buffering.
+struct BufferedPaintCanvas : public PaintCanvas, public BufferedCanvas {
+    BufferedPaintCanvas(HWND hwnd)
+        :  PaintCanvas(hwnd),
+           BufferedCanvas(PAINTSTRUCT::hdc, 0, 0, rcPaint.right, rcPaint.bottom)
+    {
+    }
 
-	operator HDC() {return BufferedCanvas::_hdc;}
+    operator HDC() {return BufferedCanvas::_hdc;}
 };
 
 
- /// TextColor locally selects a text color for drawing.
-struct TextColor
-{
-	TextColor(HDC hdc, COLORREF color)
-	 : _hdc(hdc), _old_color(SetTextColor(hdc, color)) {}
+/// TextColor locally selects a text color for drawing.
+struct TextColor {
+    TextColor(HDC hdc, COLORREF color)
+        : _hdc(hdc), _old_color(SetTextColor(hdc, color)) {}
 
-	~TextColor() {SetTextColor(_hdc, _old_color);}
+    ~TextColor() {SetTextColor(_hdc, _old_color);}
 
 protected:
-	HDC		 _hdc;
-	COLORREF _old_color;
+    HDC      _hdc;
+    COLORREF _old_color;
 };
 
- /// BkMode locally sets the background mode for drawing.
-struct BkMode
-{
-	BkMode(HDC hdc, int bkmode)
-	 : _hdc(hdc), _old_bkmode(SetBkMode(hdc, bkmode)) {}
+/// BkMode locally sets the background mode for drawing.
+struct BkMode {
+    BkMode(HDC hdc, int bkmode)
+        : _hdc(hdc), _old_bkmode(SetBkMode(hdc, bkmode)) {}
 
-	~BkMode() {SetBkMode(_hdc, _old_bkmode);}
+    ~BkMode() {SetBkMode(_hdc, _old_bkmode);}
 
 protected:
-	HDC		 _hdc;
-	COLORREF _old_bkmode;
+    HDC      _hdc;
+    COLORREF _old_bkmode;
 };
 
- /// FontSelection locally selects a font for drawing.
-struct FontSelection
-{
-	FontSelection(HDC hdc, HFONT hFont)
-	 : _hdc(hdc), _old_hFont(SelectFont(hdc, hFont)) {}
+/// FontSelection locally selects a font for drawing.
+struct FontSelection {
+    FontSelection(HDC hdc, HFONT hFont)
+        : _hdc(hdc), _old_hFont(SelectFont(hdc, hFont)) {}
 
-	~FontSelection() {SelectFont(_hdc, _old_hFont);}
+    ~FontSelection() {SelectFont(_hdc, _old_hFont);}
 
 protected:
-	HDC		_hdc;
-	HFONT	_old_hFont;
+    HDC     _hdc;
+    HFONT   _old_hFont;
 };
 
- /// BitmapSelection locally selects a bitmap into a device context.
-struct BitmapSelection
-{
-	BitmapSelection(HDC hdc, HBITMAP hBmp)
-	 : _hdc(hdc), _old_hBmp(SelectBitmap(hdc, hBmp)) {}
+/// BitmapSelection locally selects a bitmap into a device context.
+struct BitmapSelection {
+    BitmapSelection(HDC hdc, HBITMAP hBmp)
+        : _hdc(hdc), _old_hBmp(SelectBitmap(hdc, hBmp)) {}
 
-	~BitmapSelection() {SelectBitmap(_hdc, _old_hBmp);}
+    ~BitmapSelection() {SelectBitmap(_hdc, _old_hBmp);}
 
 protected:
-	HDC		_hdc;
-	HBITMAP	_old_hBmp;
+    HDC     _hdc;
+    HBITMAP _old_hBmp;
 };
 
- /// BrushSelection locally selects a brush into a device context.
-struct BrushSelection
-{
-	BrushSelection(HDC hdc, HBRUSH hBrush)
-	 : _hdc(hdc), _old_hBrush(SelectBrush(hdc, hBrush)) {}
+/// BrushSelection locally selects a brush into a device context.
+struct BrushSelection {
+    BrushSelection(HDC hdc, HBRUSH hBrush)
+        : _hdc(hdc), _old_hBrush(SelectBrush(hdc, hBrush)) {}
 
-	~BrushSelection() {SelectBrush(_hdc, _old_hBrush);}
+    ~BrushSelection() {SelectBrush(_hdc, _old_hBrush);}
 
 protected:
-	HDC		_hdc;
-	HBRUSH	_old_hBrush;
+    HDC     _hdc;
+    HBRUSH  _old_hBrush;
 };
 
 
- /// Popup Menus
-struct PopupMenu
-{
-	PopupMenu()
-	 :	_hmenu(CreatePopupMenu())
-	{
-	}
+/// Popup Menus
+struct PopupMenu {
+    PopupMenu()
+        :  _hmenu(CreatePopupMenu())
+    {
+    }
 
-	~PopupMenu()
-	{
-		DestroyMenu(_hmenu);
-	}
+    ~PopupMenu()
+    {
+        DestroyMenu(_hmenu);
+    }
 
-	PopupMenu(UINT nid);
+    PopupMenu(UINT nid);
 
-	operator HMENU() {return _hmenu;}
+    operator HMENU() {return _hmenu;}
 
-	void Append(UINT id, LPCTSTR str, UINT flags=MF_STRING)
-	{
-		AppendMenu(_hmenu, flags, id, str);
-	}
+    void Append(UINT id, LPCTSTR str, UINT flags = MF_STRING)
+    {
+        AppendMenu(_hmenu, flags, id, str);
+    }
 
-	int TrackPopupMenu(HWND hwnd, const POINT& pt, UINT flags=TPM_LEFTBUTTON|TPM_RIGHTBUTTON, LPTPMPARAMS tpm=NULL) {
-	 return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, tpm);
-	}
+    int TrackPopupMenu(HWND hwnd, const POINT &pt, UINT flags = TPM_LEFTBUTTON | TPM_RIGHTBUTTON, LPTPMPARAMS tpm = NULL)
+    {
+        return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, tpm);
+    }
 
-	int PopupContextMenu(HWND hwnd, POINTS pos, UINT flags=TPM_LEFTBUTTON|TPM_RIGHTBUTTON) {
-	 POINT pt;
-	 pt.x = pos.x;
-	 pt.y = pos.y;
-	 return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
-	}
+    int PopupContextMenu(HWND hwnd, POINTS pos, UINT flags = TPM_LEFTBUTTON | TPM_RIGHTBUTTON)
+    {
+        POINT pt;
+        pt.x = pos.x;
+        pt.y = pos.y;
+        return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
+    }
 
-	int TrackPopupMenu(HWND hwnd, POINTS pos, UINT flags=TPM_LEFTBUTTON|TPM_RIGHTBUTTON) {
-	 POINT pt;
-	 pt.x = pos.x;
-	 pt.y = pos.y;
-	 ClientToScreen(hwnd, &pt);
-	 return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
-	}
+    int TrackPopupMenu(HWND hwnd, POINTS pos, UINT flags = TPM_LEFTBUTTON | TPM_RIGHTBUTTON)
+    {
+        POINT pt;
+        pt.x = pos.x;
+        pt.y = pos.y;
+        ClientToScreen(hwnd, &pt);
+        return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
+    }
 
-	int TrackPopupMenuAtCursor(HWND hwnd, UINT flags=TPM_LEFTBUTTON) {
-	 POINT pt; GetCursorPos(&pt);
-	 return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
-	}
+    int TrackPopupMenuAtCursor(HWND hwnd, UINT flags = TPM_LEFTBUTTON)
+    {
+        POINT pt; GetCursorPos(&pt);
+        return TrackPopupMenuEx(_hmenu, flags, pt.x, pt.y, hwnd, NULL);
+    }
 
-	int TrackPopupMenuAtPos(HWND hwnd, DWORD pos, UINT flags=TPM_LEFTBUTTON) {
-	 return TrackPopupMenuEx(_hmenu, flags, GET_X_LPARAM(pos), GET_Y_LPARAM(pos), hwnd, NULL);
-	}
+    int TrackPopupMenuAtPos(HWND hwnd, DWORD pos, UINT flags = TPM_LEFTBUTTON)
+    {
+        return TrackPopupMenuEx(_hmenu, flags, GET_X_LPARAM(pos), GET_Y_LPARAM(pos), hwnd, NULL);
+    }
 
 protected:
-	HMENU _hmenu;
+    HMENU _hmenu;
 };
 
 
-struct Variant : public VARIANT
-{
-	Variant() {VariantInit(this);}
-	Variant(const VARIANT& var);
-	Variant(const VARIANT* var);
-	~Variant();
+struct Variant : public VARIANT {
+    Variant() {VariantInit(this);}
+    Variant(const VARIANT &var);
+    Variant(const VARIANT *var);
+    ~Variant();
 
-	operator long() const;
-	operator bool() const;
-	operator VARIANT_BOOL() const;
-	operator IDispatch*() const;
+    operator long() const;
+    operator bool() const;
+    operator VARIANT_BOOL() const;
+    operator IDispatch *() const;
 };
 
 
-struct BStr
-{
-	BStr()
-	{
-		_p = NULL;
-	}
+struct BStr {
+    BStr()
+    {
+        _p = NULL;
+    }
 
-	BStr(const BSTR s)
-	{
-		_p = SysAllocString(s);
-	}
+    BStr(const BSTR s)
+    {
+        _p = SysAllocString(s);
+    }
 
-	BStr(LPCSTR s)
-	{
-		WCHAR b[BUFFER_LEN];
+    BStr(LPCSTR s)
+    {
+        WCHAR b[BUFFER_LEN];
 
-		if (s)
-			_p = SysAllocStringLen(b, MultiByteToWideChar(CP_ACP, 0, s, -1, b, BUFFER_LEN)-1);
-		else
-			_p = NULL;
-	}
+        if (s)
+            _p = SysAllocStringLen(b, MultiByteToWideChar(CP_ACP, 0, s, -1, b, BUFFER_LEN) - 1);
+        else
+            _p = NULL;
+    }
 
-	BStr(LPCWSTR s)
-	{
-		_p = SysAllocString(s);
-	}
+    BStr(LPCWSTR s)
+    {
+        _p = SysAllocString(s);
+    }
 
-	BStr(const VARIANT& var)
-	 :	_p(NULL)
-	{
-		assign(var);
-	}
+    BStr(const VARIANT &var)
+        :  _p(NULL)
+    {
+        assign(var);
+    }
 
-	~BStr()
-	{
-		SysFreeString(_p);
-	}
+    ~BStr()
+    {
+        SysFreeString(_p);
+    }
 
-	void assign(BSTR s);
-	void assign(const VARIANT& var);
+    void assign(BSTR s);
+    void assign(const VARIANT &var);
 
-	operator BSTR() const
-	{
-		return _p? _p: (BSTR)L"";
-	}
+    operator BSTR() const
+    {
+        return _p ? _p : (BSTR)L"";
+    }
 
-	int length() const
-	{
-		return _p? wcslen(_p): 0;
-	}
+    int length() const
+    {
+        return _p ? wcslen(_p) : 0;
+    }
 
 protected:
-	BSTR	_p;
+    BSTR    _p;
 };
 
 
- /// string class for TCHAR strings
+/// string class for TCHAR strings
 struct String
 #ifdef UNICODE
- : public wstring
+    : public wstring
 #else
- : public string
+    : public string
 #endif
 {
 #ifdef UNICODE
-	typedef wstring super;
+    typedef wstring super;
 #else
-	typedef string super;
+    typedef string super;
 #endif
 
-	String() {}
+    String() {}
 
-	String(LPCTSTR s) {if (s) super::assign(s);}
-	String(LPCTSTR s, int l) : super(s, l) {}
+    String(LPCTSTR s) {if (s) super::assign(s);}
+    String(LPCTSTR s, int l) : super(s, l) {}
 
-	String(const super& other) : super(other) {}
-	String(const String& other) : super(other) {}
+    String(const super &other) : super(other) {}
+    String(const String &other) : super(other) {}
 
 #ifdef UNICODE
-	String(LPCSTR s) {assign(s);}
-	String(LPCSTR s, int l) {assign(s, l);}
-	String(const string& other) {assign(other.c_str());}
-	String& operator=(LPCSTR s) {assign(s); return *this;}
-	void assign(LPCSTR s) {if (s) {TCHAR b[BUFFER_LEN]; super::assign(b, MultiByteToWideChar(CP_ACP, 0, s, -1, b, BUFFER_LEN)-1);} else erase();}
-	void assign(LPCSTR s, int l) {if (s) {TCHAR b[BUFFER_LEN]; super::assign(b, MultiByteToWideChar(CP_ACP, 0, s, l, b, BUFFER_LEN));} else erase();}
-	void assign(const BStr& s) {int l = s.length(); super::assign(s, l);}
+    String(LPCSTR s) {assign(s);}
+    String(LPCSTR s, int l) {assign(s, l);}
+    String(const string &other) {assign(other.c_str());}
+    String &operator=(LPCSTR s) {assign(s); return *this;}
+    void assign(LPCSTR s) {if (s) {TCHAR b[BUFFER_LEN]; super::assign(b, MultiByteToWideChar(CP_ACP, 0, s, -1, b, BUFFER_LEN) - 1);} else erase();}
+    void assign(LPCSTR s, int l) {if (s) {TCHAR b[BUFFER_LEN]; super::assign(b, MultiByteToWideChar(CP_ACP, 0, s, l, b, BUFFER_LEN));} else erase();}
+    void assign(const BStr &s) {int l = s.length(); super::assign(s, l);}
 #else
-	String(LPCWSTR s) {assign(s);}
-	String(LPCWSTR s, int l) {assign(s, l);}
-	String(const wstring& other) {assign(other.c_str());}
-	String& operator=(LPCWSTR s) {assign(s); return *this;}
-	void assign(LPCWSTR s) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, -1, b, BUFFER_LEN, 0, 0)-1);} else erase();}
-	void assign(LPCWSTR s, int l) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
-	void assign(const BStr& s) {int l = s.length(); if (l) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
+    String(LPCWSTR s) {assign(s);}
+    String(LPCWSTR s, int l) {assign(s, l);}
+    String(const wstring &other) {assign(other.c_str());}
+    String &operator=(LPCWSTR s) {assign(s); return *this;}
+    void assign(LPCWSTR s) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, -1, b, BUFFER_LEN, 0, 0) - 1);} else erase();}
+    void assign(LPCWSTR s, int l) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
+    void assign(const BStr &s) {int l = s.length(); if (l) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
 #endif
-	String(const BStr& s) {assign(s);}
-	String& operator=(const BStr& s) {assign(s); return *this;}
+    String(const BStr &s) {assign(s);}
+    String &operator=(const BStr &s) {assign(s); return *this;}
 
-	String& operator=(LPCTSTR s) {if (s) super::assign(s); else erase(); return *this;}
-	String& operator=(const super& s) {super::assign(s); return *this;}
-	void assign(LPCTSTR s) {super::assign(s);}
-	void assign(LPCTSTR s, int l) {super::assign(s, l);}
+    String &operator=(LPCTSTR s) {if (s) super::assign(s); else erase(); return *this;}
+    String &operator=(const super &s) {super::assign(s); return *this;}
+    void assign(LPCTSTR s) {super::assign(s);}
+    void assign(LPCTSTR s, int l) {super::assign(s, l);}
 
-	operator LPCTSTR() const {return c_str();}
+    operator LPCTSTR() const {return c_str();}
 
 #ifdef UNICODE
-	operator string() const {char b[BUFFER_LEN]; return string(b, WideCharToMultiByte(CP_ACP, 0, c_str(), -1, b, BUFFER_LEN, 0, 0)-1);}
+    operator string() const {char b[BUFFER_LEN]; return string(b, WideCharToMultiByte(CP_ACP, 0, c_str(), -1, b, BUFFER_LEN, 0, 0) - 1);}
 #else
-	operator wstring() const {WCHAR b[BUFFER_LEN]; return wstring(b, MultiByteToWideChar(CP_ACP, 0, c_str(), -1, b, BUFFER_LEN)-1);}
+    operator wstring() const {WCHAR b[BUFFER_LEN]; return wstring(b, MultiByteToWideChar(CP_ACP, 0, c_str(), -1, b, BUFFER_LEN) - 1);}
 #endif
 
-	LPTSTR str() {return (LPTSTR)data();}	/// return modifyable character string pointer
+    LPTSTR str() {return (LPTSTR)data();}   /// return modifyable character string pointer
 
-	String& printf(LPCTSTR fmt, ...)
-	{
-		va_list l;
-		TCHAR b[BUFFER_LEN];
+    String &printf(LPCTSTR fmt, ...)
+    {
+        va_list l;
+        TCHAR b[BUFFER_LEN];
 
-		va_start(l, fmt);
-		super::assign(b, _vsntprintf(b, COUNTOF(b), fmt, l));
-		va_end(l);
+        va_start(l, fmt);
+        super::assign(b, _vsntprintf(b, COUNTOF(b), fmt, l));
+        va_end(l);
 
-		return *this;
-	}
+        return *this;
+    }
 
-	String& vprintf(LPCTSTR fmt, va_list l)
-	{
-		TCHAR b[BUFFER_LEN];
+    String &vprintf(LPCTSTR fmt, va_list l)
+    {
+        TCHAR b[BUFFER_LEN];
 
-		super::assign(b, _vsntprintf(b, COUNTOF(b), fmt, l));
+        super::assign(b, _vsntprintf(b, COUNTOF(b), fmt, l));
 
-		return *this;
-	}
+        return *this;
+    }
 
-	String& appendf(LPCTSTR fmt, ...)
-	{
-		va_list l;
-		TCHAR b[BUFFER_LEN];
+    String &appendf(LPCTSTR fmt, ...)
+    {
+        va_list l;
+        TCHAR b[BUFFER_LEN];
 
-		va_start(l, fmt);
-		super::append(b, _vsntprintf(b, COUNTOF(b), fmt, l));
-		va_end(l);
+        va_start(l, fmt);
+        super::append(b, _vsntprintf(b, COUNTOF(b), fmt, l));
+        va_end(l);
 
-		return *this;
-	}
+        return *this;
+    }
 
-	String& vappendf(LPCTSTR fmt, va_list l)
-	{
-		TCHAR b[BUFFER_LEN];
+    String &vappendf(LPCTSTR fmt, va_list l)
+    {
+        TCHAR b[BUFFER_LEN];
 
-		super::append(b, _vsntprintf(b, COUNTOF(b), fmt, l));
+        super::append(b, _vsntprintf(b, COUNTOF(b), fmt, l));
 
-		return *this;
-	}
+        return *this;
+    }
 
-	void toLower()
-	{
-		if (!empty())
-			CharLower(str());
-	}
+    void toLower()
+    {
+        if (!empty())
+            CharLower(str());
+    }
 };
 
-#define	_STRING_DEFINED
+#define _STRING_DEFINED
 
 
-struct FmtString : public String
-{
-	FmtString(LPCTSTR fmt, ...)
-	{
-		va_list l;
+struct FmtString : public String {
+    FmtString(LPCTSTR fmt, ...)
+    {
+        va_list l;
 
-		va_start(l, fmt);
-		vprintf(fmt, l);
-		va_end(l);
-	}
+        va_start(l, fmt);
+        vprintf(fmt, l);
+        va_end(l);
+    }
 };
 
 
 #ifdef UNICODE
 
-struct ANS
-{
-	ANS(LPCWSTR s)
-	{
-		int l = wcslen(s) + 1;
-		_str = (LPSTR) malloc(2*l);
+struct ANS {
+    ANS(LPCWSTR s)
+    {
+        int l = wcslen(s) + 1;
+        _str = (LPSTR) malloc(2 * l);
 
-		if (WideCharToMultiByte(CP_ACP, 0, s, -1, _str, 2*l, 0, 0) <= 0)
-			*_str = '\0';
-	}
+        if (WideCharToMultiByte(CP_ACP, 0, s, -1, _str, 2 * l, 0, 0) <= 0)
+            *_str = '\0';
+    }
 
-	~ANS()
-	{
-		free(_str);
-	}
+    ~ANS()
+    {
+        free(_str);
+    }
 
-	operator LPCSTR() {return _str;}
+    operator LPCSTR() {return _str;}
 
 protected:
-	LPSTR	_str;
+    LPSTR   _str;
 };
 
-#define	UNC(x) ((LPCWSTR)(x))
+#define UNC(x) ((LPCWSTR)(x))
 
 #else
 
-#define	ANS(x) ((LPCSTR)(x))
+#define ANS(x) ((LPCSTR)(x))
 
-struct UNC
-{
-	UNC(LPCSTR s)
-	{
-		int l = strlen(s) + 1;
-		_str = (LPWSTR) malloc(2*l);
+struct UNC {
+    UNC(LPCSTR s)
+    {
+        int l = strlen(s) + 1;
+        _str = (LPWSTR) malloc(2 * l);
 
-		if (_str && MultiByteToWideChar(CP_ACP, 0, s, -1, _str, l) <= 0)
-			*_str = '\0';
-	}
+        if (_str && MultiByteToWideChar(CP_ACP, 0, s, -1, _str, l) <= 0)
+            *_str = '\0';
+    }
 
-	~UNC()
-	{
-		free(_str);
-	}
+    ~UNC()
+    {
+        free(_str);
+    }
 
-	operator LPCWSTR() {return _str;}
+    operator LPCWSTR() {return _str;}
 
 protected:
-	LPWSTR	_str;
+    LPWSTR  _str;
 };
 
 #endif
 
 
- // determine windows version string
+// determine windows version string
 String get_windows_version_str();
 
 
- /// link dynamicly to functions by using GetModuleHandle() and GetProcAddress()
-template<typename FCT> struct DynamicFct
-{
-	DynamicFct(LPCTSTR moduleName, UINT ordinal)
-	{
-		HMODULE hModule = GetModuleHandle(moduleName);
+/// link dynamicly to functions by using GetModuleHandle() and GetProcAddress()
+template<typename FCT> struct DynamicFct {
+    DynamicFct(LPCTSTR moduleName, UINT ordinal)
+    {
+        HMODULE hModule = GetModuleHandle(moduleName);
 
-		_fct = (FCT) GetProcAddress(hModule, (LPCSTR)ordinal);
-	}
+        _fct = (FCT) GetProcAddress(hModule, (LPCSTR)ordinal);
+    }
 
-	DynamicFct(LPCTSTR moduleName, LPCSTR name)
-	{
-		HMODULE hModule = GetModuleHandle(moduleName);
+    DynamicFct(LPCTSTR moduleName, LPCSTR name)
+    {
+        HMODULE hModule = GetModuleHandle(moduleName);
 
-		_fct = (FCT) GetProcAddress(hModule, name);
-	}
+        _fct = (FCT) GetProcAddress(hModule, name);
+    }
 
-	FCT operator*() const {return _fct;}
-	operator bool() const {return _fct? true: false;}
+    FCT operator*() const {return _fct;}
+    operator bool() const {return _fct ? true : false;}
 
 protected:
-	FCT	_fct;
+    FCT _fct;
 };
 
 
- /// link dynamicly to functions by using LoadLibrary() and GetProcAddress()
-template<typename FCT> struct DynamicLoadLibFct
-{
-	DynamicLoadLibFct(LPCTSTR moduleName, UINT ordinal)
-	{
-		_hModule = LoadLibrary(moduleName);
+/// link dynamicly to functions by using LoadLibrary() and GetProcAddress()
+template<typename FCT> struct DynamicLoadLibFct {
+    DynamicLoadLibFct(LPCTSTR moduleName, UINT ordinal)
+    {
+        _hModule = LoadLibrary(moduleName);
 
-		_fct = (FCT) GetProcAddress(_hModule, (LPCSTR)ordinal);
-	}
+        _fct = (FCT) GetProcAddress(_hModule, (LPCSTR)ordinal);
+    }
 
-	DynamicLoadLibFct(LPCTSTR moduleName, LPCSTR name)
-	{
-		_hModule = LoadLibrary(moduleName);
+    DynamicLoadLibFct(LPCTSTR moduleName, LPCSTR name)
+    {
+        _hModule = LoadLibrary(moduleName);
 
-		_fct = (FCT) GetProcAddress(_hModule, name);
-	}
+        _fct = (FCT) GetProcAddress(_hModule, name);
+    }
 
-	~DynamicLoadLibFct()
-	{
-		FreeLibrary(_hModule);
-	}
+    ~DynamicLoadLibFct()
+    {
+        FreeLibrary(_hModule);
+    }
 
-	FCT operator*() const {return _fct;}
-	operator bool() const {return _fct? true: false;}
+    FCT operator*() const {return _fct;}
+    operator bool() const {return _fct ? true : false;}
 
 protected:
-	HMODULE _hModule;
-	FCT	_fct;
+    HMODULE _hModule;
+    FCT _fct;
 };
 
 
-struct Context
-{
-	Context(const char* ctx)
-	 :	_ctx(ctx)
-	{
-		_last = s_current;
-		s_current = this;
-	}
+struct Context {
+    Context(const char *ctx)
+        :  _ctx(ctx)
+    {
+        _last = s_current;
+        s_current = this;
+    }
 
-	Context(const char* ctx, LPCSTR obj)
-	 :	_ctx(ctx),
-		_obj(obj)
-	{
-		_last = s_current;
-		s_current = this;
-	}
+    Context(const char *ctx, LPCSTR obj)
+        :  _ctx(ctx),
+           _obj(obj)
+    {
+        _last = s_current;
+        s_current = this;
+    }
 
-	Context(const char* ctx, LPCWSTR obj)
-	 :	_ctx(ctx),
-		_obj(obj)
-	{
-		_last = s_current;
-		s_current = this;
-	}
+    Context(const char *ctx, LPCWSTR obj)
+        :  _ctx(ctx),
+           _obj(obj)
+    {
+        _last = s_current;
+        s_current = this;
+    }
 
-	Context(const Context& other)
-	 :	_ctx(other._ctx),
-		_obj(other._obj)
-	{
-		_last = NULL;
-	}
+    Context(const Context &other)
+        :  _ctx(other._ctx),
+           _obj(other._obj)
+    {
+        _last = NULL;
+    }
 
-	~Context()
-	{
-		if (_last) {
-			s_current = _last;
-			_last = NULL;
-		}
-	}
+    ~Context()
+    {
+        if (_last) {
+            s_current = _last;
+            _last = NULL;
+        }
+    }
 
-	String toString() const;
-	String getStackTrace() const;
+    String toString() const;
+    String getStackTrace() const;
 
-	const char* _ctx;
-	String	_obj;
+    const char *_ctx;
+    String  _obj;
 
-	static Context& current() {return *s_current;}
+    static Context &current() {return *s_current;}
 
 protected:
-	Context* _last;
+    Context *_last;
 
-	static Context*	s_current;	///@todo use TLS
-	static Context	s_main;
+    static Context *s_current;  ///@todo use TLS
+    static Context  s_main;
 };
 
-#define	CONTEXT_OBJ __ctx__._obj
-#define	CONTEXT(c) Context __ctx__(c)
-#define	CURRENT_CONTEXT Context::current()
-#define	OBJ_CONTEXT(c, o) Context __ctx__(c, o)
+#define CONTEXT_OBJ __ctx__._obj
+#define CONTEXT(c) Context __ctx__(c)
+#define CURRENT_CONTEXT Context::current()
+#define OBJ_CONTEXT(c, o) Context __ctx__(c, o)
 
 
-extern bool SplitFileSysURL(LPCTSTR url, String& dir_out, String& fname_out);
+extern bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out);
 
 
 #endif // __cplusplus

@@ -17,16 +17,16 @@
  */
 
 
- //
- // Explorer clone - precompiled header support
- //
- // precomp.h
- //
- // Martin Fuchs, 17.05.2004
- //
+//
+// Explorer clone - precompiled header support
+//
+// precomp.h
+//
+// Martin Fuchs, 17.05.2004
+//
 
-#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES			1
-#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES         1
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT   1
 
 #define WIN32_NO_STATUS
 #define _INC_WINDOWS
@@ -58,10 +58,10 @@
 #define WINXPBLUEBRUSH() CreateSolidBrush(RGB(0, 78, 192))
 #define LIGHTGREENBRUSH() CreateSolidBrush(COLOR_LIGHTGREEN())
 
-#define	NOTIFYAREA_WIDTH_DEF	100
-#define	NOTIFYAREA_SPACE		10
-#define	NOTIFYICON_SIZE			16
-#define	NOTIFYICON_DIST			NOTIFYICON_SIZE + NOTIFYICON_SIZE / 4
-#define	NOTIFYICON_X			2
-#define	NOTIFYICON_Y			3
+#define NOTIFYAREA_WIDTH_DEF    100
+#define NOTIFYAREA_SPACE        10
+#define NOTIFYICON_SIZE         16
+#define NOTIFYICON_DIST         NOTIFYICON_SIZE + NOTIFYICON_SIZE / 4
+#define NOTIFYICON_X            2
+#define NOTIFYICON_Y            3
 #define NOTIFY_HINT_Y (DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2)

@@ -17,15 +17,15 @@
  */
 
 
- //
- // Explorer clone
- //
- // explorer.cpp
- //
- // Martin Fuchs, 23.07.2003
- //
- // Credits: Thanks to Leon Finker for his explorer cabinet window example
- //
+//
+// Explorer clone
+//
+// explorer.cpp
+//
+// Martin Fuchs, 23.07.2003
+//
+// Credits: Thanks to Leon Finker for his explorer cabinet window example
+//
 
 
 #include "precomp.h"
@@ -49,11 +49,11 @@
 extern "C" int initialize_gdb_stub();    // start up GDB stub
 
 
-DynamicLoadLibFct<void(__stdcall*)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
+DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
 
 ExplorerGlobals g_Globals;
-boolean SelectOpt=FALSE;
+boolean SelectOpt = FALSE;
 
 
 ExplorerGlobals::ExplorerGlobals()
@@ -83,7 +83,7 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
     _hInstance = hInstance;
 
 #ifndef __MINGW32__ // SHRestricted() missing in MinGW (as of 29.10.2003)
-    _SHRestricted = (DWORD(STDAPICALLTYPE*)(RESTRICTIONS)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), "SHRestricted");
+    _SHRestricted = (DWORD(STDAPICALLTYPE *)(RESTRICTIONS)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), "SHRestricted");
 #endif
 
     _icon_cache.init();
@@ -115,7 +115,7 @@ void ExplorerGlobals::load_config()
 void ExplorerGlobals::read_persistent()
 {
     // read configuration file
-    _cfg_dir.printf(TEXT("%s\\ReactOS"), (LPCTSTR)SpecialFolderFSPath(CSIDL_APPDATA,0));
+    _cfg_dir.printf(TEXT("%s\\ReactOS"), (LPCTSTR)SpecialFolderFSPath(CSIDL_APPDATA, 0));
     _cfg_path.printf(TEXT("%s\\ros-explorer-cfg.xml"), _cfg_dir.c_str());
 
     //if (!_cfg.read_file(_cfg_path)) {
@@ -128,7 +128,7 @@ void ExplorerGlobals::read_persistent()
     //    _cfg.read_file(TEXT("explorer-cfg-template.xml"));
     //}
 
-     // read bookmarks
+    // read bookmarks
     _favorites_path.printf(TEXT("%s\\ros-explorer-bookmarks.xml"), _cfg_dir.c_str());
 
     if (!_favorites.read(_favorites_path)) {
@@ -139,7 +139,7 @@ void ExplorerGlobals::read_persistent()
 
 void ExplorerGlobals::write_persistent()
 {
-     // write configuration file
+    // write configuration file
     RecursiveCreateDirectory(_cfg_dir);
     _favorites.write(_favorites_path);
 }
@@ -190,14 +190,14 @@ bool FileTypeManager::is_exe_file(LPCTSTR ext)
     };
 
     TCHAR ext_buffer[_MAX_EXT];
-    const LPCTSTR* p;
+    const LPCTSTR *p;
     LPCTSTR s;
     LPTSTR d;
 
-    for(s=ext+1,d=ext_buffer; (*d=toupper(*s)); s++)
+    for (s = ext + 1, d = ext_buffer; (*d = toupper(*s)); s++)
         ++d;
 
-    for(p=s_executable_extensions; *p; p++)
+    for (p = s_executable_extensions; *p; p++)
         if (!lstrcmp(ext_buffer, *p))
             return true;
 
@@ -205,7 +205,7 @@ bool FileTypeManager::is_exe_file(LPCTSTR ext)
 }
 
 
-const FileTypeInfo& FileTypeManager::operator[](String ext)
+const FileTypeInfo &FileTypeManager::operator[](String ext)
 {
     ext.toLower();
 
@@ -213,7 +213,7 @@ const FileTypeInfo& FileTypeManager::operator[](String ext)
     if (found != end())
         return found->second;
 
-    FileTypeInfo& ftype = super::operator[](ext);
+    FileTypeInfo &ftype = super::operator[](ext);
 
     ftype._neverShowExt = false;
 
@@ -239,24 +239,24 @@ const FileTypeInfo& FileTypeManager::operator[](String ext)
     return ftype;
 }
 
-LPCTSTR FileTypeManager::set_type(Entry* entry, bool dont_hide_ext)
+LPCTSTR FileTypeManager::set_type(Entry *entry, bool dont_hide_ext)
 {
     LPCTSTR ext = _tcsrchr(entry->_data.cFileName, TEXT('.'));
 
     if (ext) {
-        const FileTypeInfo& type = (*this)[ext];
+        const FileTypeInfo &type = (*this)[ext];
 
         if (!type._displayname.empty())
             entry->_type_name = _tcsdup(type._displayname);
 
-         // hide some file extensions
+        // hide some file extensions
         if (type._neverShowExt && !dont_hide_ext) {
             int len = ext - entry->_data.cFileName;
 
             if (entry->_display_name != entry->_data.cFileName)
                 free(entry->_display_name);
 
-            entry->_display_name = (LPTSTR) malloc((len+1)*sizeof(TCHAR));
+            entry->_display_name = (LPTSTR) malloc((len + 1) * sizeof(TCHAR));
             lstrcpyn(entry->_display_name, entry->_data.cFileName, len + 1);
         }
 
@@ -269,37 +269,37 @@ LPCTSTR FileTypeManager::set_type(Entry* entry, bool dont_hide_ext)
 
 
 Icon::Icon()
- : _id(ICID_UNKNOWN),
-    _itype(IT_STATIC),
-    _hicon(0)
+    : _id(ICID_UNKNOWN),
+      _itype(IT_STATIC),
+      _hicon(0)
 {
 }
 
 Icon::Icon(ICON_ID id, UINT nid)    //, int cx, int cy
- :    _id(id),
-    _itype(IT_STATIC),
-    _hicon(ResIcon(nid))    // ResIconEx(nid, cx, cy)
+    :    _id(id),
+         _itype(IT_STATIC),
+         _hicon(ResIcon(nid))    // ResIconEx(nid, cx, cy)
 {
 }
 
 Icon::Icon(ICON_ID id, UINT nid, int icon_size)
- :    _id(id),
-    _itype(IT_STATIC),
-    _hicon(ResIconEx(nid, icon_size, icon_size))
+    :    _id(id),
+         _itype(IT_STATIC),
+         _hicon(ResIconEx(nid, icon_size, icon_size))
 {
 }
 
 Icon::Icon(ICON_TYPE itype, int id, HICON hIcon)
- :    _id((ICON_ID)id),
-    _itype(itype),
-    _hicon(hIcon)
+    :    _id((ICON_ID)id),
+         _itype(itype),
+         _hicon(hIcon)
 {
 }
 
 Icon::Icon(ICON_TYPE itype, int id, int sys_idx)
- :    _id((ICON_ID)id),
-    _itype(itype),
-    _sys_idx(sys_idx)
+    :    _id((ICON_ID)id),
+         _itype(itype),
+         _sys_idx(sys_idx)
 {
 }
 
@@ -436,14 +436,14 @@ void IconCache::init()
     _icons[ICID_BOOKMARK]    = Icon(ICID_BOOKMARK,    IDI_DOT_TRANS,    icon_size);
     _icons[ICID_MINIMIZE]    = Icon(ICID_MINIMIZE,    IDI_MINIMIZE,    icon_size);
     _icons[ICID_CONTROLPAN] = Icon(ICID_CONTROLPAN, IDI_CONTROLPAN,    icon_size);
-    _icons[ICID_DESKSETTING]= Icon(ICID_DESKSETTING,IDI_DESKSETTING,icon_size);
+    _icons[ICID_DESKSETTING] = Icon(ICID_DESKSETTING, IDI_DESKSETTING, icon_size);
     _icons[ICID_NETCONNS]    = Icon(ICID_NETCONNS,    IDI_NETCONNS,    icon_size);
     _icons[ICID_ADMIN]        = Icon(ICID_ADMIN,        IDI_ADMIN,        icon_size);
     _icons[ICID_RECENT]     = Icon(ICID_RECENT,     IDI_RECENT,        icon_size);
 }
 
 
-const Icon& IconCache::extract(LPCTSTR path, UINT flags)
+const Icon &IconCache::extract(LPCTSTR path, UINT flags)
 {
     // search for matching icon with unchanged flags in the cache
     CacheKey mapkey(path, flags);
@@ -453,7 +453,7 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
         return _icons[found->second];
 
     // search for matching icon with handle
-    CacheKey mapkey_hicon(path, flags|ICF_HICON);
+    CacheKey mapkey_hicon(path, flags | ICF_HICON);
     if (flags != mapkey_hicon.second) {
         found = _pathCache.find(mapkey_hicon);
 
@@ -461,8 +461,8 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
             return _icons[found->second];
     }
 
-     // search for matching icon in the system image list cache
-    CacheKey mapkey_syscache(path, flags|ICF_SYSCACHE);
+    // search for matching icon in the system image list cache
+    CacheKey mapkey_syscache(path, flags | ICF_SYSCACHE);
     if (flags != mapkey_syscache.second) {
         found = _pathCache.find(mapkey_syscache);
 
@@ -478,14 +478,13 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
         shgfi_flags = SHGFI_SYSICONINDEX;
         if (flags & ICF_LARGE) {
             shgfi_flags |= SHGFI_LARGEICON;
-        }
-        else {
+        } else {
             shgfi_flags |= SHGFI_SMALLICON;
         }
         HIMAGELIST himl = (HIMAGELIST)SHGetFileInfo(path, 0, &sfi, sizeof(sfi), shgfi_flags);
         if (himl) {
             HICON hicon = ImageList_GetIcon(himl, sfi.iIcon, ILD_NORMAL);
-            const Icon& icon = add(hicon, IT_CACHED);
+            const Icon &icon = add(hicon, IT_CACHED);
 
             ///@todo limit cache size
             _pathCache[mapkey_hicon] = icon;
@@ -499,18 +498,18 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
     if (flags & ICF_OPEN)
         shgfi_flags |= SHGFI_OPENICON;
 
-    if ((flags&(ICF_LARGE|ICF_MIDDLE|ICF_OVERLAYS|ICF_HICON)) && !(flags&ICF_SYSCACHE)) {
+    if ((flags & (ICF_LARGE | ICF_MIDDLE | ICF_OVERLAYS | ICF_HICON)) && !(flags & ICF_SYSCACHE)) {
         shgfi_flags |= SHGFI_ICON;
 
-        if (!(flags & (ICF_LARGE|ICF_MIDDLE)))
+        if (!(flags & (ICF_LARGE | ICF_MIDDLE)))
             shgfi_flags |= SHGFI_SMALLICON;
 
         if (flags & ICF_OVERLAYS)
             shgfi_flags |= SHGFI_ADDOVERLAYS;
 
-         // get small/big icons with/without overlays
+        // get small/big icons with/without overlays
         if (SHGetFileInfo(path, 0, &sfi, sizeof(sfi), shgfi_flags)) {
-            const Icon& icon = add(sfi.hIcon, IT_CACHED);
+            const Icon &icon = add(sfi.hIcon, IT_CACHED);
 
             ///@todo limit cache size
             _pathCache[mapkey_hicon] = icon;
@@ -518,17 +517,17 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
             return icon;
         }
     } else {
-        assert(!(flags&ICF_OVERLAYS));
+        assert(!(flags & ICF_OVERLAYS));
 
-        shgfi_flags |= SHGFI_SYSICONINDEX|SHGFI_SMALLICON;
+        shgfi_flags |= SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
 
-         // use system image list - the "search program dialog" needs it
+        // use system image list - the "search program dialog" needs it
         HIMAGELIST himlSys_small = (HIMAGELIST) SHGetFileInfo(path, 0, &sfi, sizeof(sfi), shgfi_flags);
 
         if (himlSys_small) {
             _himlSys_small = himlSys_small;
 
-            const Icon& icon = add(sfi.iIcon/*, IT_SYSCACHE*/);
+            const Icon &icon = add(sfi.iIcon/*, IT_SYSCACHE*/);
 
             ///@todo limit cache size
             _pathCache[mapkey_syscache] = icon;
@@ -540,9 +539,9 @@ const Icon& IconCache::extract(LPCTSTR path, UINT flags)
     return _icons[ICID_NONE];
 }
 
-const Icon& IconCache::extract(LPCTSTR path, int icon_idx, UINT flags)
+const Icon &IconCache::extract(LPCTSTR path, int icon_idx, UINT flags)
 {
-    IdxCacheKey key(path, make_pair(icon_idx, (flags|ICF_HICON)&~ICF_SYSCACHE));
+    IdxCacheKey key(path, make_pair(icon_idx, (flags | ICF_HICON) & ~ICF_SYSCACHE));
 
     key.first.toLower();
 
@@ -554,7 +553,7 @@ const Icon& IconCache::extract(LPCTSTR path, int icon_idx, UINT flags)
     HICON hIcon;
 
     if ((int)ExtractIconEx(path, icon_idx, NULL, &hIcon, 1) > 0) {
-        const Icon& icon = add(hIcon, IT_CACHED);
+        const Icon &icon = add(hIcon, IT_CACHED);
 
         _idxCache[key] = icon;
 
@@ -567,7 +566,7 @@ const Icon& IconCache::extract(LPCTSTR path, int icon_idx, UINT flags)
     }
 }
 
-const Icon& IconCache::extract(IExtractIcon* pExtract, LPCTSTR path, int icon_idx, UINT flags)
+const Icon &IconCache::extract(IExtractIcon *pExtract, LPCTSTR path, int icon_idx, UINT flags)
 {
     HICON hIconLarge = 0;
     HICON hIcon;
@@ -593,17 +592,17 @@ const Icon& IconCache::extract(IExtractIcon* pExtract, LPCTSTR path, int icon_id
     return _icons[ICID_NONE];
 }
 
-const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
+const Icon &IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
 {
-     // search for matching icon with unchanged flags in the cache
+    // search for matching icon with unchanged flags in the cache
     PidlCacheKey mapkey(pidl, flags);
     PidlCacheMap::iterator found = _pidlcache.find(mapkey);
 
     if (found != _pidlcache.end())
         return _icons[found->second];
 
-     // search for matching icon with handle
-    PidlCacheKey mapkey_hicon(pidl, flags|ICF_HICON);
+    // search for matching icon with handle
+    PidlCacheKey mapkey_hicon(pidl, flags | ICF_HICON);
     if (flags != mapkey_hicon.second) {
         found = _pidlcache.find(mapkey_hicon);
 
@@ -611,8 +610,8 @@ const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
             return _icons[found->second];
     }
 
-     // search for matching icon in the system image list cache
-    PidlCacheKey mapkey_syscache(pidl, flags|ICF_SYSCACHE);
+    // search for matching icon in the system image list cache
+    PidlCacheKey mapkey_syscache(pidl, flags | ICF_SYSCACHE);
     if (flags != mapkey_syscache.second) {
         found = _pidlcache.find(mapkey_syscache);
 
@@ -624,18 +623,18 @@ const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
 
     int shgfi_flags = SHGFI_PIDL;
 
-    if (!(flags & (ICF_LARGE|ICF_MIDDLE)))
+    if (!(flags & (ICF_LARGE | ICF_MIDDLE)))
         shgfi_flags |= SHGFI_SMALLICON;
 
     if (flags & ICF_OPEN)
         shgfi_flags |= SHGFI_OPENICON;
 
     if (flags & ICF_SYSCACHE) {
-        assert(!(flags&ICF_OVERLAYS));
+        assert(!(flags & ICF_OVERLAYS));
 
-        HIMAGELIST himlSys = (HIMAGELIST) SHGetFileInfo((LPCTSTR)pidl, 0, &sfi, sizeof(sfi), SHGFI_SYSICONINDEX|shgfi_flags);
+        HIMAGELIST himlSys = (HIMAGELIST) SHGetFileInfo((LPCTSTR)pidl, 0, &sfi, sizeof(sfi), SHGFI_SYSICONINDEX | shgfi_flags);
         if (himlSys) {
-            const Icon& icon = add(sfi.iIcon/*, IT_SYSCACHE*/);
+            const Icon &icon = add(sfi.iIcon/*, IT_SYSCACHE*/);
 
             ///@todo limit cache size
             _pidlcache[mapkey_syscache] = icon;
@@ -646,8 +645,8 @@ const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
         if (flags & ICF_OVERLAYS)
             shgfi_flags |= SHGFI_ADDOVERLAYS;
 
-        if (SHGetFileInfo((LPCTSTR)pidl, 0, &sfi, sizeof(sfi), SHGFI_ICON|shgfi_flags)) {
-            const Icon& icon = add(sfi.hIcon, IT_CACHED);
+        if (SHGetFileInfo((LPCTSTR)pidl, 0, &sfi, sizeof(sfi), SHGFI_ICON | shgfi_flags)) {
+            const Icon &icon = add(sfi.hIcon, IT_CACHED);
 
             ///@todo limit cache size
             _pidlcache[mapkey_hicon] = icon;
@@ -660,43 +659,43 @@ const Icon& IconCache::extract(LPCITEMIDLIST pidl, UINT flags)
 }
 
 
-const Icon& IconCache::add(HICON hIcon, ICON_TYPE type)
+const Icon &IconCache::add(HICON hIcon, ICON_TYPE type)
 {
     int id = ++s_next_id;
 
     return _icons[id] = Icon(type, id, hIcon);
 }
 
-const Icon&    IconCache::add(int sys_idx/*, ICON_TYPE type=IT_SYSCACHE*/)
+const Icon    &IconCache::add(int sys_idx/*, ICON_TYPE type=IT_SYSCACHE*/)
 {
     int id = ++s_next_id;
 
     return _icons[id] = SysCacheIcon(id, sys_idx);
 }
 
-const Icon& IconCache::get_icon(int id)
+const Icon &IconCache::get_icon(int id)
 {
     return _icons[id];
 }
 
 IconCache::~IconCache()
 {
-/* We don't need to free cached resources - they are automatically freed at process termination
-    for (int index = s_next_id; index >= 0; index--) {
-        IconMap::iterator found = _icons.find(index);
+    /* We don't need to free cached resources - they are automatically freed at process termination
+        for (int index = s_next_id; index >= 0; index--) {
+            IconMap::iterator found = _icons.find(index);
 
-        if (found != _icons.end()) {
-            Icon& icon = found->second;
+            if (found != _icons.end()) {
+                Icon& icon = found->second;
 
-            if ((icon.get_icontype() == IT_DYNAMIC) ||
-                (icon.get_icontype() == IT_CACHED))
-            {
-                DestroyIcon(icon.get_hicon());
-                _icons.erase(found);
+                if ((icon.get_icontype() == IT_DYNAMIC) ||
+                    (icon.get_icontype() == IT_CACHED))
+                {
+                    DestroyIcon(icon.get_hicon());
+                    _icons.erase(found);
+                }
             }
         }
-    }
-*/
+    */
 }
 
 void IconCache::free_icon(int icon_id)
@@ -704,7 +703,7 @@ void IconCache::free_icon(int icon_id)
     IconMap::iterator found = _icons.find(icon_id);
 
     if (found != _icons.end()) {
-        Icon& icon = found->second;
+        Icon &icon = found->second;
 
         if (icon.destroy())
             _icons.erase(found);
@@ -716,7 +715,7 @@ ResString::ResString(UINT nid)
 {
     TCHAR buffer[BUFFER_LEN];
 
-    int len = LoadString(g_Globals._hInstance, nid, buffer, sizeof(buffer)/sizeof(TCHAR));
+    int len = LoadString(g_Globals._hInstance, nid, buffer, sizeof(buffer) / sizeof(TCHAR));
 
     super::assign(buffer, len);
 }
@@ -734,7 +733,7 @@ SmallIcon::SmallIcon(UINT nid)
 
 SizeIcon::SizeIcon(UINT nid, int size)
 {
-	_hicon = (HICON)LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(nid), IMAGE_ICON, size, size, LR_SHARED);
+    _hicon = (HICON)LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(nid), IMAGE_ICON, size, size, LR_SHARED);
 }
 
 ResIconEx::ResIconEx(UINT nid, int w, int h)
@@ -779,11 +778,11 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
     cmd._mdi =  true;
     cmd._cmdShow = cmdShow;
 
-     // parse command line options, which may overwrite the MDI flag
+    // parse command line options, which may overwrite the MDI flag
     if (lpCmdLine)
         cmd.ParseCmdLine(lpCmdLine);
 
-     // create main window
+    // create main window
     MainFrameBase::Create(cmd);
 }
 
@@ -794,28 +793,28 @@ bool ExplorerCmd::ParseCmdLine(LPCTSTR lpCmdLine)
     LPCTSTR b = lpCmdLine;
     LPCTSTR p = b;
 
-    while(*b) {
-         // remove leading space
-        while(_istspace((unsigned)*b))
+    while (*b) {
+        // remove leading space
+        while (_istspace((unsigned)*b))
             ++b;
 
         p = b;
 
         bool quote = false;
 
-         // options are separated by ','
-        for(; *p; ++p) {
+        // options are separated by ','
+        for (; *p; ++p) {
             if (*p == '"')    // Quote characters may appear at any position in the command line.
                 quote = !quote;
-            else if (*p==',' && !quote)
+            else if (*p == ',' && !quote)
                 break;
         }
 
         if (p > b) {
             int l = p - b;
 
-             // remove trailing space
-            while(l>0 && _istspace((unsigned)b[l-1]))
+            // remove trailing space
+            while (l > 0 && _istspace((unsigned)b[l - 1]))
                 --l;
 
             if (!EvaluateOption(String(b, l)))
@@ -835,8 +834,8 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
 {
     String opt_str;
 
-     // Remove quote characters, as they are evaluated at this point.
-    for(; *option; ++option)
+    // Remove quote characters, as they are evaluated at this point.
+    for (; *option; ++option)
         if (*option != '"')
             opt_str += *option;
 
@@ -845,34 +844,29 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
     if (option[0] == '/') {
         ++option;
 
-         // option /e for windows in explorer mode
+        // option /e for windows in explorer mode
         if (!_tcsicmp(option, TEXT("e")))
             _flags |= OWM_EXPLORE;
-         // option /root for rooted explorer windows
+        // option /root for rooted explorer windows
         else if (!_tcsicmp(option, TEXT("root")))
             _flags |= OWM_ROOTED;
-         // non-standard options: /mdi, /sdi
+        // non-standard options: /mdi, /sdi
         else if (!_tcsicmp(option, TEXT("mdi")))
             _mdi = true;
         else if (!_tcsicmp(option, TEXT("sdi")))
             _mdi = false;
-        else if (!_tcsicmp(option, TEXT("n")))
-        {
+        else if (!_tcsicmp(option, TEXT("n"))) {
             // Do nothing
-        }
-        else if (!_tcsicmp(option, TEXT("select")))
-        {
+        } else if (!_tcsicmp(option, TEXT("select"))) {
             SelectOpt = TRUE;
-        }
-        else
+        } else
             return false;
 
     } else {
         if (!_path.empty())
             return false;
 
-        if((SelectOpt == TRUE) && (PathFileExists(option)))
-        {
+        if ((SelectOpt == TRUE) && (PathFileExists(option))) {
             TCHAR szDir[MAX_PATH];
 
             _tsplitpath(option, szPath, szDir, NULL, NULL);
@@ -880,8 +874,7 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
             PathRemoveBackslash(szPath);
             _path = szPath;
             SelectOpt = FALSE;
-        }
-        else
+        } else
             _path = opt_str;
     }
 
@@ -893,9 +886,9 @@ bool ExplorerCmd::IsValidPath() const
     if (!_path.empty()) {
         DWORD attribs = GetFileAttributes(_path);
 
-        if (attribs!=INVALID_FILE_ATTRIBUTES && (attribs&FILE_ATTRIBUTE_DIRECTORY))
+        if (attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY))
             return true;    // file system path
-        else if (*_path==':' && _path.at(1)==':')
+        else if (*_path == ':' && _path.at(1) == ':')
             return true;    // text encoded IDL
     }
 
@@ -924,25 +917,24 @@ PopupMenu::PopupMenu(UINT nid)
 }
 
 
- /// "About Explorer" Dialog
+/// "About Explorer" Dialog
 struct ExplorerAboutDlg : public
-            CtlColorParent<
-                OwnerDrawParent<Dialog>
-            >
-{
-    typedef CtlColorParent<
-                OwnerDrawParent<Dialog>
-            > super;
+    CtlColorParent <
+    OwnerDrawParent<Dialog>
+    > {
+    typedef CtlColorParent <
+    OwnerDrawParent<Dialog>
+    > super;
 
     ExplorerAboutDlg(HWND hwnd)
-     :    super(hwnd)
+        :    super(hwnd)
     {
         SetWindowIcon(hwnd, IDI_PEXLORER);
 
         new FlatButton(hwnd, IDOK);
 
         _hfont = CreateFont(20, 0, 0, 0, FW_BOLD, TRUE, 0, 0, 0, 0, 0, 0, 0, TEXT("Sans Serif"));
-        new ColorStatic(hwnd, IDC_PE_EXPLORER, RGB(32,32,128), 0, _hfont);
+        new ColorStatic(hwnd, IDC_PE_EXPLORER, RGB(32, 32, 128), 0, _hfont);
 
         new HyperlinkCtrl(hwnd, IDC_WWW);
 
@@ -963,12 +955,12 @@ struct ExplorerAboutDlg : public
 
     LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     {
-        switch(nmsg) {
-          case WM_PAINT:
+        switch (nmsg) {
+        case WM_PAINT:
             Paint();
             break;
 
-          default:
+        default:
             return super::WndProc(nmsg, wparam, lparam);
         }
 
@@ -1001,14 +993,14 @@ static void InitInstance(HINSTANCE hInstance)
     setlocale(LC_COLLATE, "");    // set collating rules to local settings for compareName
 
 #ifndef ROSSHELL
-     // register frame window class
-    g_Globals._hframeClass = IconWindowClass(CLASSNAME_FRAME,IDI_EXPLORER);
+    // register frame window class
+    g_Globals._hframeClass = IconWindowClass(CLASSNAME_FRAME, IDI_EXPLORER);
 
-     // register child window class
-    WindowClass(CLASSNAME_CHILDWND, CS_CLASSDC|CS_DBLCLKS).Register();
+    // register child window class
+    WindowClass(CLASSNAME_CHILDWND, CS_CLASSDC | CS_DBLCLKS).Register();
 
-     // register tree window class
-    WindowClass(CLASSNAME_WINEFILETREE, CS_CLASSDC|CS_DBLCLKS).Register();
+    // register tree window class
+    WindowClass(CLASSNAME_WINEFILETREE, CS_CLASSDC | CS_DBLCLKS).Register();
 #endif
 
     g_Globals._cfStrFName = RegisterClipboardFormat(CFSTR_FILENAME);
@@ -1019,23 +1011,23 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
 {
     CONTEXT("explorer_main");
 
-     // initialize Common Controls library
+    // initialize Common Controls library
     CommonControlInit usingCmnCtrl;
 
     try {
         InitInstance(hInstance);
-    } catch(COMException& e) {
+    } catch (COMException &e) {
         HandleException(e, GetDesktopWindow());
         return -1;
     }
 
 #ifndef ROSSHELL
     if (cmdShow != SW_HIDE) {
-/*    // don't maximize if being called from the ROS desktop
-        if (cmdShow == SW_SHOWNORMAL)
-                ///@todo read window placement from registry
-            cmdShow = SW_MAXIMIZE;
-*/
+        /*    // don't maximize if being called from the ROS desktop
+                if (cmdShow == SW_SHOWNORMAL)
+                        ///@todo read window placement from registry
+                    cmdShow = SW_MAXIMIZE;
+        */
 
         explorer_show_frame(cmdShow, lpCmdLine);
     }
@@ -1047,13 +1039,13 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
 }
 
 
- // MinGW does not provide a Unicode startup routine, so we have to implement an own.
+// MinGW does not provide a Unicode startup routine, so we have to implement an own.
 #if defined(__MINGW32__) && defined(UNICODE)
 
 #define _tWinMain wWinMain
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int);
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     CONTEXT("main");
 
@@ -1067,10 +1059,10 @@ int main(int argc, char* argv[])
 
     LPWSTR cmdline = GetCommandLineW();
 
-    while(*cmdline && !_istspace((unsigned)*cmdline))
+    while (*cmdline && !_istspace((unsigned)*cmdline))
         ++cmdline;
 
-    while(_istspace((unsigned)*cmdline))
+    while (_istspace((unsigned)*cmdline))
         ++cmdline;
 
     return wWinMain(GetModuleHandle(NULL), 0, cmdline, nShowCmd);
@@ -1103,16 +1095,16 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // strip extended options from the front of the command line
     String ext_options;
 
-    while(*lpCmdLine == '-') {
-        while(*lpCmdLine && !_istspace((unsigned)*lpCmdLine))
+    while (*lpCmdLine == '-') {
+        while (*lpCmdLine && !_istspace((unsigned)*lpCmdLine))
             ext_options += *lpCmdLine++;
 
-        while(_istspace((unsigned)*lpCmdLine))
+        while (_istspace((unsigned)*lpCmdLine))
             ++lpCmdLine;
     }
 
     // command line option "-install" to replace previous shell application with PExlorer
-    if (_tcsstr(ext_options,TEXT("-install"))) {
+    if (_tcsstr(ext_options, TEXT("-install"))) {
         // install PExlorer into the registry
         TCHAR path[MAX_PATH];
 
@@ -1124,7 +1116,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
                 ///@todo save previous shell application in config file
 
-                RegSetValueEx(hkey, TEXT("Shell"), 0, REG_SZ, (LPBYTE)path, l*sizeof(TCHAR));
+                RegSetValueEx(hkey, TEXT("Shell"), 0, REG_SZ, (LPBYTE)path, l * sizeof(TCHAR));
                 RegCloseKey(hkey);
             }
 
@@ -1132,7 +1124,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
                 ///@todo save previous shell application in config file
 
-                RegSetValueEx(hkey, TEXT("Shell"), 0, REG_SZ, (LPBYTE)TEXT(""), l*sizeof(TCHAR));
+                RegSetValueEx(hkey, TEXT("Shell"), 0, REG_SZ, (LPBYTE)TEXT(""), l * sizeof(TCHAR));
                 RegCloseKey(hkey);
             }
         }
@@ -1146,7 +1138,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             GetWindowThreadProcessId(shellWindow, &pid);
             HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 
-             // On Win 9x it's sufficient to destroy the shell window.
+            // On Win 9x it's sufficient to destroy the shell window.
             DestroyWindow(shellWindow);
 
             if (TerminateProcess(hProcess, 0))
@@ -1157,10 +1149,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
         startup_desktop = TRUE;
     } else {
-         // create desktop window and task bar only, if there is no other shell and we are
-         // the first explorer instance
-         // MS Explorer looks additionally into the registry entry HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\shell,
-         // to decide wether it is currently configured as shell application.
+        // create desktop window and task bar only, if there is no other shell and we are
+        // the first explorer instance
+        // MS Explorer looks additionally into the registry entry HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\shell,
+        // to decide wether it is currently configured as shell application.
         startup_desktop = !any_desktop_running;
     }
 
@@ -1176,24 +1168,24 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #endif
 
     // If there is given the command line option "-desktop", create desktop window anyways
-    if (_tcsstr(ext_options,TEXT("-desktop")))
+    if (_tcsstr(ext_options, TEXT("-desktop")))
         startup_desktop = TRUE;
 #ifndef ROSSHELL
-    else if (_tcsstr(ext_options,TEXT("-nodesktop")))
+    else if (_tcsstr(ext_options, TEXT("-nodesktop")))
         startup_desktop = FALSE;
 
     // Don't display cabinet window in desktop mode
-    if (startup_desktop && !_tcsstr(ext_options,TEXT("-explorer")))
+    if (startup_desktop && !_tcsstr(ext_options, TEXT("-explorer")))
         nShowCmd = SW_HIDE;
 #endif
 
-    if (_tcsstr(ext_options,TEXT("-noautostart")))
+    if (_tcsstr(ext_options, TEXT("-noautostart")))
         autostart = false;
-    else if (_tcsstr(ext_options,TEXT("-autostart")))
+    else if (_tcsstr(ext_options, TEXT("-autostart")))
         autostart = true;
 
 #ifndef __WINE__
-    if (_tcsstr(ext_options,TEXT("-console"))) {
+    if (_tcsstr(ext_options, TEXT("-console"))) {
         AllocConsole();
 
         _dup2(_open_osfhandle((long)GetStdHandle(STD_INPUT_HANDLE), _O_RDONLY), 0);
@@ -1209,8 +1201,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
 
     if (startup_desktop) {
-         // hide the XP login screen (Credit to Nicolas Escuder)
-         // another undocumented event: "Global\\msgina: ReturnToWelcome"
+        // hide the XP login screen (Credit to Nicolas Escuder)
+        // another undocumented event: "Global\\msgina: ReturnToWelcome"
         if (!SetShellReadyEvent(TEXT("msgina: ShellReadyEvent")))
             SetShellReadyEvent(TEXT("Global\\msgina: ShellReadyEvent"));
     }
@@ -1229,10 +1221,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     bool use_gdb_stub = false;    // !IsDebuggerPresent();
 
-    if (_tcsstr(ext_options,TEXT("-debug")))
+    if (_tcsstr(ext_options, TEXT("-debug")))
         use_gdb_stub = true;
 
-    if (_tcsstr(ext_options,TEXT("-break"))) {
+    if (_tcsstr(ext_options, TEXT("-break"))) {
         LOG(TEXT("debugger breakpoint"));
 #ifdef _MSC_VER
         DebugBreak();
@@ -1268,32 +1260,32 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #endif
     }
 
-    if (_tcsstr(ext_options,TEXT("-?"))) {
+    if (_tcsstr(ext_options, TEXT("-?"))) {
         MessageBoxA(g_Globals._hwndDesktop,
-            "/e        open cabinet window in explorer mode\r\n"
-            "/root        open cabinet window in rooted mode\r\n"
-            "/mdi        open cabinet window in MDI mode\r\n"
-            "/sdi        open cabinet window in SDI mode\r\n"
-            "\r\n"
-            "-?        display command line options\r\n"
-            "\r\n"
-            "-desktop        start in desktop mode regardless of an already running shell\r\n"
-            "-nodesktop    disable desktop mode\r\n"
-            "-explorer        display cabinet window regardless of enabled desktop mode\r\n"
-            "\r\n"
-            "-install        replace previous shell application with PExlorer\r\n"
-            "\r\n"
-            "-noautostart    disable autostarts\r\n"
-            "-autostart    enable autostarts regardless of debug build\r\n"
-            "\r\n"
-            "-console        open debug console\r\n"
-            "\r\n"
-            "-debug        activate GDB remote debugging stub\r\n"
-            "-break        activate debugger breakpoint\r\n",
-            "PExlorer - command line options", MB_OK);
+                    "/e        open cabinet window in explorer mode\r\n"
+                    "/root        open cabinet window in rooted mode\r\n"
+                    "/mdi        open cabinet window in MDI mode\r\n"
+                    "/sdi        open cabinet window in SDI mode\r\n"
+                    "\r\n"
+                    "-?        display command line options\r\n"
+                    "\r\n"
+                    "-desktop        start in desktop mode regardless of an already running shell\r\n"
+                    "-nodesktop    disable desktop mode\r\n"
+                    "-explorer        display cabinet window regardless of enabled desktop mode\r\n"
+                    "\r\n"
+                    "-install        replace previous shell application with PExlorer\r\n"
+                    "\r\n"
+                    "-noautostart    disable autostarts\r\n"
+                    "-autostart    enable autostarts regardless of debug build\r\n"
+                    "\r\n"
+                    "-console        open debug console\r\n"
+                    "\r\n"
+                    "-debug        activate GDB remote debugging stub\r\n"
+                    "-break        activate debugger breakpoint\r\n",
+                    "PExlorer - command line options", MB_OK);
     }
 
-    Thread* pSSOThread = NULL;
+    Thread *pSSOThread = NULL;
 
     if (startup_desktop) {
         // launch SSO thread to allow message processing independent from the explorer main thread
@@ -1303,7 +1295,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     /**TODO launching autostart programs can be moved into a background thread. */
     if (autostart) {
-        const char* argv[] = {"", "s"};    // call startup routine in SESSION_START mode
+        const char *argv[] = {"", "s"};    // call startup routine in SESSION_START mode
         startup(2, argv);
     }
 

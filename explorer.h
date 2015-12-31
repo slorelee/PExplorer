@@ -17,13 +17,13 @@
  */
 
 
- //
- // Explorer clone
- //
- // explorer.h
- //
- // Martin Fuchs, 23.07.2003
- //
+//
+// Explorer clone
+//
+// explorer.h
+//
+// Martin Fuchs, 23.07.2003
+//
 
 
 #define _LIGHT_STARTMENU
@@ -42,38 +42,34 @@
 
 #include "shell/shellfs.h"
 
-#ifndef ROSSHELL
-#include "shell/unixfs.h"
-#endif
-
 #include "utility/window.h"
 
 
-#define	IDW_STATUSBAR			0x100
-#define	IDW_TOOLBAR				0x101
-#define	IDW_EXTRABAR			0x102
-#define	IDW_DRIVEBAR			0x103
-#define	IDW_ADDRESSBAR			0x104
-#define	IDW_SIDEBAR				0x106
-#define	IDW_FIRST_CHILD			0xC000	/*0x200*/
+#define IDW_STATUSBAR           0x100
+#define IDW_TOOLBAR             0x101
+#define IDW_EXTRABAR            0x102
+#define IDW_DRIVEBAR            0x103
+#define IDW_ADDRESSBAR          0x104
+#define IDW_SIDEBAR             0x106
+#define IDW_FIRST_CHILD         0xC000  /*0x200*/
 
 
-#define	PM_GET_FILEWND_PTR		(WM_APP+0x05)
-#define	PM_GET_SHELLBROWSER_PTR	(WM_APP+0x06)
+#define PM_GET_FILEWND_PTR      (WM_APP+0x05)
+#define PM_GET_SHELLBROWSER_PTR (WM_APP+0x06)
 
-#define	PM_GET_CONTROLWINDOW	(WM_APP+0x16)
+#define PM_GET_CONTROLWINDOW    (WM_APP+0x16)
 
-#define	PM_RESIZE_CHILDREN		(WM_APP+0x17)
-#define	PM_GET_WIDTH			(WM_APP+0x18)
+#define PM_RESIZE_CHILDREN      (WM_APP+0x17)
+#define PM_GET_WIDTH            (WM_APP+0x18)
 
-#define	PM_REFRESH				(WM_APP+0x1B)
-#define	PM_REFRESH_CONFIG		(WM_APP+0x1C)
+#define PM_REFRESH              (WM_APP+0x1B)
+#define PM_REFRESH_CONFIG       (WM_APP+0x1C)
 
 
-#define	CLASSNAME_FRAME 		TEXT("CabinetWClass")	// same class name for frame window as in MS Explorer
+#define CLASSNAME_FRAME         TEXT("CabinetWClass")   // same class name for frame window as in MS Explorer
 
-#define	CLASSNAME_CHILDWND		TEXT("WFS_Child")
-#define	CLASSNAME_WINEFILETREE	TEXT("WFS_Tree")
+#define CLASSNAME_CHILDWND      TEXT("WFS_Child")
+#define CLASSNAME_WINEFILETREE  TEXT("WFS_Tree")
 
 
 #include "shell/pane.h"
@@ -83,38 +79,37 @@
 
 #ifndef ROSSHELL
 
- /// Explorer command line parser
- // for commands like "/e,/root,c:\"
- // or "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\::{21EC2020-3AEA-1069-A2DD-08002B30309D}" (launch of control panel)
-struct ExplorerCmd
-{
-	ExplorerCmd()
-	 :	_flags(0),
-		_cmdShow(SW_SHOWNORMAL),
-		_mdi(false),
-		_valid_path(false)
-	{
-	}
+/// Explorer command line parser
+// for commands like "/e,/root,c:\"
+// or "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\::{21EC2020-3AEA-1069-A2DD-08002B30309D}" (launch of control panel)
+struct ExplorerCmd {
+    ExplorerCmd()
+        :  _flags(0),
+           _cmdShow(SW_SHOWNORMAL),
+           _mdi(false),
+           _valid_path(false)
+    {
+    }
 
-	ExplorerCmd(LPCTSTR url, bool mdi)
-	 :	_path(url),
-		_flags(0),
-		_cmdShow(SW_SHOWNORMAL),
-		_mdi(mdi),
-		_valid_path(true)	//@@
-	{
-	}
+    ExplorerCmd(LPCTSTR url, bool mdi)
+        :  _path(url),
+           _flags(0),
+           _cmdShow(SW_SHOWNORMAL),
+           _mdi(mdi),
+           _valid_path(true)   //@@
+    {
+    }
 
-	bool	ParseCmdLine(LPCTSTR lpCmdLine);
-	bool	EvaluateOption(LPCTSTR option);
-	bool	IsValidPath() const;
+    bool    ParseCmdLine(LPCTSTR lpCmdLine);
+    bool    EvaluateOption(LPCTSTR option);
+    bool    IsValidPath() const;
 
-	String	_path;
-	TCHAR	szPath[MAX_PATH];
-	int		_flags;	// OPEN_WINDOW_MODE
-	int		_cmdShow;
-	bool	_mdi;
-	bool	_valid_path;
+    String  _path;
+    TCHAR   szPath[MAX_PATH];
+    int     _flags; // OPEN_WINDOW_MODE
+    int     _cmdShow;
+    bool    _mdi;
+    bool    _valid_path;
 };
 
 #include "shell/mainframe.h"

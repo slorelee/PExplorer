@@ -17,101 +17,101 @@
  */
 
 
- //
- // Explorer clone
- //
- // shellbrowserimpl.cpp
- //
- // Martin Fuchs, 28.09.2003
- //
- // Credits: Thanks to Leon Finker for his explorer cabinet window example
- //
+//
+// Explorer clone
+//
+// shellbrowserimpl.cpp
+//
+// Martin Fuchs, 28.09.2003
+//
+// Credits: Thanks to Leon Finker for his explorer cabinet window example
+//
 
 
 #include <precomp.h>
 
 
-HRESULT IShellBrowserImpl::QueryInterface(REFIID iid, void** ppvObject)
+HRESULT IShellBrowserImpl::QueryInterface(REFIID iid, void **ppvObject)
 {
-	if (!ppvObject)
-		return E_POINTER;
+    if (!ppvObject)
+        return E_POINTER;
 
-	if (iid == IID_IUnknown)
-		*ppvObject = (IUnknown*)static_cast<IShellBrowser*>(this);
-	else if (iid == IID_IOleWindow)
-		*ppvObject = static_cast<IOleWindow*>(this);
-	else if (iid == IID_IShellBrowser)
-		*ppvObject = static_cast<IShellBrowser*>(this);
-	else if (iid == IID_ICommDlgBrowser)
-		*ppvObject = static_cast<ICommDlgBrowser*>(this);
-	else if (iid == IID_IServiceProvider)
-		*ppvObject = static_cast<IServiceProvider*>(this);
-	else {
-		*ppvObject = NULL;
-		return E_NOINTERFACE;
-	}
+    if (iid == IID_IUnknown)
+        *ppvObject = (IUnknown *)static_cast<IShellBrowser *>(this);
+    else if (iid == IID_IOleWindow)
+        *ppvObject = static_cast<IOleWindow *>(this);
+    else if (iid == IID_IShellBrowser)
+        *ppvObject = static_cast<IShellBrowser *>(this);
+    else if (iid == IID_ICommDlgBrowser)
+        *ppvObject = static_cast<ICommDlgBrowser *>(this);
+    else if (iid == IID_IServiceProvider)
+        *ppvObject = static_cast<IServiceProvider *>(this);
+    else {
+        *ppvObject = NULL;
+        return E_NOINTERFACE;
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
-HRESULT IShellBrowserImpl::QueryService(REFGUID guidService, REFIID riid, void** ppvObject)
+HRESULT IShellBrowserImpl::QueryService(REFGUID guidService, REFIID riid, void **ppvObject)
 {
-	if (!ppvObject)
-		return E_POINTER;
+    if (!ppvObject)
+        return E_POINTER;
 
-	///@todo use guidService
+    ///@todo use guidService
 
-	if (riid == IID_IUnknown)
-		*ppvObject = (IUnknown*)static_cast<IShellBrowser*>(this);
-	else if (riid == IID_IOleWindow)
-		*ppvObject = static_cast<IOleWindow*>(this);
-	else if (riid == IID_IShellBrowser)
-		*ppvObject = static_cast<IShellBrowser*>(this);
-	else if (riid == IID_ICommDlgBrowser)
-		*ppvObject = static_cast<ICommDlgBrowser*>(this);
-	else if (riid == IID_IServiceProvider)
-		*ppvObject = static_cast<IServiceProvider*>(this);
-	else if (riid == IID_IOleCommandTarget)
-		*ppvObject = static_cast<IOleCommandTarget*>(this);
-	else {
-		*ppvObject = NULL;
-		return E_NOINTERFACE;
-	}
+    if (riid == IID_IUnknown)
+        *ppvObject = (IUnknown *)static_cast<IShellBrowser *>(this);
+    else if (riid == IID_IOleWindow)
+        *ppvObject = static_cast<IOleWindow *>(this);
+    else if (riid == IID_IShellBrowser)
+        *ppvObject = static_cast<IShellBrowser *>(this);
+    else if (riid == IID_ICommDlgBrowser)
+        *ppvObject = static_cast<ICommDlgBrowser *>(this);
+    else if (riid == IID_IServiceProvider)
+        *ppvObject = static_cast<IServiceProvider *>(this);
+    else if (riid == IID_IOleCommandTarget)
+        *ppvObject = static_cast<IOleCommandTarget *>(this);
+    else {
+        *ppvObject = NULL;
+        return E_NOINTERFACE;
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
-HRESULT IShellBrowserImpl::QueryStatus(const GUID* pguidCmdGroup, ULONG cCmds, OLECMD prgCmds[], OLECMDTEXT* pCmdText)
+HRESULT IShellBrowserImpl::QueryStatus(const GUID *pguidCmdGroup, ULONG cCmds, OLECMD prgCmds[], OLECMDTEXT *pCmdText)
 {
-	return E_FAIL;	///@todo implement IOleCommandTarget
+    return E_FAIL;  ///@todo implement IOleCommandTarget
 }
 
-HRESULT IShellBrowserImpl::Exec(const GUID* pguidCmdGroup, DWORD nCmdID, DWORD nCmdexecopt, VARIANT* pvaIn, VARIANT* pvaOut)
+HRESULT IShellBrowserImpl::Exec(const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmdexecopt, VARIANT *pvaIn, VARIANT *pvaOut)
 {
-	return E_FAIL;	///@todo implement IOleCommandTarget
+    return E_FAIL;  ///@todo implement IOleCommandTarget
 }
 
 
- // process default command: look for folders and traverse into them
-HRESULT IShellBrowserImpl::OnDefaultCommand(IShellView* ppshv)
+// process default command: look for folders and traverse into them
+HRESULT IShellBrowserImpl::OnDefaultCommand(IShellView *ppshv)
 {
-	IDataObject* selection;
+    IDataObject *selection;
 
-	HRESULT hr = ppshv->GetItemObject(SVGIO_SELECTION, IID_IDataObject, (void**)&selection);
-	if (FAILED(hr))
-		return hr;
+    HRESULT hr = ppshv->GetItemObject(SVGIO_SELECTION, IID_IDataObject, (void **)&selection);
+    if (FAILED(hr))
+        return hr;
 
-	PIDList pidList;
+    PIDList pidList;
 
-	hr = pidList.GetData(selection);
-	if (FAILED(hr)) {
-		selection->Release();
-		return hr;
-	}
+    hr = pidList.GetData(selection);
+    if (FAILED(hr)) {
+        selection->Release();
+        return hr;
+    }
 
-	hr = OnDefaultCommand(pidList);
+    hr = OnDefaultCommand(pidList);
 
-	selection->Release();
+    selection->Release();
 
-	return hr;
+    return hr;
 }

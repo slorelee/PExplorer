@@ -17,46 +17,46 @@
  */
 
 
- //
- // Explorer and Desktop clone
- //
- // desktopbar.h
- //
- // Martin Fuchs, 22.08.2003
- //
+//
+// Explorer and Desktop clone
+//
+// desktopbar.h
+//
+// Martin Fuchs, 22.08.2003
+//
 
 
-#define	CLASSNAME_EXPLORERBAR	TEXT("Shell_TrayWnd")
-#define	TITLE_EXPLORERBAR		TEXT("")	// use an empty window title, so windows taskmanager does not show the window in its application list
+#define CLASSNAME_EXPLORERBAR   TEXT("Shell_TrayWnd")
+#define TITLE_EXPLORERBAR       TEXT("")    // use an empty window title, so windows taskmanager does not show the window in its application list
 
-#define	IDC_START				0x1000
-#define	IDC_LOGOFF				0x1001
-#define	IDC_SHUTDOWN			0x1002
-#define	IDC_LAUNCH				0x1003
-#define	IDC_START_HELP			0x1004
-#define	IDC_SEARCH_FILES		0x1005
-#define	IDC_SEARCH_COMPUTER		0x1006
-#define	IDC_SETTINGS			0x1007
-#define	IDC_ADMIN				0x1008
-#define	IDC_DOCUMENTS			0x1009
-#define	IDC_RECENT				0x100A
-#define	IDC_FAVORITES			0x100B
-#define	IDC_PROGRAMS			0x100C
-#define	IDC_EXPLORE				0x100D
-#define	IDC_NETWORK				0x100E
-#define	IDC_CONNECTIONS			0x100F
-#define	IDC_DRIVES				0x1010
-#define	IDC_CONTROL_PANEL		0x1011
-#define	IDC_SETTINGS_MENU		0x1012
-#define	IDC_PRINTERS			0x1013
-#define	IDC_PRINTERS_MENU		0x1014
-#define	IDC_BROWSE				0x1015
-#define	IDC_SEARCH_PROGRAM		0x1016
-#define	IDC_SEARCH				0x1017
-#define	IDC_TERMINATE			0x1018
-#define	IDC_RESTART 			0x1019
+#define IDC_START               0x1000
+#define IDC_LOGOFF              0x1001
+#define IDC_SHUTDOWN            0x1002
+#define IDC_LAUNCH              0x1003
+#define IDC_START_HELP          0x1004
+#define IDC_SEARCH_FILES        0x1005
+#define IDC_SEARCH_COMPUTER     0x1006
+#define IDC_SETTINGS            0x1007
+#define IDC_ADMIN               0x1008
+#define IDC_DOCUMENTS           0x1009
+#define IDC_RECENT              0x100A
+#define IDC_FAVORITES           0x100B
+#define IDC_PROGRAMS            0x100C
+#define IDC_EXPLORE             0x100D
+#define IDC_NETWORK             0x100E
+#define IDC_CONNECTIONS         0x100F
+#define IDC_DRIVES              0x1010
+#define IDC_CONTROL_PANEL       0x1011
+#define IDC_SETTINGS_MENU       0x1012
+#define IDC_PRINTERS            0x1013
+#define IDC_PRINTERS_MENU       0x1014
+#define IDC_BROWSE              0x1015
+#define IDC_SEARCH_PROGRAM      0x1016
+#define IDC_SEARCH              0x1017
+#define IDC_TERMINATE           0x1018
+#define IDC_RESTART             0x1019
 
-#define	IDC_FIRST_MENU			0x3000
+#define IDC_FIRST_MENU          0x3000
 
 // hotkeys
 #define IDHK_EXPLORER 0
@@ -65,72 +65,71 @@
 #define IDHK_LOGOFF 3
 #define IDHK_STARTMENU 4
 
- /// desktop bar window, also known as "system tray"
+/// desktop bar window, also known as "system tray"
 struct DesktopBar : public
 #ifdef __REACTOS__
-	TrayIconControllerTemplate<
-				OwnerDrawParent<Window> >
+    TrayIconControllerTemplate <
+    OwnerDrawParent<Window> >
 #else
-	OwnerDrawParent<Window>
+    OwnerDrawParent<Window>
 #endif
 {
 #ifdef __REACTOS__
-	typedef TrayIconControllerTemplate<
-				OwnerDrawParent<Window> > super;
+    typedef TrayIconControllerTemplate <
+    OwnerDrawParent<Window> > super;
 #else
-	typedef OwnerDrawParent<Window> super;
+    typedef OwnerDrawParent<Window> super;
 #endif
 
-	DesktopBar(HWND hwnd);
-	~DesktopBar();
+    DesktopBar(HWND hwnd);
+    ~DesktopBar();
 
-	static HWND Create();
+    static HWND Create();
 
 protected:
-	RECT	_work_area_org;
-	int		_taskbar_pos;
-	int		_deskbar_pos_y;
-	LRESULT	Init(LPCREATESTRUCT pcs);
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	int		Notify(int id, NMHDR* pnmh);
-	int		Command(int id, int code);
+    RECT    _work_area_org;
+    int     _taskbar_pos;
+    int     _deskbar_pos_y;
+    LRESULT Init(LPCREATESTRUCT pcs);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Notify(int id, NMHDR *pnmh);
+    int     Command(int id, int code);
 
-	void	Resize(int cx, int cy);
-	void	ControlResize(WPARAM wparam, LPARAM lparam);
-	void	RegisterHotkeys(BOOL unreg = FALSE);
-	void	ProcessHotKey(int id_hotkey);
-	void	ShowOrHideStartMenu();
-	LRESULT	ProcessCopyData(COPYDATASTRUCT* pcd);
+    void    Resize(int cx, int cy);
+    void    ControlResize(WPARAM wparam, LPARAM lparam);
+    void    RegisterHotkeys(BOOL unreg = FALSE);
+    void    ProcessHotKey(int id_hotkey);
+    void    ShowOrHideStartMenu();
+    LRESULT ProcessCopyData(COPYDATASTRUCT *pcd);
 
-	WindowHandle _hwndTaskBar;
-	WindowHandle _hwndNotify;
-	WindowHandle _hwndQuickLaunch;
-	WindowHandle _hwndrebar;
-	/* Needed to make the StartButton pushed, if it's called by windowskey: SC_TASKLIST command */
-	WindowHandle _hwndStartButton;
+    WindowHandle _hwndTaskBar;
+    WindowHandle _hwndNotify;
+    WindowHandle _hwndQuickLaunch;
+    WindowHandle _hwndrebar;
+    /* Needed to make the StartButton pushed, if it's called by windowskey: SC_TASKLIST command */
+    WindowHandle _hwndStartButton;
 
-	struct StartMenuRoot* _startMenuRoot;
+    struct StartMenuRoot *_startMenuRoot;
 
-	HBITMAP _hbmQuickLaunchBack;
+    HBITMAP _hbmQuickLaunchBack;
 #ifdef __REACTOS__
-	TrayIcon	_trayIcon;
+    TrayIcon    _trayIcon;
 
-	void	AddTrayIcons();
-	virtual void TrayClick(UINT id, int btn);
-	virtual void TrayDblClick(UINT id, int btn);
+    void    AddTrayIcons();
+    virtual void TrayClick(UINT id, int btn);
+    virtual void TrayDblClick(UINT id, int btn);
 #else
-	const UINT WM_TASKBARCREATED;
+    const UINT WM_TASKBARCREATED;
 #endif
 };
 
 
- /// special "Start" button with one click activation
-struct StartButton : public PictureButton
-{
-	typedef PictureButton super;
+/// special "Start" button with one click activation
+struct StartButton : public PictureButton {
+    typedef PictureButton super;
 
-	StartButton(HWND hwnd, UINT nid, COLORREF textcolor = -1, bool flat = false);
+    StartButton(HWND hwnd, UINT nid, COLORREF textcolor = -1, bool flat = false);
 
 protected:
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
 };

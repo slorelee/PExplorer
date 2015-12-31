@@ -20,132 +20,132 @@
 
 #ifdef UNICODE
 
-void _wsplitpath(const WCHAR* path, WCHAR* drv, WCHAR* dir, WCHAR* name, WCHAR* ext)
+void _wsplitpath(const WCHAR *path, WCHAR *drv, WCHAR *dir, WCHAR *name, WCHAR *ext)
 {
-        const WCHAR* end; /* end of processed string */
-	const WCHAR* p;	  /* search pointer */
-	const WCHAR* s;	  /* copy pointer */
+    const WCHAR *end; /* end of processed string */
+    const WCHAR *p;   /* search pointer */
+    const WCHAR *s;   /* copy pointer */
 
-	/* extract drive name */
-	if (path[0] && path[1]==':') {
-		if (drv) {
-			*drv++ = *path++;
-			*drv++ = *path++;
-			*drv = L'\0';
-		}
-	} else if (drv)
-		*drv = L'\0';
+    /* extract drive name */
+    if (path[0] && path[1] == ':') {
+        if (drv) {
+            *drv++ = *path++;
+            *drv++ = *path++;
+            *drv = L'\0';
+        }
+    } else if (drv)
+        *drv = L'\0';
 
-	/* search for end of string or stream separator */
-	for(end=path; *end && *end!=L':'; )
-		end++;
+    /* search for end of string or stream separator */
+    for (end = path; *end && *end != L':';)
+        end++;
 
-	/* search for begin of file extension */
-	for(p=end; p>path && *--p!=L'\\' && *p!=L'/'; )
-		if (*p == L'.') {
-			end = p;
-			break;
-		}
+    /* search for begin of file extension */
+    for (p = end; p > path && *--p != L'\\' && *p != L'/';)
+        if (*p == L'.') {
+            end = p;
+            break;
+        }
 
-	if (ext)
-		for(s=end; *ext=*s++; )
-			ext++;
+    if (ext)
+        for (s = end; *ext = *s++;)
+            ext++;
 
-	/* search for end of directory name */
-	for(p=end; p>path; )
-		if (*--p=='\\' || *p=='/') {
-			p++;
-			break;
-		}
+    /* search for end of directory name */
+    for (p = end; p > path;)
+        if (*--p == '\\' || *p == '/') {
+            p++;
+            break;
+        }
 
-	if (name) {
-		for(s=p; s<end; )
-			*name++ = *s++;
+    if (name) {
+        for (s = p; s < end;)
+            *name++ = *s++;
 
-		*name = L'\0';
-	}
+        *name = L'\0';
+    }
 
-	if (dir) {
-		for(s=path; s<p; )
-			*dir++ = *s++;
+    if (dir) {
+        for (s = path; s < p;)
+            *dir++ = *s++;
 
-		*dir = L'\0';
-	}
+        *dir = L'\0';
+    }
 }
 
 #else
 
-void _splitpath(const CHAR* path, CHAR* drv, CHAR* dir, CHAR* name, CHAR* ext)
+void _splitpath(const CHAR *path, CHAR *drv, CHAR *dir, CHAR *name, CHAR *ext)
 {
-        const CHAR* end; /* end of processed string */
-	const CHAR* p;	 /* search pointer */
-	const CHAR* s;	 /* copy pointer */
+    const CHAR *end; /* end of processed string */
+    const CHAR *p;   /* search pointer */
+    const CHAR *s;   /* copy pointer */
 
-	/* extract drive name */
-	if (path[0] && path[1]==':') {
-		if (drv) {
-			*drv++ = *path++;
-			*drv++ = *path++;
-			*drv = '\0';
-		}
-	} else if (drv)
-		*drv = '\0';
+    /* extract drive name */
+    if (path[0] && path[1] == ':') {
+        if (drv) {
+            *drv++ = *path++;
+            *drv++ = *path++;
+            *drv = '\0';
+        }
+    } else if (drv)
+        *drv = '\0';
 
-	/* search for end of string or stream separator */
-	for(end=path; *end && *end!=':'; )
-		end++;
+    /* search for end of string or stream separator */
+    for (end = path; *end && *end != ':';)
+        end++;
 
-	/* search for begin of file extension */
-	for(p=end; p>path && *--p!='\\' && *p!='/'; )
-		if (*p == '.') {
-			end = p;
-			break;
-		}
+    /* search for begin of file extension */
+    for (p = end; p > path && *--p != '\\' && *p != '/';)
+        if (*p == '.') {
+            end = p;
+            break;
+        }
 
-	if (ext)
-		for(s=end; (*ext=*s++); )
-			ext++;
+    if (ext)
+        for (s = end; (*ext = *s++);)
+            ext++;
 
-	/* search for end of directory name */
-	for(p=end; p>path; )
-		if (*--p=='\\' || *p=='/') {
-			p++;
-			break;
-		}
+    /* search for end of directory name */
+    for (p = end; p > path;)
+        if (*--p == '\\' || *p == '/') {
+            p++;
+            break;
+        }
 
-	if (name) {
-		for(s=p; s<end; )
-			*name++ = *s++;
+    if (name) {
+        for (s = p; s < end;)
+            *name++ = *s++;
 
-		*name = '\0';
-	}
+        *name = '\0';
+    }
 
-	if (dir) {
-		for(s=path; s<p; )
-			*dir++ = *s++;
+    if (dir) {
+        for (s = path; s < p;)
+            *dir++ = *s++;
 
-		*dir = '\0';
-	}
+        *dir = '\0';
+    }
 }
 
 #endif
 
 /*
-void main()	// test splipath()
+void main() // test splipath()
 {
-	TCHAR drv[_MAX_DRIVE+1], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
+    TCHAR drv[_MAX_DRIVE+1], dir[_MAX_DIR], name[_MAX_FNAME], ext[_MAX_EXT];
 
-	_tsplitpath(L"x\\y", drv, dir, name, ext);
-	_tsplitpath(L"x\\", drv, dir, name, ext);
-	_tsplitpath(L"\\x", drv, dir, name, ext);
-	_tsplitpath(L"x", drv, dir, name, ext);
-	_tsplitpath(L"", drv, dir, name, ext);
-	_tsplitpath(L".x", drv, dir, name, ext);
-	_tsplitpath(L":x", drv, dir, name, ext);
-	_tsplitpath(L"a:x", drv, dir, name, ext);
-	_tsplitpath(L"a.b:x", drv, dir, name, ext);
-	_tsplitpath(L"W:\\/\\abc/Z:~", drv, dir, name, ext);
-	_tsplitpath(L"abc.EFGH:12345", drv, dir, name, ext);
-	_tsplitpath(L"C:/dos/command.com", drv, dir, name, ext);
+    _tsplitpath(L"x\\y", drv, dir, name, ext);
+    _tsplitpath(L"x\\", drv, dir, name, ext);
+    _tsplitpath(L"\\x", drv, dir, name, ext);
+    _tsplitpath(L"x", drv, dir, name, ext);
+    _tsplitpath(L"", drv, dir, name, ext);
+    _tsplitpath(L".x", drv, dir, name, ext);
+    _tsplitpath(L":x", drv, dir, name, ext);
+    _tsplitpath(L"a:x", drv, dir, name, ext);
+    _tsplitpath(L"a.b:x", drv, dir, name, ext);
+    _tsplitpath(L"W:\\/\\abc/Z:~", drv, dir, name, ext);
+    _tsplitpath(L"abc.EFGH:12345", drv, dir, name, ext);
+    _tsplitpath(L"C:/dos/command.com", drv, dir, name, ext);
 }
 */

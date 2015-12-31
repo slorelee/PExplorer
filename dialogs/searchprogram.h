@@ -17,92 +17,89 @@
  */
 
 
- //
- // Explorer clone
- //
- // dialogs/searchprogram.h
- //
- // Explorer dialogs
- //
- // Martin Fuchs, 02.10.2003
- //
+//
+// Explorer clone
+//
+// dialogs/searchprogram.h
+//
+// Explorer dialogs
+//
+// Martin Fuchs, 02.10.2003
+//
 
 
-typedef void (*COLLECT_CALLBACK)(Entry* entry, void* param);
-typedef stack<ShellDirectory*> ShellDirectoryStack;
+typedef void (*COLLECT_CALLBACK)(Entry *entry, void *param);
+typedef stack<ShellDirectory *> ShellDirectoryStack;
 
- /// Thread for collecting start menu entries
-struct CollectProgramsThread : public Thread
-{
-	CollectProgramsThread(COLLECT_CALLBACK callback, HWND hwnd, void* para)
-	 :	_cache_valid(false),
-		_callback(callback),
-		_hwnd(hwnd),
-		_para(para)
-	{
-	}
+/// Thread for collecting start menu entries
+struct CollectProgramsThread : public Thread {
+    CollectProgramsThread(COLLECT_CALLBACK callback, HWND hwnd, void *para)
+        :  _cache_valid(false),
+           _callback(callback),
+           _hwnd(hwnd),
+           _para(para)
+    {
+    }
 
-	~CollectProgramsThread()
-	{
-		free_dirs();
-	}
+    ~CollectProgramsThread()
+    {
+        free_dirs();
+    }
 
-	int		Run();
-	void	free_dirs();
+    int     Run();
+    void    free_dirs();
 
-	bool	_cache_valid;
+    bool    _cache_valid;
 
 protected:
-	COLLECT_CALLBACK _callback;
-	HWND	_hwnd;
-	void*	_para;
-	ShellDirectoryStack _dirs;
+    COLLECT_CALLBACK _callback;
+    HWND    _hwnd;
+    void   *_para;
+    ShellDirectoryStack _dirs;
 
-	void	collect_programs(const ShellPath& path);
+    void    collect_programs(const ShellPath &path);
 };
 
 
- /// entry for the list in "find program" dialogs
-struct FPDEntry
-{
-	Entry*	_entry;
-	int		_idxIcon;
-	String	_menu_path;
-	String	_path;
+/// entry for the list in "find program" dialogs
+struct FPDEntry {
+    Entry  *_entry;
+    int     _idxIcon;
+    String  _menu_path;
+    String  _path;
 };
 
 typedef list<FPDEntry> FPDCache;
 
 
- /// Dialog to work with the complete list of start menu entries
-struct FindProgramDlg : public ResizeController<Dialog>
-{
-	typedef ResizeController<Dialog> super;
+/// Dialog to work with the complete list of start menu entries
+struct FindProgramDlg : public ResizeController<Dialog> {
+    typedef ResizeController<Dialog> super;
 
-	FindProgramDlg(HWND hwnd);
-	~FindProgramDlg();
+    FindProgramDlg(HWND hwnd);
+    ~FindProgramDlg();
 
 protected:
-	HWND	_list_ctrl;
-	HACCEL	_haccel;
-	String	_lwr_filter;
+    HWND    _list_ctrl;
+    HACCEL  _haccel;
+    String  _lwr_filter;
 
-	CollectProgramsThread _thread;
-	FPDCache _cache;
+    CollectProgramsThread _thread;
+    FPDCache _cache;
 
-	String	_common_programs, _user_programs;
+    String  _common_programs, _user_programs;
 
-	ListSort _sort;
+    ListSort _sort;
 
-	virtual LRESULT WndProc(UINT, WPARAM, LPARAM);
-	virtual int	Command(int id, int code);
-	virtual int	Notify(int id, NMHDR* pnmh);
+    virtual LRESULT WndProc(UINT, WPARAM, LPARAM);
+    virtual int Command(int id, int code);
+    virtual int Notify(int id, NMHDR *pnmh);
 
-	void	Refresh(bool delete_cache=false);
-	void	add_entry(const FPDEntry& cache_entry);
-	void	LaunchSelected();
-	void	CheckEntries();
+    void    Refresh(bool delete_cache = false);
+    void    add_entry(const FPDEntry &cache_entry);
+    void    LaunchSelected();
+    void    CheckEntries();
 
-	static void collect_programs_callback(Entry* entry, void* param);
-	static int CALLBACK CompareFunc(LPARAM lparam1, LPARAM lparam2, LPARAM lparamSort);
+    static void collect_programs_callback(Entry *entry, void *param);
+    static int CALLBACK CompareFunc(LPARAM lparam1, LPARAM lparam2, LPARAM lparamSort);
 };

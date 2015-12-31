@@ -67,145 +67,129 @@ static BOOL wininit()
 
 static BOOL pendingRename()
 {
-    static const WCHAR ValueName[] = {'P','e','n','d','i','n','g',
-                                      'F','i','l','e','R','e','n','a','m','e',
-                                      'O','p','e','r','a','t','i','o','n','s',0};
-    static const WCHAR SessionW[] = { 'S','y','s','t','e','m','\\',
-                                     'C','u','r','r','e','n','t','C','o','n','t','r','o','l','S','e','t','\\',
-                                     'C','o','n','t','r','o','l','\\',
-                                     'S','e','s','s','i','o','n',' ','M','a','n','a','g','e','r',0};
-    WCHAR *buffer=NULL;
-    const WCHAR *src=NULL, *dst=NULL;
-    DWORD dataLength=0;
-    HKEY hSession=NULL;
+    static const WCHAR ValueName[] = {'P', 'e', 'n', 'd', 'i', 'n', 'g',
+                                      'F', 'i', 'l', 'e', 'R', 'e', 'n', 'a', 'm', 'e',
+                                      'O', 'p', 'e', 'r', 'a', 't', 'i', 'o', 'n', 's', 0
+                                     };
+    static const WCHAR SessionW[] = { 'S', 'y', 's', 't', 'e', 'm', '\\',
+                                      'C', 'u', 'r', 'r', 'e', 'n', 't', 'C', 'o', 'n', 't', 'r', 'o', 'l', 'S', 'e', 't', '\\',
+                                      'C', 'o', 'n', 't', 'r', 'o', 'l', '\\',
+                                      'S', 'e', 's', 's', 'i', 'o', 'n', ' ', 'M', 'a', 'n', 'a', 'g', 'e', 'r', 0
+                                    };
+    WCHAR *buffer = NULL;
+    const WCHAR *src = NULL, *dst = NULL;
+    DWORD dataLength = 0;
+    HKEY hSession = NULL;
     DWORD res;
 
     printf("Entered\n");
 
-    if ((res=RegOpenKeyExW(HKEY_LOCAL_MACHINE, SessionW, 0, KEY_ALL_ACCESS, &hSession))
-            !=ERROR_SUCCESS)
-    {
-        if (res==ERROR_FILE_NOT_FOUND)
-        {
+    if ((res = RegOpenKeyExW(HKEY_LOCAL_MACHINE, SessionW, 0, KEY_ALL_ACCESS, &hSession))
+        != ERROR_SUCCESS) {
+        if (res == ERROR_FILE_NOT_FOUND) {
             printf("The key was not found - skipping\n");
-            res=TRUE;
-        }
-        else
-        {
+            res = TRUE;
+        } else {
             printf("Couldn't open key, error %ld\n", res);
-            res=FALSE;
+            res = FALSE;
         }
 
         goto end;
     }
 
-    res=RegQueryValueExW(hSession, ValueName, NULL, NULL /* The value type does not really interest us, as it is not
+    res = RegQueryValueExW(hSession, ValueName, NULL, NULL /* The value type does not really interest us, as it is not
                                                              truely a REG_MULTI_SZ anyways */,
-            NULL, &dataLength);
-    if (res==ERROR_FILE_NOT_FOUND)
-    {
+                           NULL, &dataLength);
+    if (res == ERROR_FILE_NOT_FOUND) {
         /* No value - nothing to do. Great! */
         printf("Value not present - nothing to rename\n");
-        res=TRUE;
+        res = TRUE;
         goto end;
     }
 
-    if (res!=ERROR_SUCCESS)
-    {
+    if (res != ERROR_SUCCESS) {
         printf("Couldn't query value's length (%ld)\n", res);
-        res=FALSE;
+        res = FALSE;
         goto end;
     }
 
-    buffer=malloc(dataLength);
-    if (buffer==NULL)
-    {
+    buffer = malloc(dataLength);
+    if (buffer == NULL) {
         printf("Couldn't allocate %lu bytes for the value\n", dataLength);
-        res=FALSE;
+        res = FALSE;
         goto end;
     }
 
-    res=RegQueryValueExW(hSession, ValueName, NULL, NULL, (LPBYTE)buffer, &dataLength);
-    if (res!=ERROR_SUCCESS)
-    {
+    res = RegQueryValueExW(hSession, ValueName, NULL, NULL, (LPBYTE)buffer, &dataLength);
+    if (res != ERROR_SUCCESS) {
         printf("Couldn't query value after successfully querying before (%lu),\n"
-                "please report to wine-devel@winehq.org\n", res);
-        res=FALSE;
+               "please report to wine-devel@winehq.org\n", res);
+        res = FALSE;
         goto end;
     }
 
     /* Make sure that the data is long enough and ends with two NULLs. This
      * simplifies the code later on.
      */
-    if (dataLength<2*sizeof(buffer[0]) ||
-            buffer[dataLength/sizeof(buffer[0])-1]!='\0' ||
-            buffer[dataLength/sizeof(buffer[0])-2]!='\0')
-    {
+    if (dataLength < 2 * sizeof(buffer[0]) ||
+        buffer[dataLength / sizeof(buffer[0]) - 1] != '\0' ||
+        buffer[dataLength / sizeof(buffer[0]) - 2] != '\0') {
         printf("Improper value format - doesn't end with NULL\n");
-        res=FALSE;
+        res = FALSE;
         goto end;
     }
 
-    for(src=buffer; (src-buffer)*sizeof(src[0])<dataLength && *src!='\0';
-            src=dst+lstrlenW(dst)+1)
-    {
-        DWORD dwFlags=0;
+    for (src = buffer; (src - buffer)*sizeof(src[0]) < dataLength && *src != '\0';
+         src = dst + lstrlenW(dst) + 1) {
+        DWORD dwFlags = 0;
 
         printf("processing next command\n");
 
-        dst=src+lstrlenW(src)+1;
+        dst = src + lstrlenW(src) + 1;
 
         /* We need to skip the \??\ header */
-        if (src[0]=='\\' && src[1]=='?' && src[2]=='?' && src[3]=='\\')
-            src+=4;
+        if (src[0] == '\\' && src[1] == '?' && src[2] == '?' && src[3] == '\\')
+            src += 4;
 
-        if (dst[0]=='!')
-        {
-            dwFlags|=MOVEFILE_REPLACE_EXISTING;
+        if (dst[0] == '!') {
+            dwFlags |= MOVEFILE_REPLACE_EXISTING;
             dst++;
         }
 
-        if (dst[0]=='\\' && dst[1]=='?' && dst[2]=='?' && dst[3]=='\\')
-            dst+=4;
+        if (dst[0] == '\\' && dst[1] == '?' && dst[2] == '?' && dst[3] == '\\')
+            dst += 4;
 
-        if (*dst!='\0')
-        {
+        if (*dst != '\0') {
             /* Rename the file */
             MoveFileExW(src, dst, dwFlags);
-        } else
-        {
+        } else {
             /* Delete the file or directory */
-			res = GetFileAttributesW (src);
-            if (res != (DWORD)-1)
-            {
-                if ((res&FILE_ATTRIBUTE_DIRECTORY)==0)
-                {
+            res = GetFileAttributesW(src);
+            if (res != (DWORD) - 1) {
+                if ((res & FILE_ATTRIBUTE_DIRECTORY) == 0) {
                     /* It's a file */
                     DeleteFileW(src);
-                } else
-                {
+                } else {
                     /* It's a directory */
                     RemoveDirectoryW(src);
                 }
-            } else
-            {
+            } else {
                 printf("couldn't get file attributes (%ld)\n", GetLastError());
             }
         }
     }
 
-    if ((res=RegDeleteValueW(hSession, ValueName))!=ERROR_SUCCESS)
-    {
+    if ((res = RegDeleteValueW(hSession, ValueName)) != ERROR_SUCCESS) {
         printf("Error deleting the value (%lu)\n", GetLastError());
-        res=FALSE;
+        res = FALSE;
     } else
-        res=TRUE;
+        res = TRUE;
 
 end:
-    if (buffer!=NULL)
+    if (buffer != NULL)
         free(buffer);
 
-    if (hSession!=NULL)
+    if (hSession != NULL)
         RegCloseKey(hSession);
 
     return res;
@@ -215,12 +199,11 @@ enum runkeys {
     RUNKEY_RUN, RUNKEY_RUNONCE, RUNKEY_RUNSERVICES, RUNKEY_RUNSERVICESONCE
 };
 
-const WCHAR runkeys_names[][30]=
-{
-    {'R','u','n',0},
-    {'R','u','n','O','n','c','e',0},
-    {'R','u','n','S','e','r','v','i','c','e','s',0},
-    {'R','u','n','S','e','r','v','i','c','e','s','O','n','c','e',0}
+const WCHAR runkeys_names[][30] = {
+    {'R', 'u', 'n', 0},
+    {'R', 'u', 'n', 'O', 'n', 'c', 'e', 0},
+    {'R', 'u', 'n', 'S', 'e', 'r', 'v', 'i', 'c', 'e', 's', 0},
+    {'R', 'u', 'n', 'S', 'e', 'r', 'v', 'i', 'c', 'e', 's', 'O', 'n', 'c', 'e', 0}
 };
 
 #define INVALID_RUNCMD_RETURN -1
@@ -240,32 +223,30 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
 {
     STARTUPINFOW si;
     PROCESS_INFORMATION info;
-    DWORD exit_code=0;
-    WCHAR szCmdLineExp[MAX_PATH+1]= L"\0";
+    DWORD exit_code = 0;
+    WCHAR szCmdLineExp[MAX_PATH + 1] = L"\0";
 
     ExpandEnvironmentStringsW(cmdline, szCmdLineExp, sizeof(szCmdLineExp) / sizeof(WCHAR));
 
     memset(&si, 0, sizeof(si));
-    si.cb=sizeof(si);
-    if (minimized)
-    {
-        si.dwFlags=STARTF_USESHOWWINDOW;
-        si.wShowWindow=SW_MINIMIZE;
+    si.cb = sizeof(si);
+    if (minimized) {
+        si.dwFlags = STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_MINIMIZE;
     }
     memset(&info, 0, sizeof(info));
 
-    if (!CreateProcessW(NULL, szCmdLineExp, NULL, NULL, FALSE, 0, NULL, dir, &si, &info))
-    {
+    if (!CreateProcessW(NULL, szCmdLineExp, NULL, NULL, FALSE, 0, NULL, dir, &si, &info)) {
         printf("Failed to run command (%ld)\n", GetLastError());
 
         return INVALID_RUNCMD_RETURN;
     }
 
     printf("Successfully ran command\n"); //%s - Created process handle %p\n",
-               //wine_dbgstr_w(szCmdLineExp), info.hProcess);
+    //wine_dbgstr_w(szCmdLineExp), info.hProcess);
 
-    if (wait)
-    {   /* wait for the process to exit */
+    if (wait) {
+        /* wait for the process to exit */
         WaitForSingleObject(info.hProcess, INFINITE);
         GetExitCodeProcess(info.hProcess, &exit_code);
     }
@@ -286,88 +267,79 @@ static int runCmd(LPWSTR cmdline, LPCWSTR dir, BOOL wait, BOOL minimized)
  *      going on to the next prog.
  */
 static BOOL ProcessRunKeys(HKEY hkRoot, LPCWSTR szKeyName, BOOL bDelete,
-        BOOL bSynchronous)
+                           BOOL bSynchronous)
 {
-    static const WCHAR WINKEY_NAME[]={'S','o','f','t','w','a','r','e','\\',
-        'M','i','c','r','o','s','o','f','t','\\','W','i','n','d','o','w','s','\\',
-        'C','u','r','r','e','n','t','V','e','r','s','i','o','n',0};
-    HKEY hkWin=NULL, hkRun=NULL;
-    LONG res=ERROR_SUCCESS;
-    DWORD i, nMaxCmdLine=0, nMaxValue=0;
-    WCHAR *szCmdLine=NULL;
-    WCHAR *szValue=NULL;
+    static const WCHAR WINKEY_NAME[] = {'S', 'o', 'f', 't', 'w', 'a', 'r', 'e', '\\',
+                                        'M', 'i', 'c', 'r', 'o', 's', 'o', 'f', 't', '\\', 'W', 'i', 'n', 'd', 'o', 'w', 's', '\\',
+                                        'C', 'u', 'r', 'r', 'e', 'n', 't', 'V', 'e', 'r', 's', 'i', 'o', 'n', 0
+                                       };
+    HKEY hkWin = NULL, hkRun = NULL;
+    LONG res = ERROR_SUCCESS;
+    DWORD i, nMaxCmdLine = 0, nMaxValue = 0;
+    WCHAR *szCmdLine = NULL;
+    WCHAR *szValue = NULL;
 
-    if (hkRoot==HKEY_LOCAL_MACHINE)
+    if (hkRoot == HKEY_LOCAL_MACHINE)
         wprintf(L"processing %s entries under HKLM\n", szKeyName);
     else
         wprintf(L"processing %s entries under HKCU\n", szKeyName);
 
-    if ((res=RegOpenKeyExW(hkRoot, WINKEY_NAME, 0, KEY_READ, &hkWin))!=ERROR_SUCCESS)
-    {
+    if ((res = RegOpenKeyExW(hkRoot, WINKEY_NAME, 0, KEY_READ, &hkWin)) != ERROR_SUCCESS) {
         printf("RegOpenKey failed on Software\\Microsoft\\Windows\\CurrentVersion (%ld)\n",
-                res);
+               res);
 
         goto end;
     }
 
-    if ((res=RegOpenKeyExW(hkWin, szKeyName, 0, bDelete?KEY_ALL_ACCESS:KEY_READ, &hkRun))!=
-            ERROR_SUCCESS)
-    {
-        if (res==ERROR_FILE_NOT_FOUND)
-        {
+    if ((res = RegOpenKeyExW(hkWin, szKeyName, 0, bDelete ? KEY_ALL_ACCESS : KEY_READ, &hkRun)) !=
+        ERROR_SUCCESS) {
+        if (res == ERROR_FILE_NOT_FOUND) {
             printf("Key doesn't exist - nothing to be done\n");
 
-            res=ERROR_SUCCESS;
-        }
-        else
+            res = ERROR_SUCCESS;
+        } else
             printf("RegOpenKey failed on run key (%ld)\n", res);
 
         goto end;
     }
 
-    if ((res=RegQueryInfoKeyW(hkRun, NULL, NULL, NULL, NULL, NULL, NULL, &i, &nMaxValue,
-                    &nMaxCmdLine, NULL, NULL))!=ERROR_SUCCESS)
-    {
+    if ((res = RegQueryInfoKeyW(hkRun, NULL, NULL, NULL, NULL, NULL, NULL, &i, &nMaxValue,
+                                &nMaxCmdLine, NULL, NULL)) != ERROR_SUCCESS) {
         printf("Couldn't query key info (%ld)\n", res);
 
         goto end;
     }
 
-    if (i==0)
-    {
+    if (i == 0) {
         printf("No commands to execute.\n");
 
-        res=ERROR_SUCCESS;
+        res = ERROR_SUCCESS;
         goto end;
     }
 
-    if ((szCmdLine=malloc(nMaxCmdLine))==NULL)
-    {
+    if ((szCmdLine = malloc(nMaxCmdLine)) == NULL) {
         printf("Couldn't allocate memory for the commands to be executed\n");
 
-        res=ERROR_NOT_ENOUGH_MEMORY;
+        res = ERROR_NOT_ENOUGH_MEMORY;
         goto end;
     }
 
-    if ((szValue=malloc((++nMaxValue)*sizeof(*szValue)))==NULL)
-    {
+    if ((szValue = malloc((++nMaxValue) * sizeof(*szValue))) == NULL) {
         printf("Couldn't allocate memory for the value names\n");
 
         free(szCmdLine);
-        res=ERROR_NOT_ENOUGH_MEMORY;
+        res = ERROR_NOT_ENOUGH_MEMORY;
         goto end;
     }
 
-    while(i>0)
-    {
-        DWORD nValLength=nMaxValue, nDataLength=nMaxCmdLine;
+    while (i > 0) {
+        DWORD nValLength = nMaxValue, nDataLength = nMaxCmdLine;
         DWORD type;
 
         --i;
 
-        if ((res=RegEnumValueW(hkRun, i, szValue, &nValLength, 0, &type,
-                        (LPBYTE)szCmdLine, &nDataLength))!=ERROR_SUCCESS)
-        {
+        if ((res = RegEnumValueW(hkRun, i, szValue, &nValLength, 0, &type,
+                                 (LPBYTE)szCmdLine, &nDataLength)) != ERROR_SUCCESS) {
             printf("Couldn't read in value %ld - %ld\n", i, res);
 
             continue;
@@ -376,20 +348,17 @@ static BOOL ProcessRunKeys(HKEY hkRoot, LPCWSTR szKeyName, BOOL bDelete,
         /* safe mode - force to run if prefixed with asterisk */
         if (GetSystemMetrics(SM_CLEANBOOT) && (szValue[0] != L'*')) continue;
 
-        if (bDelete && (res=RegDeleteValueW(hkRun, szValue))!=ERROR_SUCCESS)
-        {
+        if (bDelete && (res = RegDeleteValueW(hkRun, szValue)) != ERROR_SUCCESS) {
             printf("Couldn't delete value - %ld, %ld. Running command anyways.\n", i, res);
         }
 
-        if (type!=REG_SZ)
-        {
+        if (type != REG_SZ) {
             printf("Incorrect type of value #%ld (%ld)\n", i, type);
 
             continue;
         }
 
-        if ((res=runCmd(szCmdLine, NULL, bSynchronous, FALSE))==INVALID_RUNCMD_RETURN)
-        {
+        if ((res = runCmd(szCmdLine, NULL, bSynchronous, FALSE)) == INVALID_RUNCMD_RETURN) {
             printf("Error running cmd #%ld (%ld)\n", i, GetLastError());
         }
 
@@ -398,20 +367,20 @@ static BOOL ProcessRunKeys(HKEY hkRoot, LPCWSTR szKeyName, BOOL bDelete,
 
     free(szValue);
     free(szCmdLine);
-    res=ERROR_SUCCESS;
+    res = ERROR_SUCCESS;
 
 end:
-    if (hkRun!=NULL)
+    if (hkRun != NULL)
         RegCloseKey(hkRun);
-    if (hkWin!=NULL)
+    if (hkWin != NULL)
         RegCloseKey(hkWin);
 
     printf("done\n");
 
-    return res==ERROR_SUCCESS?TRUE:FALSE;
+    return res == ERROR_SUCCESS ? TRUE : FALSE;
 }
 
- /// structure holding startup flags
+/// structure holding startup flags
 struct op_mask {
     BOOL w9xonly; /* Perform only operations done on Windows 9x */
     BOOL ntonly; /* Perform only operations done on Windows NT */
@@ -422,8 +391,8 @@ struct op_mask {
 };
 
 static const struct op_mask
-	SESSION_START	= {FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-    SETUP			= {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE};
+    SESSION_START   = {FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+SETUP           = {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE};
 #define DEFAULT SESSION_START
 
 int startup(int argc, const char *argv[])
@@ -435,25 +404,21 @@ int startup(int argc, const char *argv[])
 
     res = GetWindowsDirectory(gen_path, sizeof(gen_path));
 
-    if (res==0)
-    {
-		printf("Couldn't get the windows directory - error %ld\n",
-			GetLastError());
+    if (res == 0) {
+        printf("Couldn't get the windows directory - error %ld\n",
+               GetLastError());
 
-		return 100;
+        return 100;
     }
 
-    if (!SetCurrentDirectory(gen_path))
-    {
+    if (!SetCurrentDirectory(gen_path)) {
         wprintf(L"Cannot set the dir to %s (%ld)\n", gen_path, GetLastError());
 
         return 100;
     }
 
-    if (argc > 1)
-    {
-        switch(argv[1][0])
-        {
+    if (argc > 1) {
+        switch (argv[1][0]) {
         case 'r': /* Restart */
             ops = SETUP;
             break;
@@ -468,27 +433,27 @@ int startup(int argc, const char *argv[])
         ops = DEFAULT;
 
     /* do not run certain items in Safe Mode */
-    if(GetSystemMetrics(SM_CLEANBOOT)) ops.startup = FALSE;
+    if (GetSystemMetrics(SM_CLEANBOOT)) ops.startup = FALSE;
 
     /* Perform the ops by order, stopping if one fails, skipping if necessary */
     /* Shachar: Sorry for the perl syntax */
     res = TRUE;
     if (res && !ops.ntonly && ops.preboot)
-         res = wininit();
+        res = wininit();
     if (res && !ops.w9xonly && ops.preboot)
-         res = pendingRename();
+        res = pendingRename();
     if (res && !ops.ntonly && ops.prelogin)
-         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICESONCE], TRUE, FALSE);
+        res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICESONCE], TRUE, FALSE);
     if (res && !ops.ntonly && ops.prelogin && ops.startup)
-         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICES], FALSE, FALSE);
+        res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNSERVICES], FALSE, FALSE);
     if (res && ops.postlogin)
-         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNONCE], TRUE, TRUE);
+        res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUNONCE], TRUE, TRUE);
     if (res && ops.postlogin && ops.startup)
-         res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
+        res = ProcessRunKeys(HKEY_LOCAL_MACHINE, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
     if (res && ops.postlogin && ops.startup)
-         res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
+        res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUN], FALSE, FALSE);
     if (res && ops.postlogin && ops.startup)
-         res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUNONCE], TRUE, FALSE);
+        res = ProcessRunKeys(HKEY_CURRENT_USER, runkeys_names[RUNKEY_RUNONCE], TRUE, FALSE);
 
     printf("Operation done\n");
 

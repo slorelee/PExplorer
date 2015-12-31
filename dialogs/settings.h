@@ -17,81 +17,77 @@
  */
 
 
- //
- // Explorer clone
- //
- // dialogs/settings.h
- //
- // Explorer dialogs
- //
- // Martin Fuchs, 18.01.2004
- //
+//
+// Explorer clone
+//
+// dialogs/settings.h
+//
+// Explorer dialogs
+//
+// Martin Fuchs, 18.01.2004
+//
 
 
 void ExplorerPropertySheet(HWND hparent);
 
 
- /// "Desktopbar Settings" Property Sheet Dialog
-struct DesktopSettingsDlg : public OwnerDrawParent<PropSheetPageDlg>
-{
-	typedef OwnerDrawParent<PropSheetPageDlg> super;
+/// "Desktopbar Settings" Property Sheet Dialog
+struct DesktopSettingsDlg : public OwnerDrawParent<PropSheetPageDlg> {
+    typedef OwnerDrawParent<PropSheetPageDlg> super;
 
-	DesktopSettingsDlg(HWND hwnd);
+    DesktopSettingsDlg(HWND hwnd);
 
 protected:
-	ResBitmap	_bmp0;
-	ResBitmap	_bmp1;
-	ResBitmap	_bmp2;
-	ResBitmap	_bmp3;
-	ResBitmap	_bmp4;
-	ResBitmap	_bmp5;
-	ResBitmap	_bmp6;
-	ResBitmap	_bmp7;
-	ResBitmap	_bmp8;
-	ResBitmap	_bmp9;
-	ResBitmap	_bmp10;
+    ResBitmap   _bmp0;
+    ResBitmap   _bmp1;
+    ResBitmap   _bmp2;
+    ResBitmap   _bmp3;
+    ResBitmap   _bmp4;
+    ResBitmap   _bmp5;
+    ResBitmap   _bmp6;
+    ResBitmap   _bmp7;
+    ResBitmap   _bmp8;
+    ResBitmap   _bmp9;
+    ResBitmap   _bmp10;
 
-	int	_alignment_cur;
-	int	_alignment_tmp;
+    int _alignment_cur;
+    int _alignment_tmp;
 
-	virtual int Command(int id, int code);
-	virtual int Notify(int id, NMHDR* pnmh);
+    virtual int Command(int id, int code);
+    virtual int Notify(int id, NMHDR *pnmh);
 };
 
 
- /// "Taskbar Settings" Property Sheet Dialog
-struct TaskbarSettingsDlg : public PropSheetPageDlg
-{
-	typedef PropSheetPageDlg super;
+/// "Taskbar Settings" Property Sheet Dialog
+struct TaskbarSettingsDlg : public PropSheetPageDlg {
+    typedef PropSheetPageDlg super;
 
-	TaskbarSettingsDlg(HWND hwnd);
+    TaskbarSettingsDlg(HWND hwnd);
 
-	virtual int	Command(int id, int code);
-	virtual int Notify(int id, NMHDR* pnmh);
+    virtual int Command(int id, int code);
+    virtual int Notify(int id, NMHDR *pnmh);
 
 protected:
 
 };
 
 
- /// "Startmenu Settings" Property Sheet Dialog
-struct StartmenuSettingsDlg : public PropSheetPageDlg
-{
-	typedef PropSheetPageDlg super;
+/// "Startmenu Settings" Property Sheet Dialog
+struct StartmenuSettingsDlg : public PropSheetPageDlg {
+    typedef PropSheetPageDlg super;
 
-	StartmenuSettingsDlg(HWND hwnd);
+    StartmenuSettingsDlg(HWND hwnd);
 
-	virtual int	Command(int id, int code);
+    virtual int Command(int id, int code);
 };
 
 
- /// configuration dialog to choose between MDI and SDI mode
-struct MdiSdiDlg : public ResizeController<Dialog>
-{
-	typedef ResizeController<Dialog> super;
+/// configuration dialog to choose between MDI and SDI mode
+struct MdiSdiDlg : public ResizeController<Dialog> {
+    typedef ResizeController<Dialog> super;
 
-	MdiSdiDlg(HWND hwnd);
+    MdiSdiDlg(HWND hwnd);
 
 protected:
-	virtual int	Command(int id, int code);
+    virtual int Command(int id, int code);
 };

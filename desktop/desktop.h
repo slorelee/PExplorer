@@ -17,108 +17,106 @@
  */
 
 
- //
- // Explorer clone
- //
- // desktop.h
- //
- // Martin Fuchs, 09.08.2003
- //
+//
+// Explorer clone
+//
+// desktop.h
+//
+// Martin Fuchs, 09.08.2003
+//
 
-#define	PM_SET_ICON_ALGORITHM	(WM_APP+0x19)
-#define	PM_GET_ICON_ALGORITHM	(WM_APP+0x1A)
+#define PM_SET_ICON_ALGORITHM   (WM_APP+0x19)
+#define PM_GET_ICON_ALGORITHM   (WM_APP+0x1A)
 
 /*
  /// subclassed background window behind the visible desktop window
 struct BackgroundWindow : public SubclassedWindow
 {
-	typedef SubclassedWindow super;
+    typedef SubclassedWindow super;
 
-	BackgroundWindow(HWND hwnd);
+    BackgroundWindow(HWND hwnd);
 
 protected:
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
 
-	void	DrawDesktopBkgnd(HDC hdc);
+    void    DrawDesktopBkgnd(HDC hdc);
 
-	int		_display_version;
+    int     _display_version;
 };
 */
 
- /// Implementation of the Explorer desktop window
-struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl
-{
-	typedef PreTranslateWindow super;
+/// Implementation of the Explorer desktop window
+struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl {
+    typedef PreTranslateWindow super;
 
-	DesktopWindow(HWND hwnd);
-	~DesktopWindow();
+    DesktopWindow(HWND hwnd);
+    ~DesktopWindow();
 
-	static HWND Create();
+    static HWND Create();
 
-	virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND* lphwnd)
-	{
-		*lphwnd = _hwnd;
-		return S_OK;
-	}
+    virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *lphwnd)
+    {
+        *lphwnd = _hwnd;
+        return S_OK;
+    }
 
-	virtual HRESULT STDMETHODCALLTYPE QueryActiveShellView(IShellView** ppshv)
-	{
-		_pShellView->AddRef();
-		*ppshv = _pShellView;
-		return S_OK;
-	}
+    virtual HRESULT STDMETHODCALLTYPE QueryActiveShellView(IShellView **ppshv)
+    {
+        _pShellView->AddRef();
+        *ppshv = _pShellView;
+        return S_OK;
+    }
 
-	virtual HRESULT STDMETHODCALLTYPE GetControlWindow(UINT id, HWND* lphwnd)
-	{
-		return E_NOTIMPL;
-	}
+    virtual HRESULT STDMETHODCALLTYPE GetControlWindow(UINT id, HWND *lphwnd)
+    {
+        return E_NOTIMPL;
+    }
 
-	virtual HRESULT STDMETHODCALLTYPE SendControlMsg(UINT id, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* pret)
-	{
-		return E_NOTIMPL;
-	}
+    virtual HRESULT STDMETHODCALLTYPE SendControlMsg(UINT id, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *pret)
+    {
+        return E_NOTIMPL;
+    }
 
 protected:
-	LRESULT	Init(LPCREATESTRUCT pcs);
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    LRESULT Init(LPCREATESTRUCT pcs);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
 
-	IShellView*	_pShellView;
-	WindowHandle _desktopBar;
+    IShellView *_pShellView;
+    WindowHandle _desktopBar;
 
-	virtual HRESULT OnDefaultCommand(LPIDA pida);
+    virtual HRESULT OnDefaultCommand(LPIDA pida);
 };
 
 
- /// subclassed ShellView window
-struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow>
-{
-	typedef ExtContextMenuHandlerT<SubclassedWindow> super;
+/// subclassed ShellView window
+struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow> {
+    typedef ExtContextMenuHandlerT<SubclassedWindow> super;
 
-	DesktopShellView(HWND hwnd, IShellView* pShellView);
-	~DesktopShellView();
+    DesktopShellView(HWND hwnd, IShellView *pShellView);
+    ~DesktopShellView();
 
-	bool	InitDragDrop();
+    bool    InitDragDrop();
 
 protected:
-	IShellView* _pShellView;
+    IShellView *_pShellView;
 
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	int		Command(int id, int code);
-	int		Notify(int id, NMHDR* pnmh);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Command(int id, int code);
+    int     Notify(int id, NMHDR *pnmh);
 
-	bool	DoContextMenu(int x, int y);
-	LRESULT LoadWallpaper(BOOL fInitial);
-	void	DrawDesktopBkgnd(HDC hdc);
-	HRESULT DoDesktopContextMenu(int x, int y);
-	void	PositionIcons(int dir=1);
+    bool    DoContextMenu(int x, int y);
+    LRESULT LoadWallpaper(BOOL fInitial);
+    void    DrawDesktopBkgnd(HDC hdc);
+    HRESULT DoDesktopContextMenu(int x, int y);
+    void    PositionIcons(int dir = 1);
 
-	void	refresh();
+    void    refresh();
 
-	HWND	_hwndListView;
-	int		_icon_algo;
+    HWND    _hwndListView;
+    int     _icon_algo;
 
-	HBRUSH _hbrWallp;
-	DWORD _fTileWallp;
-	RECT _rcWp;
-	TCHAR _szBMPName[MAX_PATH + 1];
+    HBRUSH _hbrWallp;
+    DWORD _fTileWallp;
+    RECT _rcWp;
+    TCHAR _szBMPName[MAX_PATH + 1];
 };

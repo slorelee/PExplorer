@@ -17,166 +17,163 @@
  */
 
 
- //
- // Explorer clone
- //
- // mainframe.h
- //
- // Martin Fuchs, 23.07.2003
- //
+//
+// Explorer clone
+//
+// mainframe.h
+//
+// Martin Fuchs, 23.07.2003
+//
 
 
-#define	PM_OPEN_WINDOW			(WM_APP+0x07)
+#define PM_OPEN_WINDOW          (WM_APP+0x07)
 
 enum OPEN_WINDOW_MODE {
-	OWM_EXPLORE=1,	/// window in explore mode
-	OWM_ROOTED=2,	/// "rooted" window with special shell namespace root
-	OWM_DETAILS=4,	/// view files in detail mode
-	OWM_PIDL=8,		/// path is given as PIDL, otherwise as LPCTSTR
-	OWM_SEPARATE=16	/// open separate subfolder windows
+    OWM_EXPLORE = 1, /// window in explore mode
+    OWM_ROOTED = 2, /// "rooted" window with special shell namespace root
+    OWM_DETAILS = 4, /// view files in detail mode
+    OWM_PIDL = 8,   /// path is given as PIDL, otherwise as LPCTSTR
+    OWM_SEPARATE = 16 /// open separate subfolder windows
 };
 
 
- /// Explorer frame window base class
-struct MainFrameBase : public PreTranslateWindow
-{
-	typedef PreTranslateWindow super;
+/// Explorer frame window base class
+struct MainFrameBase : public PreTranslateWindow {
+    typedef PreTranslateWindow super;
 
-	MainFrameBase(HWND hwnd);
-	~MainFrameBase();
+    MainFrameBase(HWND hwnd);
+    ~MainFrameBase();
 
-	static HWND Create(const ExplorerCmd& cmd);
-	static int OpenShellFolders(LPIDA pida, HWND hFrameWnd);
+    static HWND Create(const ExplorerCmd &cmd);
+    static int OpenShellFolders(LPIDA pida, HWND hFrameWnd);
 
-	WindowHandle _hwndrebar;
+    WindowHandle _hwndrebar;
 
-	WindowHandle _htoolbar;
-	WindowHandle _haddrcombo;
-	WindowHandle _hstatusbar;
+    WindowHandle _htoolbar;
+    WindowHandle _haddrcombo;
+    WindowHandle _hstatusbar;
 
-	WindowHandle _hsidebar;
-	HIMAGELIST	_himl;
+    WindowHandle _hsidebar;
+    HIMAGELIST  _himl;
 
-	HMENU		_hMenuFrame;
-	HMENU		_hMenuWindow;
+    HMENU       _hMenuFrame;
+    HMENU       _hMenuWindow;
 
-	MenuInfo	_menu_info;
+    MenuInfo    _menu_info;
 
 protected:
-	FullScreenParameters _fullscreen;
+    FullScreenParameters _fullscreen;
 
-	HACCEL		_hAccel;
-	HIMAGELIST	_himl_old;
+    HACCEL      _hAccel;
+    HIMAGELIST  _himl_old;
 
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	bool	ProcessMessage(UINT nmsg, WPARAM wparam, LPARAM lparam, LRESULT* pres);
-	int		Command(int id, int code);
-	int		Notify(int id, NMHDR* pnmh);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    bool    ProcessMessage(UINT nmsg, WPARAM wparam, LPARAM lparam, LRESULT *pres);
+    int     Command(int id, int code);
+    int     Notify(int id, NMHDR *pnmh);
 
-	virtual BOOL TranslateMsg(MSG* pmsg);
+    virtual BOOL TranslateMsg(MSG *pmsg);
 
-	void	toggle_child(HWND hwnd, UINT cmd, HWND hchild, int band_idx=-1);
+    void    toggle_child(HWND hwnd, UINT cmd, HWND hchild, int band_idx = -1);
 
-	void	resize_frame_client();
-	virtual void resize_frame(int cx, int cy);
-	virtual void frame_get_clientspace(PRECT prect);
+    void    resize_frame_client();
+    virtual void resize_frame(int cx, int cy);
+    virtual void frame_get_clientspace(PRECT prect);
 
-	BOOL	toggle_fullscreen();
-	void	fullscreen_move();
+    BOOL    toggle_fullscreen();
+    void    fullscreen_move();
 
-	void	FillBookmarks();
-	virtual bool go_to(LPCTSTR url, bool new_window);
+    void    FillBookmarks();
+    virtual bool go_to(LPCTSTR url, bool new_window);
 };
 
 
 #ifndef _NO_MDI
 
-struct MDIMainFrame : public MainFrameBase
-{
-	typedef MainFrameBase super;
+struct MDIMainFrame : public MainFrameBase {
+    typedef MainFrameBase super;
 
-	MDIMainFrame(HWND hwnd);
+    MDIMainFrame(HWND hwnd);
 
-	static HWND Create();
-	static HWND Create(LPCTSTR path, int mode=OWM_EXPLORE|OWM_DETAILS);
-	static HWND Create(LPCITEMIDLIST pidl, int mode=OWM_EXPLORE|OWM_DETAILS|OWM_PIDL);
+    static HWND Create();
+    static HWND Create(LPCTSTR path, int mode = OWM_EXPLORE | OWM_DETAILS);
+    static HWND Create(LPCITEMIDLIST pidl, int mode = OWM_EXPLORE | OWM_DETAILS | OWM_PIDL);
 
-	ChildWindow* CreateChild(LPCTSTR path=NULL, int mode=OWM_EXPLORE|OWM_DETAILS);
-	ChildWindow* CreateChild(LPCITEMIDLIST pidl, int mode=OWM_EXPLORE|OWM_DETAILS|OWM_PIDL);
+    ChildWindow *CreateChild(LPCTSTR path = NULL, int mode = OWM_EXPLORE | OWM_DETAILS);
+    ChildWindow *CreateChild(LPCITEMIDLIST pidl, int mode = OWM_EXPLORE | OWM_DETAILS | OWM_PIDL);
 
 protected:
-	HWND	_hmdiclient;
+    HWND    _hmdiclient;
 
-	WindowHandle _hextrabar;
+    WindowHandle _hextrabar;
 #ifndef _NO_WIN_FS
-	WindowHandle _hdrivebar;
+    WindowHandle _hdrivebar;
 #endif
 
 protected:
-	LRESULT	WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	int		Command(int id, int code);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Command(int id, int code);
 
-	virtual BOOL TranslateMsg(MSG* pmsg);
+    virtual BOOL TranslateMsg(MSG *pmsg);
 
-	bool	activate_drive_window(LPCTSTR path);
-	bool	activate_child_window(LPCTSTR filesys);
+    bool    activate_drive_window(LPCTSTR path);
+    bool    activate_child_window(LPCTSTR filesys);
 
-	virtual void resize_frame(int cx, int cy);
-	virtual void frame_get_clientspace(PRECT prect);
+    virtual void resize_frame(int cx, int cy);
+    virtual void frame_get_clientspace(PRECT prect);
 
-	virtual bool go_to(LPCTSTR url, bool new_window);
+    virtual bool go_to(LPCTSTR url, bool new_window);
 
 #ifndef _NO_WIN_FS
-	TCHAR	_drives[BUFFER_LEN];
+    TCHAR   _drives[BUFFER_LEN];
 #endif
 };
 
 #endif
 
 
-struct SDIMainFrame : public ExtContextMenuHandlerT<
-				ShellBrowserChildT<MainFrameBase>
-			>
-{
-	typedef ExtContextMenuHandlerT<
-				ShellBrowserChildT<MainFrameBase>
-			> super;
+struct SDIMainFrame : public ExtContextMenuHandlerT <
+    ShellBrowserChildT<MainFrameBase>
+    > {
+    typedef ExtContextMenuHandlerT <
+    ShellBrowserChildT<MainFrameBase>
+    > super;
 
-	SDIMainFrame(HWND hwnd);
+    SDIMainFrame(HWND hwnd);
 
-	static HWND Create();
-	static HWND Create(LPCTSTR path, int mode=OWM_EXPLORE|OWM_DETAILS);
-	static HWND Create(LPCITEMIDLIST pidl, int mode=OWM_EXPLORE|OWM_DETAILS|OWM_PIDL);
+    static HWND Create();
+    static HWND Create(LPCTSTR path, int mode = OWM_EXPLORE | OWM_DETAILS);
+    static HWND Create(LPCITEMIDLIST pidl, int mode = OWM_EXPLORE | OWM_DETAILS | OWM_PIDL);
 
 protected:
-	ShellPathInfo _shellpath_info;
+    ShellPathInfo _shellpath_info;
 
-	WindowHandle _left_hwnd;
-	WindowHandle _right_hwnd;
+    WindowHandle _left_hwnd;
+    WindowHandle _right_hwnd;
 
-/**@todo focus handling for TAB switching
-	int 	_focus_pane;		// 0: left	1: right
-*/
+    /**@todo focus handling for TAB switching
+        int     _focus_pane;        // 0: left  1: right
+    */
 
-	int 	_split_pos;
-	int		_last_split;
-	RECT	_clnt_rect;
+    int     _split_pos;
+    int     _last_split;
+    RECT    _clnt_rect;
 
-	String	_url;
+    String  _url;
 
-	LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-	int		Command(int id, int code);
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Command(int id, int code);
 
-	void	resize_frame(int cx, int cy);
-	void	resize_children();
-	void	update_clnt_rect();
+    void    resize_frame(int cx, int cy);
+    void    resize_children();
+    void    update_clnt_rect();
 
-	void	update_shell_browser();
-	void	jump_to(LPCTSTR path, int mode);
-	void	jump_to(LPCITEMIDLIST path, int mode);
+    void    update_shell_browser();
+    void    jump_to(LPCTSTR path, int mode);
+    void    jump_to(LPCITEMIDLIST path, int mode);
 
-	 // interface BrowserCallback
-	virtual void	entry_selected(Entry* entry);
+    // interface BrowserCallback
+    virtual void    entry_selected(Entry *entry);
 
-	void	set_url(LPCTSTR url);
+    void    set_url(LPCTSTR url);
 };

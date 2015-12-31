@@ -17,20 +17,19 @@
  */
 
 
- //
- // Explorer clone
- //
- // shellservices.h
- //
- // Martin Fuchs, 28.03.2005
- //
+//
+// Explorer clone
+//
+// shellservices.h
+//
+// Martin Fuchs, 28.03.2005
+//
 
 
- // launch start programs
+// launch start programs
 extern "C" int startup(int argc, const char *argv[]);
 
- // load Shell Service Objects (volume control, printer/network icons, ...)
-struct SSOThread : public Thread
-{
-	int	Run();
+// load Shell Service Objects (volume control, printer/network icons, ...)
+struct SSOThread : public Thread {
+    int Run();
 };

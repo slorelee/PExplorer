@@ -17,13 +17,13 @@
  */
 
 
- //
- // Explorer clone
- //
- // externals.h
- //
- // Martin Fuchs, 07.06.2003
- //
+//
+// Explorer clone
+//
+// externals.h
+//
+// Martin Fuchs, 07.06.2003
+//
 
 
 #ifdef __cplusplus
@@ -31,19 +31,19 @@ extern "C" {
 #endif
 
 
- // explorer main routine
+// explorer main routine
 extern int explorer_main(HINSTANCE hinstance, LPTSTR lpCmdLine, int cmdshow);
 
- // display explorer/file manager window
-extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine=NULL);
+// display explorer/file manager window
+extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
 
- // display explorer "About" dialog
+// display explorer "About" dialog
 extern void explorer_about(HWND hwndParent);
 
- // test for already running desktop instance
+// test for already running desktop instance
 extern BOOL IsAnyDesktopRunning(void);
 
- // show shutdown dialog
+// show shutdown dialog
 extern void ShowExitWindowsDialog(HWND hwndOwner);
 
 #ifdef __cplusplus

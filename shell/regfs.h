@@ -17,66 +17,63 @@
  */
 
 
- //
- // Explorer clone
- //
- // regfs.h
- //
- // Martin Fuchs, 31.01.2004
- //
+//
+// Explorer clone
+//
+// regfs.h
+//
+// Martin Fuchs, 31.01.2004
+//
 
 
- /// Registry entry
-struct RegEntry : public Entry
-{
-	RegEntry(Entry* parent) : Entry(parent, ET_REGISTRY) {}
+/// Registry entry
+struct RegEntry : public Entry {
+    RegEntry(Entry *parent) : Entry(parent, ET_REGISTRY) {}
 
 protected:
-	RegEntry() : Entry(ET_REGISTRY) {}
+    RegEntry() : Entry(ET_REGISTRY) {}
 
-	virtual bool get_path(PTSTR path, size_t path_count) const;
-	virtual BOOL launch_entry(HWND hwnd, UINT nCmdShow);
+    virtual bool get_path(PTSTR path, size_t path_count) const;
+    virtual BOOL launch_entry(HWND hwnd, UINT nCmdShow);
 };
 
 
- /// Registry key entry
-struct RegDirectory : public RegEntry, public Directory
-{
-	RegDirectory(Entry* parent, LPCTSTR path, HKEY hKeyRoot);
+/// Registry key entry
+struct RegDirectory : public RegEntry, public Directory {
+    RegDirectory(Entry *parent, LPCTSTR path, HKEY hKeyRoot);
 
-	~RegDirectory()
-	{
-		free(_path);
-		_path = NULL;
-	}
+    ~RegDirectory()
+    {
+        free(_path);
+        _path = NULL;
+    }
 
-	virtual void read_directory(int scan_flags=0);
-	virtual const void* get_next_path_component(const void*) const;
-	virtual Entry* find_entry(const void*);
+    virtual void read_directory(int scan_flags = 0);
+    virtual const void *get_next_path_component(const void *) const;
+    virtual Entry *find_entry(const void *);
 
 protected:
-	HKEY	_hKeyRoot;
+    HKEY    _hKeyRoot;
 };
 
 
- /// Registry key entry
-struct RegistryRoot : public RegEntry, public Directory
-{
-	RegistryRoot()
-	{
-	}
+/// Registry key entry
+struct RegistryRoot : public RegEntry, public Directory {
+    RegistryRoot()
+    {
+    }
 
-	RegistryRoot(Entry* parent, LPCTSTR path)
-	 :	RegEntry(parent)
-	{
-		_path = _tcsdup(path);
-	}
+    RegistryRoot(Entry *parent, LPCTSTR path)
+        :  RegEntry(parent)
+    {
+        _path = _tcsdup(path);
+    }
 
-	~RegistryRoot()
-	{
-		free(_path);
-		_path = NULL;
-	}
+    ~RegistryRoot()
+    {
+        free(_path);
+        _path = NULL;
+    }
 
-	virtual void read_directory(int scan_flags=0);
+    virtual void read_directory(int scan_flags = 0);
 };

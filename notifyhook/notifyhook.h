@@ -17,19 +17,19 @@
  */
 
 
- //
- // NotifyHook DLL for ROS Explorer
- //
- // notifyhook.h
- //
- // Martin Fuchs, 17.03.2004
- //
+//
+// NotifyHook DLL for ROS Explorer
+//
+// notifyhook.h
+//
+// Martin Fuchs, 17.03.2004
+//
 
 
 #ifdef _NOTIFYHOOK_IMPL
-#define	DECL_NOTIFYHOOK __declspec(dllexport)
+#define DECL_NOTIFYHOOK __declspec(dllexport)
 #else
-#define	DECL_NOTIFYHOOK __declspec(dllimport)
+#define DECL_NOTIFYHOOK __declspec(dllimport)
 #ifdef _MSC_VER
 #pragma comment(lib, "notifyhook")
 #endif
@@ -43,7 +43,7 @@ DECL_NOTIFYHOOK UINT InstallNotifyHook(void);
 DECL_NOTIFYHOOK void DeinstallNotifyHook(void);
 
 DECL_NOTIFYHOOK void GetWindowModulePath(HWND hwnd);
-DECL_NOTIFYHOOK int GetWindowModulePathCopyData(LPARAM lparam, HWND* phwnd, LPSTR buffer, int size);
+DECL_NOTIFYHOOK int GetWindowModulePathCopyData(LPARAM lparam, HWND *phwnd, LPSTR buffer, int size);
 
 #ifdef __cplusplus
 };
