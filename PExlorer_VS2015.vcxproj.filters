@@ -5,7 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
-    <ClCompile Include="i386-stub-win32.c" />
     <ClCompile Include="precomp.cpp" />
     <ClCompile Include="utility\dragdropimpl.cpp">
       <Filter>utility</Filter>

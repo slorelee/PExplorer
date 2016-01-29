@@ -5,7 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
-    <ClCompile Include="i386-stub-win32.c" />
     <ClCompile Include="precomp.cpp" />
     <ClCompile Include="utility\dragdropimpl.cpp">
       <Filter>utility</Filter>
@@ -78,9 +77,6 @@
     </ClCompile>
     <ClCompile Include="taskbar\traynotify.cpp">
       <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\unixfs.cpp">
-      <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="utility\utility.cpp">
       <Filter>utility</Filter>
@@ -172,9 +168,6 @@
     </ClInclude>
     <ClInclude Include="taskbar\traynotify.h">
       <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\unixfs.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="utility\utility.h">
       <Filter>utility</Filter>
@@ -409,6 +402,9 @@
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{2b39a04d-e818-4c51-b95b-10048f65df5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="jconfig">
+      <UniqueIdentifier>{738faaa0-fce2-4d26-9acb-5e6c2f9169f5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

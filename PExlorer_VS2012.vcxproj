@@ -307,27 +307,11 @@
     <ClCompile Include="shell\regfs.cpp" />
     <ClCompile Include="shell\shellbrowser.cpp" />
     <ClCompile Include="shell\shellfs.cpp" />
-    <ClCompile Include="shell\unixfs.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="shell\webchild.cpp" />
     <ClCompile Include="shell\winfs.cpp" />
     <ClCompile Include="dialogs\searchprogram.cpp" />
     <ClCompile Include="dialogs\settings.cpp" />
     <ClCompile Include="explorer.cpp" />
-    <ClCompile Include="i386-stub-win32.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="precomp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -353,7 +337,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utility\dragdropimpl.h" />
+    <ClInclude Include="jconfig\jcfg.h" />    <ClInclude Include="utility\dragdropimpl.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
     <ClInclude Include="utility\treedroptarget.h" />
@@ -376,7 +360,6 @@
     <ClInclude Include="shell\regfs.h" />
     <ClInclude Include="shell\shellbrowser.h" />
     <ClInclude Include="shell\shellfs.h" />
-    <ClInclude Include="shell\unixfs.h" />
     <ClInclude Include="shell\webchild.h" />
     <ClInclude Include="shell\winfs.h" />
     <ClInclude Include="dialogs\searchprogram.h" />
