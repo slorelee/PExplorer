@@ -387,7 +387,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
 
     case WM_HOTKEY:
-        ProcessHotKey(wparam);
+        ProcessHotKey((int)wparam);
         break;
 
     case WM_COPYDATA:
@@ -460,8 +460,8 @@ int DesktopBar::Notify(int id, NMHDR *pnmh)
 void DesktopBar::Resize(int cx, int cy)
 {
     ///@todo general children resizing algorithm
-    int quicklaunch_width = SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
-    int notifyarea_width = SendMessage(_hwndNotify, PM_GET_WIDTH, 0, 0);
+    int quicklaunch_width = (int)SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
+    int notifyarea_width = (int)SendMessage(_hwndNotify, PM_GET_WIDTH, 0, 0);
     //_log_(FmtString("Resize - %d,%d\r\n", cx, cy));
     HDWP hdwp = BeginDeferWindowPos(3);
 
@@ -530,7 +530,7 @@ int DesktopBar::Command(int id, int code)
 
     default:
         if (_hwndQuickLaunch)
-            return SendMessage(_hwndQuickLaunch, WM_COMMAND, MAKEWPARAM(id, code), 0);
+            return (int)SendMessage(_hwndQuickLaunch, WM_COMMAND, MAKEWPARAM(id, code), 0);
         else
             return 1;
     }

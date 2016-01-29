@@ -198,7 +198,7 @@ void FindProgramDlg::collect_programs_callback(Entry *entry, void *param)
 
                 String menu_path;
 
-                int len = pThis->_common_programs.size();
+                size_t len = pThis->_common_programs.size();
 
                 if (len && !_tcsnicmp(entry_path, pThis->_common_programs, len))
                     menu_path = ResString(IDS_ALL_USERS) + (String(entry_path) + len);

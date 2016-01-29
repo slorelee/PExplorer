@@ -490,7 +490,7 @@ static HRESULT my_SHBindToParent(LPCITEMIDLIST pidl, REFIID riid, VOID **ppv, LP
         hr = desktop->QueryInterface(riid, ppv);
     } else {
         // Copy the ID list, truncating the last item.
-        int length = marker->mkid.abID - pidl->mkid.abID;
+        int length = (int)(marker->mkid.abID - pidl->mkid.abID);
         if (LPITEMIDLIST parent_id = reinterpret_cast<LPITEMIDLIST>(
                                          malloc(length + sizeof(pidl->mkid.cb)))) {
             LPBYTE raw_data = reinterpret_cast<LPBYTE>(parent_id);

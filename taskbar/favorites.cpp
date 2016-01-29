@@ -46,7 +46,7 @@ String DecodeURLString(const char *s)
         } else
             *o++ = *p;
 
-    return String(buffer, o - buffer);
+    return String(buffer, (int)(o - buffer));
 }
 
 

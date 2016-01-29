@@ -445,7 +445,7 @@ LRESULT StartMenu::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
 
     case WM_KEYDOWN:
-        ProcessKey(wparam);
+        ProcessKey((int)wparam);
         break;
 #else
     case PM_STARTENTRY_FOCUSED: { ///@todo use TrackMouseEvent() and WM_MOUSEHOVER to wait a bit before opening submenus
@@ -679,7 +679,7 @@ void StartMenu::ProcessKey(int vk)
         break;
 
     case VK_END:
-        SelectButtonIndex(_buttons.size() - 1, false);
+        SelectButtonIndex((int)_buttons.size() - 1, false);
         break;
 
     case VK_LEFT:
@@ -711,7 +711,7 @@ bool StartMenu::Navigate(int step)
         if (step > 0)
             idx = 0 - step;
         else
-            idx = _buttons.size() - step;
+            idx = (int)_buttons.size() - step;
     }
 
     for (;;) {
@@ -721,10 +721,10 @@ bool StartMenu::Navigate(int step)
             break;
 
         if (idx < 0)
-            idx += _buttons.size();
+            idx += (int)_buttons.size();
 
         if (idx > (int)_buttons.size())
-            idx -= _buttons.size() + 1;
+            idx -= (int)_buttons.size() + 1;
 
         if (SelectButtonIndex(idx, false))
             return true;
@@ -1655,7 +1655,7 @@ void StartMenuRoot::TrackStartmenu()
 
     while (IsWindow(hwnd) && IsWindowVisible(hwnd)) {
         if (!GetMessage(&msg, 0, 0, 0)) {
-            PostQuitMessage(msg.wParam);
+            PostQuitMessage((int)msg.wParam);
             break;
         }
 

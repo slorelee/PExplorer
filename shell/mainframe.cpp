@@ -318,7 +318,7 @@ bool MainFrameBase::ProcessMessage(UINT nmsg, WPARAM wparam, LPARAM lparam, LRES
 
     case WM_SHOWWINDOW:
         if (wparam) {   // trigger child resizing after window creation - now we can succesfully call IsWindowVisible()
-            int height = SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
+            int height = (int)SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
             MoveWindow(_hwndrebar, 0, 0, LOWORD(lparam), height, TRUE);
             resize_frame_client();
         }
@@ -530,7 +530,7 @@ void MainFrameBase::resize_frame(int cx, int cy)
     RECT rect = {0, 0, cx, cy};
 
     if (_hwndrebar) {
-        int height = SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
+        int height = (int)SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
         rect.top += height;
         rect.top += 5;
 
@@ -1191,7 +1191,7 @@ int MDIMainFrame::Command(int id, int code)
         if (super::Command(id, code) == 0)
             return 0;
         else
-            return DefFrameProc(_hwnd, _hmdiclient, WM_COMMAND, MAKELONG(id, code), 0);
+            return (int)DefFrameProc(_hwnd, _hmdiclient, WM_COMMAND, MAKELONG(id, code), 0);
     }
 
     return 0;
@@ -1218,7 +1218,7 @@ void MDIMainFrame::resize_frame(int cx, int cy)
     RECT rect = {0, 0, cx, cy};
 
     if (_hwndrebar) {
-        int height = SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
+        int height = (int)SendMessage(_hwndrebar, RB_GETBARHEIGHT, 0, 0);
         rect.top += height;
         rect.top += 5;
     } else {
@@ -1533,7 +1533,7 @@ LRESULT SDIMainFrame::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         else
             _shellpath_info._root_shell_path = DesktopFolderPath(); //SpecialFolderPath(CSIDL_DRIVES, _hwnd);
 
-        jump_to(shell_path, wparam);    ///@todo content of 'path' not used any more
+        jump_to(shell_path, (int)wparam);    ///@todo content of 'path' not used any more
         return TRUE;
     }   // success
 

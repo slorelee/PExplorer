@@ -141,7 +141,7 @@ void QuickLaunchBar::AddShortcuts()
     }
 
     _btn_dist = LOWORD(SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0));
-    _size = _entries.size() * (_btn_dist + 1) + TASKBAR_ICON_SIZE / 2;
+    _size = (int)(_entries.size() * (_btn_dist + 1) + TASKBAR_ICON_SIZE / 2);
 
     //adjust QuickLaunchBar width
     REBARBANDINFO rbBand;
@@ -156,7 +156,7 @@ void QuickLaunchBar::AddShortcuts()
 void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry *entry, int flags)
 {
     TBADDBITMAP ab = {0, (UINT_PTR)hbmp};
-    int bmp_idx = SendMessage(_hwnd, TB_ADDBITMAP, 1, (LPARAM)&ab);
+    int bmp_idx = (int)SendMessage(_hwnd, TB_ADDBITMAP, 1, (LPARAM)&ab);
 
     QuickLaunchEntry qle;
 
@@ -183,8 +183,8 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case PM_GET_WIDTH: {
         // take line wrapping into account
-        int btns = SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
-        int rows = SendMessage(_hwnd, TB_GETROWS, 0, 0);
+        int btns = (int)SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
+        int rows = (int)SendMessage(_hwnd, TB_GETROWS, 0, 0);
 
         if (rows < 2 || rows == btns)
             return _size;
@@ -208,7 +208,7 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         ScreenToClient(_hwnd, &clnt_pt);
 
         Entry *entry = NULL;
-        int idx = SendMessage(_hwnd, TB_HITTEST, 0, (LPARAM)&clnt_pt);
+        int idx = (int)SendMessage(_hwnd, TB_HITTEST, 0, (LPARAM)&clnt_pt);
 
         if (idx >= 0 &&
             SendMessage(_hwnd, TB_GETBUTTON, idx, (LPARAM)&btn) != -1 &&
@@ -255,7 +255,7 @@ int QuickLaunchBar::Notify(int id, NMHDR *pnmh)
     case TTN_GETDISPINFO: {
         NMTTDISPINFO *ttdi = (NMTTDISPINFO *) pnmh;
 
-        int id = ttdi->hdr.idFrom;
+        int id = (int)ttdi->hdr.idFrom;
         ttdi->lpszText = _entries[id]._title.str();
 #ifdef TTF_DI_SETITEM
         ttdi->uFlags |= TTF_DI_SETITEM;

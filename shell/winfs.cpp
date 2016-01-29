@@ -45,7 +45,7 @@ int ScanNTFSStreams(Entry *entry, HANDLE hFile)
             WCHAR name_padding[_MAX_FNAME]; // room for reading stream name
         } hdr;
 
-        if (!BackupRead(hFile, (LPBYTE)&hdr, (LPBYTE)&hdr.cStreamName - (LPBYTE)&hdr, &read, FALSE, FALSE, &ctx) ||
+        if (!BackupRead(hFile, (LPBYTE)&hdr, (DWORD)((LPBYTE)&hdr.cStreamName - (LPBYTE)&hdr), &read, FALSE, FALSE, &ctx) ||
             (long)read != (LPBYTE)&hdr.cStreamName - (LPBYTE)&hdr)
             break;
 
@@ -55,7 +55,7 @@ int ScanNTFSStreams(Entry *entry, HANDLE hFile)
                 read == hdr.dwStreamNameSize) {
                 ++cnt;
 
-                int l = hdr.dwStreamNameSize / sizeof(WCHAR);
+                size_t l = hdr.dwStreamNameSize / sizeof(WCHAR);
                 LPCWSTR p = hdr.cStreamName;
                 LPCWSTR e = hdr.cStreamName + l;
 
@@ -73,7 +73,7 @@ int ScanNTFSStreams(Entry *entry, HANDLE hFile)
                 Entry *stream_entry = new WinEntry(entry);
 
                 memcpy(&stream_entry->_data, &entry->_data, sizeof(WIN32_FIND_DATA));
-                lstrcpy(stream_entry->_data.cFileName, String(p, l));
+                lstrcpy(stream_entry->_data.cFileName, String(p, (int)l));
 
                 stream_entry->_down = NULL;
                 stream_entry->_expanded = false;

@@ -939,7 +939,7 @@ void OutputWorker::output_number(LPDRAWITEMSTRUCT dis, int *positions, int col, 
             pos = 3;
         }
 
-    DrawText(dis->hDC, b, d - b, &rt, DT_RIGHT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+    DrawText(dis->hDC, b, (int)(d - b), &rt, DT_RIGHT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 }
 
 

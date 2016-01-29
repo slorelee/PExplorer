@@ -361,8 +361,8 @@ struct Dialog : public Window {
     Dialog(HWND);
     ~Dialog();
 
-    static int DoModal(UINT nid, CREATORFUNC creator, HWND hwndParent = 0);
-    static int DoModal(UINT nid, CREATORFUNC_INFO creator, const void *info, HWND hwndParent = 0);
+    static INT_PTR DoModal(UINT nid, CREATORFUNC creator, HWND hwndParent = 0);
+    static INT_PTR DoModal(UINT nid, CREATORFUNC_INFO creator, const void *info, HWND hwndParent = 0);
 
 protected:
     LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
@@ -394,7 +394,7 @@ struct PropertySheetDialog : public PROPSHEETHEADER {
     PropertySheetDialog(HWND owner);
 
     void    add(PropSheetPage &psp);
-    int     DoModal(int start_page = 0);
+    INT_PTR     DoModal(int start_page = 0);
 
     HWND    GetCurrentPage();
 
@@ -613,7 +613,7 @@ template<typename BASE> struct OwnerDrawParent : public BASE {
         switch (nmsg) {
         case WM_DRAWITEM:
             if (wparam) {   // should there be drawn a control?
-                HWND hctl = GetDlgItem(this->_hwnd, wparam);
+                HWND hctl = GetDlgItem(this->_hwnd, (int)wparam);
 
                 if (hctl)
                     return SendMessage(hctl, PM_DISPATCH_DRAWITEM, wparam, lparam);
@@ -921,7 +921,7 @@ inline int ListView_GetItemData(HWND list_ctrl, int idx)
     if (!ListView_GetItem(list_ctrl, &item))
         return 0;
 
-    return item.lParam;
+    return (int)item.lParam;
 }
 
 inline int ListView_FindItemPara(HWND list_ctrl, LPARAM param)

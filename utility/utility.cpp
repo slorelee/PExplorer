@@ -410,7 +410,7 @@ BOOL RecursiveCreateDirectory(LPCTSTR path_in)
     LPTSTR dir = hole_path + drv_len;
 
     int l;
-    LPTSTR p = hole_path + (l = _tcslen(hole_path));
+    LPTSTR p = hole_path + (l = (int)_tcslen(hole_path));
 
     while (--p >= hole_path && (*p == '/' || *p == '\\'))
         *p = '\0';

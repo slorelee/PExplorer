@@ -42,7 +42,7 @@ void RegDirectory::read_directory(int scan_flags)
 
     _tcscpy(buffer, (LPCTSTR)_path);
     LPTSTR pname = buffer + _tcslen(buffer);
-    int plen = MAX_PATH - _tcslen(buffer);
+    int plen = (int)(MAX_PATH - _tcslen(buffer));
 
     HKEY hkey;
 

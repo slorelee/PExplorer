@@ -265,7 +265,7 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
             btninfo.cbSize = sizeof(TBBUTTONINFO);
             btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
 
-            int idx = SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
+            int idx = (int)SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
 
             if (idx >= 0 &&
                 SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1 &&
@@ -447,7 +447,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
                 hbmp = 0;
 
             TBADDBITMAP ab = {0, (UINT_PTR)hbmp};
-            int bmp_idx = SendMessage(pThis->_htoolbar, TB_ADDBITMAP, 1, (LPARAM)&ab);
+            int bmp_idx = (int)SendMessage(pThis->_htoolbar, TB_ADDBITMAP, 1, (LPARAM)&ab);
 
             TaskBarEntry entry;
 
@@ -480,7 +480,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
                 btn.iString = (INT_PTR)title;
 
             btn.iBitmap = entry._bmp_idx;
-            entry._btn_idx = SendMessage(pThis->_htoolbar, TB_BUTTONCOUNT, 0, 0);
+            entry._btn_idx = (int)SendMessage(pThis->_htoolbar, TB_BUTTONCOUNT, 0, 0);
 
             SendMessage(pThis->_htoolbar, TB_INSERTBUTTON, entry._btn_idx, (LPARAM)&btn);
 
@@ -605,7 +605,7 @@ TaskBarMap::iterator TaskBarMap::find_id(int id)
 
 void TaskBar::ResizeButtons()
 {
-    int btns = _map.size();
+    int btns = (int)_map.size();
 
     if (btns > 0) {
         int bar_width = ClientRect(_hwnd).right;

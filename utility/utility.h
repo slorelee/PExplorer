@@ -767,7 +767,7 @@ struct BStr {
         return _p ? _p : (BSTR)L"";
     }
 
-    int length() const
+    size_t length() const
     {
         return _p ? wcslen(_p) : 0;
     }
@@ -814,7 +814,7 @@ struct String
     String &operator=(LPCWSTR s) {assign(s); return *this;}
     void assign(LPCWSTR s) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, -1, b, BUFFER_LEN, 0, 0) - 1);} else erase();}
     void assign(LPCWSTR s, int l) {if (s) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
-    void assign(const BStr &s) {int l = s.length(); if (l) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
+    void assign(const BStr &s) {int l = (int)s.length(); if (l) {char b[BUFFER_LEN]; super::assign(b, WideCharToMultiByte(CP_ACP, 0, s, l, b, BUFFER_LEN, 0, 0));} else erase();}
 #endif
     String(const BStr &s) {assign(s);}
     String &operator=(const BStr &s) {assign(s); return *this;}
@@ -930,10 +930,10 @@ protected:
 struct UNC {
     UNC(LPCSTR s)
     {
-        int l = strlen(s) + 1;
+        size_t l = strlen(s) + 1;
         _str = (LPWSTR) malloc(2 * l);
 
-        if (_str && MultiByteToWideChar(CP_ACP, 0, s, -1, _str, l) <= 0)
+        if (_str && MultiByteToWideChar(CP_ACP, 0, s, -1, _str, (int)l) <= 0)
             *_str = '\0';
     }
 

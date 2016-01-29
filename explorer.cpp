@@ -46,11 +46,9 @@
 #include "services/shellservices.h"
 #include "jconfig\jcfg.h"
 
-extern "C" int initialize_gdb_stub();    // start up GDB stub
-
-
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
+boolean DebugMode = FALSE;
 
 ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
@@ -96,7 +94,7 @@ void ExplorerGlobals::load_config()
     DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
     if (dwRet != 0) {
         str = TEXT(szFile);
-        int nPos = str.rfind(TEXT('\\'));
+        size_t nPos = str.rfind(TEXT('\\'));
         if (nPos != -1) {
             str = str.substr(0, nPos);
         }
@@ -251,13 +249,13 @@ LPCTSTR FileTypeManager::set_type(Entry *entry, bool dont_hide_ext)
 
         // hide some file extensions
         if (type._neverShowExt && !dont_hide_ext) {
-            int len = ext - entry->_data.cFileName;
+            intptr_t len = ext - entry->_data.cFileName;
 
             if (entry->_display_name != entry->_data.cFileName)
                 free(entry->_display_name);
 
             entry->_display_name = (LPTSTR) malloc((len + 1) * sizeof(TCHAR));
-            lstrcpyn(entry->_display_name, entry->_data.cFileName, len + 1);
+            lstrcpyn(entry->_display_name, entry->_data.cFileName, (int)len + 1);
         }
 
         if (is_exe_file(ext))
@@ -811,13 +809,13 @@ bool ExplorerCmd::ParseCmdLine(LPCTSTR lpCmdLine)
         }
 
         if (p > b) {
-            int l = p - b;
+            intptr_t l = p - b;
 
             // remove trailing space
             while (l > 0 && _istspace((unsigned)b[l - 1]))
                 --l;
 
-            if (!EvaluateOption(String(b, l)))
+            if (!EvaluateOption(String(b, (int)l)))
                 ok = false;
 
             if (*p)
@@ -1218,11 +1216,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             (*g_SHDOCVW_ShellDDEInit)(TRUE);
     }
 
-
-    bool use_gdb_stub = false;    // !IsDebuggerPresent();
-
     if (_tcsstr(ext_options, TEXT("-debug")))
-        use_gdb_stub = true;
+        DebugMode = true;
 
     if (_tcsstr(ext_options, TEXT("-break"))) {
         LOG(TEXT("debugger breakpoint"));
@@ -1231,13 +1226,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #else
         asm("int3");
 #endif
-    }
-
-    // activate GDB remote debugging stub if no other debugger is running
-    if (use_gdb_stub) {
-        LOG(TEXT("waiting for debugger connection...\n"));
-
-        initialize_gdb_stub();
     }
 
     g_Globals.init(hInstance);

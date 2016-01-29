@@ -260,7 +260,7 @@ LRESULT CALLBACK Window::WindowWndProc(HWND hwnd, UINT nmsg, WPARAM wparam, LPAR
             return pThis->Command(LOWORD(wparam), HIWORD(wparam));
 
         case WM_NOTIFY:
-            return pThis->Notify(wparam, (NMHDR *)lparam);
+            return pThis->Notify((int)wparam, (NMHDR *)lparam);
 
         case WM_NOTIFYFORMAT:
             return NFR_CURRENT;
@@ -322,7 +322,7 @@ LRESULT CALLBACK SubclassedWindow::SubclassedWndProc(HWND hwnd, UINT nmsg, WPARA
             break;
 
         case WM_NOTIFY:
-            return pThis->Notify(wparam, (NMHDR *)lparam);
+            return pThis->Notify((int)wparam, (NMHDR *)lparam);
 
         case WM_NOTIFYFORMAT:
             return NFR_CURRENT;
@@ -354,7 +354,7 @@ int SubclassedWindow::Command(int id, int code)
 
 int SubclassedWindow::Notify(int id, NMHDR *pnmh)
 {
-    return CallWindowProc(_orgWndProc, _hwnd, WM_NOTIFY, id, (LPARAM)pnmh);
+    return (int)CallWindowProc(_orgWndProc, _hwnd, WM_NOTIFY, id, (LPARAM)pnmh);
 }
 
 
@@ -655,7 +655,7 @@ int Window::MessageLoop()
         }
     }
 
-    return msg.wParam;
+    return (int)msg.wParam;
 }
 
 
@@ -703,7 +703,7 @@ Dialog::~Dialog()
     unregister_dialog(_hwnd);
 }
 
-int Dialog::DoModal(UINT nid, CREATORFUNC creator, HWND hwndParent)
+INT_PTR Dialog::DoModal(UINT nid, CREATORFUNC creator, HWND hwndParent)
 {
     Lock lock(GetStaticWindowData()._create_crit_sect); // protect access to s_window_creator and s_new_info
 
@@ -715,7 +715,7 @@ int Dialog::DoModal(UINT nid, CREATORFUNC creator, HWND hwndParent)
     return DialogBoxParam(g_Globals._hInstance, MAKEINTRESOURCE(nid), hwndParent, DialogProc, 0/*lpParam*/);
 }
 
-int Dialog::DoModal(UINT nid, CREATORFUNC_INFO creator, const void *info, HWND hwndParent)
+INT_PTR Dialog::DoModal(UINT nid, CREATORFUNC_INFO creator, const void *info, HWND hwndParent)
 {
     Lock lock(GetStaticWindowData()._create_crit_sect); // protect access to s_window_creator and s_new_info
 
@@ -738,7 +738,7 @@ INT_PTR CALLBACK Window::DialogProc(HWND hwnd, UINT nmsg, WPARAM wparam, LPARAM 
             return TRUE;    // message has been processed
 
         case WM_NOTIFY:
-            pThis->Notify(wparam, (NMHDR *)lparam);
+            pThis->Notify((int)wparam, (NMHDR *)lparam);
             return TRUE;    // message has been processed
 
         case WM_NOTIFYFORMAT:
@@ -803,7 +803,7 @@ void ResizeManager::HandleSize(int cx, int cy)
 
     _last_size = new_size;
 
-    HDWP hDWP = BeginDeferWindowPos(size());
+    HDWP hDWP = BeginDeferWindowPos((int)size());
 
     for (ResizeManager::const_iterator it = begin(); it != end(); ++it) {
         const ResizeEntry &e = *it;
@@ -1359,10 +1359,10 @@ void PropertySheetDialog::add(PropSheetPage &psp)
     _pages.push_back(psp);
 }
 
-int PropertySheetDialog::DoModal(int start_page)
+INT_PTR PropertySheetDialog::DoModal(int start_page)
 {
     PROPSHEETHEADER::ppsp = (LPCPROPSHEETPAGE) &_pages[0];
-    PROPSHEETHEADER::nPages = _pages.size();
+    PROPSHEETHEADER::nPages = (UINT)_pages.size();
     PROPSHEETHEADER::nStartPage = start_page;
     /*
         Window* pwnd = Window::create_property_sheet(this, WINDOW_CREATOR(PropertySheetDlg), NULL);
@@ -1371,7 +1371,7 @@ int PropertySheetDialog::DoModal(int start_page)
 
         HWND hwndPropSheet = *pwnd;
     */
-    int ret = PropertySheet(this);
+    intptr_t ret = PropertySheet(this);
     if (ret == -1)
         return -1;
 
@@ -1443,7 +1443,7 @@ INT_PTR CALLBACK PropSheetPageDlg::DialogProc(HWND hwnd, UINT nmsg, WPARAM wpara
             return TRUE;    // message has been processed
 
         case WM_NOTIFY:
-            pThis->Notify(wparam, (NMHDR *)lparam);
+            pThis->Notify((int)wparam, (NMHDR *)lparam);
             return TRUE;    // message has been processed
 
         case WM_NOTIFYFORMAT:

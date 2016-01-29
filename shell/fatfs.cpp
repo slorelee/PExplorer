@@ -85,7 +85,7 @@ void FATDirectory::read_directory(int scan_flags)
 
     _tcscpy(buffer, (LPCTSTR)_path);
     LPTSTR pname = buffer + _tcslen(buffer);
-    int plen = COUNTOF(buffer) - _tcslen(buffer);
+    int plen = (int)(COUNTOF(buffer) - _tcslen(buffer));
 
     *pname++ = '\\';
     --plen;
@@ -396,7 +396,7 @@ bool FATDirectory::read_dir()
                 }
         }
 
-        buf->dat[0] = 0;     // Endekennzeichen für Rekurs setzen
+        buf->dat[0] = 0;     // Endekennzeichen fE Rekurs setzen
     }
 
     return true;

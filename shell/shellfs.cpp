@@ -149,7 +149,7 @@ bool ShellEntry::get_path(PTSTR path, size_t path_count) const
     LPCTSTR ret = fs_path;
 
     if (ret) {
-        lstrcpyn(path, ret, path_count);
+        lstrcpyn(path, ret, (int)path_count);
         return true;
     } else
         return false;
@@ -181,7 +181,7 @@ bool ShellDirectory::get_path(PTSTR path, size_t path_count) const
     if (!(attribs & SFGAO_FILESYSTEM))
         return false;
 
-    if (FAILED(path_from_pidl(get_parent_folder(), &*_pidl, path, path_count)))
+    if (FAILED(path_from_pidl(get_parent_folder(), &*_pidl, path, (int)path_count)))
         return false;
 
     return true;

@@ -157,11 +157,11 @@ void BrowserNavigator::navigated(LPCTSTR url)
     }
 
     if (!nav && !_new_html_txt.empty()) {   ///@todo move this into DocumentComplete() ?
-        int len = _new_html_txt.length();
+        size_t len = _new_html_txt.length();
         HGLOBAL hHtmlText = GlobalAlloc(GPTR, len);
 
         if (!hHtmlText) {
-            T2nA_binary(_new_html_txt, (char *)hHtmlText, len);
+            T2nA_binary(_new_html_txt, (char *)hHtmlText, (int)len);
             _new_html_txt.erase();
 
             SIfacePtr<IStream> pStream;

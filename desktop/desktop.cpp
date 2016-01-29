@@ -514,7 +514,7 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     switch (nmsg) {
     case WM_TIMER: {
-        UINT tid = (WPARAM)wparam;
+        UINT tid = (UINT)wparam;
         if (tid == ID_TIMER_ADJUST_ICONPOSITION) {
             KillTimer(_hwnd, tid);
             if (_hwndListView) {
@@ -533,7 +533,7 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
 
     case PM_SET_ICON_ALGORITHM:
-        _icon_algo = wparam;
+        _icon_algo = (int)wparam;
         PositionIcons();
         break;
 

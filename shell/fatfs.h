@@ -98,10 +98,10 @@ struct BootSector32 {
     BYTE    SectorsPerCluster;
     WORD    ReservedSectors;
     BYTE    NumberFATs;
-    WORD    reserved1;  // immer 0 für FAT32
+    WORD    reserved1;  // immer 0 for FAT32
     WORD    Sectors16;
     BYTE    MediaDescr;
-    WORD    reserved2;  // immer 0 für FAT32
+    WORD    reserved2;  // immer 0 for FAT32
     WORD    SectorsPerTrack;
     WORD    Heads;
     DWORD   HiddenSectors;

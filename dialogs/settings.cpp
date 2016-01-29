@@ -89,7 +89,7 @@ DesktopSettingsDlg::DesktopSettingsDlg(HWND hwnd)
     new PictureButton(_hwnd, IDC_ICON_ALIGN_9, _bmp9);
     new PictureButton(_hwnd, IDC_ICON_ALIGN_10, _bmp10);
 
-    _alignment_cur = SendMessage(g_Globals._hwndShellView, PM_GET_ICON_ALGORITHM, 0, 0);
+    _alignment_cur = (int)SendMessage(g_Globals._hwndShellView, PM_GET_ICON_ALGORITHM, 0, 0);
     _alignment_tmp = _alignment_cur;
 
 }
