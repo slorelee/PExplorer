@@ -60,8 +60,8 @@
 
 #define NOTIFYAREA_WIDTH_DEF    100
 #define NOTIFYAREA_SPACE        10
-#define NOTIFYICON_SIZE         16
-#define NOTIFYICON_DIST         NOTIFYICON_SIZE + NOTIFYICON_SIZE / 4
-#define NOTIFYICON_X            2
-#define NOTIFYICON_Y            3
+#define NOTIFYICON_SIZE         20
+#define NOTIFYICON_DIST         (NOTIFYICON_SIZE + NOTIFYICON_SIZE / 2 + 1)
+#define NOTIFYICON_X            1
+#define NOTIFYICON_Y            1
 #define NOTIFY_HINT_Y (DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2)

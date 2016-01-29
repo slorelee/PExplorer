@@ -551,7 +551,7 @@ int NotifyArea::Notify(int id, NMHDR *pnmh)
         ScreenToClient(_hwnd, &pt);
 
         if (_show_button &&
-            pt.x >= NOTIFYICON_X && pt.x < NOTIFYICON_X + NOTIFYICON_SIZE &&
+            pt.x >= NOTIFYICON_X && pt.x < NOTIFYICON_X + NOTIFYICON_DIST &&
             pt.y >= NOTIFYICON_Y && pt.y < NOTIFYICON_Y + NOTIFY_HINT_Y) {
             static ResString sShowIcons(IDS_SHOW_HIDDEN_ICONS);
             static ResString sHideIcons(IDS_HIDE_ICONS);
@@ -815,7 +815,7 @@ NotifyIconSet::iterator NotifyArea::IconHitTest(const POINT &pos)
     for (; it != _sorted_icons.end(); ++it) {
         //NotifyInfo& entry = const_cast<NotifyInfo&>(*it); // Why does GCC 3.3 need this additional const_cast ?!
 
-        if (pos.x >= x && pos.x < x + NOTIFYICON_SIZE)
+        if (pos.x >= x && pos.x < x + NOTIFYICON_DIST)
             break;
 
         x += NOTIFYICON_DIST;
