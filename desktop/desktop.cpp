@@ -391,7 +391,6 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
     InitDragDrop();
     LoadWallpaper(TRUE);
 
-    _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement
     SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
 
 }
@@ -520,6 +519,9 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (tid == ID_TIMER_ADJUST_ICONPOSITION) {
             KillTimer(_hwnd, tid);
             if (_hwndListView) {
+                _icon_algo = 7;    // move icon to the right/bottom first
+                PositionIcons();
+                _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement
                 PositionIcons();
                 return 0;
             }
@@ -731,8 +733,8 @@ void DesktopShellView::PositionIcons(int dir)
     int dx2 = dir_x2 * cx;
     int dy2 = dir_y2 * cy;
 
-    int xoffset = (cx - 32) / 2;
-    int yoffset = 4/*(cy-32)/2*/;
+    int xoffset = (cx - GetSystemMetrics(SM_CXICON)) / 2;
+    int yoffset = (cy - GetSystemMetrics(SM_CYICON)) / 2;
 
     int start_x = start_pos.x * (work_area.right - cx) + xoffset;
     int start_y = start_pos.y * (work_area.bottom - cy) + yoffset;
