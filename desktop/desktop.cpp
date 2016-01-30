@@ -62,7 +62,8 @@ static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
                 if (rect.right > 0 && rect.bottom > 0 &&
                     rect.right > rect.left && rect.bottom > rect.top) {
                     minimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
-                    ShowWindowAsync(hwnd, SW_MINIMIZE);
+                    //ShowWindowAsync(hwnd, SW_MINIMIZE);
+                    PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);  //Some apps like WebChat can't be minimized by ShowWindowAsync()
                 }
         }
 
@@ -80,7 +81,8 @@ void Desktop::ToggleMinimize()
         const list<MinimizeStruct> &cminimized = minimized;
         for (list<MinimizeStruct>::const_reverse_iterator it = cminimized.rbegin();
              it != cminimized.rend(); ++it) {
-            ShowWindowAsync(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
+            //ShowWindowAsync(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
+            PostMessage(it->first, WM_SYSCOMMAND, it->second & WS_MAXIMIZE ? SC_MAXIMIZE : SC_RESTORE, 0);
             Sleep(20);
         }
 
