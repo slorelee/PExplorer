@@ -1,0 +1,8 @@
+.gitignore
+*.opensdf
+*.sdf
+*.user
+.vs/
+ipch/
+Win32/
+x64/
