@@ -175,7 +175,7 @@ NotifyInfo::NotifyInfo()
     _uCallbackMessage = 0;
     _version = 0;
 
-    _mode = NIM_AUTO;
+    _mode = NIM_SHOW;
     _lastChange = GetTickCount();
 }
 
