@@ -35,6 +35,7 @@ extern "C" {
 extern int explorer_main(HINSTANCE hinstance, LPTSTR lpCmdLine, int cmdshow);
 
 // display explorer/file manager window
+extern void explorer_open_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
 extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
 
 // display explorer "About" dialog

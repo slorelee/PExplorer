@@ -20,11 +20,12 @@ int g_JCfg_taskbar_iconsize = 32;
 int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
-const string def_jcfg = TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
+const string def_jcfg = TEXT("{\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
+                        TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
                         TEXT("\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
                         TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
-                        TEXT("\"JS_QUICKLAUNCH\":{\"lock\":false},")
+                        TEXT("\"JS_QUICKLAUNCH\":{\"lock\":true,\"3rd_startup_arguments\":\"\"},")
                         TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
 
 std::string

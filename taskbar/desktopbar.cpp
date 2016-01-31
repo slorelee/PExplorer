@@ -303,7 +303,7 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
 {
     switch (id_hotkey) {
     case IDHK_EXPLORER:
-        explorer_show_frame(SW_SHOWNORMAL);
+        explorer_open_frame(SW_SHOWNORMAL);
         break;
 
     case IDHK_RUN:
@@ -505,11 +505,7 @@ int DesktopBar::Command(int id, int code)
         break;
 
     case ID_EXPLORE: {
-        const TCHAR *mp = g_JVARMap[TEXT("JVAR_MODULEPATH")].ToString().c_str();
-        String explorer_path;
-        explorer_path = FmtString(TEXT("%s\\explorer.exe"), mp);
-        launch_file(_hwnd, explorer_path, SW_SHOW);
-        //explorer_show_frame(SW_SHOWNORMAL);
+        explorer_open_frame(SW_SHOWNORMAL);
         break;
     }
     case ID_TASKMGR:

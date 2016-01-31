@@ -751,6 +751,17 @@ ResBitmap::ResBitmap(UINT nid)
     _hBmp = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(nid));
 }
 
+void explorer_open_frame(int cmdShow, LPTSTR lpCmdLine)
+{
+    static String explorer_path = JCFG2("JS_FILEEXPLORER", "3rd_filename").ToString();
+    static String explorer_startup = JCFG2("JS_QUICKLAUNCH", "3rd_startup_arguments").ToString();
+    if (explorer_path.empty()) {
+        explorer_show_frame(cmdShow, lpCmdLine);
+    }
+    else {
+        launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOW, explorer_startup.c_str());
+    }
+}
 
 #ifndef ROSSHELL
 

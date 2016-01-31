@@ -110,16 +110,25 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
                         if (SendMessage(hFrameWnd, PM_OPEN_WINDOW, flags, (LPARAM)(LPCITEMIDLIST)pidl_abs))
                             ++cnt;
                     } else {
-                        HWND hwnd;
-#ifndef _NO_MDI
-                        if (mdi)
-                            hwnd = MDIMainFrame::Create(pidl_abs, 0);
-                        else
-#endif
-                            hwnd = SDIMainFrame::Create(pidl_abs, 0);
-
-                        if (hwnd)
+                        static String explorer_path = JCFG2("JS_FILEEXPLORER", "3rd_filename").ToString();
+                        static String explorer_open = JCFG2("JS_DESKTOP", "3rd_open_arguments").ToString();
+                        if (!explorer_path.empty()) {
+                            String explorer_parameters = FmtString(explorer_open, (LPCTSTR)FileSysShellPath(pidl_abs));
+                            launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOW, explorer_parameters.c_str());
                             ++cnt;
+                        }
+                        else {
+                            HWND hwnd;
+#ifndef _NO_MDI
+                            if (mdi)
+                                hwnd = MDIMainFrame::Create(pidl_abs, 0);
+                            else
+#endif
+                                hwnd = SDIMainFrame::Create(pidl_abs, 0);
+
+                            if (hwnd)
+                                ++cnt;
+                        }
                     }
                 } catch (COMException &e) {
                     HandleException(e, g_Globals._hMainWnd);
