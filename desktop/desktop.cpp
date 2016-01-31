@@ -716,6 +716,9 @@ void DesktopShellView::PositionIcons(int dir)
     RECT work_area;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
 
+    /* disable default allignment */
+    // SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
+
     const POINTS &dir1 = s_align_dir1[_icon_algo];
     const POINTS &dir2 = s_align_dir2[_icon_algo];
     const POINTS &start_pos = s_align_start[_icon_algo];
