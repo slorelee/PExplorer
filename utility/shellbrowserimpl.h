@@ -27,11 +27,8 @@
 // Credits: Thanks to Leon Finker for his explorer cabinet window example
 //
 
-#ifdef __MINGW32__
 #include "servprov.h"   // for IServiceProvider
 #include "docobj.h"     // for IOleCommandTarget
-#endif
-
 
 /// Implementation of IShellBrowser and ICommDlgBrowser interfaces for explorer child windows (see ShellBrowserChild)
 struct IShellBrowserImpl
