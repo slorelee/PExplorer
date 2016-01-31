@@ -76,6 +76,7 @@ protected:
     int             _size;
 
     void    AddShortcuts();
+    void    ReloadShortcuts();
     void    AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry *entry, int flags = TBSTATE_ENABLED);
     void    UpdateDesktopButtons(int desktop_idx);
 };

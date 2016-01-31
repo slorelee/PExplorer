@@ -19,13 +19,22 @@ extern Value JCfg_GetValue(Object *jcfg, string key1, string key2);
 extern Value JCfg_GetValue(Object *jcfg, string key1, string key2, string key3);
 
 extern int JCfg_GetDesktopBarHeight();
+extern bool JCfg_GetDesktopBarUseSmallIcon();
 
 #define JVAR(key) (g_JVARMap[TEXT(key)])
 #define JCFG1(key1) JCfg_GetValue(&g_JCfg, TEXT(key1))
 #define JCFG2(key1, key2) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2))
 #define JCFG3(key1, key2, key3) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), TEXT(key3))
 
+#define SET_JCFG1(key1) g_JCfg[TEXT(key1)]
+#define SET_JCFG2(key1, key2) g_JCfg[TEXT(key1)][TEXT(key2)]
+#define SET_JCFG3(key1, key2, key3) g_JCfg[TEXT(key1)][TEXT(key2)][TEXT(key3)]
+
+#define JCFG_TB(n, ...) (JCFG##n("JS_TASKBAR", __VA_ARGS__))
 #define JCFG_QL(n, ...) (JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))
+
+#define JCFG_TB_SET(n, ...) (SET_JCFG##n("JS_TASKBAR", __VA_ARGS__))
+#define JCFG_QL_SET(n, ...) (SET_JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))
 
 #define DESKTOP_BKCOLOR() (JValueToColor(JCFG2("JS_DESKTOP", "bkcolor")))
 #define TASKBAR_BKCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "bkcolor")))

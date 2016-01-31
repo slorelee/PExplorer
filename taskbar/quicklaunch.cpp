@@ -83,10 +83,47 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
                                 TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT,
                                 IDW_QUICKLAUNCHBAR, 0, 0, 0, NULL, 0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
 
-    if (hwnd)
+    if (hwnd) {
         new QuickLaunchBar(hwnd);
-
+    }
     return hwnd;
+}
+
+void QuickLaunchBar::ReloadShortcuts()
+{
+    int cnt = 0;
+    ShellDirectory *shelldir = NULL;
+    try {
+        static TCHAR path[MAX_PATH];
+        SpecialFolderFSPath app_data(CSIDL_APPDATA, _hwnd); ///@todo perhaps also look into CSIDL_COMMON_APPDATA ?
+        _stprintf(path, TEXT("%s\\")QUICKLAUNCH_FOLDER, (LPCTSTR)app_data);
+        RecursiveCreateDirectory(path);
+        shelldir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
+        shelldir->smart_scan(SORT_NAME);
+
+        // immediatelly extract the shortcut icons
+        for (Entry *entry = shelldir->_down; entry; entry = entry->_next)
+            cnt++;
+    } catch (COMException &) {
+        cnt = 0;
+    }
+
+    if (shelldir) delete shelldir;
+
+    if (_entries.size() == cnt + 2) {
+        return;
+    }
+
+    _next_id = IDC_FIRST_QUICK_ID;
+    _entries.clear();
+    delete _dir;
+    int btns = (int)SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
+    int i = 0;
+    for (i = btns;i >= 0;i--) {
+        SendMessage(_hwnd, TB_DELETEBUTTON, i, 0);
+    }
+
+    AddShortcuts();
 }
 
 void QuickLaunchBar::AddShortcuts()
@@ -141,7 +178,8 @@ void QuickLaunchBar::AddShortcuts()
     }
 
     _btn_dist = LOWORD(SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0));
-    _size = (int)(_entries.size() * (_btn_dist + 1) + TASKBAR_ICON_SIZE / 2);
+    _size = (int)(_entries.size() * _btn_dist + 5 + 3); // 3 for BTNS_SEP
+    if (JCFG_TB(2, "userebar").ToBool() == TRUE) _size += 20;
 
     //adjust QuickLaunchBar width
     REBARBANDINFO rbBand;
@@ -180,25 +218,33 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case PM_REFRESH:
         AddShortcuts();
         break;
-
+    case PM_RELOAD_BUTTONS: {
+        ReloadShortcuts();
+        break;
+    }
     case PM_GET_WIDTH: {
         // take line wrapping into account
         int btns = (int)SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
         int rows = (int)SendMessage(_hwnd, TB_GETROWS, 0, 0);
 
-        if (rows < 2 || rows == btns)
+        static int maxbtns = JCFG_QL(2, "maxiconsinrow").ToInt();
+
+        if ((rows < 2 && maxbtns == 0) || rows == btns)
             return _size;
+        if (btns - 1 == maxbtns) return _size; // BTNS_SEP
 
         RECT rect;
         int max_cx = 0;
 
         for (QuickLaunchMap::const_iterator it = _entries.begin(); it != _entries.end(); ++it) {
             SendMessage(_hwnd, TB_GETRECT, it->first, (LPARAM)&rect);
-
-            if (rect.right > max_cx)
-                max_cx = rect.right;
+            if (rect.right > max_cx) max_cx = rect.right;
         }
 
+        if (maxbtns > 0) {
+            int maxbtns_cx = maxbtns * _btn_dist + 5;  // no BTNS_SEP
+            if ((btns - 2) > maxbtns || max_cx > maxbtns_cx) max_cx = maxbtns_cx;
+        }
         return max_cx;
     }
     case WM_CONTEXTMENU: {

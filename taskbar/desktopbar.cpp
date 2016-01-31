@@ -159,55 +159,57 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
     _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
 
-    // create rebar window to manage task and quick launch bar
-#ifndef _NO_REBAR
-    _hwndrebar = CreateWindowEx(WS_EX_TOOLWINDOW, REBARCLASSNAME, NULL,
-                                WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-                                RBS_VARHEIGHT | RBS_AUTOSIZE | RBS_DBLCLKTOGGLE | RBS_REGISTERDROP |
-                                CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_TOP | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE,
-                                0, 1, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
+    SetTimer(_hwnd, 0, 1000, NULL);
 
-    REBARBANDINFO rbBand;
-    rbBand.cbSize = sizeof(REBARBANDINFO);
-    rbBand.fMask = RBBIM_TEXT | RBBS_FIXEDBMP | RBBIM_STYLE | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE | RBBIM_ID | RBBIM_IDEALSIZE;
-    {
-        rbBand.fMask |= RBBIM_COLORS | RBBIM_BACKGROUND;
-        rbBand.clrBack = 0;
-        HDC hdc = GetDC(_hwnd);
-        _hbmQuickLaunchBack = CreateSolidBitmap(hdc, 768, 16, TASKBAR_BKCOLOR());
-        rbBand.hbmBack = _hbmQuickLaunchBack;
+    if (JCFG_TB(2, "userebar").ToBool() == TRUE) {
+        JCFG_QL_SET(2, "maxiconsinrow") = 0;
+        // create rebar window to manage task and quick launch bar
+        _hwndrebar = CreateWindowEx(WS_EX_TOOLWINDOW, REBARCLASSNAME, NULL,
+            WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
+            RBS_VARHEIGHT | RBS_AUTOSIZE | RBS_DBLCLKTOGGLE | RBS_REGISTERDROP |
+            CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_TOP | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE,
+            start_btn_width + 1, 1, 0, 0, _hwnd, 0, g_Globals._hInstance, 0);
+
+        REBARBANDINFO rbBand;
+        rbBand.cbSize = sizeof(REBARBANDINFO);
+        rbBand.fMask = RBBIM_TEXT | RBBS_FIXEDBMP | RBBIM_STYLE | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE | RBBIM_ID | RBBIM_IDEALSIZE;
+        {
+            rbBand.fMask |= RBBIM_COLORS | RBBIM_BACKGROUND;
+            rbBand.clrBack = 0;
+            HDC hdc = GetDC(_hwnd);
+            _hbmQuickLaunchBack = CreateSolidBitmap(hdc, 768, 16, TASKBAR_BKCOLOR());
+            rbBand.hbmBack = _hbmQuickLaunchBack;
+            //rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
+        }
+        rbBand.cyChild = REBARBAND_HEIGHT - 5;
+        rbBand.cyMaxChild = (ULONG)-1;
+        rbBand.cyMinChild = REBARBAND_HEIGHT;
+        rbBand.cyIntegral = REBARBAND_HEIGHT + 3;   //@@ OK?
+        rbBand.fStyle = RBBS_VARIABLEHEIGHT | RBBS_FIXEDBMP | RBBS_HIDETITLE;
+        if (JCFG_TB(2, "rebarlock").ToBool() == TRUE) {
+            rbBand.fStyle |= RBBS_NOGRIPPER;
+        } else {
+            rbBand.fStyle |= RBBS_GRIPPERALWAYS;
+        }
+        TCHAR QuickLaunchBand[] = TEXT("Quicklaunch");
+        rbBand.lpText = QuickLaunchBand;
+        rbBand.cch = sizeof(QuickLaunchBand);
+        rbBand.hwndChild = _hwndQuickLaunch;
+        rbBand.cx = 100;
+        rbBand.cxMinChild = 100;
         //rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
-    }
-    rbBand.cyChild = REBARBAND_HEIGHT - 5;
-    rbBand.cyMaxChild = (ULONG) - 1;
-    rbBand.cyMinChild = REBARBAND_HEIGHT;
-    rbBand.cyIntegral = REBARBAND_HEIGHT + 3;   //@@ OK?
-    rbBand.fStyle = RBBS_VARIABLEHEIGHT | RBBS_FIXEDBMP | RBBS_HIDETITLE;
-    if (JCFG_QL(2, "lock").ToBool() == TRUE) {
-        rbBand.fStyle |= RBBS_NOGRIPPER;
-    } else {
-        rbBand.fStyle |= RBBS_GRIPPERALWAYS;
-    }
-    TCHAR QuickLaunchBand[] = TEXT("Quicklaunch");
-    rbBand.lpText = QuickLaunchBand;
-    rbBand.cch = sizeof(QuickLaunchBand);
-    rbBand.hwndChild = _hwndQuickLaunch;
-    rbBand.cx = 100;
-    rbBand.cxMinChild = 100;
-    //rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
-    rbBand.wID = IDW_QUICKLAUNCHBAR;
-    SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM) - 1, (LPARAM)&rbBand);
+        rbBand.wID = IDW_QUICKLAUNCHBAR;
+        SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
 
-    TCHAR TaskbarBand[] = TEXT("Taskbar");
-    rbBand.lpText = TaskbarBand;
-    rbBand.cch = sizeof(TaskbarBand);
-    rbBand.hwndChild = _hwndTaskBar;
-    rbBand.cx = 200;    //pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
-    rbBand.cxMinChild = 50;
-    rbBand.wID = IDW_TASKTOOLBAR;
-    SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM) - 1, (LPARAM)&rbBand);
-#endif
-
+        TCHAR TaskbarBand[] = TEXT("Taskbar");
+        rbBand.lpText = TaskbarBand;
+        rbBand.cch = sizeof(TaskbarBand);
+        rbBand.hwndChild = _hwndTaskBar;
+        rbBand.cx = 200;    //pcs->cx-_taskbar_pos-quicklaunch_width-(notifyarea_width+1);
+        rbBand.cxMinChild = 50;
+        rbBand.wID = IDW_TASKTOOLBAR;
+        SendMessage(_hwndrebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
+    }
 
     RegisterHotkeys();
 
@@ -411,7 +413,9 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
 
     case WM_TIMER:
-        if (wparam == ID_TRAY_VOLUME) {
+        if (wparam == 0) {
+            SendMessage(_hwndQuickLaunch, PM_RELOAD_BUTTONS, 0, 0);
+        } else if (wparam == ID_TRAY_VOLUME) {
             KillTimer(_hwnd, wparam);
             launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL, TEXT("-t"));    // launch volume control in small mode
         }
@@ -422,9 +426,9 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_SYSCOLORCHANGE:
         /* Forward WM_SYSCOLORCHANGE to common controls */
-#ifndef _NO_REBAR
-        SendMessage(_hwndrebar, WM_SYSCOLORCHANGE, 0, 0);
-#endif
+        if (_hwndrebar) {
+            SendMessage(_hwndrebar, WM_SYSCOLORCHANGE, 0, 0);
+        }
         SendMessage(_hwndQuickLaunch, WM_SYSCOLORCHANGE, 0, 0);
         SendMessage(_hwndTaskBar, WM_SYSCOLORCHANGE, 0, 0);
         break;

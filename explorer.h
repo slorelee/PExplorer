@@ -61,6 +61,7 @@
 
 #define PM_RESIZE_CHILDREN      (WM_APP+0x17)
 #define PM_GET_WIDTH            (WM_APP+0x18)
+#define PM_RELOAD_BUTTONS       (WM_APP+0x19)
 
 #define PM_REFRESH              (WM_APP+0x1B)
 #define PM_REFRESH_CONFIG       (WM_APP+0x1C)

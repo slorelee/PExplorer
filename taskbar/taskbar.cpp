@@ -148,7 +148,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     metrics.cbSize = sizeof(TBMETRICS);
     metrics.dwMask = TBMF_BARPAD | TBMF_BUTTONSPACING;
     metrics.cxBarPad = 0;
-    metrics.cyBarPad = 0;
+    metrics.cyBarPad = JCFG_TB(2, "padding-top").ToInt();
     metrics.cxButtonSpacing = 3;
     metrics.cyButtonSpacing = 0;
 

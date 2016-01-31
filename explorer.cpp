@@ -104,6 +104,7 @@ void ExplorerGlobals::load_config()
     String cfgfile = str + TEXT("\\PExlorer.jcfg");
 #endif
     Load_JCfg(cfgfile);
+    JCfg_GetDesktopBarUseSmallIcon();
 }
 
 void ExplorerGlobals::read_persistent()
