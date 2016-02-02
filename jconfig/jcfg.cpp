@@ -243,7 +243,6 @@ JCfg_GetDesktopBarUseSmallIcon()
                 g_JCfg_taskbar_iconsize = 16;
                 g_JCfg_taskbar_startmenu_iconsize = 16;
                 JCFG_TB_SET(2, "height") = 32;
-                JCFG_TB_SET(2, "padding-top") = 5;
             }
         } else if (v.GetType() == IntVal) {
             g_JCfg_taskbar_iconsize = v;
