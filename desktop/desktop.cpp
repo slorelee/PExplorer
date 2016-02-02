@@ -223,7 +223,8 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 
         fs.ViewMode = FVM_ICON;
         fs.fFlags = FWF_DESKTOP | FWF_NOCLIENTEDGE | FWF_NOSCROLL | FWF_BESTFITWINDOW | FWF_SNAPTOGRID; //|FWF_AUTOARRANGE;
-
+        /* PositionIcons() need remove FWF_SNAPTOGRID flag, but set the flag after the
+           view be created need use IFolderView2 interface in windows vista or later. */
         ClientRect rect(_hwnd);
 
         hr = _pShellView->CreateViewWindow(NULL, &fs, this, &rect, &hWndView);
@@ -519,9 +520,11 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (tid == ID_TIMER_ADJUST_ICONPOSITION) {
             KillTimer(_hwnd, tid);
             if (_hwndListView) {
-                _icon_algo = 7;    // move icon to the right/bottom first
+                /* as the DesktopFloderView with the FWF_SNAPTOGRID flag,
+                   move icon to the right/bottom first. */
+                _icon_algo = 7;
                 PositionIcons();
-                _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement
+                _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement (top/left)
                 PositionIcons();
                 return 0;
             }
