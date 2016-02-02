@@ -102,8 +102,12 @@ void QuickLaunchBar::ReloadShortcuts()
         shelldir->smart_scan(SORT_NAME);
 
         // immediatelly extract the shortcut icons
-        for (Entry *entry = shelldir->_down; entry; entry = entry->_next)
-            cnt++;
+        for (Entry *entry = shelldir->_down; entry; entry = entry->_next) {
+            if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+                continue;
+            if (!(entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+                cnt++;
+        }
     } catch (COMException &) {
         cnt = 0;
     }
@@ -228,13 +232,13 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         int rows = (int)SendMessage(_hwnd, TB_GETROWS, 0, 0);
 
         static int maxbtns = JCFG_QL(2, "maxiconsinrow").ToInt();
-
-        if ((rows < 2 && maxbtns == 0) || rows == btns)
-            return _size;
-        if (btns - 1 == maxbtns) return _size; // BTNS_SEP
+        if (maxbtns < 0) maxbtns = 0;
+        if (maxbtns > 0 && maxbtns < 2) maxbtns = 2; // miniconsinrow = 2 Show Desktop & Explorer
+        if (maxbtns == 0 || rows == btns) return _size;
+        if (btns - 1 <= maxbtns) return _size; // BTNS_SEP
 
         RECT rect;
-        int max_cx = 0;
+        int max_cx = 2 * _btn_dist + 5;
 
         for (QuickLaunchMap::const_iterator it = _entries.begin(); it != _entries.end(); ++it) {
             SendMessage(_hwnd, TB_GETRECT, it->first, (LPARAM)&rect);
