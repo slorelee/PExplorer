@@ -28,6 +28,7 @@
 
 #include <precomp.h>
 #include <time.h>
+#include <ShellAPI.h>
 
 #include "../resource.h"
 
@@ -663,8 +664,11 @@ void NotifyArea::UpdateIcons()
     }
 
     // sync tooltip areas to current icon number
-    if (_sorted_icons.size() != _last_icon_count) {
-        RECT rect = {NOTIFYICON_X, NOTIFYICON_Y, NOTIFYICON_X + NOTIFYICON_SIZE, NOTIFYICON_Y + NOTIFY_HINT_Y};
+    size_t current_icon_count = _sorted_icons.size();
+    if (_show_button) current_icon_count++;
+
+    if (current_icon_count != _last_icon_count) {
+        RECT rect = {NOTIFYICON_X, NOTIFYICON_Y, NOTIFYICON_X + NOTIFYICON_DIST - 1, NOTIFYICON_Y + NOTIFY_HINT_Y - 1};
 
         UINT tt_idx = 0;
 
@@ -675,8 +679,7 @@ void NotifyArea::UpdateIcons()
             rect.right += NOTIFYICON_DIST;
         }
 
-        size_t icon_cnt = _sorted_icons.size();
-        while (tt_idx < icon_cnt) {
+        while (tt_idx < current_icon_count) {
             _tooltip.add(_hwnd, tt_idx++, rect);
 
             rect.left += NOTIFYICON_DIST;
@@ -686,7 +689,7 @@ void NotifyArea::UpdateIcons()
         while (tt_idx < _last_icon_count)
             _tooltip.remove(_hwnd, tt_idx++);
 
-        _last_icon_count = _sorted_icons.size();
+        _last_icon_count = current_icon_count;
     }
 
     SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
@@ -723,7 +726,7 @@ void NotifyArea::Paint()
                 rightArrowIcon = SizeIcon(IDI_NOTIFY_R_W, TASKBAR_ICON_SIZE);
             }
         }
-        DrawIconEx(canvas, x, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, _show_hidden ? rightArrowIcon : leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
+        DrawIconEx(canvas, x + (NOTIFYICON_DIST - NOTIFYICON_SIZE) / 2, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, _show_hidden ? rightArrowIcon : leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
         x += NOTIFYICON_DIST;
     }
 
@@ -742,7 +745,7 @@ void NotifyArea::Paint()
             AlphaBlend(canvas, x, y, NOTIFYICON_SIZE, NOTIFYICON_SIZE, mem_dc, 0, 0, NOTIFYICON_SIZE, NOTIFYICON_SIZE, blend);
         } else
 #endif
-            DrawIconEx(canvas, x, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
+            DrawIconEx(canvas, x + (NOTIFYICON_DIST - NOTIFYICON_SIZE) / 2, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
 
         x += NOTIFYICON_DIST;
     }
