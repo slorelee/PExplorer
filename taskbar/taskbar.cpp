@@ -404,7 +404,8 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 
     if ((style & WS_VISIBLE) && !(ex_style & WS_EX_TOOLWINDOW) &&
         !GetParent(hwnd) && !GetWindow(hwnd, GW_OWNER)) {
-        TCHAR title[BUFFER_LEN];
+        TCHAR title[BUFFER_LEN] = {0};
+        TCHAR strbuffer[BUFFER_LEN] = {0};
 
         if (!GetWindowText(hwnd, title, BUFFER_LEN))
             title[0] = '\0';
@@ -413,6 +414,14 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
         //TODO:check not only titlename but processname
         String str_title = title;
         if (str_title.find(TEXT("Windows Shell Experience ")) != string::npos) {
+            return FALSE;
+        }
+
+        //do not show 'Windows 10's Metro Window
+        if (!GetClassName(hwnd, strbuffer, BUFFER_LEN))
+            strbuffer[0] = '\0';
+        str_title = strbuffer;
+        if (str_title.find(TEXT("ApplicationFrameWindow")) != string::npos) {
             return FALSE;
         }
 
