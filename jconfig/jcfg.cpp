@@ -28,7 +28,7 @@ const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
                         TEXT("\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,")
                         TEXT("\"smallicon\":false,\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
-                        TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
+                        TEXT("\"JS_STARTMENU\":{\"text\":\"\",\"command\":{\"shutdown\":\"Wpeutil.exe Shutdown\",\"reboot\":\"Wpeutil.exe Reboot\"}},")
                         TEXT("\"JS_QUICKLAUNCH\":{\"3rd_startup_arguments\":\"\",\"maxiconsinrow\":8},")
                         TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
 
