@@ -133,12 +133,24 @@ Object
 Load_JCfg(string filename)
 {
     string istr = ReadTextFile(filename);
-    string cstr;
-    StringCodeChange(istr.c_str(), CP_UTF8, cstr, CP_ACP);
-    Object jcfg = Deserialize(cstr).ToObject();
+    string cstr = TEXT("");
+    const char *pstr = istr.c_str();
+
     Object def_config = Deserialize(def_jcfg).ToObject();
-    Update_KeyName(&jcfg);
-    Merge_JCfg(&jcfg, &def_config, JCFG_MERGEFLAG_NONE);
+    Object jcfg = def_config;
+
+    if (strlen(pstr) > 3) {
+        if ((unsigned char)pstr[0] == (unsigned char)0xEF &&
+            (unsigned char)pstr[1] == (unsigned char)0xBB &&
+             (unsigned char)pstr[2] == (unsigned char)0xBF) {
+            StringCodeChange(pstr + 3, CP_UTF8, cstr, CP_ACP);
+        } else {
+             StringCodeChange(pstr, CP_UTF8, cstr, CP_ACP);
+        }
+        jcfg = Deserialize(cstr).ToObject();
+        Update_KeyName(&jcfg);
+        Merge_JCfg(&jcfg, &def_config, JCFG_MERGEFLAG_NONE);
+    }
     Object test = jcfg["JS_DESKTOP"].ToObject();
     g_JCfg = jcfg;
     return jcfg;
