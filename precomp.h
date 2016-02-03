@@ -48,8 +48,8 @@
 #include "globals.h"
 #include "externals.h"
 
-#include "vendor\json.h"
-#include "jconfig\jcfg.h"
+#include "vendor/json.h"
+#include "jconfig/jcfg.h"
 
 #define DEFWINBRUSH() GetSysColorBrush(COLOR_BTNFACE)
 //#define TASKBAR_BRUSH() DEFWINBRUSH()

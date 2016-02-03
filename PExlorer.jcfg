@@ -68,11 +68,6 @@
   {
     "::第3方文件管理器":"##{JVAR_MODULEPATH}\\explorer++.exe"
   },
-  "::快速启动栏":
-  {
-    "::第3方文件管理器启动参数":"",
-    "::单行最大图标数":8
-  },
   "::桌面":
   {
     "::第3方文件管理器打开参数":"\"%s\"",
@@ -87,5 +82,23 @@
     "theme":"dark",
     "height": 40,
     "bkcolor":[0,122,204]
+  },
+  "::开始菜单":
+  {
+    "commands": {
+      "reboot": {
+         "command": "Wpeutil.exe",
+         "parameters": "Reboot"
+      },
+      "shutdown": {
+         "command": "Wpeutil.exe",
+         "parameters": "Shutdown"
+      }
+    }
+  },
+  "::快速启动栏":
+  {
+    "::第3方文件管理器启动参数":"",
+    "::单行最大图标数":8
   }
 }

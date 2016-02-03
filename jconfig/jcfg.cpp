@@ -28,7 +28,7 @@ const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
                         TEXT("\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,")
                         TEXT("\"smallicon\":false,\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
-                        TEXT("\"JS_STARTMENU\":{\"text\":\"\",\"command\":{\"shutdown\":\"Wpeutil.exe Shutdown\",\"reboot\":\"Wpeutil.exe Reboot\"}},")
+                        TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
                         TEXT("\"JS_QUICKLAUNCH\":{\"3rd_startup_arguments\":\"\",\"maxiconsinrow\":8},")
                         TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
 
@@ -186,9 +186,9 @@ ExpendJString(Value *v)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1)
+JCfg_GetValue(Object *jcfg, string key1, Value defval)
 {
-    if (jcfg->HasKey(key1) == false) return Object();
+    if (jcfg->HasKey(key1) == false) return defval;
     Value v = (*jcfg)[key1];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -197,11 +197,11 @@ JCfg_GetValue(Object *jcfg, string key1)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2)
+JCfg_GetValue(Object *jcfg, string key1, string key2, Value defval)
 {
-    if (jcfg->HasKey(key1) == false) return Object();
-    if ((*jcfg)[key1].GetType() != ObjectVal) return Object();
-    if ((*jcfg)[key1].HasKey(key2) == false) return Object();
+    if (jcfg->HasKey(key1) == false) return defval;
+    if ((*jcfg)[key1].GetType() != ObjectVal) return defval;
+    if ((*jcfg)[key1].HasKey(key2) == false) return defval;
     Value v = (*jcfg)[key1][key2];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -210,13 +210,27 @@ JCfg_GetValue(Object *jcfg, string key1, string key2)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2, string key3)
+JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, Value defval)
 {
-    Value v = JCfg_GetValue(jcfg, key1, key2);
-    if (v.GetType() != ObjectVal) return Object();
-    if (v.HasKey(key3) == false) return Object();
+    Value v = JCfg_GetValue(jcfg, key1, key2, Value());
+    if (v.GetType() != ObjectVal) return defval;
+    if (v.HasKey(key3) == false) return defval;
 
-    v = v[key3];
+    v = v.ToObject()[key3];
+    if (v.GetType() == StringVal) {
+        ExpendJString(&v);
+    }
+    return v;
+}
+
+Value
+JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, string key4, Value defval)
+{
+    Value v = JCfg_GetValue(jcfg, key1, key2, key3, Value());
+    if (v.GetType() != ObjectVal) return defval;
+    if (v.HasKey(key4) == false) return defval;
+
+    v = v.ToObject()[key4];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
     }

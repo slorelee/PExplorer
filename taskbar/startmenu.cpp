@@ -40,6 +40,7 @@
 #include "../dialogs/searchprogram.h"
 #include "../dialogs/settings.h"
 
+#include "../jconfig/jcfg.h"
 
 #define SHELLPATH_CONTROL_PANEL     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}")
 #define SHELLPATH_PRINTERS          TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{2227A280-3AEA-1069-A2DE-08002B30309D}")
@@ -1734,9 +1735,7 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
     if (!g_Globals._SHRestricted || SHRestricted(REST_STARTMENULOGOFF) != 1)
         AddButton(ResString(IDS_LOGOFF),    ICID_LOGOFF, false, IDC_LOGOFF);
 
-#ifdef __REACTOS__
     AddButton(ResString(IDS_RESTART), ICID_RESTART, false, IDC_RESTART);
-#endif
 
     if (!g_Globals._SHRestricted || !SHRestricted(REST_NOCLOSE))
         AddButton(ResString(IDS_SHUTDOWN),  ICID_SHUTDOWN, false, IDC_SHUTDOWN);
@@ -1849,6 +1848,9 @@ void StartMenuRoot::ProcessKey(int vk)
 
 int StartMenuHandler::Command(int id, int code)
 {
+    String cmd = TEXT("");
+    INT showflags = SW_SHOWNORMAL;
+    String parameters = TEXT("");
     switch (id) {
 
     // start menu root
@@ -1902,7 +1904,41 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_LOGOFF:
         CloseStartMenu(id);
-        ShowLogoffDialog(g_Globals._hwndDesktopBar);
+        cmd = JCFG_SMC_DEF("logoff", "command", Value(TEXT(""))).ToString();
+        if (cmd != TEXT("")) {
+            showflags = JCFG_SMC_DEF("logoff", "showflags", Value(showflags)).ToInt();
+            parameters = JCFG_SMC_DEF("logoff", "parameters", Value(TEXT(""))).ToString();
+            launch_file(_hwnd, cmd, showflags, parameters);
+        } else {
+            ShowLogoffDialog(g_Globals._hwndDesktopBar);
+        }
+        break;
+
+    case IDC_RESTART:
+        CloseStartMenu(id);
+        cmd = JCFG_SMC_DEF("reboot", "command", Value(TEXT(""))).ToString();
+        if (cmd != TEXT("")) {
+            showflags = JCFG_SMC_DEF("reboot", "showflags", Value(showflags)).ToInt();
+            parameters = JCFG_SMC_DEF("reboot", "parameters", Value(TEXT(""))).ToString();
+            launch_file(_hwnd, cmd, showflags, parameters);
+        }
+        else {
+            ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
+        }
+        /* An alternative way to do restart without shell32 help */
+        //launch_file(_hwnd, TEXT("shutdown.exe"), SW_HIDE, TEXT("-r"));
+        break;
+
+    case IDC_SHUTDOWN:
+        CloseStartMenu(id);
+        cmd = JCFG_SMC_DEF("shutdown", "command", Value(TEXT(""))).ToString();
+        if (cmd != TEXT("")) {
+            showflags = JCFG_SMC_DEF("shutdown", "showflags", Value(showflags)).ToInt();
+            parameters = JCFG_SMC_DEF("shutdown", "parameters", Value(TEXT(""))).ToString();
+            launch_file(_hwnd, cmd, showflags, parameters);
+        } else {
+            ShowExitWindowsDialog(g_Globals._hwndDesktop);
+        }
         break;
 
 #ifndef __REACTOS__
@@ -1911,18 +1947,6 @@ int StartMenuHandler::Command(int id, int code)
         DestroyWindow(g_Globals._hwndDesktop);
         break;
 #endif
-
-    case IDC_SHUTDOWN:
-        CloseStartMenu(id);
-        ShowExitWindowsDialog(g_Globals._hwndDesktop);
-        break;
-
-    case IDC_RESTART:
-        CloseStartMenu(id);
-        ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
-        /* An alternative way to do restart without shell32 help */
-        //launch_file(_hwnd, TEXT("shutdown.exe"), SW_HIDE, TEXT("-r"));
-        break;
 
     // settings menu
 

@@ -27,7 +27,7 @@
 
 #include "vendor/json.h"
 #include "taskbar/favorites.h"
-#include "jconfig\jcfg.h"
+#include "jconfig/jcfg.h"
 
 /// management of file types
 struct FileTypeInfo {
