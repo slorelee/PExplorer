@@ -59,7 +59,7 @@
 #define LIGHTGREENBRUSH() CreateSolidBrush(COLOR_LIGHTGREEN())
 
 #define NOTIFYAREA_WIDTH_DEF    100
-#define NOTIFYAREA_SPACE        10
+#define NOTIFYAREA_SPACE        3
 #define NOTIFYICON_SIZE         16
 #define NOTIFYICON_DIST         (NOTIFYICON_SIZE + NOTIFYICON_SIZE / 2 + 1)
 #define NOTIFYICON_X            1
