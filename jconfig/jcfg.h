@@ -31,6 +31,7 @@ extern bool JCfg_GetDesktopBarUseSmallIcon();
 #define SET_JCFG3(key1, key2, key3) g_JCfg[TEXT(key1)][TEXT(key2)][TEXT(key3)]
 
 #define JCFG_VMN(key) (JCfg_GetValue(&g_JCfg, TEXT("JS_VERBMENUNAME"), g_Globals._langID, TEXT(key)))
+#define JCFG_VMC(key1, key2) (JCfg_GetValue(&g_JCfg, TEXT("JS_VERBMENUCOMMAND"), TEXT(key1), TEXT(key2)))
 
 #define JCFG_TB(n, ...) (JCFG##n("JS_TASKBAR", __VA_ARGS__))
 #define JCFG_QL(n, ...) (JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))

@@ -637,16 +637,16 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                 if (idCmd == FCIDM_SHVIEWLAST - 1) {
                     explorer_about(_hwnd);
                 } else if (idCmd) {
-                    TCHAR namebuffer[MAX_PATH + 1] = { 0 };
+                    TCHAR namebuffer[MAX_PATH + 1] = {0};
                     String menuname;
                     GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
                     menuname = namebuffer;
                     if (menuname == JCFG_VMN("cmdhere")) {
                         static TCHAR sDesktopPath[MAX_PATH + 1];
-                        String parameter;
+                        String parameters;
                         SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
-                        parameter.printf(TEXT("/k \"cd /D %s\""), sDesktopPath);
-                        launch_file(g_Globals._hwndShellView, TEXT("cmd.exe"), SW_SHOWNORMAL, parameter);
+                        parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
+                        launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
                     } else {
                         CMINVOKECOMMANDINFO cmi = { 0 };
                         cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
