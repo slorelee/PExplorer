@@ -36,6 +36,10 @@
 
 #include <wincon.h>
 
+#ifndef _WIN32_WINNT_WINBLUE
+#define _WIN32_WINNT_WINBLUE                0x0603
+#endif
+
 #include <VersionHelpers.h>
 
 #ifndef __WINE__

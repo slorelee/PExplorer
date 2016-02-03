@@ -1,4 +1,4 @@
-
+ï»¿
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -21,7 +21,7 @@ int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
 const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
-                        TEXT("{\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"ÖØÃüÃû(&M)\",\"cmdhere\":\"ÔÚ´Ë´¦´ò¿ªÃüÁî´°¿Ú(&W)\"}},")
+                        TEXT("{\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"é‡å‘½å(&M)\",\"cmdhere\":\"åœ¨æ­¤å¤„æ‰“å¼€å‘½ä»¤çª—å£(&W)\"}},")
                         TEXT("{\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
                         TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
