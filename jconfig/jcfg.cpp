@@ -21,10 +21,10 @@ int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
 const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
-                        TEXT("{\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"重命名(&M)\",\"cmdhere\":\"在此处打开命令窗口(&W)\"}},")
-                        TEXT("{\"JS_VERBMENUCOMMAND\":{\"cmdhere\":{\"command\":\"cmd.exe\",\"parameters\":\"/k \"CD /D %s\"\"}},")
-                        TEXT("{\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
-                        TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
+                        TEXT("\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"重命名(&M)\",\"cmdhere\":\"在此处打开命令窗口(&W)\"}},")
+                        TEXT("\"JS_VERBMENUCOMMAND\":{\"cmdhere\":{\"command\":\"cmd.exe\",\"parameters\":\"/k \\\"CD /D %s\\\"\"}},")
+                        TEXT("\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
+                        TEXT("\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
                         TEXT("\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,")
                         TEXT("\"smallicon\":false,\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
