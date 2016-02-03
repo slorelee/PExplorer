@@ -20,7 +20,9 @@ int g_JCfg_taskbar_iconsize = 32;
 int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
-const string def_jcfg = TEXT("{\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
+const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
+                        TEXT("{\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"重命名(&M)\",\"cmdhere\":\"在此处打开命令窗口(&W)\"}},")
+                        TEXT("{\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
                         TEXT("{\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
                         TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
                         TEXT("\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,")
@@ -183,6 +185,9 @@ JCfg_GetValue(Object *jcfg, string key1)
 Value
 JCfg_GetValue(Object *jcfg, string key1, string key2)
 {
+    if (jcfg->HasKey(key1) == false) return Object();
+    if ((*jcfg)[key1].GetType() != ObjectVal) return Object();
+    if ((*jcfg)[key1].HasKey(key2) == false) return Object();
     Value v = (*jcfg)[key1][key2];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
@@ -193,7 +198,11 @@ JCfg_GetValue(Object *jcfg, string key1, string key2)
 Value
 JCfg_GetValue(Object *jcfg, string key1, string key2, string key3)
 {
-    Value v = (*jcfg)[key1][key2][key3];
+    Value v = JCfg_GetValue(jcfg, key1, key2);
+    if (v.GetType() != ObjectVal) return Object();
+    if (v.HasKey(key3) == false) return Object();
+
+    v = v[key3];
     if (v.GetType() == StringVal) {
         ExpendJString(&v);
     }

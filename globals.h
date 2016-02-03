@@ -202,10 +202,13 @@ extern struct ExplorerGlobals {
     void    write_persistent();
 
     void    load_config();
+    void    get_systeminfo();
 
     HINSTANCE   _hInstance;
     UINT        _cfStrFName;
 
+    BOOL        _isNT5;
+    String      _langID;
 #ifndef ROSSHELL
     ATOM        _hframeClass;
     HWND        _hMainWnd;

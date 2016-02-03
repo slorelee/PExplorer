@@ -599,7 +599,7 @@ bool DesktopShellView::DoContextMenu(int x, int y)
     for (int i = pida->cidl; i > 0; --i)
         apidl[i - 1] = (LPCITEMIDLIST)((LPBYTE)pida + pida->aoffset[i]);
 
-    hr = ShellFolderContextMenu(ShellFolder(parent_pidl), _hwnd, pida->cidl, apidl, x, y, _cm_ifs);
+    hr = ShellFolderContextMenu(ShellFolder(parent_pidl), _hwnd, pida->cidl, apidl, x, y, _cm_ifs, _pShellView);
 
     selection->Release();
 
@@ -637,16 +637,28 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                 if (idCmd == FCIDM_SHVIEWLAST - 1) {
                     explorer_about(_hwnd);
                 } else if (idCmd) {
-                    CMINVOKECOMMANDINFO cmi = { 0 };
-                    cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-                    cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
-                    if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
-                    if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
-                    cmi.hwnd = _hwnd;
-                    cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
-                    cmi.nShow = SW_SHOWNORMAL;
+                    TCHAR namebuffer[MAX_PATH + 1] = { 0 };
+                    String menuname;
+                    GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                    menuname = namebuffer;
+                    if (menuname == JCFG_VMN("cmdhere")) {
+                        static TCHAR sDesktopPath[MAX_PATH + 1];
+                        String parameter;
+                        SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
+                        parameter.printf(TEXT("/k \"cd /D %s\""), sDesktopPath);
+                        launch_file(g_Globals._hwndShellView, TEXT("cmd.exe"), SW_SHOWNORMAL, parameter);
+                    } else {
+                        CMINVOKECOMMANDINFO cmi = { 0 };
+                        cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
+                        cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+                        if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
+                        if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
+                        cmi.hwnd = _hwnd;
+                        cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+                        cmi.nShow = SW_SHOWNORMAL;
 
-                    hr = pcm->InvokeCommand(&cmi);
+                        hr = pcm->InvokeCommand(&cmi);
+                    }
                 }
             } else
                 _cm_ifs.reset();

@@ -29,6 +29,7 @@
 
 
 #include <precomp.h>
+#include <ShObjIdl.h>
 
 
 #ifdef _MS_VER
@@ -522,7 +523,7 @@ IContextMenu *CtxMenuInterfaces::query_interfaces(IContextMenu *pcm1)
 
 
 HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int cidl,
-                               LPCITEMIDLIST *apidl, int x, int y, CtxMenuInterfaces &cm_ifs)
+                               LPCITEMIDLIST *apidl, int x, int y, CtxMenuInterfaces &cm_ifs, IShellView *psv)
 {
     IContextMenu *pcm;
 
@@ -535,7 +536,10 @@ HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int 
         HMENU hmenu = CreatePopupMenu();
 
         if (hmenu) {
-            hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, CMF_NORMAL | CMF_EXPLORE | CMF_EXTENDEDVERBS);
+            UINT flags = CMF_NORMAL | CMF_EXPLORE | CMF_EXTENDEDVERBS;
+            if (!g_Globals._isNT5) flags |= CMF_CANRENAME;
+
+            hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, flags);
 
             if (SUCCEEDED(hr)) {
                 UINT idCmd = TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, hwndParent, NULL);
@@ -543,21 +547,36 @@ HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int 
                 cm_ifs.reset();
 
                 if (idCmd) {
-                    CMINVOKECOMMANDINFO cmi = { 0 };
-                    cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-                    cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
-                    if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
-                    if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
-                    cmi.hwnd = hwndParent;
-                    cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
-                    cmi.nShow = SW_SHOWNORMAL;
+                    TCHAR namebuffer[MAX_PATH + 1] = {0};
+                    String menuname;
+                    GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                    menuname = namebuffer;
+                    if (menuname == JCFG_VMN("rename")) {
+                        if (psv) {
+                            IFolderView2 *pfv2 = NULL;
+                            hr = psv->QueryInterface(IID_IFolderView2, (void**)&pfv2);
+                            if (SUCCEEDED(hr)) {
+                                pfv2->DoRename();
+                            }
+                        }
+                    } else {
+                        CMINVOKECOMMANDINFO cmi = { 0 };
+                        cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
+                        cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+                        if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
+                        if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
+                        cmi.hwnd = hwndParent;
+                        cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+                        cmi.nShow = SW_SHOWNORMAL;
 
-                    hr = pcm->InvokeCommand(&cmi);
-                    if (hr == COPYENGINE_E_USER_CANCELLED) hr = S_OK;
+                        hr = pcm->InvokeCommand(&cmi);
+                        if (hr == COPYENGINE_E_USER_CANCELLED) hr = S_OK;
+                    }
+                } else {
+                    cm_ifs.reset();
                 }
-            } else
-                cm_ifs.reset();
-            DestroyMenu(hmenu);
+                DestroyMenu(hmenu);
+            }
         }
 
         pcm->Release();

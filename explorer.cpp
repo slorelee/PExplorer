@@ -36,6 +36,8 @@
 
 #include <wincon.h>
 
+#include <VersionHelpers.h>
+
 #ifndef __WINE__
 #include <io.h>        // for dup2()
 #include <fcntl.h>    // for _O_RDONLY
@@ -44,7 +46,7 @@
 //#include "dialogs/settings.h"    // for MdiSdiDlg
 
 #include "services/shellservices.h"
-#include "jconfig\jcfg.h"
+#include "jconfig/jcfg.h"
 
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
@@ -105,6 +107,18 @@ void ExplorerGlobals::load_config()
 #endif
     Load_JCfg(cfgfile);
     JCfg_GetDesktopBarUseSmallIcon();
+}
+
+void ExplorerGlobals::get_systeminfo()
+{
+    g_Globals._isNT5 = !IsWindowsVistaOrGreater();
+
+    Value v = JCFG2("JS_SYSTEMINFO", "langid");
+    String langID = v.ToString();
+    g_Globals._langID = langID;
+    if (langID == TEXT("0")) {
+        g_Globals._langID.printf(TEXT("%d"), GetSystemDefaultLangID());
+    }
 }
 
 void ExplorerGlobals::read_persistent()
@@ -1056,7 +1070,6 @@ static bool SetShellReadyEvent(LPCTSTR evtName)
     return true;
 }
 
-
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 {
     CONTEXT("WinMain()");
@@ -1213,6 +1226,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     g_Globals.read_persistent();
     g_Globals.load_config();
+    g_Globals.get_systeminfo();
 
     if (startup_desktop) {
         WaitCursor wait;

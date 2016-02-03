@@ -97,7 +97,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_NO_ALPHABLEND;_DEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_NO_ALPHABLEND;_DEBUG;WIN32;_WIN32_IE=0x0700;_WIN32_WINNT=0x0601;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -146,7 +146,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_NO_ALPHABLEND;_DEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_NO_ALPHABLEND;_DEBUG;WIN32;_WIN32_IE=0x0700;_WIN32_WINNT=0x0601;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -195,7 +195,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0700;_WIN32_WINNT=0x0601;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -242,7 +242,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0600;_WIN32_WINNT=0x0501;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_NO_ALPHABLEND;NDEBUG;WIN32;_WIN32_IE=0x0700;_WIN32_WINNT=0x0601;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

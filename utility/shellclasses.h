@@ -1137,4 +1137,4 @@ protected:
 
 
 extern HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int cidl,
-                                      LPCITEMIDLIST *ppidl, int x, int y, CtxMenuInterfaces &cm_ifs);
+                                      LPCITEMIDLIST *ppidl, int x, int y, CtxMenuInterfaces &cm_ifs, IShellView *psv = NULL);
