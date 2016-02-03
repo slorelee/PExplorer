@@ -774,7 +774,7 @@ void explorer_open_frame(int cmdShow, LPTSTR lpCmdLine)
         explorer_show_frame(cmdShow, lpCmdLine);
     }
     else {
-        launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOW, explorer_startup.c_str());
+        launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOWNORMAL, explorer_startup.c_str());
     }
 }
 

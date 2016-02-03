@@ -114,7 +114,7 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
                         static String explorer_open = JCFG2("JS_DESKTOP", "3rd_open_arguments").ToString();
                         if (!explorer_path.empty()) {
                             String explorer_parameters = FmtString(explorer_open, (LPCTSTR)FileSysShellPath(pidl_abs));
-                            launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOW, explorer_parameters.c_str());
+                            launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOWNORMAL, explorer_parameters.c_str());
                             ++cnt;
                         }
                         else {
