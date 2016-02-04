@@ -636,8 +636,11 @@ bool DesktopShellView::DoContextMenu(int x, int y)
 
     if (SUCCEEDED(hr)) {
         //refresh();
-    } else
+    } else {
+#ifdef _DEBUG
         CHECKERROR(hr);
+#endif
+    }
 
     return true;
 }
