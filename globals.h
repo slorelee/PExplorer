@@ -207,6 +207,7 @@ extern struct ExplorerGlobals {
     HINSTANCE   _hInstance;
     UINT        _cfStrFName;
 
+    BOOL        _isWinPE;
     BOOL        _isNT5;
     String      _langID;
 #ifndef ROSSHELL

@@ -1904,7 +1904,9 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_LOGOFF:
         CloseStartMenu(id);
-        cmd = JCFG_SMC_DEF("logoff", "command", Value(TEXT(""))).ToString();
+        if (g_Globals._isWinPE) {
+            cmd = JCFG_SMC_DEF("logoff", "command", Value(TEXT(""))).ToString();
+        }
         if (cmd != TEXT("")) {
             showflags = JCFG_SMC_DEF("logoff", "showflags", Value(showflags)).ToInt();
             parameters = JCFG_SMC_DEF("logoff", "parameters", Value(TEXT(""))).ToString();
@@ -1916,13 +1918,14 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_RESTART:
         CloseStartMenu(id);
-        cmd = JCFG_SMC_DEF("reboot", "command", Value(TEXT(""))).ToString();
+        if (g_Globals._isWinPE) {
+            cmd = JCFG_SMC_DEF("reboot", "command", Value(TEXT(""))).ToString();
+        }
         if (cmd != TEXT("")) {
             showflags = JCFG_SMC_DEF("reboot", "showflags", Value(showflags)).ToInt();
             parameters = JCFG_SMC_DEF("reboot", "parameters", Value(TEXT(""))).ToString();
             launch_file(_hwnd, cmd, showflags, parameters);
-        }
-        else {
+        } else {
             ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
         }
         /* An alternative way to do restart without shell32 help */
@@ -1931,7 +1934,9 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_SHUTDOWN:
         CloseStartMenu(id);
-        cmd = JCFG_SMC_DEF("shutdown", "command", Value(TEXT(""))).ToString();
+        if (g_Globals._isWinPE) {
+            cmd = JCFG_SMC_DEF("shutdown", "command", Value(TEXT(""))).ToString();
+        }
         if (cmd != TEXT("")) {
             showflags = JCFG_SMC_DEF("shutdown", "showflags", Value(showflags)).ToInt();
             parameters = JCFG_SMC_DEF("shutdown", "parameters", Value(TEXT(""))).ToString();

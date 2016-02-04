@@ -77,6 +77,8 @@ ExplorerGlobals::ExplorerGlobals()
     _hwndDesktopBar = 0;
     _hwndShellView = 0;
     _hwndDesktop = 0;
+
+    _isWinPE = FALSE;
 }
 
 
@@ -1228,6 +1230,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // init common controls library
     CommonControlInit usingCmnCtrl;
 
+    if (_tcsstr(ext_options, TEXT("-winpe"))) {
+        g_Globals._isWinPE = TRUE;
+    }
     g_Globals.read_persistent();
     g_Globals.load_config();
     g_Globals.get_systeminfo();
