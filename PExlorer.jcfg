@@ -73,7 +73,7 @@
     "::第3方文件管理器打开参数":"\"%s\"",
     "注释":"绿豆沙色",
     "::桌面背景色":[199,237,204],
-    "::桌面壁纸":"##{JVAR_MODULEPATH}\\wallpaper.bmp"
+    "::桌面壁纸":"##{JVAR_MODULEPATH}\\wallpaper.jpg"
   },
   "JS_TASKBAR":
   {

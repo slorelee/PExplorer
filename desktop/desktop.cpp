@@ -27,7 +27,8 @@
 
 
 #include <precomp.h>
-
+#include <olectl.h>
+#include <ole2.h>
 #include "../resource.h"
 
 #include "../taskbar/desktopbar.h"
@@ -425,43 +426,73 @@ void DesktopShellView::refresh()
     _pShellView->Refresh();
 }
 
-static HBRUSH WINAPI
-SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
+// Function LoadAnImage: accepts a file name(JPG/GIF/BMP) and returns a HBITMAP.
+// On error, it returns 0.
+
+static HBITMAP LoadAnImage(LPCTSTR szFileName)
 {
-    HBRUSH hbrush = NULL;
-    BITMAPFILEHEADER bmfh;
+    // Use IPicture stuff to use JPG / GIF files
+    IPicture *pIPic = NULL;
+    IStream *pIStream = NULL;
+    HGLOBAL hGB;
     HANDLE hFile;
     DWORD dwFileSize, dwRead;
-    BITMAPINFOHEADER *pbmih;
 
-
+    // Read file in memory
     hFile = CreateFile(szFileName, GENERIC_READ, FILE_SHARE_READ,
                        NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
         return NULL;
     }
-
     dwFileSize = GetFileSize(hFile, NULL);
-    ReadFile(hFile, (LPVOID)&bmfh, sizeof(BITMAPFILEHEADER), &dwRead, NULL);
+    hGB = GlobalAlloc(GPTR, dwFileSize);
+    if (!hGB) {
+        CloseHandle(hFile);
+        return NULL;
+    }
+    ReadFile(hFile, (LPVOID)hGB, dwFileSize, &dwRead, NULL);
+    CloseHandle(hFile);
 
-    if (bmfh.bfType == MAKEWORD('B', 'M') &&
-        (pbmih = (BITMAPINFOHEADER *)VirtualAlloc(
-                     NULL,
-                     (dwFileSize - dwRead),
-                     MEM_COMMIT | MEM_RESERVE,
-                     PAGE_READWRITE))) {
-
-        ReadFile(hFile, (LPVOID)pbmih, (dwFileSize - dwRead), &dwRead, NULL);
-
-        if (hbrush = CreateDIBPatternBrushPt(pbmih, DIB_RGB_COLORS)) {
-            *pnWidth = pbmih->biWidth;
-            *pnHeight = pbmih->biHeight;
-        }
-
-        VirtualFree(pbmih, 0, MEM_RELEASE);
+    CreateStreamOnHGlobal(hGB, false, &pIStream);
+    if (!pIStream) {
+        GlobalFree(hGB);
+        return NULL;
     }
 
-    CloseHandle(hFile);
+    OleLoadPicture(pIStream, 0, false, IID_IPicture, (void**)&pIPic);
+
+    if (!pIPic) {
+        pIStream->Release();
+        GlobalFree(hGB);
+        return NULL;
+    }
+    pIStream->Release();
+    GlobalFree(hGB);
+
+    HBITMAP hbmp = 0;
+    pIPic->get_Handle((unsigned int*)&hbmp);
+
+    // Copy the image. Necessary, because upon pIPic's release,
+    // the handle is destroyed.
+    HBITMAP hretbmp = (HBITMAP)CopyImage(hbmp, IMAGE_BITMAP, 0, 0, LR_COPYRETURNORG);
+    pIPic->Release();
+    return hretbmp;
+}
+
+static HBRUSH WINAPI
+SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
+{
+    HBRUSH hbrush = NULL;
+
+    HBITMAP hbmp = LoadAnImage(szFileName);
+    if (hbmp){
+        hbrush = CreatePatternBrush(hbmp);
+        BITMAP bmp = {0};
+        GetObject(hbmp, sizeof(BITMAP), (LPBYTE)&bmp);
+        *pnWidth = bmp.bmWidth;
+        *pnHeight = bmp.bmHeight;
+    }
+
     return hbrush;
 }
 
