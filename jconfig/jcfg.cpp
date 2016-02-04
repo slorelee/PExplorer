@@ -9,6 +9,8 @@
 using namespace std;
 using namespace json;
 
+#define CP_UNICODE -1
+
 #define JCFG_MERGEFLAG_NONE 0
 #define JCFG_MERGEFLAG_OVERWRITE 1
 
@@ -20,17 +22,17 @@ int g_JCfg_taskbar_iconsize = 32;
 int g_JCfg_taskbar_startmenu_iconsize = 32;
 
 //default jcfg data
-const string def_jcfg = TEXT("{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},")
-                        TEXT("\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"重命名(&M)\",\"cmdhere\":\"在此处打开命令窗口(&W)\"}},")
-                        TEXT("\"JS_VERBMENUCOMMAND\":{\"cmdhere\":{\"command\":\"cmd.exe\",\"parameters\":\"/k \\\"CD /D %s\\\"\"}},")
-                        TEXT("\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},")
-                        TEXT("\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},")
-                        TEXT("\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\",")
-                        TEXT("\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,")
-                        TEXT("\"smallicon\":false,\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},")
-                        TEXT("\"JS_STARTMENU\":{\"text\":\"\"},")
-                        TEXT("\"JS_QUICKLAUNCH\":{\"3rd_startup_arguments\":\"\",\"maxiconsinrow\":8},")
-                        TEXT("\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}");
+const wstring def_jcfg = L"{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},"
+                         L"\"JS_VERBMENUNAME\":{\"2052\":{\"rename\":\"重命名(&M)\",\"cmdhere\":\"在此处打开命令窗口(&W)\"}},"
+                         L"\"JS_VERBMENUCOMMAND\":{\"cmdhere\":{\"command\":\"cmd.exe\",\"parameters\":\"/k \\\"CD /D %s\\\"\"}},"
+                         L"\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},"
+                         L"\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},"
+                         L"\"JS_TASKBAR\":{\"theme\":\"dark\",\"bkcolor\":[0,0,0],\"bkcolor2\":[0,122,204],\"textcolor\":\"0xffffff\","
+                         L"\"userebar\":false,\"rebarlock\":false,\"padding-top\":0,"
+                         L"\"smallicon\":false,\"height\":40,\"icon_size\":32,\"*x600\":{\"height\":32,\"icon_size\":16}},"
+                         L"\"JS_STARTMENU\":{\"text\":\"\"},"
+                         L"\"JS_QUICKLAUNCH\":{\"3rd_startup_arguments\":\"\",\"maxiconsinrow\":8},"
+                         L"\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}";
 
 std::string
 ReadTextFile(string filename)
@@ -49,16 +51,22 @@ ReadTextFile(string filename)
 inline void
 StringCodeChange(LPCTSTR src, UINT _srcCode, string &dest, UINT _destCode)
 {
-    int len = MultiByteToWideChar(_srcCode , 0, src, -1, NULL, 0);
-    WCHAR *srcTemp = new WCHAR[len];
-    MultiByteToWideChar(_srcCode , 0, src, -1, srcTemp, len);
+    int len = 0;
+    WCHAR *srcTemp = (WCHAR *)src;
+    char *destTemp = NULL;
+    if (_srcCode != CP_UNICODE) {
+        len = MultiByteToWideChar(_srcCode , 0, src, -1, NULL, 0);
+        srcTemp = new WCHAR[len];
+        MultiByteToWideChar(_srcCode , 0, src, -1, srcTemp, len);
+    }
+
     len = WideCharToMultiByte(_destCode, 0, srcTemp, -1, NULL, 0, NULL, NULL);
-    char *destTemp = new char[len];
+    destTemp = new char[len];
     WideCharToMultiByte(_destCode, 0, srcTemp, -1, destTemp, len, NULL, NULL);
 
     dest = destTemp;
 
-    delete []srcTemp;
+    if (_srcCode != CP_UNICODE) delete []srcTemp;
     delete []destTemp;
 }
 
@@ -134,10 +142,12 @@ Object
 Load_JCfg(string filename)
 {
     string istr = ReadTextFile(filename);
+    string defstr = TEXT("");
     string cstr = TEXT("");
     const char *pstr = istr.c_str();
 
-    Object def_config = Deserialize(def_jcfg).ToObject();
+    StringCodeChange((LPCTSTR)def_jcfg.c_str(), CP_UNICODE, defstr, CP_ACP);
+    Object def_config = Deserialize(defstr).ToObject();
     Object jcfg = def_config;
 
     if (strlen(pstr) > 3) {
