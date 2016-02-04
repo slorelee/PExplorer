@@ -241,17 +241,17 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,106,136,50,14
 END
 
-IDD_ABOUT_EXPLORER DIALOGEX 0, 0, 199, 106
+IDD_ABOUT_EXPLORER DIALOGEX 0, 0, 255, 110
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About PExlorer"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "PExlorer",IDC_PE_EXPLORER,91,13,104,11
-    LTEXT           "V 1.0 beta",IDC_VERSION_TXT,91,27,104,8
-    LTEXT           "(c) 2015 Slore",IDC_STATIC,91,42,104,8
-    LTEXT           "",IDC_WIN_VERSION,91,58,98,22
-    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,17,84,129,8
-    CONTROL         "&OK",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,154,90,38,12
+    LTEXT           "PExlorer",IDC_PE_EXPLORER,100,15,100,12
+    LTEXT           "V 1.0 RC1",IDC_VERSION_TXT,100,30,100,12
+    LTEXT           "(c) 2015 Slore",IDC_STATIC,100,45,100,12
+    LTEXT           "",IDC_WIN_VERSION,100,60,145,22
+    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,10,90,145,12
+    CONTROL         "&OK",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,200,90,40,12
 END
 
 
