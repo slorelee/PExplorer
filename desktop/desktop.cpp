@@ -34,6 +34,12 @@
 #include "../taskbar/desktopbar.h"
 #include "../taskbar/taskbar.h" // for PM_GET_LAST_ACTIVE
 
+enum WallPaperStyle {
+    STYLE_WP_STRETCH = 0,
+    STYLE_WP_TILE,
+    STYLE_WP_CENTER
+};
+
 
 static BOOL (WINAPI *SetShellWindow)(HWND);
 static BOOL (WINAPI *SetShellWindowEx)(HWND, HWND);
@@ -391,6 +397,10 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
 
     //refresh();
     InitDragDrop();
+
+    _hbmWallp = 0;
+    _hbrWallp = 0;
+    _rcBitmapWp = {0, 0, 0, 0};
     LoadWallpaper(TRUE);
 
     SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
@@ -400,6 +410,11 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
 
 DesktopShellView::~DesktopShellView()
 {
+    if (_hbmWallp) {
+        DeleteObject(_hbmWallp);
+        _hbmWallp = NULL;
+    }
+
     if (_hbrWallp) {
         DeleteObject(_hbrWallp);
         _hbrWallp = NULL;
@@ -479,45 +494,120 @@ static HBITMAP LoadAnImage(LPCTSTR szFileName)
     return hretbmp;
 }
 
-static HBRUSH WINAPI
-SHLoadDIBitmapBrush(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
+HBITMAP
+DesktopShellView::SHLoadDIBitmap(LPCTSTR szFileName, int *pnWidth, int *pnHeight)
 {
-    HBRUSH hbrush = NULL;
-
     HBITMAP hbmp = LoadAnImage(szFileName);
+
     if (hbmp){
-        hbrush = CreatePatternBrush(hbmp);
         BITMAP bmp = {0};
         GetObject(hbmp, sizeof(BITMAP), (LPBYTE)&bmp);
         *pnWidth = bmp.bmWidth;
         *pnHeight = bmp.bmHeight;
     }
+    return hbmp;
+}
 
-    return hbrush;
+/*
+static
+HBITMAP GetSrcBit(HDC hDC, DWORD dstBitWidth, DWORD dstBitHeight, DWORD srcBitWidth, DWORD srcBitHeight)
+{
+    HDC hBufDC;
+    HBITMAP hBitmap, hBitTemp;
+    //创建设备上下文(HDC)
+    hBufDC = CreateCompatibleDC(hDC);
+    //创建HBITMAP
+    hBitmap = CreateCompatibleBitmap(hDC, dstBitWidth, dstBitHeight);
+    hBitTemp = (HBITMAP)SelectObject(hBufDC, hBitmap);
+    //得到位图缓冲区
+    StretchBlt(hBufDC, 0, 0, dstBitWidth, dstBitHeight,
+        hDC, 0, 0, srcBitWidth, srcBitHeight, SRCCOPY);
+    //得到最终的位图信息
+    hBitmap = (HBITMAP)SelectObject(hBufDC, hBitTemp);
+    //释放内存
+    DeleteObject(hBitTemp);
+    DeleteDC(hBufDC);
+    return hBitmap;
+}
+*/
+
+HBITMAP
+DesktopShellView::StretchWallpaper()
+{
+    if (!_hbmWallp) return _hbmWallp;
+    if (_fStyleWallp != STYLE_WP_STRETCH) return _hbmWallp;
+
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+
+    if (_rcStretchBitmapWp.right == width && _rcStretchBitmapWp.bottom == height) {
+        return _hbmWallp;
+    }
+
+    MemCanvas srcCanvas;
+    BitmapSelection srcBmp(srcCanvas, _hbmWallp);
+
+    MemCanvas dstCanvas((HDC)srcCanvas);//CreateCompatibleDC(srcCanvas);
+    HBITMAP hcbmp = CreateCompatibleBitmap(srcCanvas, width, height);
+    HBITMAP hdstbmp = SelectBitmap(dstCanvas, hcbmp);
+    BOOL ret = StretchBlt(dstCanvas, 0, 0, width, height, srcCanvas, 0, 0, _rcBitmapWp.right, _rcBitmapWp.bottom, SRCCOPY);
+    HBITMAP hbmp = SelectBitmap(dstCanvas, hdstbmp);//GetSrcBit(srcCanvas, width, height, _rcBitmapWp.right, _rcBitmapWp.bottom);
+    //HBITMAP hbmp = GetSrcBit(srcCanvas, width, height, _rcBitmapWp.right, _rcBitmapWp.bottom);
+    if (hbmp) {
+        BITMAP bmp = {0};
+        GetObject(hbmp, sizeof(BITMAP), (LPBYTE)&bmp);
+        hbmp = (HBITMAP)CopyImage(hbmp, IMAGE_BITMAP, 0, 0, LR_COPYRETURNORG);
+    }
+
+    if (hbmp) {
+        _rcStretchBitmapWp.right = width;
+        _rcStretchBitmapWp.bottom = height;
+        return hbmp;
+    }
+    return _hbmWallp;
 }
 
 LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 {
-    DWORD dwSize, dwType, lRet, fTile = 0;
     String wallpaper_path = JCFG2("JS_DESKTOP", "wallpaper").ToString();
     int x, y;
 
-    //TODO:load config
-    _fTileWallp = 1;
+    _fStyleWallp = JCFG2("JS_DESKTOP", "wallpaperstyle").ToInt();
+    _fStyleWallp = STYLE_WP_STRETCH;
     ExpandEnvironmentStrings(wallpaper_path, _szBMPName, MAX_PATH);
 
     // need to repaint whole thing, so invalidate entire desktop window
     //InvalidateRect(_hwnd, NULL, TRUE);
-    if (_hbrWallp)
+
+    if (_hbmWallp) {
+        DeleteObject(_hbmWallp);
+        _hbmWallp = NULL;
+    }
+
+    if (_hbrWallp) {
         DeleteObject(_hbrWallp);
+        _hbrWallp = NULL;
+    }
 
-    _hbrWallp = SHLoadDIBitmapBrush(_szBMPName, &x, &y);
+    _rcWp = { 0, 0, 0, 0};
+    _rcBitmapWp = { 0, 0, 0, 0};
+    _rcStretchBitmapWp = { 0, 0, 0, 0 };
 
-    if (!_fTileWallp) {
+    _hbmWallp = SHLoadDIBitmap(_szBMPName, &x, &y);
+
+    if (_fStyleWallp == STYLE_WP_CENTER) {
         _rcWp.left = max(0, (GetSystemMetrics(SM_CXSCREEN) - x) / 2);
         _rcWp.top = max(0, (GetSystemMetrics(SM_CYSCREEN) - y) / 2);
         _rcWp.right = _rcWp.left + x;
         _rcWp.bottom = _rcWp.top + y;
+    }
+
+    if (_hbmWallp) {
+        _rcBitmapWp.right = x;
+        _rcBitmapWp.bottom = y;
+        _rcStretchBitmapWp = _rcBitmapWp;
+        HBITMAP bmp = StretchWallpaper();
+        _hbrWallp = CreatePatternBrush(bmp);
     }
 
     return TRUE;
@@ -527,9 +617,9 @@ void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
 {
     RECT rc;
     GetClipBox(hdc, &rc);
-    if (_hbrWallp && _fTileWallp) {
-        SetBrushOrgEx(hdc, 0 - rc.left, 0 - rc.top, NULL);
-        FillRect(hdc, &rc, _hbrWallp);
+    if (_hbrWallp && _fStyleWallp != STYLE_WP_CENTER) {
+       SetBrushOrgEx(hdc, 0 - rc.left, 0 - rc.top, NULL);
+       FillRect(hdc, &rc, _hbrWallp);
     } else {
         HBRUSH hBkBrush = CreateSolidBrush(DESKTOP_BKCOLOR());
         if (!_hbrWallp) {

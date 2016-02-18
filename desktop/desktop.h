@@ -105,7 +105,9 @@ protected:
     int     Notify(int id, NMHDR *pnmh);
 
     bool    DoContextMenu(int x, int y);
+    HBITMAP SHLoadDIBitmap(LPCTSTR szFileName, int *pnWidth, int *pnHeight);
     LRESULT LoadWallpaper(BOOL fInitial);
+    HBITMAP StretchWallpaper();
     void    DrawDesktopBkgnd(HDC hdc);
     HRESULT DoDesktopContextMenu(int x, int y);
     void    PositionIcons(int dir = 1);
@@ -115,8 +117,12 @@ protected:
     HWND    _hwndListView;
     int     _icon_algo;
 
+    DWORD _fStyleWallp;
+    HBITMAP _hbmWallp;
     HBRUSH _hbrWallp;
-    DWORD _fTileWallp;
+
     RECT _rcWp;
+    RECT _rcBitmapWp;
+    RECT _rcStretchBitmapWp;
     TCHAR _szBMPName[MAX_PATH + 1];
 };
