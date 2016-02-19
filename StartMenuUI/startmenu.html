@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>StartMenuPane</title>
+    <meta charset="UTF-8" />
+    <style type="text/css">
+#startmenu {
+  background: black;
+  width: 500px;
+  height: 600px;
+}
+
+#leftpane {
+  width: 288px;
+  height: 584px;
+  float: left;
+  background: white;
+  margin: 8px 0px auto 8px;
+}
+#rightpane {
+  width: 40%;
+  height: 100%;
+  float: left;
+  margin: 8px 0px;
+}
+#lefthead {
+  height: 13%
+}
+#listview {
+  height: 65%
+}
+#leftbottom {
+  height: 13%
+}
+#righthead {
+  height: 13%
+}
+.blue {
+    color: #d9eef7;
+    border: solid 1px #0076a3;
+    background: #0095cd;
+}
+.button {
+    display: inline-block;
+    line-height:30px;
+    text-align: center;
+    text-decoration: none;
+    height: 60px;
+    width: 60px;
+    float: left;
+    margin: 10px 10px auto 10px;
+}
+.pfirst {
+    margin-left: 30px;
+}
+
+.pane_nav {
+    width: 100%;
+}
+.imgbuttonsel {
+    background-image:  url('pane_button.png');
+}
+
+.imgbutton {
+    width: 100%;
+    height: 35px;
+    float: left;
+    text-align: center;
+    text-decoration: none;
+    line-height:30px;
+    color: #d9eef7;
+}
+
+.imgbutton:hover {
+    background: DarkOrange;
+}
+
+    </style>
+    <script type="text/javascript">
+      var defaultimgbtnsel = 'rp_rcapp';
+      var lastimgbuttonsel = defaultimgbtnsel;
+      function rplink_click(btnid) {
+         document.getElementById(lastimgbuttonsel).className="imgbutton";
+         document.getElementById(btnid).className="imgbutton imgbuttonsel";
+         lastimgbuttonsel = btnid;
+      }
+
+    </script>
+  </head>
+  <body>
+  <div id='startmenu'>
+    <div id='leftpane'>
+      <div id='lefthead'>
+        <a href="#" class="button blue pfirst">常用<br/>程序</a>
+        <a href="#" class="button blue">磁盘<br/>工具</a>
+        <a href="#" class="button blue">系统<br/>安装</a>
+      </div>
+      <HR width='80%' color='Silver' size=1 />
+      <div id='listview'>
+        
+      </div>
+      <HR width='80%' color='Silver' size=1 />
+      <div id='leftbottom'>
+        <a href="#" class="button blue pfirst">所有<br/>程序</a>
+        <a href="#" class="button blue">控制<br/>面板</a>
+        <a href="#" class="button blue">计算<br/>  器</a>
+      </div>
+    </div>
+    <div id='rightpane'>
+    <div id='righthead'>
+          <a href="#" class="button blue pfirst">用户</a>
+          <a href="#" class="button blue">文档</a>
+      </div>
+      <HR width='80%' color='DimGray' size=1 />
+      <div id='pane_nav'>
+          <a href="#" class="imgbutton">维护工具</a>
+          <a href="#rplink_rcapp" id='rp_rcapp' onclick='rplink_click(this.id);' class="imgbutton imgbuttonsel">常用程序</a>
+          <a href="#rplink_drive" id='rp_drive' onclick='rplink_click(this.id);' class="imgbutton">驱动相关</a>
+          <a href="#" class="imgbutton">系统安装</a>
+          <div name='dummy' style='float:left;height:200px;width: 100%;' />
+      </div>
+      <HR width='80%' color='DimGray' size=1 />
+      <div id='help'>
+          <a href="#" class="imgbutton">帮助</a>
+      </div>
+      <HR width='80%' color='DimGray' size=1 />
+      <div id='power_option'>
+        <a href="#" class="imgbutton">重启</a>
+        <a href="#" class="imgbutton">关机</a>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>
