@@ -123,6 +123,5 @@ protected:
 
     RECT _rcWp;
     RECT _rcBitmapWp;
-    RECT _rcStretchBitmapWp;
     TCHAR _szBMPName[MAX_PATH + 1];
 };
