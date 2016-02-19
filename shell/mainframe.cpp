@@ -75,7 +75,7 @@ HWND MainFrameBase::Create(const ExplorerCmd &cmd)
         UpdateWindow(hFrame);
 
         // Open the first child window after initializing the application
-        if (cmd.IsValidPath()) {
+        if (cmd.IsValidPath() || _tcsstr(cmd._path, TEXT("://"))) {
             // We use the static s_path variable to store the path string in order
             // to avoid accessing prematurely freed memory in the PostMessage handlers.
             static String s_path = cmd._path;
