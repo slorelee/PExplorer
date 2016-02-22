@@ -518,6 +518,8 @@ HBITMAP GetSrcBit(HDC hDC, DWORD dstBitWidth, DWORD dstBitHeight, DWORD srcBitWi
     HBITMAP hbmp = CreateCompatibleBitmap(hDC, dstBitWidth, dstBitHeight);
     MemCanvas dstCanvas(hDC);
     BitmapSelection bmpSel(dstCanvas, hbmp);
+    SetStretchBltMode(dstCanvas, HALFTONE);
+    SetBrushOrgEx(dstCanvas, 0, 0, NULL);
     BOOL ret = StretchBlt(dstCanvas, 0, 0, dstBitWidth, dstBitHeight, hDC, 0, 0, srcBitWidth, srcBitHeight, SRCCOPY);
     return hbmp;
 }
