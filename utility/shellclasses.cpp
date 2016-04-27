@@ -547,11 +547,10 @@ HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int 
                 cm_ifs.reset();
 
                 if (idCmd) {
-                    TCHAR namebuffer[MAX_PATH + 1] = {0};
-                    String menuname;
-                    GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
-                    menuname = namebuffer;
-                    if (menuname == JCFG_VMN("rename")) {
+                    WCHAR namebuffer[MAX_PATH + 1] = {0};
+                    pcm->GetCommandString(idCmd, GCS_VERBW, NULL, (char *)namebuffer, MAX_PATH);
+                    //GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                    if (_wcsicmp(namebuffer, L"rename") == 0) {
                         if (psv) {
                             IFolderView2 *pfv2 = NULL;
                             hr = psv->QueryInterface(IID_IFolderView2, (void**)&pfv2);

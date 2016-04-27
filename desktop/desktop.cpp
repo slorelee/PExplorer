@@ -803,16 +803,17 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                 if (idCmd == FCIDM_SHVIEWLAST - 1) {
                     explorer_about(_hwnd);
                 } else if (idCmd) {
-                    TCHAR namebuffer[MAX_PATH + 1] = {0};
-                    String menuname;
-                    GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
-                    menuname = namebuffer;
-                    if (menuname == JCFG_VMN("cmdhere")) {
+                    WCHAR namebuffer[MAX_PATH + 1] = {0};
+                    pcm->GetCommandString(idCmd, GCS_VERBW, NULL, (char *)namebuffer, MAX_PATH);
+                    //GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                    if (_wcsicmp(namebuffer, L"cmd") == 0) {
                         static TCHAR sDesktopPath[MAX_PATH + 1];
                         String parameters;
                         SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
                         parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
                         launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
+                    } else if (_wcsicmp(namebuffer, L"refresh") == 0 && JCFG_VMN("refresh").GetType() == NULLVal) {
+                        //do nothing
                     } else {
                         CMINVOKECOMMANDINFO cmi = { 0 };
                         cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
