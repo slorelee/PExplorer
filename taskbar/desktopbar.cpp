@@ -316,9 +316,14 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
         _startMenuRoot->Command(IDC_LOGOFF, 0);
         break;
 
-    case IDHK_DESKTOP:
-        g_Globals._desktop.ToggleMinimize();
+    case IDHK_DESKTOP: {
+        if (_startMenuRoot && _startMenuRoot->IsStartMenuVisible()) {
+                ShowOrHideStartMenu();
+        } else {
+            g_Globals._desktop.ToggleMinimize();
+        }
         break;
+    }
 
     case IDHK_STARTMENU:
         ShowOrHideStartMenu();

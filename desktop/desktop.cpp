@@ -59,41 +59,95 @@ static BOOL CALLBACK SwitchDesktopEnumFct(HWND hwnd, LPARAM lparam)
 
 static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
 {
+    BOOL rc = FALSE;
     list<MinimizeStruct> &minimized = *(list<MinimizeStruct> *)lparam;
 
-    if (hwnd != g_Globals._hwndDesktopBar && hwnd != g_Globals._hwndDesktop)
-        if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
-            RECT rect;
+    if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
 
-            if (GetWindowRect(hwnd, &rect))
-                if (rect.right > 0 && rect.bottom > 0 &&
-                    rect.right > rect.left && rect.bottom > rect.top) {
-                    minimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
-                    //ShowWindowAsync(hwnd, SW_MINIMIZE);
-                    PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);  //Some apps like WebChat can't be minimized by ShowWindowAsync()
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
+        RECT rect;
+        if (GetWindowRect(hwnd, &rect)) {
+            if (rect.right > 0 && rect.bottom > 0 &&
+                rect.right > rect.left && rect.bottom > rect.top) {
+                minimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
+                rc = ShowWindowAsync(hwnd, SW_SHOWMINIMIZED);
+                if (rc == FALSE) {
+                    PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);  //Some apps like TaskManager can't be minimized by ShowWindowAsync()
                 }
+            }
         }
+    }
 
     return TRUE;
 }
 
-/// minimize/restore all windows on the desktop
+static BOOL CALLBACK UnminimizedDesktopEnumFct(HWND hwnd, LPARAM lparam)
+{
+    BOOL rc = FALSE;
+    list<MinimizeStruct> &unminimized = *(list<MinimizeStruct> *)lparam;
+
+    if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
+        //do not show 'Windows 10's Metro Window
+        TCHAR strbuffer[BUFFER_LEN] = { 0 };
+        if (!GetClassName(hwnd, strbuffer, BUFFER_LEN))
+            strbuffer[0] = '\0';
+        String str_buffer = strbuffer;
+        if (str_buffer.find(TEXT("ApplicationFrameWindow")) != string::npos ||
+            str_buffer.find(TEXT("Windows.UI.Core.CoreWindow")) != string::npos) {
+            return TRUE;
+        }
+
+        RECT rect;
+        if (GetWindowRect(hwnd, &rect)) {
+            if (rect.right > 0 && rect.bottom > 0 &&
+                rect.right > rect.left && rect.bottom > rect.top) {
+                unminimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
+            }
+        }
+    }
+    return TRUE;
+}
+
+// flag = SW_SHOWMINIMIZED or SW_SHOWNORMAL
+static void ToggleWindows(list<MinimizeStruct> *windows, int flag, list<MinimizeStruct> *minimized = NULL)
+{
+    BOOL rc = FALSE;
+    for (list<MinimizeStruct>::const_reverse_iterator it = windows->rbegin();
+    it != windows->rend(); ++it) {
+        if (flag == SW_SHOWMINIMIZED) {
+            minimized->push_back(MinimizeStruct(it->first, GetWindowStyle(it->first)));
+            rc = ShowWindowAsync(it->first, SW_SHOWMINIMIZED);
+            if (rc == FALSE) {
+                PostMessage(it->first, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+            }
+        } else {
+            rc = ShowWindowAsync(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
+            if (rc == FALSE) {
+                PostMessage(it->first, WM_SYSCOMMAND, it->second & WS_MAXIMIZE ? SC_MAXIMIZE : SC_RESTORE, 0);
+            }
+        }
+        Sleep(20);
+    }
+    windows->clear();
+}
+
+// minimize/restore all windows on the desktop
 void Desktop::ToggleMinimize()
 {
+    BOOL rc = FALSE;
     list<MinimizeStruct> &minimized = _minimized;
-
     if (minimized.empty()) {
         EnumWindows(MinimizeDesktopEnumFct, (LPARAM)&minimized);
     } else {
-        const list<MinimizeStruct> &cminimized = minimized;
-        for (list<MinimizeStruct>::const_reverse_iterator it = cminimized.rbegin();
-             it != cminimized.rend(); ++it) {
-            //ShowWindowAsync(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
-            PostMessage(it->first, WM_SYSCOMMAND, it->second & WS_MAXIMIZE ? SC_MAXIMIZE : SC_RESTORE, 0);
-            Sleep(20);
+        list<MinimizeStruct> unminimized;
+        EnumWindows(UnminimizedDesktopEnumFct, (LPARAM)&unminimized);
+        if (!unminimized.empty()) {
+            minimized.clear();
+            ToggleWindows(&unminimized, SW_SHOWMINIMIZED, &minimized);
+        } else {
+            ToggleWindows(&minimized, SW_SHOWNORMAL);
         }
-
-        minimized.clear();
     }
 }
 
