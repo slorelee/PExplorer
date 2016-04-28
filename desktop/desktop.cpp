@@ -336,9 +336,10 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         SetShellWindow(_hwnd);
 
     // create the explorer bar
-    _desktopBar = DesktopBar::Create();
-    g_Globals._hwndDesktopBar = _desktopBar;
-
+    if (JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
+        _desktopBar = DesktopBar::Create();
+        g_Globals._hwndDesktopBar = _desktopBar;
+    }
     return 0;
 }
 
