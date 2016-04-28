@@ -31,14 +31,14 @@
 #include "startmenu.h"
 
 
-String DecodeURLString(const char *s)
+String DecodeURLString(const TCHAR *s)
 {
     TCHAR buffer[BUFFER_LEN];
     LPTSTR o = buffer;
 
-    for (const char *p = s; *p; ++p)
-        if (*p == '%') {
-            if (!strncmp(p + 1, "20", 2)) {
+    for (const TCHAR *p = s; *p; ++p)
+        if (*p == TEXT('%')) {
+            if (!_tcsncmp(p + 1, TEXT("20"), 2)) {
                 *o++ = ' ';
                 p += 2;
             } else

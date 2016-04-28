@@ -236,8 +236,14 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <tchar.h>
 #include <stdexcept>
 
+#ifdef UNICODE
+#define string_t std::wstring
+#else
+#define string_t string
+#endif
 
 // PLEASE SEE THE README FOR USAGE INFORMATION AND EXAMPLES. Comments will be kept to a minimum to reduce clutter.
 namespace json
@@ -264,7 +270,7 @@ public:
     // This is the type used to store key/value pairs. If you want to get an iterator for this class to iterate over its members,
     // use this.
     // For example: Object::ValueMap::iterator my_iterator;
-    typedef std::map<std::string, Value> ValueMap;
+    typedef std::map<string_t, Value> ValueMap;
 
 protected:
 
@@ -289,32 +295,32 @@ public:
     // Value my_val = my_object["some key name"];
     // my_object["some key name"] = "overwriting the value with this new string value";
     // my_object["new key name"] = "a new key being inserted";
-    Value &operator [](const std::string &key);
-    const Value &operator [](const std::string &key) const;
-    Value &operator [](const char *key);
-    const Value &operator [](const char *key) const;
+    Value &operator [](const string_t &key);
+    const Value &operator [](const string_t &key) const;
+    Value &operator [](const TCHAR *key);
+    const Value &operator [](const TCHAR *key) const;
 
     ValueMap::const_iterator begin() const;
     ValueMap::const_iterator end() const;
     ValueMap::iterator begin();
     ValueMap::iterator end();
 
-    // Find will return end() if the key can't be found, just like std::map does. ->first will be the key (a std::string),
+    // Find will return end() if the key can't be found, just like std::map does. ->first will be the key (a string_t),
     // ->second will be the Value.
-    ValueMap::iterator find(const std::string &key);
-    ValueMap::const_iterator find(const std::string &key) const;
+    ValueMap::iterator find(const string_t &key);
+    ValueMap::const_iterator find(const string_t &key) const;
 
     // Convenience wrapper to search for a key
-    bool HasKey(const std::string &key) const;
+    bool HasKey(const string_t &key) const;
 
     // Checks if the object contains all the keys in the array. If it does, returns -1.
     // If it doesn't, returns the index of the first key it couldn't find.
-    int HasKeys(const std::vector<std::string> &keys) const;
-    int HasKeys(const char *keys[], int key_count) const;
+    int HasKeys(const std::vector<string_t> &keys) const;
+    int HasKeys(const TCHAR *keys[], int key_count) const;
 
     // Removes all values and resets the state back to default
     void Clear();
-    void Remove(const std::string &key) { mValues.erase(key);};
+    void Remove(const string_t &key) { mValues.erase(key);};
 
     size_t size() const {return mValues.size();}
 
@@ -371,6 +377,7 @@ public:
     size_t size() const;
 };
 
+
 // Represents a JSON value which is either of: string, number, object, array, boolean, null
 class Value
 {
@@ -380,7 +387,7 @@ protected:
     int                             mIntVal;
     float                           mFloatVal;
     double                          mDoubleVal;
-    std::string                     mStringVal;
+    string_t                     mStringVal;
     Object                          mObjectVal;
     Array                           mArrayVal;
     bool                            mBoolVal;
@@ -391,8 +398,8 @@ public:
     Value(int v)                : mValueType(IntVal), mIntVal(v), mFloatVal((float)v), mDoubleVal((double)v), mBoolVal(false) {}
     Value(float v)              : mValueType(FloatVal), mIntVal((int)v), mFloatVal(v), mDoubleVal((double)v), mBoolVal(false) {}
     Value(double v)             : mValueType(DoubleVal), mIntVal((int)v), mFloatVal((float)v), mDoubleVal(v), mBoolVal(false) {}
-    Value(const std::string &v) : mValueType(StringVal), mIntVal(), mFloatVal(), mDoubleVal(), mStringVal(v), mBoolVal(false) {}
-    Value(const char *v)        : mValueType(StringVal), mIntVal(), mFloatVal(), mDoubleVal(), mStringVal(v), mBoolVal(false) {}
+    Value(const string_t &v) : mValueType(StringVal), mIntVal(), mFloatVal(), mDoubleVal(), mStringVal(v), mBoolVal(false) {}
+    Value(const TCHAR *v)        : mValueType(StringVal), mIntVal(), mFloatVal(), mDoubleVal(), mStringVal(v), mBoolVal(false) {}
     Value(const Object &v)      : mValueType(ObjectVal), mIntVal(), mFloatVal(), mDoubleVal(), mObjectVal(v), mBoolVal(false) {}
     Value(const Array &v)       : mValueType(ArrayVal), mIntVal(), mFloatVal(), mDoubleVal(), mArrayVal(v), mBoolVal(false) {}
     Value(bool v)               : mValueType(BoolVal), mIntVal(), mFloatVal(), mDoubleVal(), mBoolVal(v) {}
@@ -420,17 +427,17 @@ public:
     // THROWS A std::runtime_error IF NOT AN ARRAY OR OBJECT.
     Value &operator [](size_t idx);
     const Value &operator [](size_t idx) const;
-    Value &operator [](const std::string &key);
-    const Value &operator [](const std::string &key) const;
-    Value &operator [](const char *key);
-    const Value &operator [](const char *key) const;
+    Value &operator [](const string_t &key);
+    const Value &operator [](const string_t &key) const;
+    Value &operator [](const TCHAR *key);
+    const Value &operator [](const TCHAR *key) const;
 
     // If this value represents an object, these methods let you check if a single key or an array of
     // keys is contained within it.
     // THROWS A std::runtime_error IF NOT AN OBJECT.
-    bool        HasKey(const std::string &key) const;
-    int         HasKeys(const std::vector<std::string> &keys) const;
-    int         HasKeys(const char *keys[], int key_count) const;
+    bool        HasKey(const string_t &key) const;
+    int         HasKeys(const std::vector<string_t> &keys) const;
+    int         HasKeys(const TCHAR *keys[], int key_count) const;
 
 
     // non-operator versions, **will throw a std::runtime_error if invalid with an appropriate error message**
@@ -438,7 +445,7 @@ public:
     float               ToFloat() const;
     double              ToDouble() const;
     bool                ToBool() const;
-    const std::string  &ToString() const;
+    const string_t  &ToString() const;
     Object             *RefObject();
     Object              ToObject() const;
     Array               ToArray() const;
@@ -448,7 +455,7 @@ public:
     float               ToFloat(float def) const                {return IsNumeric() ? mFloatVal : def;}
     double              ToDouble(double def) const              {return IsNumeric() ? mDoubleVal : def;}
     bool                ToBool(bool def) const                  {return (mValueType == BoolVal) ? mBoolVal : def;}
-    const std::string  &ToString(const std::string &def) const  {return (mValueType == StringVal) ? mStringVal : def;}
+    const string_t  &ToString(const string_t &def) const  {return (mValueType == StringVal) ? mStringVal : def;}
 
 
     // Please note that as per C++ rules, implicitly casting a Value to a std::string won't work.
@@ -462,7 +469,7 @@ public:
     operator float() const;
     operator double() const;
     operator bool() const;
-    operator std::string() const;
+    operator string_t() const;
     operator Object() const;
     operator Array() const;
 
@@ -479,14 +486,14 @@ public:
 // Converts a JSON Object or Array instance into a JSON string representing it. RETURNS EMPTY STRING ON ERROR.
 // As per JSON specification, a JSON data structure must be an array or an object. Thus, you must either pass in a
 // json::Array, json::Object, or a json::Value that has an Array or Object as its underlying type.
-std::string Serialize(const Value &obj);
+string_t Serialize(const Value &obj);
 
 // If there is an error, Value will be NULLVal. Pass in a valid JSON string (such as one returned from Serialize, or obtained
 // elsewhere) to receive a Value in return that represents the JSON structure. Check the type of Value by calling GetType().
 // It will be ObjectVal or ArrayVal (or NULLVal if invalid JSON). The Value class contains the operator [] for indexing in the
 // case that the underlying type is an object or array. You may, if you prefer, create an object or array from the Value returned
 // by this method by simply passing it into the constructor.
-Value       Deserialize(const std::string &str);
+Value       Deserialize(const string_t &str);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

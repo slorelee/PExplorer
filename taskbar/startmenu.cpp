@@ -734,7 +734,7 @@ bool StartMenu::Navigate(int step)
     return false;
 }
 
-bool StartMenu::JumpToNextShortcut(char c)
+bool StartMenu::JumpToNextShortcut(TCHAR c)
 {
     int cur_idx = GetSelectionIndex();
 

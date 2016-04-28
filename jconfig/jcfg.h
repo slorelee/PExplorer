@@ -11,13 +11,13 @@ extern Object   g_JCfg;
 extern int g_JCfg_taskbar_iconsize;
 extern int g_JCfg_taskbar_startmenu_iconsize;
 
-extern Object Load_JCfg(string filename);
+extern Object Load_JCfg(string_t filename);
 extern COLORREF JValueToColor(Value val);
 
-extern Value JCfg_GetValue(Object *jcfg, string key1, Value defval);
-extern Value JCfg_GetValue(Object *jcfg, string key1, string key2, Value defval);
-extern Value JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, Value defval);
-extern Value JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, string key4, Value defval);
+extern Value JCfg_GetValue(Object *jcfg, string_t key1, Value defval);
+extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, Value defval);
+extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, Value defval);
+extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, string_t key4, Value defval);
 
 extern int JCfg_GetDesktopBarHeight();
 extern bool JCfg_GetDesktopBarUseSmallIcon();

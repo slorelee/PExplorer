@@ -115,7 +115,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
         return 1;
 
     // create start button
-    string start_str(JCFG2("JS_STARTMENU", "text").ToString());
+    string_t start_str(JCFG2("JS_STARTMENU", "text").ToString());
     WindowCanvas canvas(_hwnd);
     FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
     RECT rect = {0, 0};

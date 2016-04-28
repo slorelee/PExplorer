@@ -231,7 +231,7 @@ FileChildWindow::FileChildWindow(HWND hwnd, const FileChildWndInfo &info)
 
     if (_root._entry) {
         if (info._etype != ET_SHELL)
-            wsprintf(_root._entry->_data.cFileName, TEXT("%s - %s"), drv, _root._fs);
+            _stprintf(_root._entry->_data.cFileName, TEXT("%s - %s"), drv, _root._fs);
         /*@@else
                 lstrcpy(_root._entry->_data.cFileName, TEXT("GetDesktopFolder"));*/
 

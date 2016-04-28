@@ -40,7 +40,7 @@ extern HWND create_webchildwindow(const WebChildWndInfo &info);
 #define CLSID_MyComputerName     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
 #define CLSID_RecycleBinName     TEXT("::{645FF040-5081-101B-9F08-00AA002F954E}")
 #define CLSID_UsersFilesName     TEXT("::{59031A47-3F72-44A7-89C5-5595FE6B30EE}")
-#define CLSID_MyDocumentsName    TEXT("::")TEXT(STR_MYDOCS_CLSID)
+#define CLSID_MyDocumentsName    TEXT("::"STR_MYDOCS_CLSID)
 //"{450D8FBA-AD25-11D0-98A8-0800361B1103}"
 
 #define DEF_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \

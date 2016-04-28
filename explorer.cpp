@@ -97,7 +97,7 @@ void ExplorerGlobals::load_config()
     String str = TEXT("");
     DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
     if (dwRet != 0) {
-        str = TEXT(szFile);
+        str = szFile;
         size_t nPos = str.rfind(TEXT('\\'));
         if (nPos != -1) {
             str = str.substr(0, nPos);
@@ -1281,7 +1281,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     /**TODO launching autostart programs can be moved into a background thread. */
     if (autostart) {
-        const char *argv[] = {"", "s"};    // call startup routine in SESSION_START mode
+        const TCHAR *argv[] = {TEXT(""), TEXT("s")};    // call startup routine in SESSION_START mode
         startup(2, argv);
     }
 

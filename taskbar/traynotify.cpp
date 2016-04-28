@@ -1369,7 +1369,7 @@ bool ClockWindow::FormatTime()
     if (!(GetDateFormat(LOCALE_USER_DEFAULT, DATE_SHORTDATE, NULL, NULL,
                         date_buffer, sizeof(date_buffer) / sizeof(TCHAR)))) return false;
 
-    _tcscat(buffer, "\r\n");
+    _tcscat(buffer, TEXT("\r\n"));
     _tcscat(buffer, date_buffer);
 
     if (_tcscmp(buffer, _time)) {

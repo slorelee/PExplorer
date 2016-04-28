@@ -34,40 +34,63 @@ const wstring def_jcfg = L"{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},"
                          L"\"JS_QUICKLAUNCH\":{\"3rd_startup_arguments\":\"\",\"maxiconsinrow\":8},"
                          L"\"JS_NOTIFYAREA\":{\"notifyicon_size\":16,\"padding-left\":20,\"padding-right\":20}}";
 
-std::string
-ReadTextFile(string filename)
-{
-    std::ifstream t(filename);
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    std::string contents(buffer.str());
-    return contents;
-}
 
 /*
-    string s1, s2;
+    string_t s1, s2;
     StringCodeChange(s1.c_str(), CP_ACP, s2, CP_UTF8);
 */
 inline void
-StringCodeChange(LPCTSTR src, UINT _srcCode, string &dest, UINT _destCode)
+StringCodeChange(LPCCH src, UINT _srcCode, std::string &dest, UINT _destCode)
 {
     int len = 0;
     WCHAR *srcTemp = (WCHAR *)src;
-    char *destTemp = NULL;
+    CHAR *destTemp = NULL;
+
     if (_srcCode != CP_UNICODE) {
-        len = MultiByteToWideChar(_srcCode , 0, src, -1, NULL, 0);
-        srcTemp = new WCHAR[len];
-        MultiByteToWideChar(_srcCode , 0, src, -1, srcTemp, len);
+        len = MultiByteToWideChar(_srcCode , 0, (LPCCH)src, -1, NULL, 0);
+        srcTemp = new TCHAR[len];
+        MultiByteToWideChar(_srcCode , 0, (LPCCH)src, -1, srcTemp, len);
     }
 
     len = WideCharToMultiByte(_destCode, 0, srcTemp, -1, NULL, 0, NULL, NULL);
-    destTemp = new char[len];
+    destTemp = new CHAR[len];
     WideCharToMultiByte(_destCode, 0, srcTemp, -1, destTemp, len, NULL, NULL);
 
     dest = destTemp;
 
     if (_srcCode != CP_UNICODE) delete []srcTemp;
     delete []destTemp;
+}
+
+inline void
+StringCodeChange(LPCCH src, UINT _srcCode, std::wstring &dest, UINT _destCode)
+{
+    int len = 0;
+    WCHAR *destTemp = (WCHAR *)src;
+
+    if (_srcCode != CP_UNICODE) {
+        len = MultiByteToWideChar(_srcCode, 0, (LPCCH)src, -1, NULL, 0);
+        destTemp = new WCHAR[len];
+        MultiByteToWideChar(_srcCode, 0, (LPCCH)src, -1, destTemp, len);
+    }
+    dest = destTemp;
+    if (_srcCode != CP_UNICODE) delete[]destTemp;
+}
+
+string
+ReadTextFile(string_t filename)
+{
+    string ansi_filename;
+#ifdef UNICODE
+    StringCodeChange((LPCCH)filename.c_str(), CP_UNICODE, ansi_filename, CP_ACP);
+#else
+    ansi_filename = filename;
+#endif
+    ifstream t(ansi_filename);
+    stringstream buffer;
+    buffer << t.rdbuf();
+    string contents(buffer.str());
+    return contents;
 }
 
 void Merge_JCfg(Object *dst, Object *src, UINT flags)
@@ -139,14 +162,14 @@ Update_KeyName(Object *jcfg)
 }
 
 Object
-Load_JCfg(string filename)
+Load_JCfg(string_t filename)
 {
     string istr = ReadTextFile(filename);
-    string defstr = TEXT("");
-    string cstr = TEXT("");
+    string_t defstr = TEXT("");
+    string_t cstr = TEXT("");
     const char *pstr = istr.c_str();
 
-    StringCodeChange((LPCTSTR)def_jcfg.c_str(), CP_UNICODE, defstr, CP_ACP);
+    StringCodeChange((LPCCH)def_jcfg.c_str(), CP_UNICODE, defstr, CP_ACP);
     Object def_config = Deserialize(defstr).ToObject();
     Object jcfg = def_config;
 
@@ -154,26 +177,26 @@ Load_JCfg(string filename)
         if ((unsigned char)pstr[0] == (unsigned char)0xEF &&
             (unsigned char)pstr[1] == (unsigned char)0xBB &&
              (unsigned char)pstr[2] == (unsigned char)0xBF) {
-            StringCodeChange(pstr + 3, CP_UTF8, cstr, CP_ACP);
+            StringCodeChange((LPCCH)pstr + 3, CP_UTF8, cstr, CP_ACP);
         } else {
-             StringCodeChange(pstr, CP_UTF8, cstr, CP_ACP);
+             StringCodeChange((LPCCH)pstr, CP_UTF8, cstr, CP_ACP);
         }
         jcfg = Deserialize(cstr).ToObject();
         Update_KeyName(&jcfg);
         Merge_JCfg(&jcfg, &def_config, JCFG_MERGEFLAG_NONE);
     }
-    Object test = jcfg["JS_DESKTOP"].ToObject();
+    Object test = jcfg[TEXT("JS_DESKTOP")].ToObject();
     g_JCfg = jcfg;
     return jcfg;
 }
 
 inline void
-string_replace(string &s1, const string &s2, const string &s3)
+string_replace(string_t &s1, const string_t &s2, const string_t &s3)
 {
-    string::size_type pos = 0;
-    string::size_type a = s2.size();
-    string::size_type b = s3.size();
-    while ((pos = s1.find(s2, pos)) != string::npos) {
+    string_t::size_type pos = 0;
+    string_t::size_type a = s2.size();
+    string_t::size_type b = s3.size();
+    while ((pos = s1.find(s2, pos)) != string_t::npos) {
         s1.replace(pos, a, s3);
         pos += b;
     }
@@ -182,13 +205,13 @@ string_replace(string &s1, const string &s2, const string &s3)
 void
 ExpendJString(Value *v)
 {
-    string val = v->ToString();
+    string_t val = v->ToString();
     if (val.length() < 3) return;
     if (val[0] != TEXT('#')) return;
     val = val.substr(1);
     for (Object::ValueMap::iterator it = g_JVARMap.begin(); it != g_JVARMap.end(); ++it) {
-        string exp = TEXT("#{") + it->first + TEXT("}");
-        if (val.find(TEXT("#{")) != string::npos) {
+        string_t exp = TEXT("#{") + it->first + TEXT("}");
+        if (val.find(TEXT("#{")) != string_t::npos) {
             string_replace(val, exp, it->second.ToString());
         }
     }
@@ -196,7 +219,7 @@ ExpendJString(Value *v)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, Value defval)
+JCfg_GetValue(Object *jcfg, string_t key1, Value defval)
 {
     if (jcfg->HasKey(key1) == false) return defval;
     Value v = (*jcfg)[key1];
@@ -207,7 +230,7 @@ JCfg_GetValue(Object *jcfg, string key1, Value defval)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2, Value defval)
+JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, Value defval)
 {
     if (jcfg->HasKey(key1) == false) return defval;
     if ((*jcfg)[key1].GetType() != ObjectVal) return defval;
@@ -220,7 +243,7 @@ JCfg_GetValue(Object *jcfg, string key1, string key2, Value defval)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, Value defval)
+JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, Value defval)
 {
     Value v = JCfg_GetValue(jcfg, key1, key2, Value());
     if (v.GetType() != ObjectVal) return defval;
@@ -234,7 +257,7 @@ JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, Value defval)
 }
 
 Value
-JCfg_GetValue(Object *jcfg, string key1, string key2, string key3, string key4, Value defval)
+JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, string_t key4, Value defval)
 {
     Value v = JCfg_GetValue(jcfg, key1, key2, key3, Value());
     if (v.GetType() != ObjectVal) return defval;
@@ -254,7 +277,7 @@ JValueToColor(Value val)
         Array arr_rgb = val.ToArray();
         return RGB(arr_rgb[0].ToInt(), arr_rgb[1].ToInt(), arr_rgb[2].ToInt());
     } else if (val.GetType() == StringVal) {
-        string color_str = val.ToString();
+        string_t color_str = val.ToString();
         return std::stol(color_str, nullptr, 0);
     } else if (val.GetType() == IntVal) {
         return (COLORREF)val.ToInt();
