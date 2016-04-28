@@ -124,8 +124,8 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
                             ++cnt;
                     } else {
                         static String explorer_path = JCFG2("JS_FILEEXPLORER", "3rd_filename").ToString();
-                        static String explorer_open = JCFG2("JS_DESKTOP", "3rd_open_arguments").ToString();
                         if (!explorer_path.empty()) {
+                            static String explorer_open = JCFG2("JS_DESKTOP", "3rd_open_arguments").ToString();
                             String explorer_parameters;
                             SHDESCRIPTIONID desc = {0};
                             SHGetDataFromIDList(parentfolder, pidl, SHGDFIL_DESCRIPTIONID, &desc, sizeof(desc));
