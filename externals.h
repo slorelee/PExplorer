@@ -34,8 +34,14 @@ extern "C" {
 // explorer main routine
 extern int explorer_main(HINSTANCE hinstance, LPTSTR lpCmdLine, int cmdshow);
 
+enum ExplorerStartupMode {
+    EXPLORER_OPEN_NORMAL = 0,
+    EXPLORER_OPEN_DESKTOP,
+    EXPLORER_OPEN_QUICKLAUNCH
+};
+
 // display explorer/file manager window
-extern void explorer_open_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
+extern int explorer_open_frame(int cmdshow, LPTSTR lpCmdLine = NULL, int mode = EXPLORER_OPEN_NORMAL);
 extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
 
 // display explorer "About" dialog
@@ -44,6 +50,10 @@ extern void explorer_about(HWND hwndParent);
 // test for already running desktop instance
 extern BOOL IsAnyDesktopRunning(void);
 
+// show run dialog
+extern void ShowLaunchDialog(HWND hwndOwner);
+// show logoff dialog
+extern void ShowLogoffDialog(HWND hwndOwner);
 // show shutdown dialog
 extern void ShowExitWindowsDialog(HWND hwndOwner);
 

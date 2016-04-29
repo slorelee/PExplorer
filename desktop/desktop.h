@@ -85,6 +85,8 @@ protected:
     WindowHandle _desktopBar;
 
     virtual HRESULT OnDefaultCommand(LPIDA pida);
+    void    RegisterHotkeys(BOOL unreg = FALSE);
+    void    ProcessHotKey(int id_hotkey);
 };
 
 

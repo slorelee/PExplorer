@@ -231,6 +231,7 @@ DesktopWindow::DesktopWindow(HWND hwnd)
 
 DesktopWindow::~DesktopWindow()
 {
+    RegisterHotkeys(TRUE);
     if (_pShellView)
         _pShellView->Release();
 }
@@ -340,9 +341,49 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         _desktopBar = DesktopBar::Create();
         g_Globals._hwndDesktopBar = _desktopBar;
     }
+
+    RegisterHotkeys();
     return 0;
 }
 
+
+#define AUTOREGISTERHOTKEY(unreg, hwnd, id,fsModifiers, vk)\
+  if (!unreg) RegisterHotKey(hwnd, id,fsModifiers, vk);\
+  else UnregisterHotKey(hwnd, id);
+
+void DesktopWindow::RegisterHotkeys(BOOL unreg)
+{
+    // register hotkey WIN+E opening explorer
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_EXPLORER, MOD_WIN, 'E');
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_RUN, MOD_WIN, 'R');
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_LOGOFF, MOD_WIN, 'L');
+    if (g_Globals._hwndDesktopBar == (HWND)0) {
+        AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
+    }
+    ///@todo register all common hotkeys
+}
+
+void DesktopWindow::ProcessHotKey(int id_hotkey)
+{
+    switch (id_hotkey) {
+    case IDHK_EXPLORER:
+        explorer_open_frame(SW_SHOWNORMAL);
+        break;
+
+    case IDHK_RUN:
+        ShowLaunchDialog(_hwnd);
+        break;
+
+    case IDHK_LOGOFF:
+         ShowLogoffDialog(_hwnd);
+        break;
+
+    case IDHK_DESKTOP:
+         g_Globals._desktop.ToggleMinimize();
+        break;
+    //@todo implement all common hotkeys
+    }
+}
 
 LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
@@ -351,6 +392,10 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case WM_RBUTTONDBLCLK:
     case WM_MBUTTONDBLCLK:
         explorer_show_frame(SW_SHOWNORMAL);
+        break;
+
+    case WM_HOTKEY:
+        ProcessHotKey((int)wparam);
         break;
 
     case WM_DISPLAYCHANGE:

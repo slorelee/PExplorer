@@ -123,9 +123,9 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
                         if (SendMessage(hFrameWnd, PM_OPEN_WINDOW, flags, (LPARAM)(LPCITEMIDLIST)pidl_abs))
                             ++cnt;
                     } else {
-                        static String explorer_path = JCFG2("JS_FILEEXPLORER", "3rd_filename").ToString();
+                        static String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("%s")).ToString();
                         if (!explorer_path.empty()) {
-                            static String explorer_open = JCFG2("JS_DESKTOP", "3rd_open_arguments").ToString();
+                            static String explorer_open = JCFG2_DEF("JS_DESKTOP", "3rd_open_arguments", TEXT("%s")).ToString();
                             String explorer_parameters;
                             SHDESCRIPTIONID desc = {0};
                             SHGetDataFromIDList(parentfolder, pidl, SHGDFIL_DESCRIPTIONID, &desc, sizeof(desc));

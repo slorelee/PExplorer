@@ -1848,9 +1848,6 @@ void StartMenuRoot::ProcessKey(int vk)
 
 int StartMenuHandler::Command(int id, int code)
 {
-    String cmd = TEXT("");
-    INT showflags = SW_SHOWNORMAL;
-    String parameters = TEXT("");
     switch (id) {
 
     // start menu root
@@ -1904,46 +1901,19 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_LOGOFF:
         CloseStartMenu(id);
-        if (g_Globals._isWinPE) {
-            cmd = JCFG_SMC_DEF("logoff", "command", Value(TEXT(""))).ToString();
-        }
-        if (cmd != TEXT("")) {
-            showflags = JCFG_SMC_DEF("logoff", "showflags", Value(showflags)).ToInt();
-            parameters = JCFG_SMC_DEF("logoff", "parameters", Value(TEXT(""))).ToString();
-            launch_file(_hwnd, cmd, showflags, parameters);
-        } else {
-            ShowLogoffDialog(g_Globals._hwndDesktopBar);
-        }
+        ShowLogoffDialog(g_Globals._hwndDesktopBar);
         break;
 
     case IDC_RESTART:
         CloseStartMenu(id);
-        if (g_Globals._isWinPE) {
-            cmd = JCFG_SMC_DEF("reboot", "command", Value(TEXT(""))).ToString();
-        }
-        if (cmd != TEXT("")) {
-            showflags = JCFG_SMC_DEF("reboot", "showflags", Value(showflags)).ToInt();
-            parameters = JCFG_SMC_DEF("reboot", "parameters", Value(TEXT(""))).ToString();
-            launch_file(_hwnd, cmd, showflags, parameters);
-        } else {
-            ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
-        }
+        ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
         /* An alternative way to do restart without shell32 help */
         //launch_file(_hwnd, TEXT("shutdown.exe"), SW_HIDE, TEXT("-r"));
         break;
 
     case IDC_SHUTDOWN:
         CloseStartMenu(id);
-        if (g_Globals._isWinPE) {
-            cmd = JCFG_SMC_DEF("shutdown", "command", Value(TEXT(""))).ToString();
-        }
-        if (cmd != TEXT("")) {
-            showflags = JCFG_SMC_DEF("shutdown", "showflags", Value(showflags)).ToInt();
-            parameters = JCFG_SMC_DEF("shutdown", "parameters", Value(TEXT(""))).ToString();
-            launch_file(_hwnd, cmd, showflags, parameters);
-        } else {
-            ShowExitWindowsDialog(g_Globals._hwndDesktop);
-        }
+        ShowExitWindowsDialog(g_Globals._hwndDesktop);
         break;
 
 #ifndef __REACTOS__
@@ -2130,16 +2100,33 @@ int RunDialogThread::Run()
     return 0;
 }
 
-void StartMenuHandler::ShowLaunchDialog(HWND hwndOwner)
+void ShowLaunchDialog(HWND hwndOwner)
 {
     RunDialogThread *rdt = new RunDialogThread();
     rdt->Start();
 }
 
-void StartMenuHandler::ShowLogoffDialog(HWND hwndOwner)
+static int CommandHook(HWND hwnd, const TCHAR *act)
+{
+	String cmd = TEXT("");
+	INT showflags = SW_SHOWNORMAL;
+	String parameters = TEXT("");
+	if (g_Globals._isWinPE) {
+		cmd = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("command"), Value(TEXT(""))).ToString();
+	}
+	if (cmd != TEXT("")) {
+		showflags = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("showflags"), Value(showflags)).ToInt();
+		parameters = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("parameters"), Value(TEXT(""))).ToString();
+		launch_file(hwnd, cmd, showflags, parameters);
+		return 1;
+	}
+	return 0;
+}
+void ShowLogoffDialog(HWND hwndOwner)
 {
     static DynamicFct<LOGOFFWINDOWSDIALOG> LogoffWindowsDialog(TEXT("SHELL32"), 54);
     //  static DynamicFct<RESTARTWINDOWSDLG> RestartDialog(TEXT("SHELL32"), 59);
+    if (CommandHook(hwndOwner, TEXT("logoff")) == 1) return;
 
     if (LogoffWindowsDialog)
         (*LogoffWindowsDialog)(0);
@@ -2154,7 +2141,7 @@ void StartMenuHandler::ShowLogoffDialog(HWND hwndOwner)
 void ShowExitWindowsDialog(HWND hwndOwner)
 {
     static DynamicFct<EXITWINDOWSDLG> ExitWindowsDialog(TEXT("SHELL32"), 60);
-
+    if (CommandHook(hwndOwner, TEXT("shutdown")) == 1) return;
     if (ExitWindowsDialog)
         (*ExitWindowsDialog)(hwndOwner);
     else
@@ -2164,7 +2151,7 @@ void ShowExitWindowsDialog(HWND hwndOwner)
 void StartMenuHandler::ShowRestartDialog(HWND hwndOwner, UINT flags)
 {
     static DynamicFct<RESTARTWINDOWSDLG> RestartDlg(TEXT("SHELL32"), 59);
-
+    if (CommandHook(hwndOwner, TEXT("reboot")) == 1) return;
     if (RestartDlg)
         (*RestartDlg)(hwndOwner, (LPWSTR)L"You selected restart.\n\n", flags);
     else

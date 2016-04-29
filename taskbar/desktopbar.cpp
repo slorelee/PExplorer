@@ -291,34 +291,17 @@ LRESULT StartButton::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
 void DesktopBar::RegisterHotkeys(BOOL unreg)
 {
-    // register hotkey WIN+E opening explorer
-    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_EXPLORER, MOD_WIN, 'E');
-    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_RUN, MOD_WIN, 'R');
-    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
-    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_LOGOFF, MOD_WIN, 'L');
+    // register hotkey CONTROL+ESC opening STARTMENU
     AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_STARTMENU, MOD_CONTROL, VK_ESCAPE);
-
-    ///@todo register all common hotkeys
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
 }
 
 void DesktopBar::ProcessHotKey(int id_hotkey)
 {
     switch (id_hotkey) {
-    case IDHK_EXPLORER:
-        explorer_open_frame(SW_SHOWNORMAL);
-        break;
-
-    case IDHK_RUN:
-        _startMenuRoot->Command(IDC_LAUNCH, 0);
-        break;
-
-    case IDHK_LOGOFF:
-        _startMenuRoot->Command(IDC_LOGOFF, 0);
-        break;
-
     case IDHK_DESKTOP: {
         if (_startMenuRoot && _startMenuRoot->IsStartMenuVisible()) {
-                ShowOrHideStartMenu();
+            ShowOrHideStartMenu();
         } else {
             g_Globals._desktop.ToggleMinimize();
         }
@@ -328,7 +311,6 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
     case IDHK_STARTMENU:
         ShowOrHideStartMenu();
         break;
-        ///@todo implement all common hotkeys
     }
 }
 
@@ -514,7 +496,7 @@ int DesktopBar::Command(int id, int code)
         break;
 
     case ID_EXPLORE: {
-        explorer_open_frame(SW_SHOWNORMAL);
+        explorer_open_frame(SW_SHOWNORMAL, NULL, EXPLORER_OPEN_QUICKLAUNCH);
         break;
     }
     case ID_TASKMGR:

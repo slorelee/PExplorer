@@ -27,6 +27,8 @@ extern bool JCfg_GetDesktopBarUseSmallIcon();
 #define JCFG2(key1, key2) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), Value())
 #define JCFG3(key1, key2, key3) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), TEXT(key3), Value())
 
+#define JCFG2_DEF(key1, key2, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), Value((defval)))
+
 #define SET_JCFG1(key1) g_JCfg[TEXT(key1)]
 #define SET_JCFG2(key1, key2) g_JCfg[TEXT(key1)][TEXT(key2)]
 #define SET_JCFG3(key1, key2, key3) g_JCfg[TEXT(key1)][TEXT(key2)][TEXT(key3)]
@@ -34,7 +36,7 @@ extern bool JCfg_GetDesktopBarUseSmallIcon();
 #define JCFG_VMN(key) (JCfg_GetValue(&g_JCfg, TEXT("JS_VERBMENUNAME"), g_Globals._langID, TEXT(key), Value()))
 #define JCFG_VMC(key1, key2) (JCfg_GetValue(&g_JCfg, TEXT("JS_VERBMENUCOMMAND"), TEXT(key1), TEXT(key2), Value()))
 #define JCFG_SMC(key1, key2) (JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), TEXT(key1), TEXT(key2), Value()))
-#define JCFG_SMC_DEF(key1, key2, defval) (JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), TEXT(key1), TEXT(key2), (defval)))
+#define JCFG_SMC_DEF(key1, key2, defval) (JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), TEXT(key1), TEXT(key2), Value((defval))))
 
 #define JCFG_TB(n, ...) (JCFG##n("JS_TASKBAR", __VA_ARGS__))
 #define JCFG_QL(n, ...) (JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))

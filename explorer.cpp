@@ -772,16 +772,25 @@ ResBitmap::ResBitmap(UINT nid)
     _hBmp = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(nid));
 }
 
-void explorer_open_frame(int cmdShow, LPTSTR lpCmdLine)
+int explorer_open_frame(int cmdShow, LPTSTR lpCmdLine, int mode)
 {
-    static String explorer_path = JCFG2("JS_FILEEXPLORER", "3rd_filename").ToString();
-    static String explorer_startup = JCFG2("JS_QUICKLAUNCH", "3rd_startup_arguments").ToString();
+    static String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("")).ToString();
+
     if (explorer_path.empty()) {
         explorer_show_frame(cmdShow, lpCmdLine);
+        return 1;
     }
-    else {
-        launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOWNORMAL, explorer_startup.c_str());
+
+    static String explorer_open;
+    if (mode == EXPLORER_OPEN_NORMAL) {
+        explorer_open = JCFG2_DEF("JS_FILEEXPLORER", "3rd_open_arguments", TEXT("%s")).ToString();
+    } else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
+        explorer_open = JCFG2_DEF("JS_QUICKLAUNCH", "3rd_open_arguments", TEXT("")).ToString();
     }
+    if (lpCmdLine == NULL) lpCmdLine = TEXT("");
+    String explorer_parameters = FmtString(explorer_open, lpCmdLine);
+    launch_file(g_Globals._hwndShellView, explorer_path.c_str(), cmdShow, explorer_parameters.c_str());
+    return 0;
 }
 
 #ifndef ROSSHELL
@@ -1036,7 +1045,7 @@ static void InitInstance(HINSTANCE hInstance)
 int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
 {
     CONTEXT("explorer_main");
-
+    int rc = 0;
     // initialize Common Controls library
     CommonControlInit usingCmnCtrl;
 
@@ -1055,12 +1064,12 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
                     cmdShow = SW_MAXIMIZE;
         */
 
-        explorer_show_frame(cmdShow, lpCmdLine);
+        rc = explorer_open_frame(cmdShow, lpCmdLine, EXPLORER_OPEN_NORMAL);
     }
 #endif
-
-    Window::MessageLoop();
-
+    if (g_Globals._hwndDesktop || rc == 1) {
+        Window::MessageLoop();
+    }
     return 1;
 }
 
