@@ -385,6 +385,44 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
     }
 }
 
+static void VK_WIN_HOOK()
+{
+    String winhotkey = JCFG2_DEF("JS_HOTKEY", "WIN", TEXT("")).ToString();
+    if (winhotkey.empty()) return;
+
+    winhotkey.toUpper();
+    String key1, key2;
+    size_t pos = winhotkey.find(TEXT("+"));
+    if (pos == string_t::npos) return;
+    key1 = winhotkey.substr(0, pos);
+    key2 = winhotkey.substr(pos + 1, winhotkey.length() - pos - 1);
+
+    BYTE bVkey1 = 0;
+    if (key1 == TEXT("WIN")) {
+        bVkey1 = VK_LWIN;
+    } else if (key1 == TEXT("SHIFT")) {
+        bVkey1 = VK_SHIFT;
+    } else if (key1 == TEXT("CTRL")) {
+        bVkey1 = VK_CONTROL;
+    } else if (key1 == TEXT("ALT")) {
+        bVkey1 = VK_MENU;
+    }
+    BYTE bVkey2 = 0;
+    if (key2.length() >= 2 && key2.at(0) == TEXT('F')) {
+        bVkey2 = VK_F1 + _wtoi(key2.substr(1).c_str());
+        if (bVkey2 < VK_F1 || bVkey2 > VK_F12) bVkey2 = 0;
+    } else {
+        bVkey2 = (BYTE)(key2.at(0));
+        if (bVkey2 < TEXT('A') || bVkey2 > TEXT('Z')) bVkey2 = 0;
+    }
+    if (bVkey1 == 0 || bVkey2 == 0) return;
+
+    keybd_event(bVkey1, 0, 0, 0);
+    keybd_event(bVkey2, 0, 0, 0);
+    keybd_event(bVkey2, 0, KEYEVENTF_KEYUP, 0);
+    keybd_event(bVkey1, 0, KEYEVENTF_KEYUP, 0);
+}
+
 LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     switch (nmsg) {
@@ -422,8 +460,11 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_SYSCOMMAND:
         if (wparam == SC_TASKLIST) {
-            if (_desktopBar)
+            if (_desktopBar) {
                 SendMessage(_desktopBar, nmsg, wparam, lparam);
+            } else {
+                VK_WIN_HOOK();
+            }
         }
         goto def;
 

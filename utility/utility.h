@@ -876,6 +876,12 @@ struct String
         return *this;
     }
 
+    void toUpper()
+    {
+        if (!empty())
+            CharUpper(str());
+    }
+    
     void toLower()
     {
         if (!empty())
