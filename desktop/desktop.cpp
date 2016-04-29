@@ -57,14 +57,39 @@ static BOOL CALLBACK SwitchDesktopEnumFct(HWND hwnd, LPARAM lparam)
     return TRUE;
 }
 
+//default ingore contextmenu,tooltips and Windows 10's Metro Window
+#define DEF_IGNORE_WINDOW_TITLES TEXT("")
+#define DEF_IGNORE_WINDOW_CLASSES TEXT(";#32768;tooltips_class32;ApplicationFrameWindow;Windows.UI.Core.CoreWindow")
+
+static BOOL IsIgnoredWindow(HWND hwnd)
+{
+    static String ignore_window_titles = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_TITLES", TEXT("")).ToString();
+    static String ignore_window_classes = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_CLASSES", TEXT("")).ToString();
+    ignore_window_classes.append(DEF_IGNORE_WINDOW_CLASSES);
+    TCHAR strbuffer[BUFFER_LEN] = { 0 };
+    if (!GetWindowText(hwnd, strbuffer, BUFFER_LEN))
+        strbuffer[0] = '\0';
+    if (!ignore_window_titles.empty() && ignore_window_titles.find(strbuffer) != string_t::npos) {
+        return TRUE;
+    }
+    LOG(strbuffer);
+    if (!GetClassName(hwnd, strbuffer, BUFFER_LEN))
+        strbuffer[0] = '\0';
+    if (!ignore_window_classes.empty() && ignore_window_classes.find(strbuffer) != string_t::npos) {
+        return TRUE;
+    }
+    LOG(strbuffer);
+    return FALSE;
+}
+
 static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
 {
     BOOL rc = FALSE;
     list<MinimizeStruct> &minimized = *(list<MinimizeStruct> *)lparam;
 
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
-
     if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
+        if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
             if (rect.right > 0 && rect.bottom > 0 &&
@@ -88,16 +113,7 @@ static BOOL CALLBACK UnminimizedDesktopEnumFct(HWND hwnd, LPARAM lparam)
 
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
     if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
-        //do not show 'Windows 10's Metro Window
-        TCHAR strbuffer[BUFFER_LEN] = { 0 };
-        if (!GetClassName(hwnd, strbuffer, BUFFER_LEN))
-            strbuffer[0] = '\0';
-        String str_buffer = strbuffer;
-        if (str_buffer.find(TEXT("ApplicationFrameWindow")) != string::npos ||
-            str_buffer.find(TEXT("Windows.UI.Core.CoreWindow")) != string::npos) {
-            return TRUE;
-        }
-
+        if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
             if (rect.right > 0 && rect.bottom > 0 &&
