@@ -401,15 +401,15 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
     }
 }
 
-static void VK_WIN_HOOK()
+int VK_WIN_HOOK()
 {
-    String winhotkey = JCFG2_DEF("JS_HOTKEY", "WIN", TEXT("")).ToString();
-    if (winhotkey.empty()) return;
+    static String winhotkey = JCFG2_DEF("JS_HOTKEY", "WIN", TEXT("")).ToString();
+    if (winhotkey.empty()) return 0;
 
     winhotkey.toUpper();
     String key1, key2;
     size_t pos = winhotkey.find(TEXT("+"));
-    if (pos == string_t::npos) return;
+    if (pos == string_t::npos) return -1;
     key1 = winhotkey.substr(0, pos);
     key2 = winhotkey.substr(pos + 1, winhotkey.length() - pos - 1);
 
@@ -431,12 +431,13 @@ static void VK_WIN_HOOK()
         bVkey2 = (BYTE)(key2.at(0));
         if (bVkey2 < TEXT('A') || bVkey2 > TEXT('Z')) bVkey2 = 0;
     }
-    if (bVkey1 == 0 || bVkey2 == 0) return;
+    if (bVkey1 == 0 || bVkey2 == 0) return -1;
 
     keybd_event(bVkey1, 0, 0, 0);
     keybd_event(bVkey2, 0, 0, 0);
     keybd_event(bVkey2, 0, KEYEVENTF_KEYUP, 0);
     keybd_event(bVkey1, 0, KEYEVENTF_KEYUP, 0);
+    return 1;
 }
 
 LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
@@ -476,10 +477,8 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_SYSCOMMAND:
         if (wparam == SC_TASKLIST) {
-            if (_desktopBar) {
+            if (VK_WIN_HOOK() == 0 && _desktopBar) {
                 SendMessage(_desktopBar, nmsg, wparam, lparam);
-            } else {
-                VK_WIN_HOOK();
             }
         }
         goto def;

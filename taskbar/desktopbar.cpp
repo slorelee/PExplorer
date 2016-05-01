@@ -475,12 +475,15 @@ void DesktopBar::Resize(int cx, int cy)
     PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
 }
 
+extern int VK_WIN_HOOK();
 
 int DesktopBar::Command(int id, int code)
 {
     switch (id) {
     case IDC_START:
-        ShowOrHideStartMenu();
+        if (VK_WIN_HOOK() == 0) {
+            ShowOrHideStartMenu();
+        }
         break;
 
     case ID_ABOUT_EXPLORER:

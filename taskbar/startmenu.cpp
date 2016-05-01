@@ -1823,7 +1823,7 @@ void StartMenuRoot::CloseStartMenu(int id)
     if (_submenu)
         CloseSubmenus();
 
-    ShowWindow(_hwnd, SW_HIDE);
+    if (IsStartMenuVisible()) ShowWindow(_hwnd, SW_HIDE);
 }
 
 bool StartMenuRoot::IsStartMenuVisible() const
