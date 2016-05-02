@@ -459,6 +459,16 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
             if (found != _sorted_icons.end()) {
                 const NotifyInfo &entry = const_cast<NotifyInfo &>(*found); // Why does GCC 3.3 need this additional const_cast ?!
+                // allow SetForegroundWindow() in client process
+                DWORD pid;
+
+                if (GetWindowThreadProcessId(entry._hWnd, &pid)) {
+                    // bind dynamically to AllowSetForegroundWindow() to be compatible to WIN98
+                    static DynamicFct<BOOL(WINAPI *)(DWORD)> AllowSetForegroundWindow(TEXT("USER32"), "AllowSetForegroundWindow");
+
+                    if (AllowSetForegroundWindow)
+                        (*AllowSetForegroundWindow)(pid);
+                }
 
                 // set activation time stamp
                 if (nmsg == WM_LBUTTONDOWN ||   // Some programs need PostMessage() instead of SendMessage().
@@ -472,31 +482,28 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
                 // Notify the message if the owner is still alive
                 if (IsWindow(entry._hWnd)) {
-                    if (nmsg == WM_MOUSEMOVE ||     // avoid to call blocking SendMessage() for merely moving the mouse over icons
-                        nmsg == WM_LBUTTONDOWN ||   // Some programs need PostMessage() instead of SendMessage().
-                        nmsg == WM_MBUTTONDOWN ||   // So call SendMessage() only for BUTTONUP and BLCLK messages
+                    if (//nmsg == WM_MOUSEMOVE ||     // avoid to call blocking SendMessage() for merely moving the mouse over icons
+                        nmsg == WM_LBUTTONDOWN || nmsg == WM_LBUTTONUP ||
+                        nmsg == WM_MBUTTONDOWN || nmsg == WM_MBUTTONUP ||
 #ifdef WM_XBUTTONDOWN
-                        nmsg == WM_XBUTTONDOWN ||
+                        nmsg == WM_XBUTTONDOWN || nmsg == WM_XBUTTONUP ||
 #endif
-                        nmsg == WM_RBUTTONDOWN)
-                        PostMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
-                    else {
-                        // allow SetForegroundWindow() in client process
-                        DWORD pid;
-
-                        if (GetWindowThreadProcessId(entry._hWnd, &pid)) {
-                            // bind dynamically to AllowSetForegroundWindow() to be compatible to WIN98
-                            static DynamicFct<BOOL(WINAPI *)(DWORD)> AllowSetForegroundWindow(TEXT("USER32"), "AllowSetForegroundWindow");
-
-                            if (AllowSetForegroundWindow)
-                                (*AllowSetForegroundWindow)(pid);
+                        nmsg == WM_RBUTTONDOWN || nmsg == WM_RBUTTONUP) {
+                        if (entry._version == NOTIFYICON_VERSION_4)
+                        {
+                            POINT messagePt = pt;
+                            ClientToScreen(_hwnd, &messagePt);
+                            WPARAM nwparam = 0;
+                            LPARAM nlparam = lparam;
+                            if (nmsg == WM_LBUTTONUP) nlparam = NIN_KEYSELECT;
+                            else if (nmsg == WM_RBUTTONUP) nlparam = WM_CONTEXTMENU;
+                            nwparam = MAKEWPARAM(messagePt.x, messagePt.y);
+                            SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, nwparam, MAKELPARAM(nlparam, entry._uID));
+                        } else {
+                            SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
                         }
-
-                        // use PostMessage() for notifcation icons of Shell Service Objects in the own process
-                        if (pid == GetCurrentProcessId())
-                            PostMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
-                        else
-                            SendMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
+                    } else {
+                        SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
                     }
                 } else if (_icon_map.erase(entry))  // delete icons without valid owner window
                     UpdateIcons();

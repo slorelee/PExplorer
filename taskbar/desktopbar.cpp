@@ -60,6 +60,8 @@ DesktopBar::~DesktopBar()
     SystemParametersInfo(SPI_SETWORKAREA, 0, &_work_area_org, 0);
     PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
 
+    UnloadSSO();
+
     // exit application after destroying desktop window
     PostQuitMessage(0);
 }
@@ -109,6 +111,58 @@ CreateSolidBitmap(HDC hdc, int width, int height, COLORREF cref)
     return hbmp;
 }
 
+static IOleCommandTarget *StartSSO(CLSID clsid)
+{
+    LPVOID lpVoid;
+    IOleCommandTarget *target = NULL;
+
+    // The SSO might have a custom manifest.
+    // Activate it before loading the object.
+    //ULONG_PTR ulCookie;
+    //HANDLE hContext = ELActivateActCtxForClsid(clsid, &ulCookie);
+
+    if (SUCCEEDED(CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER, IID_IOleCommandTarget,
+        &lpVoid)))
+    {
+        // Start ShellServiceObject
+        reinterpret_cast <IOleCommandTarget*> (lpVoid)->Exec(&CGID_ShellServiceObject,
+            OLECMDID_NEW,
+            OLECMDEXECOPT_DODEFAULT,
+            NULL, NULL);
+        target = reinterpret_cast <IOleCommandTarget*>(lpVoid);
+    }
+
+    //if (hContext != INVALID_HANDLE_VALUE)
+    //ELDeactivateActCtx(hContext, &ulCookie);
+
+    return target;
+}
+
+//Purpose: Loads the system icons
+void DesktopBar::LoadSSO()
+{
+    CLSID /*clsid,*/ clsidTray;
+    IOleCommandTarget *target = NULL;
+
+    CLSIDFromString(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}", &clsidTray);
+    target = StartSSO(clsidTray);
+    if (target)
+        ssoIconList.push_back(target);
+}
+
+// Purpose: Unload the system icons
+void DesktopBar::UnloadSSO()
+{
+    // Go through each element of the array and stop it...
+    while (!ssoIconList.empty())
+    {
+        if (ssoIconList.back()->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE,
+            OLECMDEXECOPT_DODEFAULT, NULL, NULL) == S_OK)
+            ssoIconList.back()->Release();
+        ssoIconList.pop_back();
+    }
+}
+
 LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 {
     if (super::Init(pcs))
@@ -156,6 +210,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     // notify all top level windows about the successfully created desktop bar
     SendNotifyMessage(HWND_BROADCAST, WM_TASKBARCREATED, 0, 0);
 
+    LoadSSO();
 
     _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
 
@@ -549,12 +604,29 @@ void DesktopBar::ShowOrHideStartMenu()
 }
 
 
-/// copy data structure for tray notifications
+// copy data structure for tray notifications
 struct TrayNotifyCDS {
     DWORD   cookie;
     DWORD   notify_code;
     NOTIFYICONDATA nicon_data;
 };
+
+static LRESULT IconIdentifierEvent(COPYDATASTRUCT *pcd)
+{
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+
+    TrayNotifyCDS *ptr = (TrayNotifyCDS *)pcd->lpData;
+    switch (ptr->notify_code)
+    {
+    case 2:
+        return MAKELONG(16, 16);
+    default:
+        return MAKELONG(cursorPos.x, cursorPos.y);
+    }
+
+    return 0;
+}
 
 LRESULT DesktopBar::ProcessCopyData(COPYDATASTRUCT *pcd)
 {
@@ -566,6 +638,8 @@ LRESULT DesktopBar::ProcessCopyData(COPYDATASTRUCT *pcd)
 
         if (notify_area)
             return notify_area->ProcessTrayNotification(ptr->notify_code, &ptr->nicon_data);
+    } else if (pcd->dwData == 3) {
+        return IconIdentifierEvent(pcd);
     }
 
     return FALSE;

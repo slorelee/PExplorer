@@ -192,6 +192,7 @@ protected:
 
     void    read_config();
     void    write_config();
+    void    show_clock(bool flag);
 
     friend struct TrayNotifyDlg;
 
@@ -203,8 +204,6 @@ protected:
     NotifyIconSet _sorted_icons;
     int     _next_idx;
     size_t  _last_icon_count;
-
-    void    show_clock(bool flag);
 };
 
 
