@@ -348,10 +348,12 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         }
     }
 
-    if (hWndView && SetShellWindowEx)
-        SetShellWindowEx(_hwnd, hWndView);
-    else if (SetShellWindow)
-        SetShellWindow(_hwnd);
+    if (JCFG2_DEF("JS_DESKTOP", "shellwindow", true).ToBool() != FALSE) {
+        if (hWndView && SetShellWindowEx)
+            SetShellWindowEx(_hwnd, hWndView);
+        else if (SetShellWindow)
+            SetShellWindow(_hwnd);
+    }
 
     // create the explorer bar
     if (JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
