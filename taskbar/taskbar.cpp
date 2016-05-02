@@ -36,15 +36,15 @@ DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_SetTaskmanWindow(TEXT("user32"), "SetTa
 DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_RegisterShellHookWindow(TEXT("user32"), "RegisterShellHookWindow");
 DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_DeregisterShellHookWindow(TEXT("user32"), "DeregisterShellHookWindow");
 
-/*
+
 DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("shell32"), (LPCSTR)0xb5);
 
- // constants for RegisterShellHook()
+// constants for RegisterShellHook()
 #define RSH_UNREGISTER          0
 #define RSH_REGISTER            1
-#define RSH_REGISTER_PROGMAN    2
-#define RSH_REGISTER_TASKMAN    3
-*/
+#define RSH_PROGMAN             2
+#define RSH_TASKMGR             3
+
 
 #ifdef _WIN64
 #define GCL_HICON GCLP_HICON
@@ -94,8 +94,8 @@ TaskBar::TaskBar(HWND hwnd)
 
 TaskBar::~TaskBar()
 {
-    //  if (g_RegisterShellHook)
-    //      (*g_RegisterShellHook)(_hwnd, RSH_UNREGISTER);
+    if (g_RegisterShellHook)
+        (*g_RegisterShellHook)(_hwnd, RSH_UNREGISTER);
 
     if (g_DeregisterShellHookWindow)
         (*g_DeregisterShellHookWindow)(_hwnd);
@@ -170,16 +170,19 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
         SetTimer(_hwnd, 0, 200, NULL);
     }
 
-    /* Alternatively we could use the RegisterShellHook() function in SHELL32, but this is not yet implemented in the WINE code.
-        if (g_RegisterShellHook) {
-            (*g_RegisterShellHook)(0, RSH_REGISTER);
+    if (g_RegisterShellHook)
+    {
+        OSVERSIONINFO osInfo;
+        osInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+        GetVersionEx(&osInfo);
 
-            if ((HIWORD(GetVersion())>>14) == W_VER_NT)
-                (*g_RegisterShellHook)(_hwnd, RSH_REGISTER_TASKMAN);
-            else
-                (*g_RegisterShellHook)(_hwnd, RSH_REGISTER);
-        }
-    */
+        (*g_RegisterShellHook)(NULL, RSH_REGISTER);
+
+        if (osInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+            (*g_RegisterShellHook)(_hwnd, RSH_PROGMAN);
+        else
+            (*g_RegisterShellHook)(_hwnd, RSH_TASKMGR);
+    }
     Refresh();
 
     return 0;
@@ -214,7 +217,7 @@ LRESULT TaskBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         SendMessage(_htoolbar, WM_SYSCOLORCHANGE, 0, 0);
         break;
 
-default: def:
+    default: def:
         if (nmsg == WM_SHELLHOOK) {
             switch (wparam) {
             case HSHELL_WINDOWCREATED:
