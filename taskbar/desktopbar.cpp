@@ -471,8 +471,12 @@ void DesktopBar::Resize(int cx, int cy)
 
     WindowRect rect(_hwnd);
     RECT work_area = {0, 0, GetSystemMetrics(SM_CXSCREEN), rect.top};
-    SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);    // don't use SPIF_SENDCHANGE because then we have to wait for any message being delivered
-    PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+    if (memcmp(&_work_area, &work_area, sizeof(RECT)) != 0) {
+        SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);    // don't use SPIF_SENDCHANGE because then we have to wait for any message being delivered
+        PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        _work_area = work_area;
+    }
 }
 
 extern int VK_WIN_HOOK();

@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// ｷﾇﾌﾘｶｨﾓ・ﾔ resources
+// ｷﾇﾌﾘｶｨﾓ・?resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -58,6 +58,11 @@ END
 IDA_SEARCH_PROGRAM ACCELERATORS
 BEGIN
     VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
+END
+
+IDA_DESKTOP ACCELERATORS
+BEGIN
+VK_F5, ID_REFRESH, VIRTKEY, NOINVERT
 END
 
 IDA_TRAYNOTIFY ACCELERATORS
@@ -164,7 +169,7 @@ IDI_DESKSETTING         ICON                    "res/desktop-settings.ico"
 IDI_NETCONNS            ICON                    "res/network-conns.ico"
 IDI_ADMIN               ICON                    "res/administration.ico"
 IDI_RECENT              ICON                    "res/recent-documents.ico"
-#endif    // ｷﾇﾌﾘｶｨﾓ・ﾔ resources
+#endif    // ｷﾇﾌﾘｶｨﾓ・?resources
 /////////////////////////////////////////////////////////////////////////////
 
 

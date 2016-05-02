@@ -88,6 +88,7 @@ struct DesktopBar : public
 
 protected:
     RECT    _work_area_org;
+    RECT    _work_area;
     int     _taskbar_pos;
     int     _deskbar_pos_y;
     LRESULT Init(LPCREATESTRUCT pcs);

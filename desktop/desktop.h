@@ -83,7 +83,7 @@ protected:
 
     IShellView *_pShellView;
     WindowHandle _desktopBar;
-
+    HACCEL _hAccel;
     virtual HRESULT OnDefaultCommand(LPIDA pida);
     void    RegisterHotkeys(BOOL unreg = FALSE);
     void    ProcessHotKey(int id_hotkey);
@@ -114,7 +114,7 @@ protected:
     HRESULT DoDesktopContextMenu(int x, int y);
     void    PositionIcons(int dir = 1);
 
-    void    refresh();
+    void    Refresh();
 
     HWND    _hwndListView;
     int     _icon_algo;

@@ -243,6 +243,7 @@ DesktopWindow::DesktopWindow(HWND hwnd)
     :  super(hwnd)
 {
     _pShellView = NULL;
+    _hAccel = LoadAccelerators(g_Globals._hInstance, MAKEINTRESOURCE(IDA_DESKTOP));
 }
 
 DesktopWindow::~DesktopWindow()
@@ -300,7 +301,7 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         FOLDERSETTINGS fs;
 
         fs.ViewMode = FVM_ICON;
-        fs.fFlags = FWF_DESKTOP | FWF_NOCLIENTEDGE | FWF_NOSCROLL | FWF_BESTFITWINDOW | FWF_SNAPTOGRID; //|FWF_AUTOARRANGE;
+        fs.fFlags = FWF_DESKTOP | FWF_ALIGNLEFT | FWF_NOCLIENTEDGE | FWF_NOSCROLL | FWF_BESTFITWINDOW | FWF_SNAPTOGRID; //|FWF_AUTOARRANGE;
         /* PositionIcons() need remove FWF_SNAPTOGRID flag, but set the flag after the
            view be created need use IFolderView2 interface in windows vista or later. */
         ClientRect rect(_hwnd);
@@ -509,8 +510,11 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
             hwnd = GetParent(hwnd);
         }
 
-        if (hwnd)
+        if (hwnd) {
+            int rc = TranslateAccelerator(g_Globals._hwndShellView, _hAccel, lpmsg);
+            if (rc != 0) return true;
             return _pShellView->TranslateAccelerator(lpmsg) == S_OK;
+        }
         return false;
     }
 
@@ -540,8 +544,6 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
        _pShellView(pShellView)
 {
     _hwndListView = GetNextWindow(hwnd, GW_CHILD);
-    /* disable default allignment */
-    SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView) & ~LVS_ALIGNMASK); //|LVS_ALIGNTOP|LVS_AUTOARRANGE);
     ShowWindow(_hwndListView, SW_HIDE);
     // work around for Windows NT, Win 98, ...
     // Without this the desktop has mysteriously only a size of 800x600 pixels.
@@ -561,8 +563,8 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
     SetRect(&_rcBitmapWp, 0, 0, 0, 0);
 
     LoadWallpaper(TRUE);
-
-    SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
+    _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement (top/left)
+    //SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
 
 }
 
@@ -595,7 +597,7 @@ bool DesktopShellView::InitDragDrop()
 }
 
 
-void DesktopShellView::refresh()
+void DesktopShellView::Refresh()
 {
     _pShellView->Refresh();
 }
@@ -782,16 +784,19 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (tid == ID_TIMER_ADJUST_ICONPOSITION) {
             KillTimer(_hwnd, tid);
             if (_hwndListView) {
-                /* as the DesktopFloderView with the FWF_SNAPTOGRID flag,
-                   move icon to the right/bottom first. */
-                _icon_algo = 7;
-                PositionIcons();
-                _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement (top/left)
                 PositionIcons();
                 return 0;
             }
         }
         return super::WndProc(nmsg, wparam, lparam);
+    }
+    case WM_SETTINGCHANGE: {
+        RECT work_area;
+        //UINT nWorkArea;
+        //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
+        ListView_SetWorkAreas(_hwndListView, 1, &work_area);
+        break;
     }
     case WM_DISPLAYCHANGE:
         LoadWallpaper(FALSE);
@@ -826,7 +831,15 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
 int DesktopShellView::Command(int id, int code)
 {
-    return super::Command(id, code);
+    switch (id) {
+    case ID_REFRESH:
+        Refresh();
+        break;
+    default:
+        return super::Command(id, code);
+    }
+
+    return 0;
 }
 
 int DesktopShellView::Notify(int id, NMHDR *pnmh)
@@ -847,7 +860,9 @@ bool DesktopShellView::DoContextMenu(int x, int y)
     hr = pidList.GetData(selection);
     if (FAILED(hr)) {
         selection->Release();
-        //CHECKERROR(hr);
+#ifdef _DEBUG
+        CHECKERROR(hr);
+#endif
         return false;
     }
 
@@ -879,6 +894,21 @@ bool DesktopShellView::DoContextMenu(int x, int y)
     return true;
 }
 
+static HRESULT DoInvokeCommand(HWND hwnd, IContextMenu *pcm, UINT idCmd)
+{
+    CMINVOKECOMMANDINFO cmi = { 0 };
+    cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
+    cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+    if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
+    if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
+    cmi.hwnd = hwnd;
+    cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+    cmi.nShow = SW_SHOWNORMAL;
+
+    HRESULT hr = pcm->InvokeCommand(&cmi);
+    return hr;
+}
+
 HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 {
     IContextMenu *pcm;
@@ -905,28 +935,25 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                 if (idCmd == FCIDM_SHVIEWLAST - 1) {
                     explorer_about(_hwnd);
                 } else if (idCmd) {
-                    WCHAR namebuffer[MAX_PATH + 1] = {0};
+                    String menuname;
+                    WCHAR namebuffer[MAX_PATH + 1] = { 0 };
                     pcm->GetCommandString(idCmd, GCS_VERBW, NULL, (char *)namebuffer, MAX_PATH);
-                    //GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
-                    if (_wcsicmp(namebuffer, L"cmd") == 0) {
+                    if (_wcsicmp(namebuffer, TEXT("")) == 0) {
+                        GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                        menuname = namebuffer;
+                    }
+
+                    if (_wcsicmp(namebuffer, L"cmd") == 0 || menuname == JCFG_VMN("cmdhere")) {
                         static TCHAR sDesktopPath[MAX_PATH + 1];
                         String parameters;
                         SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
                         parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
                         launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
-                    } else if (_wcsicmp(namebuffer, L"refresh") == 0 && JCFG_VMN("refresh").GetType() == NULLVal) {
-                        //do nothing
+                        //} else if (_wcsicmp(namebuffer, L"refresh") == 0 || menuname == JCFG_VMN("refresh")) {
+                        //	DoInvokeCommand(_hwnd, pcm, idCmd);
+                        //	SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 100, NULL);
                     } else {
-                        CMINVOKECOMMANDINFO cmi = { 0 };
-                        cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-                        cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
-                        if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
-                        if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
-                        cmi.hwnd = _hwnd;
-                        cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
-                        cmi.nShow = SW_SHOWNORMAL;
-
-                        hr = pcm->InvokeCommand(&cmi);
+                        DoInvokeCommand(_hwnd, pcm, idCmd);
                     }
                 }
             } else
@@ -1000,9 +1027,6 @@ void DesktopShellView::PositionIcons(int dir)
     RECT work_area;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
 
-    /* disable default allignment */
-    // SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
-
     const POINTS &dir1 = s_align_dir1[_icon_algo];
     const POINTS &dir2 = s_align_dir2[_icon_algo];
     const POINTS &start_pos = s_align_start[_icon_algo];
@@ -1031,6 +1055,18 @@ void DesktopShellView::PositionIcons(int dir)
 
     int all = ListView_GetItemCount(_hwndListView);
     if (all == 0) return; //no icon
+
+
+    /* disable default allignment */
+    // SetWindowStyle(_hwndListView, GetWindowStyle(_hwndListView)&~LVS_ALIGNMASK);//|LVS_ALIGNTOP|LVS_AUTOARRANGE);
+    /* remove LVS_EX_SNAPTOGRID externded style before call SetItemPosition32 */
+    DWORD ext_style = ListView_GetExtendedListViewStyle(_hwndListView);
+
+    BOOL n = ext_style & LVS_EX_SNAPTOGRID;
+    if ((ext_style & LVS_EX_SNAPTOGRID) == LVS_EX_SNAPTOGRID) {
+        ListView_SetExtendedListViewStyle(_hwndListView, ext_style & ~LVS_EX_SNAPTOGRID);
+    }
+
     int i1, i2;
 
     if (dir > 0) {
@@ -1113,18 +1149,14 @@ void DesktopShellView::PositionIcons(int dir)
         }
     }
 
-    // use a little trick to get the icons where we want them to be...
-
-    //for(IconMap::const_iterator it=pos_idx.end(); --it!=pos_idx.begin(); ) {
-    //  const IconPos& pos = it->first;
-
-    //  ListView_SetItemPosition32(_hwndListView, it->second, pos.second, pos.first);
-    //}
-
     for (IconMap::const_iterator it = pos_idx.begin(); it != pos_idx.end(); ++it) {
         const IconPos &pos = it->first;
 
         ListView_SetItemPosition32(_hwndListView, it->second, pos.second, pos.first);
+    }
+
+    if ((ext_style & LVS_EX_SNAPTOGRID) == LVS_EX_SNAPTOGRID) {
+        ListView_SetExtendedListViewStyle(_hwndListView, ext_style);
     }
     //ListView_RedrawItems(_hwndListView, 0,all - 1);
     //UpdateWindow(_hwndListView);

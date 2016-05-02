@@ -79,8 +79,9 @@
 #define IDB_LOGOV256                    130
 #define IDA_SEARCH_PROGRAM              133
 #define IDI_APPICON                     134
-#define IDA_TRAYNOTIFY                  134
+#define IDA_DESKTOP                     134
 #define IDI_FLOATING                    135
+#define IDA_TRAYNOTIFY                  135
 #define IDD_ABOUT_EXPLORER              135
 #define IDI_PEXLORER_BIG                137
 #define IDI_DOCUMENTS                   138
