@@ -375,6 +375,12 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
     if (JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
         _desktopBar = DesktopBar::Create();
         g_Globals._hwndDesktopBar = _desktopBar;
+    } else {
+        int height = JCfg_GetDesktopBarHeight();
+        RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) - height};
+        SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
+        PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
     }
 
     RegisterHotkeys();
@@ -896,9 +902,17 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         ListView_SetWorkAreas(_hwndListView, 1, &work_area);
         break;
     }
-    case WM_DISPLAYCHANGE:
+    case WM_DISPLAYCHANGE: {
         LoadWallpaper(FALSE);
+        if (JCFG_TB(2, "notaskbar").ToBool() == TRUE) {
+            int height = JCfg_GetDesktopBarHeight();
+            RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) - height };
+            SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
+            PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+            SendMessage(_hwnd, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        }
         break;
+    }
     case WM_ERASEBKGND:
         DrawDesktopBkgnd((HDC)wparam);
         break;
