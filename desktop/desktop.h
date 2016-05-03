@@ -45,6 +45,44 @@ protected:
 };
 */
 
+/// subclassed ShellView window
+typedef struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow> {
+    typedef ExtContextMenuHandlerT<SubclassedWindow> super;
+
+    DesktopShellView(HWND hwnd, IShellView *pShellView);
+    ~DesktopShellView();
+
+    POINT   GetMenuCursorPos();
+protected:
+    IShellView *_pShellView;
+
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    int     Command(int id, int code);
+    int     Notify(int id, NMHDR *pnmh);
+    bool    InitDragDrop();
+    void    Refresh();
+    bool    DoContextMenu(int x, int y);
+    HBITMAP SHLoadDIBitmap(LPCTSTR szFileName, int *pnWidth, int *pnHeight);
+    LRESULT LoadWallpaper(BOOL fInitial);
+    HBITMAP StretchWallpaper();
+    void    DrawDesktopBkgnd(HDC hdc);
+    HRESULT DoDesktopContextMenu(int x, int y);
+    void    PositionIcons(int dir = 1);
+
+
+    HWND    _hwndListView;
+    int     _icon_algo;
+    POINT   _menu_pt;
+    DWORD   _fStyleWallp;
+    HBITMAP _hbmWallp;
+    HBRUSH  _hbrWallp;
+
+    RECT    _rcWp;
+    RECT    _rcBitmapWp;
+    TCHAR   _szBMPName[MAX_PATH + 1];
+}DesktopShellView, *PDesktopShellView;
+
+
 /// Implementation of the Explorer desktop window
 struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl {
     typedef PreTranslateWindow super;
@@ -80,50 +118,15 @@ struct DesktopWindow : public PreTranslateWindow, public IShellBrowserImpl {
 protected:
     LRESULT Init(LPCREATESTRUCT pcs);
     LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    void NotificationReceipt(WPARAM wparam, LPARAM lparam);
 
+    ULONG _hSHNotify;
+    PDesktopShellView _pDesktopShellView;
     IShellView *_pShellView;
+    IFolderView2 *_pFolderView2;
     WindowHandle _desktopBar;
     HACCEL _hAccel;
     virtual HRESULT OnDefaultCommand(LPIDA pida);
     void    RegisterHotkeys(BOOL unreg = FALSE);
     void    ProcessHotKey(int id_hotkey);
-};
-
-
-/// subclassed ShellView window
-struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow> {
-    typedef ExtContextMenuHandlerT<SubclassedWindow> super;
-
-    DesktopShellView(HWND hwnd, IShellView *pShellView);
-    ~DesktopShellView();
-
-    bool    InitDragDrop();
-
-protected:
-    IShellView *_pShellView;
-
-    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-    int     Command(int id, int code);
-    int     Notify(int id, NMHDR *pnmh);
-
-    bool    DoContextMenu(int x, int y);
-    HBITMAP SHLoadDIBitmap(LPCTSTR szFileName, int *pnWidth, int *pnHeight);
-    LRESULT LoadWallpaper(BOOL fInitial);
-    HBITMAP StretchWallpaper();
-    void    DrawDesktopBkgnd(HDC hdc);
-    HRESULT DoDesktopContextMenu(int x, int y);
-    void    PositionIcons(int dir = 1);
-
-    void    Refresh();
-
-    HWND    _hwndListView;
-    int     _icon_algo;
-
-    DWORD _fStyleWallp;
-    HBITMAP _hbmWallp;
-    HBRUSH _hbrWallp;
-
-    RECT _rcWp;
-    RECT _rcBitmapWp;
-    TCHAR _szBMPName[MAX_PATH + 1];
 };

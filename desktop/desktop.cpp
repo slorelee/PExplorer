@@ -243,14 +243,21 @@ DesktopWindow::DesktopWindow(HWND hwnd)
     :  super(hwnd)
 {
     _pShellView = NULL;
+    _pFolderView2 = NULL;
     _hAccel = LoadAccelerators(g_Globals._hInstance, MAKEINTRESOURCE(IDA_DESKTOP));
 }
 
 DesktopWindow::~DesktopWindow()
 {
     RegisterHotkeys(TRUE);
+
+    if (_hSHNotify != 0)
+        SHChangeNotifyDeregister(_hSHNotify);
     if (_pShellView)
         _pShellView->Release();
+
+    if (_pFolderView2)
+        _pFolderView2->Release();
 }
 
 
@@ -278,6 +285,7 @@ HWND DesktopWindow::Create()
     return hwndDesktop;
 }
 
+#define WM_SHNOTIFY  (WM_USER+0x1)
 
 LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 {
@@ -314,7 +322,7 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
             g_Globals._hwndShellView = hWndView;
 
             // subclass shellview window
-            new DesktopShellView(hWndView, _pShellView);
+            _pDesktopShellView = new DesktopShellView(hWndView, _pShellView);
 
             _pShellView->UIActivate(SVUIA_ACTIVATE_FOCUS);
 
@@ -354,6 +362,14 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         else if (SetShellWindow)
             SetShellWindow(_hwnd);
     }
+
+    SHChangeNotifyEntry ps;
+    LPITEMIDLIST pidlDesktop;
+    SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOP, &pidlDesktop);
+    ps.pidl = pidlDesktop;
+    ps.fRecursive = FALSE;
+    _hSHNotify = SHChangeNotifyRegister(_hwnd, SHCNRF_ShellLevel,
+                                        SHCNE_CREATE | SHCNE_MKDIR, WM_SHNOTIFY, 1, &ps);
 
     // create the explorer bar
     if (JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
@@ -443,8 +459,85 @@ int VK_WIN_HOOK()
     return 1;
 }
 
+static TCHAR *SHNotify_GetEventStr(UINT dwEventID)
+{
+    TCHAR *sEvent = NULL;
+
+    switch (dwEventID) {
+    case SHCNE_RENAMEITEM: sEvent = TEXT("SHCNE_RENAMEITEM");break;       //&H1
+    case SHCNE_CREATE: sEvent = TEXT("SHCNE_CREATE");break;           //&H2
+    case SHCNE_DELETE: sEvent = TEXT("SHCNE_DELETE");break;           //&H4
+    case SHCNE_MKDIR: sEvent = TEXT("SHCNE_MKDIR");break;            //&H8
+    case SHCNE_RMDIR: sEvent = TEXT("SHCNE_RMDIR");break;            //&H10
+    case SHCNE_MEDIAINSERTED: sEvent = TEXT("SHCNE_MEDIAINSERTED");break;    //&H20
+    case SHCNE_MEDIAREMOVED: sEvent = TEXT("SHCNE_MEDIAREMOVED");break;     //&H40
+    case SHCNE_DRIVEREMOVED: sEvent = TEXT("SHCNE_DRIVEREMOVED");break;     //&H80
+    case SHCNE_DRIVEADD: sEvent = TEXT("SHCNE_DRIVEADD");break;         //&H100
+    case SHCNE_NETSHARE: sEvent = TEXT("SHCNE_NETSHARE");break;         //&H200
+    case SHCNE_NETUNSHARE: sEvent = TEXT("SHCNE_NETUNSHARE");break;       //&H400
+    case SHCNE_ATTRIBUTES: sEvent = TEXT("SHCNE_ATTRIBUTES");break;       //&H800
+    case SHCNE_UPDATEDIR: sEvent = TEXT("SHCNE_UPDATEDIR");break;        //&H1000
+    case SHCNE_UPDATEITEM: sEvent = TEXT("SHCNE_UPDATEITEM");break;       //&H2000
+    case SHCNE_SERVERDISCONNECT: sEvent = TEXT("SHCNE_SERVERDISCONNECT");break; //&H4000
+    case SHCNE_UPDATEIMAGE: sEvent = TEXT("SHCNE_UPDATEIMAGE");break;      //&H8000&
+    case SHCNE_DRIVEADDGUI: sEvent = TEXT("SHCNE_DRIVEADDGUI");break;      //&H10000
+    case SHCNE_RENAMEFOLDER: sEvent = TEXT("SHCNE_RENAMEFOLDER");break;     //&H20000
+    case SHCNE_FREESPACE: sEvent = TEXT("SHCNE_FREESPACE");break;        //&H40000
+    case SHCNE_EXTENDED_EVENT: sEvent = TEXT("SHCNE_EXTENDED_EVENT");break;   //&H4000000
+    case SHCNE_ASSOCCHANGED: sEvent = TEXT("SHCNE_ASSOCCHANGED");break;     //&H8000000
+    case SHCNE_DISKEVENTS: sEvent = TEXT("SHCNE_DISKEVENTS");break;       //&H2381F
+    case SHCNE_GLOBALEVENTS: sEvent = TEXT("SHCNE_GLOBALEVENTS");break;     //&HC0581E0
+    case SHCNE_ALLEVENTS: sEvent = TEXT("SHCNE_ALLEVENTS");break;        //&H7FFFFFFF
+    case SHCNE_INTERRUPT: sEvent = TEXT("SHCNE_INTERRUPT");break;        //&H80000000
+    }
+
+    return sEvent;
+}
+
+typedef struct {
+    LPITEMIDLIST dwItem1;    // dwItem1 contains the previous PIDL or name of the folder. 
+    LPITEMIDLIST dwItem2;    // dwItem2 contains the new PIDL or name of the folder. 
+} SHNOTIFYSTRUCT;
+
+static void GetDisplayNameFromPIDL(LPITEMIDLIST pidl)
+{
+    SHFILEINFO psfi;
+    TCHAR buffer[MAX_PATH];
+    SHGetPathFromIDList(pidl, buffer);
+    _log_(buffer);
+    SHGetFileInfo(buffer, 0, &psfi, sizeof(psfi), SHGFI_DISPLAYNAME);
+    _log_(psfi.szDisplayName);
+}
+
+void DesktopWindow::NotificationReceipt(WPARAM wparam, LPARAM lparam)
+{
+    TCHAR *eventname = SHNotify_GetEventStr(lparam);
+    _log_(eventname);
+    SHNOTIFYSTRUCT shns;
+    CopyMemory(&shns, (void *)wparam, sizeof(shns));
+    if (shns.dwItem1) {
+        GetDisplayNameFromPIDL(shns.dwItem1);
+        if (_pFolderView2 == NULL) {
+            IFolderView2 *pfv2 = NULL;
+            HRESULT hr = _pShellView->QueryInterface(IID_IFolderView, (void**)&pfv2);
+            if (SUCCEEDED(hr)) {
+                _pFolderView2 = pfv2;
+            }
+        }
+        if (_pFolderView2) {
+            POINT pt = _pDesktopShellView->GetMenuCursorPos();
+            _pFolderView2->SelectAndPositionItems(1, (LPCITEMIDLIST *)&shns.dwItem1, &pt, SVSI_EDIT);
+        } else {
+            _pShellView->SelectItem(shns.dwItem1, SVSI_EDIT);
+        }
+    }
+    if (shns.dwItem2)
+        GetDisplayNameFromPIDL(shns.dwItem2);
+}
+
 LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
+    //_log_(FmtString(TEXT("%d 0x%x 0x%x"), nmsg, wparam, lparam));
     switch (nmsg) {
     case WM_LBUTTONDBLCLK:
     case WM_RBUTTONDBLCLK:
@@ -519,7 +612,10 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         }
         return false;
     }
-
+    case WM_SHNOTIFY: {
+        NotificationReceipt(wparam, lparam);
+        goto def;
+    }
 default: def:
         return super::WndProc(nmsg, wparam, lparam);
     }
@@ -911,12 +1007,18 @@ static HRESULT DoInvokeCommand(HWND hwnd, IContextMenu *pcm, UINT idCmd)
     return hr;
 }
 
+POINT DesktopShellView::GetMenuCursorPos()
+{
+    return _menu_pt;
+}
+
 HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 {
     IContextMenu *pcm;
 
     HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
-
+    _menu_pt.x = x;
+    _menu_pt.y = y;
     if (SUCCEEDED(hr)) {
         pcm = _cm_ifs.query_interfaces(pcm);
 
