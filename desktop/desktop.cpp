@@ -243,7 +243,7 @@ DesktopWindow::DesktopWindow(HWND hwnd)
     :  super(hwnd)
 {
     _pShellView = NULL;
-    _pFolderView2 = NULL;
+    _pFolderView = NULL;
     _hAccel = LoadAccelerators(g_Globals._hInstance, MAKEINTRESOURCE(IDA_DESKTOP));
 }
 
@@ -256,8 +256,8 @@ DesktopWindow::~DesktopWindow()
     if (_pShellView)
         _pShellView->Release();
 
-    if (_pFolderView2)
-        _pFolderView2->Release();
+    if (_pFolderView)
+        _pFolderView->Release();
 }
 
 
@@ -517,25 +517,33 @@ static void GetDisplayNameFromPIDL(LPITEMIDLIST pidl)
 
 void DesktopWindow::NotificationReceipt(WPARAM wparam, LPARAM lparam)
 {
+    HRESULT hr;
     TCHAR *eventname = SHNotify_GetEventStr(lparam);
     _log_(eventname);
     SHNOTIFYSTRUCT shns;
     CopyMemory(&shns, (void *)wparam, sizeof(shns));
     if (shns.dwItem1) {
         GetDisplayNameFromPIDL(shns.dwItem1);
-        if (_pFolderView2 == NULL) {
-            IFolderView2 *pfv2 = NULL;
-            HRESULT hr = _pShellView->QueryInterface(IID_IFolderView, (void**)&pfv2);
+        if (_pFolderView == NULL) {
+            IFolderView2 *pfv = NULL;
+            hr = _pShellView->QueryInterface(IID_IFolderView2, (void**)&pfv);
             if (SUCCEEDED(hr)) {
-                _pFolderView2 = pfv2;
+                _pFolderView = pfv;
             }
         }
-        if (_pFolderView2) {
+        int item = 0;
+        hr = _pFolderView->GetSelectedItem(0, &item);
+        if (hr != S_OK) {
+            // no desktop item selected
             POINT pt = _pDesktopShellView->GetMenuCursorPos();
-            _pFolderView2->SelectAndPositionItems(1, (LPCITEMIDLIST *)&shns.dwItem1, &pt, SVSI_EDIT);
-        } else {
-            _pShellView->SelectItem(shns.dwItem1, SVSI_EDIT);
+            if (_pFolderView && pt.x != -1) {
+                _pFolderView->SelectAndPositionItems(1, (LPCITEMIDLIST *)&shns.dwItem1, &pt, SVSI_EDIT | SVSI_DESELECTOTHERS);
+            }
+            else {
+                _pShellView->SelectItem(shns.dwItem1, SVSI_EDIT | SVSI_DESELECTOTHERS);
+            }
         }
+        _pDesktopShellView->SetMenuCursorPos(-1, -1);
     }
     if (shns.dwItem2)
         GetDisplayNameFromPIDL(shns.dwItem2);
@@ -657,7 +665,7 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
     // subclass background window
     //new BackgroundWindow(_hwndListView);
 
-
+    _menu_pt = {-1, -1};
     //refresh();
     InitDragDrop();
 
@@ -1026,13 +1034,16 @@ POINT DesktopShellView::GetMenuCursorPos()
     return _menu_pt;
 }
 
+void DesktopShellView::SetMenuCursorPos(LONG x, LONG y)
+{
+    _menu_pt = { x, y };
+}
+
 HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 {
     IContextMenu *pcm;
 
     HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
-    _menu_pt.x = x;
-    _menu_pt.y = y;
     if (SUCCEEDED(hr)) {
         pcm = _cm_ifs.query_interfaces(pcm);
 
@@ -1042,6 +1053,7 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
             hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_EXPLORE | CMF_EXTENDEDVERBS);
 
             if (SUCCEEDED(hr)) {
+                _menu_pt = { x, y };
                 SetMenuDefaultItem(hmenu, -1, FALSE);
                 AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
                 AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST - 1, ResString(IDS_ABOUT_EXPLORER));
@@ -1074,11 +1086,11 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                         DoInvokeCommand(_hwnd, pcm, idCmd);
                     }
                 }
+                _menu_pt = { -1,-1 };
             } else
                 _cm_ifs.reset();
             DestroyMenu(hmenu);
         }
-
         pcm->Release();
     }
 

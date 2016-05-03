@@ -53,6 +53,7 @@ typedef struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow
     ~DesktopShellView();
 
     POINT   GetMenuCursorPos();
+    void    SetMenuCursorPos(LONG x, LONG y);
 protected:
     IShellView *_pShellView;
 
@@ -123,7 +124,7 @@ protected:
     ULONG _hSHNotify;
     PDesktopShellView _pDesktopShellView;
     IShellView *_pShellView;
-    IFolderView2 *_pFolderView2;
+    IFolderView2 *_pFolderView;
     WindowHandle _desktopBar;
     HACCEL _hAccel;
     virtual HRESULT OnDefaultCommand(LPIDA pida);
