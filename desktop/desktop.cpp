@@ -239,6 +239,14 @@ void BackgroundWindow::DrawDesktopBkgnd(HDC hdc)
 }
 */
 
+static void NotifySetWorkArea() {
+    int height = JCfg_GetDesktopBarHeight();
+    RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) - height };
+    SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
+    PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+    SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+}
+
 DesktopWindow::DesktopWindow(HWND hwnd)
     :  super(hwnd)
 {
@@ -376,11 +384,7 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         _desktopBar = DesktopBar::Create();
         g_Globals._hwndDesktopBar = _desktopBar;
     } else {
-        int height = JCfg_GetDesktopBarHeight();
-        RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) - height};
-        SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
-        PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
-        SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        NotifySetWorkArea();
     }
 
     RegisterHotkeys();
@@ -669,6 +673,9 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
     //refresh();
     InitDragDrop();
 
+    _work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &_work_area, 0);
+
     _hbmWallp = NULL;
     _hbrWallp = NULL;
     SetRect(&_rcWp, 0, 0, 0, 0);
@@ -862,6 +869,31 @@ LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
     return TRUE;
 }
 
+static void DrawDesktopWallpaper(HDC hdc, HBRUSH hbrWallp, RECT rc, RECT work_area, RECT rcWp = { 0,0,0,0 })
+{
+    RECT rc1 = { 0,0,0,0 }, rc2 = { 0,0,0,0 };
+    if (rc.top >= work_area.bottom && rc.bottom >= work_area.bottom) {
+        rc2 = rc;
+    }
+    else if (rc.bottom > work_area.bottom) {
+        rc1 = rc;rc2 = rc;
+        rc1.bottom = work_area.bottom;
+        rc2.top = work_area.bottom + 1;
+    } else {
+        rc1 = rc;
+    }
+
+    if (rc1.top != 0 || rc1.bottom != 0) {
+        SetBrushOrgEx(hdc, rcWp.left - rc.left, rcWp.top - rc.top, NULL);
+        FillRect(hdc, &rc1, hbrWallp);
+    }
+
+    if (rc2.top != 0 || rc2.bottom != 0) {
+        SetBrushOrgEx(hdc, rcWp.left, rcWp.top, NULL);
+        FillRect(hdc, &rc2, hbrWallp);
+    }
+}
+
 void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
 {
     RECT rc;
@@ -877,12 +909,10 @@ void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
         if (_fStyleWallp == STYLE_WP_CENTER) {
             if ((rc.right >= _rcWp.left && rc.bottom >= _rcWp.top) &&
                 (rc.left <= _rcWp.right && rc.top <= _rcWp.bottom)) {
-                SetBrushOrgEx(hdc, _rcWp.left - rc.left, _rcWp.top - rc.top, NULL);
-                FillRect(hdc, &_rcWp, _hbrWallp);
-            } 
+                DrawDesktopWallpaper(hdc, _hbrWallp, rc, _work_area, _rcWp);
+            }
         } else {
-            SetBrushOrgEx(hdc, 0 - rc.left, 0 - rc.top, NULL);
-            FillRect(hdc, &rc, _hbrWallp);
+            DrawDesktopWallpaper(hdc, _hbrWallp, rc, _work_area);
         }
     }
 
@@ -907,17 +937,14 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         //UINT nWorkArea;
         //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
         SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
+        _work_area = work_area;
         ListView_SetWorkAreas(_hwndListView, 1, &work_area);
         break;
     }
     case WM_DISPLAYCHANGE: {
         LoadWallpaper(FALSE);
         if (JCFG_TB(2, "notaskbar").ToBool() == TRUE) {
-            int height = JCfg_GetDesktopBarHeight();
-            RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) - height };
-            SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
-            PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
-            SendMessage(_hwnd, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+            NotifySetWorkArea();
         }
         break;
     }

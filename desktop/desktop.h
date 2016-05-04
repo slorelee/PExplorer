@@ -77,7 +77,7 @@ protected:
     DWORD   _fStyleWallp;
     HBITMAP _hbmWallp;
     HBRUSH  _hbrWallp;
-
+    RECT     _work_area;
     RECT    _rcWp;
     RECT    _rcBitmapWp;
     TCHAR   _szBMPName[MAX_PATH + 1];
