@@ -281,6 +281,8 @@ StartButton::StartButton(HWND hwnd, UINT nid, COLORREF textcolor, bool flat)
 {
 }
 
+extern int VK_WIN_HOOK();
+
 LRESULT StartButton::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     switch (nmsg) {
@@ -288,12 +290,11 @@ LRESULT StartButton::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case WM_LBUTTONDOWN:
         if (!Button_GetState(_hwnd)) {
             Button_SetState(_hwnd, TRUE);
-
             SetCapture(_hwnd);
-
-            SendMessage(GetParent(_hwnd), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(_hwnd), 0), 0);
+            if (VK_WIN_HOOK() == 0) {
+                SendMessage(GetParent(_hwnd), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(_hwnd), 0), 0);
+            }
         }
-
         Button_SetState(_hwnd, FALSE);
         break;
 
@@ -534,15 +535,11 @@ void DesktopBar::Resize(int cx, int cy)
     }
 }
 
-extern int VK_WIN_HOOK();
-
 int DesktopBar::Command(int id, int code)
 {
     switch (id) {
     case IDC_START:
-        if (VK_WIN_HOOK() == 0) {
             ShowOrHideStartMenu();
-        }
         break;
 
     case ID_ABOUT_EXPLORER:
@@ -599,7 +596,7 @@ void DesktopBar::ShowOrHideStartMenu()
             _startMenuRoot->TrackStartmenu();
 
         // StartMenu was closed, release button state
-        Button_SetState(_hwndStartButton, false);
+        Button_SetState(_hwndStartButton, FALSE);
     }
 }
 
