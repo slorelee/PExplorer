@@ -32,4 +32,8 @@ extern "C" int startup(int argc, const TCHAR *argv[]);
 // load Shell Service Objects (volume control, printer/network icons, ...)
 struct SSOThread : public Thread {
     int Run();
+private:
+    std::vector<IOleCommandTarget *> _ssoIconList;
+    void LoadSSO();
+    void UnloadSSO();
 };

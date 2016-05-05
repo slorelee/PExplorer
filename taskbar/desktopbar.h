@@ -127,7 +127,7 @@ protected:
     const UINT WM_TASKBARCREATED;
 #endif
 
-    std::vector<IOleCommandTarget*> ssoIconList;
+    std::vector<IOleCommandTarget*> _ssoIconList;
 };
 
 

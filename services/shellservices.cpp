@@ -28,45 +28,70 @@
 
 #include <precomp.h>
 
+#include <olectl.h>
+#include <ole2.h>
 #include "shellservices.h"
 
+static IOleCommandTarget *StartSSO(CLSID clsid)
+{
+    LPVOID lpVoid;
+    IOleCommandTarget *target = NULL;
+
+    // The SSO might have a custom manifest.
+    // Activate it before loading the object.
+    //ULONG_PTR ulCookie;
+    //HANDLE hContext = ELActivateActCtxForClsid(clsid, &ulCookie);
+
+    if (SUCCEEDED(CoCreateInstance(clsid, NULL,
+        CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER,
+        IID_IOleCommandTarget, &lpVoid)))
+    {
+        // Start ShellServiceObject
+        reinterpret_cast <IOleCommandTarget*> (lpVoid)->Exec(&CGID_ShellServiceObject,
+            OLECMDID_NEW,
+            OLECMDEXECOPT_DODEFAULT,
+            NULL, NULL);
+        target = reinterpret_cast <IOleCommandTarget*>(lpVoid);
+    }
+
+    //if (hContext != INVALID_HANDLE_VALUE)
+    //ELDeactivateActCtx(hContext, &ulCookie);
+
+    return target;
+}
+
+//Purpose: Loads the system icons
+void SSOThread::LoadSSO()
+{
+    CLSID /*clsid,*/ clsidTray;
+    IOleCommandTarget *target = NULL;
+
+    CLSIDFromString(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}", &clsidTray);
+    target = StartSSO(clsidTray);
+    if (target)
+        _ssoIconList.push_back(target);
+}
+
+// Purpose: Unload the system icons
+void SSOThread::UnloadSSO()
+{
+    // Go through each element of the array and stop it...
+    while (!_ssoIconList.empty())
+    {
+        if (_ssoIconList.back()->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE,
+            OLECMDEXECOPT_DODEFAULT, NULL, NULL) == S_OK)
+            _ssoIconList.back()->Release();
+        _ssoIconList.pop_back();
+    }
+}
 
 int SSOThread::Run()
 {
     ComInit usingCOM(COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE | COINIT_SPEED_OVER_MEMORY);
 
-    HKEY hkey;
-    CLSID clsid;
-    WCHAR name[MAX_PATH], value[MAX_PATH];
+    LoadSSO();
 
-    typedef vector<SIfacePtr<IOleCommandTarget>*> SSOVector;
-    SSOVector sso_ptrs;
-
-    if (!RegOpenKey(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ShellServiceObjectDelayLoad"), &hkey)) {
-        for (int idx = 0; ; ++idx) {
-            DWORD name_len = MAX_PATH;
-            DWORD value_len = sizeof(value);
-
-            if (RegEnumValueW(hkey, idx, name, &name_len, 0, NULL, (LPBYTE)&value, &value_len))
-                break;
-
-            if (!_alive)
-                break;
-
-            SIfacePtr<IOleCommandTarget> *sso_ptr = new SIfacePtr<IOleCommandTarget>;
-
-            if (CLSIDFromString(value, &clsid) == NOERROR) {
-                if (SUCCEEDED(sso_ptr->CreateInstance(clsid, IID_IOleCommandTarget))) {
-                    if (SUCCEEDED((*sso_ptr)->Exec(&CGID_ShellServiceObject, OLECMDID_NEW, OLECMDEXECOPT_DODEFAULT, NULL, NULL)))
-                        sso_ptrs.push_back(sso_ptr);
-                }
-            }
-        }
-
-        RegCloseKey(hkey);
-    }
-
-    if (!sso_ptrs.empty()) {
+    if (!_ssoIconList.empty()) {
         MSG msg;
 
         while (_alive) {
@@ -86,11 +111,7 @@ int SSOThread::Run()
         }
 
         // shutdown all running Shell Service Objects
-        for (SSOVector::iterator it = sso_ptrs.begin(); it != sso_ptrs.end(); ++it) {
-            SIfacePtr<IOleCommandTarget> *sso_ptr = *it;
-            (*sso_ptr)->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
-            delete sso_ptr;
-        }
+        UnloadSSO();
     }
 
     return 0;

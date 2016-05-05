@@ -1282,7 +1282,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     Thread *pSSOThread = NULL;
 
-    if (startup_desktop) {
+    if (startup_desktop && JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
         // launch SSO thread to allow message processing independent from the explorer main thread
         pSSOThread = new SSOThread;
         pSSOThread->Start();

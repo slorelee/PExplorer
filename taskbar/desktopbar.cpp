@@ -147,19 +147,19 @@ void DesktopBar::LoadSSO()
     CLSIDFromString(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}", &clsidTray);
     target = StartSSO(clsidTray);
     if (target)
-        ssoIconList.push_back(target);
+        _ssoIconList.push_back(target);
 }
 
 // Purpose: Unload the system icons
 void DesktopBar::UnloadSSO()
 {
     // Go through each element of the array and stop it...
-    while (!ssoIconList.empty())
+    while (!_ssoIconList.empty())
     {
-        if (ssoIconList.back()->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE,
+        if (_ssoIconList.back()->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE,
             OLECMDEXECOPT_DODEFAULT, NULL, NULL) == S_OK)
-            ssoIconList.back()->Release();
-        ssoIconList.pop_back();
+            _ssoIconList.back()->Release();
+        _ssoIconList.pop_back();
     }
 }
 
@@ -210,7 +210,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     // notify all top level windows about the successfully created desktop bar
     SendNotifyMessage(HWND_BROADCAST, WM_TASKBARCREATED, 0, 0);
 
-    LoadSSO();
+    //LoadSSO(); /* load in main() by SSOThread */
 
     _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
 
