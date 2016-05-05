@@ -365,6 +365,20 @@ LRESULT NotifyArea::Init(LPCREATESTRUCT pcs)
     return 0;
 }
 
+static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam, POINT pt)
+{
+    if (entry._version == NOTIFYICON_VERSION_4)
+    {
+        POINT messagePt = pt;
+        ClientToScreen(hwnd, &messagePt);
+        if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
+        return SendNotifyMessage(entry._hWnd, entry._uCallbackMessage,
+            MAKEWPARAM(messagePt.x, messagePt.y), MAKELPARAM(lparam, entry._uID));
+    }
+
+    return SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, lparam);
+}
+
 HWND NotifyArea::Create(HWND hwndParent)
 {
     static BtnWindowClass wcTrayNotify(CLASSNAME_TRAYNOTIFY, CS_DBLCLKS);
@@ -482,28 +496,22 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
                 // Notify the message if the owner is still alive
                 if (IsWindow(entry._hWnd)) {
-                    if (//nmsg == WM_MOUSEMOVE ||     // avoid to call blocking SendMessage() for merely moving the mouse over icons
-                        nmsg == WM_LBUTTONDOWN || nmsg == WM_LBUTTONUP ||
-                        nmsg == WM_MBUTTONDOWN || nmsg == WM_MBUTTONUP ||
+                    if (nmsg == WM_MOUSEMOVE ||
+                        nmsg == WM_LBUTTONDOWN || nmsg == WM_LBUTTONUP || WM_LBUTTONDBLCLK ||
+                        nmsg == WM_MBUTTONDOWN || nmsg == WM_MBUTTONUP || WM_MBUTTONDBLCLK ||
 #ifdef WM_XBUTTONDOWN
-                        nmsg == WM_XBUTTONDOWN || nmsg == WM_XBUTTONUP ||
+                        nmsg == WM_XBUTTONDOWN || nmsg == WM_XBUTTONUP || WM_XBUTTONDBLCLK ||
 #endif
-                        nmsg == WM_RBUTTONDOWN || nmsg == WM_RBUTTONUP) {
-                        if (entry._version == NOTIFYICON_VERSION_4)
-                        {
-                            POINT messagePt = pt;
-                            ClientToScreen(_hwnd, &messagePt);
-                            WPARAM nwparam = 0;
-                            LPARAM nlparam = lparam;
-                            if (nmsg == WM_LBUTTONUP) nlparam = NIN_KEYSELECT;
-                            else if (nmsg == WM_RBUTTONUP) nlparam = WM_CONTEXTMENU;
-                            nwparam = MAKEWPARAM(messagePt.x, messagePt.y);
-                            SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, nwparam, MAKELPARAM(nlparam, entry._uID));
+                        nmsg == WM_RBUTTONDOWN || nmsg == WM_RBUTTONUP || nmsg == WM_RBUTTONDBLCLK) {
+                        if (nmsg == WM_LBUTTONUP) {
+                            TrayNotifyMessage(_hwnd, entry, NIN_SELECT, pt);
+                            TrayNotifyMessage(_hwnd, entry, WM_LBUTTONUP, pt);
+                        } else if (nmsg == WM_RBUTTONUP) {
+                            TrayNotifyMessage(_hwnd, entry, WM_RBUTTONUP, pt);
+                            TrayNotifyMessage(_hwnd, entry, WM_CONTEXTMENU, pt);
                         } else {
-                            SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
+                            TrayNotifyMessage(_hwnd, entry, nmsg, pt);
                         }
-                    } else {
-                        SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, nmsg);
                     }
                 } else if (_icon_map.erase(entry))  // delete icons without valid owner window
                     UpdateIcons();
@@ -750,10 +758,14 @@ void NotifyArea::Paint()
             FillRect(mem_dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
             DrawIconEx(mem_dc, 0, 0, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
             AlphaBlend(canvas, x, y, NOTIFYICON_SIZE, NOTIFYICON_SIZE, mem_dc, 0, 0, NOTIFYICON_SIZE, NOTIFYICON_SIZE, blend);
-        } else
+        }
+        else
 #endif
-            DrawIconEx(canvas, x + (NOTIFYICON_DIST - NOTIFYICON_SIZE) / 2, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
-
+        {
+            int left = x + (NOTIFYICON_DIST - NOTIFYICON_SIZE) / 2;
+            int top = y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2;
+            DrawIconEx(canvas, left, top, it->_hIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);
+        }
         x += NOTIFYICON_DIST;
     }
 }
