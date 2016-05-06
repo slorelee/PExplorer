@@ -398,7 +398,7 @@ static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam,
     {
         POINT messagePt = pt;
         ClientToScreen(hwnd, &messagePt);
-        if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
+        //if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
         WPARAM wparam = MAKEWPARAM(messagePt.x, messagePt.y);
         return PostMessage(entry._hWnd, entry._uCallbackMessage, wparam, MAKELPARAM(lparam, entry._uID)) == S_OK;
     }
