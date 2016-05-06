@@ -20,6 +20,7 @@ Object  g_JCfg;
 #define DEF_TASKBARHEIGHT 40
 int g_JCfg_taskbar_iconsize = 32;
 int g_JCfg_taskbar_startmenu_iconsize = 32;
+HBRUSH g_JCfg_taskbar_bkbrush = NULL;
 
 //default jcfg data
 const wstring def_jcfg = L"{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},"
@@ -188,6 +189,10 @@ Load_JCfg(string_t filename)
     }
     Object test = jcfg[TEXT("JS_DESKTOP")].ToObject();
     g_JCfg = jcfg;
+
+    /* init taskbar background brush */
+    g_JCfg_taskbar_bkbrush = CreateSolidBrush(TASKBAR_BKCOLOR());
+
     return jcfg;
 }
 

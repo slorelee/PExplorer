@@ -2075,6 +2075,7 @@ void StartMenuHandler::ShowSearchComputer()
 }
 
 struct RunDialogThread : public Thread {
+    HWND _hwnd;
     int Run();
 };
 
@@ -2091,7 +2092,7 @@ int RunDialogThread::Run()
     rect.right = GetSystemMetrics(SM_CXSCREEN);
     rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT;
     Static dlgOwner(0, 0, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 0, 0);
-
+    _hwnd = dlgOwner;
     // Show "Run..." dialog
     if (RunFileDlg) {
         (*RunFileDlg)(dlgOwner, 0, NULL, NULL, NULL, RFF_CALCDIRECTORY);
@@ -2102,26 +2103,39 @@ int RunDialogThread::Run()
 
 void ShowLaunchDialog(HWND hwndOwner)
 {
-    RunDialogThread *rdt = new RunDialogThread();
+    static RunDialogThread *rdt = NULL;
+    if (rdt) {
+        if (rdt->is_alive()) {
+            HWND hwnd = GetNextWindow(rdt->_hwnd, GW_HWNDPREV);
+            SwitchToThisWindow(hwnd, TRUE);
+            return;
+        } else {
+            delete rdt;
+            rdt = NULL;
+        }
+    }
+
+    rdt = new RunDialogThread();
     rdt->Start();
 }
 
 static int CommandHook(HWND hwnd, const TCHAR *act)
 {
-	String cmd = TEXT("");
-	INT showflags = SW_SHOWNORMAL;
-	String parameters = TEXT("");
-	if (g_Globals._isWinPE) {
-		cmd = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("command"), Value(TEXT(""))).ToString();
-	}
-	if (cmd != TEXT("")) {
-		showflags = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("showflags"), Value(showflags)).ToInt();
-		parameters = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("parameters"), Value(TEXT(""))).ToString();
-		launch_file(hwnd, cmd, showflags, parameters);
-		return 1;
-	}
-	return 0;
+    String cmd = TEXT("");
+    INT showflags = SW_SHOWNORMAL;
+    String parameters = TEXT("");
+    if (g_Globals._isWinPE) {
+        cmd = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("command"), Value(TEXT(""))).ToString();
+    }
+    if (cmd != TEXT("")) {
+        showflags = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("showflags"), Value(showflags)).ToInt();
+        parameters = JCfg_GetValue(&g_JCfg, TEXT("JS_STARTMENU"), TEXT("commands"), act, TEXT("parameters"), Value(TEXT(""))).ToString();
+        launch_file(hwnd, cmd, showflags, parameters);
+        return 1;
+    }
+    return 0;
 }
+
 void ShowLogoffDialog(HWND hwndOwner)
 {
     static DynamicFct<LOGOFFWINDOWSDIALOG> LogoffWindowsDialog(TEXT("SHELL32"), 54);

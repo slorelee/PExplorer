@@ -233,6 +233,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
             rbBand.clrBack = 0;
             HDC hdc = GetDC(_hwnd);
             _hbmQuickLaunchBack = CreateSolidBitmap(hdc, 768, 16, TASKBAR_BKCOLOR());
+            ReleaseDC(_hwnd, hdc);
             rbBand.hbmBack = _hbmQuickLaunchBack;
             //rbBand.hbmBack = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(IDB_TB_SH_DEF_16));
         }

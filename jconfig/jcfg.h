@@ -10,6 +10,7 @@ extern Object   g_JCfg;
 
 extern int g_JCfg_taskbar_iconsize;
 extern int g_JCfg_taskbar_startmenu_iconsize;
+extern HBRUSH g_JCfg_taskbar_bkbrush;
 
 extern Object Load_JCfg(string_t filename);
 extern COLORREF JValueToColor(Value val);
@@ -47,7 +48,7 @@ extern bool JCfg_GetDesktopBarUseSmallIcon();
 #define DESKTOP_BKCOLOR() (JValueToColor(JCFG2("JS_DESKTOP", "bkcolor")))
 #define TASKBAR_BKCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "bkcolor")))
 #define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "textcolor")))
-#define TASKBAR_BRUSH() (CreateSolidBrush(TASKBAR_BKCOLOR()))
+#define TASKBAR_BRUSH() (g_JCfg_taskbar_bkbrush)
 #define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
 
 #define DESKTOPBARBAR_HEIGHT    JCfg_GetDesktopBarHeight() //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
