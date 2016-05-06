@@ -365,18 +365,45 @@ LRESULT NotifyArea::Init(LPCREATESTRUCT pcs)
     return 0;
 }
 
+#ifdef _DEBUG
+static TCHAR *getmsgstr(UINT msgid)
+{
+    TCHAR *msg = TEXT("");
+    switch (msgid) {
+    case NIN_SELECT:msg = TEXT("NIN_SELECT"); break;
+    case NIN_KEYSELECT:msg = TEXT("NIN_KEYSELECT"); break;
+    case WM_CONTEXTMENU: msg = TEXT("WM_CONTEXTMENU"); break;
+    case WM_MOUSEMOVE: msg = TEXT("WM_MOUSEMOVE"); break;
+    case WM_LBUTTONDOWN: msg = TEXT("WM_LBUTTONDOWN"); break;
+    case WM_LBUTTONUP: msg = TEXT("WM_LBUTTONUP"); break;
+    case WM_LBUTTONDBLCLK: msg = TEXT("WM_LBUTTONDBLCLK"); break;
+    case WM_RBUTTONDOWN: msg = TEXT("WM_RBUTTONDOWN"); break;
+    case WM_RBUTTONUP: msg = TEXT("WM_RBUTTONUP"); break;
+    case WM_RBUTTONDBLCLK: msg = TEXT("WM_RBUTTONDBLCLK"); break;
+    case WM_MBUTTONDOWN: msg = TEXT("WM_MBUTTONDOWN"); break;
+    case WM_MBUTTONUP: msg = TEXT("WM_MBUTTONUP"); break;
+    case WM_MBUTTONDBLCLK: msg = TEXT("WM_MBUTTONDBLCLK"); break;
+    default: _log_(FmtString(TEXT("TRAYICON MSG = %d"), msgid));
+    }
+    return msg;
+}
+#endif
+
 static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam, POINT pt)
 {
+#ifdef _DEBUG
+    _log_(FmtString(TEXT("TRAYICON MSG = %s"), getmsgstr(lparam)));
+#endif
     if (entry._version == NOTIFYICON_VERSION_4)
     {
         POINT messagePt = pt;
         ClientToScreen(hwnd, &messagePt);
         if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
-        return SendNotifyMessage(entry._hWnd, entry._uCallbackMessage,
-            MAKEWPARAM(messagePt.x, messagePt.y), MAKELPARAM(lparam, entry._uID));
+        WPARAM wparam = MAKEWPARAM(messagePt.x, messagePt.y);
+        return PostMessage(entry._hWnd, entry._uCallbackMessage, wparam, MAKELPARAM(lparam, entry._uID)) == S_OK;
     }
 
-    return SendNotifyMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, lparam);
+    return PostMessage(entry._hWnd, entry._uCallbackMessage, entry._uID, lparam) == S_OK;
 }
 
 HWND NotifyArea::Create(HWND hwndParent)
@@ -485,8 +512,8 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
                 }
 
                 // set activation time stamp
-                if (nmsg == WM_LBUTTONDOWN ||   // Some programs need PostMessage() instead of SendMessage().
-                    nmsg == WM_MBUTTONDOWN ||   // So call SendMessage() only for BUTTONUP and BLCLK messages
+                if (nmsg == WM_LBUTTONDOWN ||
+                    nmsg == WM_MBUTTONDOWN ||
 #ifdef WM_XBUTTONDOWN
                     nmsg == WM_XBUTTONDOWN ||
 #endif
@@ -496,21 +523,21 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
                 // Notify the message if the owner is still alive
                 if (IsWindow(entry._hWnd)) {
-                    if (nmsg == WM_MOUSEMOVE ||
-                        nmsg == WM_LBUTTONDOWN || nmsg == WM_LBUTTONUP || WM_LBUTTONDBLCLK ||
-                        nmsg == WM_MBUTTONDOWN || nmsg == WM_MBUTTONUP || WM_MBUTTONDBLCLK ||
+                    if (//nmsg == WM_MOUSEMOVE ||
+                        nmsg == WM_LBUTTONDOWN || nmsg == WM_LBUTTONUP || nmsg == WM_LBUTTONDBLCLK ||
+                        nmsg == WM_MBUTTONDOWN || nmsg == WM_MBUTTONUP || nmsg == WM_MBUTTONDBLCLK ||
 #ifdef WM_XBUTTONDOWN
-                        nmsg == WM_XBUTTONDOWN || nmsg == WM_XBUTTONUP || WM_XBUTTONDBLCLK ||
+                        nmsg == WM_XBUTTONDOWN || nmsg == WM_XBUTTONUP || nmsg == WM_XBUTTONDBLCLK ||
 #endif
                         nmsg == WM_RBUTTONDOWN || nmsg == WM_RBUTTONUP || nmsg == WM_RBUTTONDBLCLK) {
                         if (nmsg == WM_LBUTTONUP) {
                             TrayNotifyMessage(_hwnd, entry, NIN_SELECT, pt);
-                            TrayNotifyMessage(_hwnd, entry, WM_LBUTTONUP, pt);
+                            return TrayNotifyMessage(_hwnd, entry, WM_LBUTTONUP, pt);
                         } else if (nmsg == WM_RBUTTONUP) {
                             TrayNotifyMessage(_hwnd, entry, WM_RBUTTONUP, pt);
-                            TrayNotifyMessage(_hwnd, entry, WM_CONTEXTMENU, pt);
+                            return TrayNotifyMessage(_hwnd, entry, WM_CONTEXTMENU, pt);
                         } else {
-                            TrayNotifyMessage(_hwnd, entry, nmsg, pt);
+                            return TrayNotifyMessage(_hwnd, entry, nmsg, pt);
                         }
                     }
                 } else if (_icon_map.erase(entry))  // delete icons without valid owner window
