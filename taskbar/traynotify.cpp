@@ -223,7 +223,7 @@ bool NotifyInfo::_modify(NID_T *pnid)
         if (_hIcon)
             DestroyIcon(_hIcon);
 
-        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, 16, 16, 0);
+        _hIcon = (HICON) CopyImage((HICON)pnid->hIcon, IMAGE_ICON, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0);
 
         changes = true; ///@todo compare icon
     }
@@ -759,13 +759,13 @@ void NotifyArea::Paint()
 
     if (_show_button) {
         static int initIcon = 0;
-        static SizeIcon leftArrowIcon(IDI_NOTIFY_L_B, TASKBAR_ICON_SIZE);
-        static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, TASKBAR_ICON_SIZE);
+        static SizeIcon leftArrowIcon(IDI_NOTIFY_L_B, NOTIFYICON_SIZE);
+        static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, NOTIFYICON_SIZE);
         if (initIcon == 0) {
             initIcon = 1;
             if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
-                leftArrowIcon = SizeIcon(IDI_NOTIFY_L_W, TASKBAR_ICON_SIZE);
-                rightArrowIcon = SizeIcon(IDI_NOTIFY_R_W, TASKBAR_ICON_SIZE);
+                leftArrowIcon = SizeIcon(IDI_NOTIFY_L_W, NOTIFYICON_SIZE);
+                rightArrowIcon = SizeIcon(IDI_NOTIFY_R_W, NOTIFYICON_SIZE);
             }
         }
         DrawIconEx(canvas, x + (NOTIFYICON_DIST - NOTIFYICON_SIZE) / 2, y + ((DESKTOPBARBAR_HEIGHT - NOTIFYICON_Y * 2) - NOTIFYICON_SIZE) / 2, _show_hidden ? rightArrowIcon : leftArrowIcon, NOTIFYICON_SIZE, NOTIFYICON_SIZE, 0, 0, DI_NORMAL);

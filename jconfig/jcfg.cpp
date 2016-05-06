@@ -20,6 +20,8 @@ Object  g_JCfg;
 #define DEF_TASKBARHEIGHT 40
 int g_JCfg_taskbar_iconsize = 32;
 int g_JCfg_taskbar_startmenu_iconsize = 32;
+int g_JCfg_DPI_SX = 96;
+int g_JCfg_DPI_SY = 96;
 HBRUSH g_JCfg_taskbar_bkbrush = NULL;
 
 //default jcfg data
@@ -163,6 +165,22 @@ Update_KeyName(Object *jcfg)
     return;
 }
 
+bool JCfg_GetDesktopBarUseSmallIcon();
+
+static void
+JCfg_init() {
+    /* init taskbar background brush */
+    g_JCfg_taskbar_bkbrush = CreateSolidBrush(TASKBAR_BKCOLOR());
+    JCfg_GetDesktopBarUseSmallIcon();
+
+    HDC hdcScreen = GetDC(NULL);
+    if (hdcScreen != NULL) {
+        g_JCfg_DPI_SX = GetDeviceCaps(hdcScreen, LOGPIXELSX);
+        g_JCfg_DPI_SY = GetDeviceCaps(hdcScreen, LOGPIXELSY);
+        ReleaseDC(NULL, hdcScreen);
+    }
+}
+
 Object
 Load_JCfg(string_t filename)
 {
@@ -190,9 +208,7 @@ Load_JCfg(string_t filename)
     Object test = jcfg[TEXT("JS_DESKTOP")].ToObject();
     g_JCfg = jcfg;
 
-    /* init taskbar background brush */
-    g_JCfg_taskbar_bkbrush = CreateSolidBrush(TASKBAR_BKCOLOR());
-
+    JCfg_init();
     return jcfg;
 }
 

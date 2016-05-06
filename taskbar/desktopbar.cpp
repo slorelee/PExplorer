@@ -81,12 +81,10 @@ HWND DesktopBar::Create()
     rect.top = DESKTOPBAR_TOP;
 #endif
     rect.right = GetSystemMetrics(SM_CXSCREEN);
-    rect.bottom = rect.top + DESKTOPBARBAR_HEIGHT;
-
     return Window::Create(WINDOW_CREATOR(DesktopBar), WS_EX_PALETTEWINDOW,
                           wcDesktopBar, TITLE_EXPLORERBAR,
                           WS_POPUP | WS_CLIPCHILDREN | WS_VISIBLE,
-                          rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 0);
+                          rect.left, rect.top, rect.right - rect.left, DESKTOPBARBAR_HEIGHT, 0);
 }
 
 static HBITMAP
@@ -176,7 +174,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE | DT_CALCRECT);
 
     _deskbar_pos_y = DESKTOPBAR_TOP;
-    int start_btn_width = rect.right + TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 4); // rect.right+16+8
+    int start_btn_width = DPI_SX(rect.right) + TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 4); // rect.right+16+8
 
     _taskbar_pos = start_btn_width + 1;
     // create "Start" button

@@ -30,7 +30,7 @@
 #define TITLE_STARTMENU         TEXT("Start Menu")
 
 
-#define STARTMENU_WIDTH_MIN                 120
+#define STARTMENU_WIDTH_MIN                 DPI_SX(120)
 #define STARTMENU_LINE_HEIGHT(icon_size)    (icon_size+4)
 #define STARTMENU_SEP_HEIGHT(icon_size)     (STARTMENU_LINE_HEIGHT(icon_size)/2)
 #define STARTMENU_TOP_BTN_SPACE             8

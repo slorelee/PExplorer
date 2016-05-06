@@ -10,6 +10,10 @@ extern Object   g_JCfg;
 
 extern int g_JCfg_taskbar_iconsize;
 extern int g_JCfg_taskbar_startmenu_iconsize;
+
+extern int g_JCfg_DPI_SX;
+extern int g_JCfg_DPI_SY;
+
 extern HBRUSH g_JCfg_taskbar_bkbrush;
 
 extern Object Load_JCfg(string_t filename);
@@ -21,7 +25,6 @@ extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t 
 extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, string_t key4, Value defval);
 
 extern int JCfg_GetDesktopBarHeight();
-extern bool JCfg_GetDesktopBarUseSmallIcon();
 
 #define JVAR(key) (g_JVARMap[TEXT(key)])
 #define JCFG1(key1) JCfg_GetValue(&g_JCfg, TEXT(key1), Value())
@@ -51,8 +54,12 @@ extern bool JCfg_GetDesktopBarUseSmallIcon();
 #define TASKBAR_BRUSH() (g_JCfg_taskbar_bkbrush)
 #define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
 
-#define DESKTOPBARBAR_HEIGHT    JCfg_GetDesktopBarHeight() //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
+#define DESKTOPBARBAR_HEIGHT    DPI_SY(JCfg_GetDesktopBarHeight()) //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
 #define REBARBAND_HEIGHT        ((DESKTOPBARBAR_HEIGHT) - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))
 
-#define STARTMENUROOT_ICON_SIZE     g_JCfg_taskbar_startmenu_iconsize
-#define TASKBAR_ICON_SIZE           g_JCfg_taskbar_iconsize
+#define DPI_SX(x) (MulDiv((x),g_JCfg_DPI_SX, 96))
+#define DPI_SY(y) (MulDiv((y),g_JCfg_DPI_SY, 96))
+
+#define STARTMENUROOT_ICON_SIZE     DPI_SX(g_JCfg_taskbar_startmenu_iconsize)
+#define TASKBAR_ICON_SIZE           DPI_SX(g_JCfg_taskbar_iconsize)
+
