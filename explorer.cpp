@@ -773,14 +773,14 @@ ResBitmap::ResBitmap(UINT nid)
 
 int explorer_open_frame(int cmdShow, LPTSTR lpCmdLine, int mode)
 {
-    static String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("")).ToString();
+    String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("")).ToString();
 
     if (explorer_path.empty()) {
         explorer_show_frame(cmdShow, lpCmdLine);
         return 1;
     }
 
-    static String explorer_open;
+    String explorer_open;
     if (mode == EXPLORER_OPEN_NORMAL) {
         explorer_open = JCFG2_DEF("JS_FILEEXPLORER", "3rd_open_arguments", TEXT("%s")).ToString();
     } else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
@@ -1095,6 +1095,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // strip extended options from the front of the command line
     String ext_options;
 
+#ifdef _DEBUG
+    _CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG));
+    _CrtDumpMemoryLeaks();
+#endif
     while (*lpCmdLine == '-') {
         while (*lpCmdLine && !_istspace((unsigned)*lpCmdLine))
             ext_options += *lpCmdLine++;
@@ -1315,6 +1319,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (g_SHDOCVW_ShellDDEInit)
             (*g_SHDOCVW_ShellDDEInit)(FALSE);
     }
-
+    char *a = new char[538];
+    a[0] = 'a';a[1] = 'z';
+    _CrtDumpMemoryLeaks();
     return ret;
 }

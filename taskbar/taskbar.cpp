@@ -507,6 +507,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 
                 SendMessage(pThis->_htoolbar, TB_SETBUTTONINFO, entry._id, (LPARAM)&info);
 
+                entry._title.~String();
                 entry._title = title;
             }
         }

@@ -63,8 +63,8 @@ static BOOL CALLBACK SwitchDesktopEnumFct(HWND hwnd, LPARAM lparam)
 
 static BOOL IsIgnoredWindow(HWND hwnd)
 {
-    static String ignore_window_titles = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_TITLES", TEXT("")).ToString();
-    static String ignore_window_classes = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_CLASSES", TEXT("")).ToString();
+    String ignore_window_titles = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_TITLES", TEXT("")).ToString();
+    String ignore_window_classes = JCFG2_DEF("JS_HOTKEY", "IGNORE_WINDOW_CLASSES", TEXT("")).ToString();
     ignore_window_classes.append(DEF_IGNORE_WINDOW_CLASSES);
     TCHAR strbuffer[BUFFER_LEN] = { 0 };
     if (!GetWindowText(hwnd, strbuffer, BUFFER_LEN))
@@ -432,7 +432,7 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
 
 int VK_WIN_HOOK()
 {
-    static String winhotkey = JCFG2_DEF("JS_HOTKEY", "WIN", TEXT("")).ToString();
+    String winhotkey = JCFG2_DEF("JS_HOTKEY", "WIN", TEXT("")).ToString();
     if (winhotkey.empty()) return 0;
 
     winhotkey.toUpper();
