@@ -67,7 +67,7 @@
   },
   "::文件管理器":
   {
-    "::第3方文件管理器":"##{JVAR_MODULEPATH}\\explorer++.exe"
+    "#::第3方文件管理器":"##{JVAR_MODULEPATH}\\explorer++.exe"
   },
   "::桌面":
   {

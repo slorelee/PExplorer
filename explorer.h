@@ -113,6 +113,7 @@ struct ExplorerCmd {
     bool    _valid_path;
 };
 
+#include "shell/fileexplorer.h"
 #include "shell/mainframe.h"
 
 #endif

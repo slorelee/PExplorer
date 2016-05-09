@@ -93,6 +93,9 @@
     <ClCompile Include="jconfig\jcfg.cpp">
       <Filter>jconfig</Filter>
     </ClCompile>
+    <ClCompile Include="shell\fileexplorer.cpp">
+      <Filter>shell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -186,6 +189,9 @@
     </ClInclude>
     <ClInclude Include="jconfig\jcfg.h">
       <Filter>jconfig</Filter>
+    </ClInclude>
+    <ClInclude Include="shell\fileexplorer.h">
+      <Filter>shell</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

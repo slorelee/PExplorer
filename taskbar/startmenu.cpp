@@ -42,9 +42,9 @@
 
 #include "../jconfig/jcfg.h"
 
-#define SHELLPATH_CONTROL_PANEL     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}")
-#define SHELLPATH_PRINTERS          TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{2227A280-3AEA-1069-A2DE-08002B30309D}")
-#define SHELLPATH_NET_CONNECTIONS   TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}\\::{7007ACC7-3202-11D1-AAD2-00805FC1270E}")
+#define SHELLPATH_CONTROL_PANEL     TEXT("::{21EC2020-3AEA-1069-A2DD-08002B30309D}")
+#define SHELLPATH_PRINTERS          TEXT("::{2227A280-3AEA-1069-A2DE-08002B30309D}")
+#define SHELLPATH_NET_CONNECTIONS   TEXT("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}")
 
 
 StartMenu::StartMenu(HWND hwnd, int icon_size)
@@ -1933,13 +1933,7 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_CONTROL_PANEL: {
         CloseStartMenu(id);
 #ifndef ROSSHELL
-#ifndef _NO_MDI
-        bool mdi = true;
-        if (mdi)
-            MDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}"), 0);
-        else
-#endif
-            SDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}"), 0);
+        explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_CONTROL_PANEL);
 #else
         launch_file(_hwnd, SHELLPATH_CONTROL_PANEL);
 #endif
@@ -1954,13 +1948,7 @@ int StartMenuHandler::Command(int id, int code)
         CloseStartMenu(id);
 
 #ifndef ROSSHELL
-#ifndef _NO_MDI
-        bool mdi = true;
-        if (mdi)
-            MDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}\\::{2227A280-3AEA-1069-A2DE-08002B30309D}"), 0);
-        else
-#endif
-            SDIMainFrame::Create(TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}\\::{2227A280-3AEA-1069-A2DE-08002B30309D}"), 0);
+        explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_PRINTERS);
 #else
         launch_file(_hwnd, SHELLPATH_PRINTERS);
 #endif
@@ -1994,13 +1982,7 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_CONNECTIONS: {
         CloseStartMenu(id);
 #ifndef ROSSHELL
-#ifndef _NO_MDI
-        bool mdi = true;
-        if (mdi)
-            MDIMainFrame::Create(SHELLPATH_NET_CONNECTIONS, 0);
-        else
-#endif
-            SDIMainFrame::Create(SHELLPATH_NET_CONNECTIONS, 0);
+        explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_NET_CONNECTIONS);
 #else
         launch_file(_hwnd, SHELLPATH_NET_CONNECTIONS);
 #endif

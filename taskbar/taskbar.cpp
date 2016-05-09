@@ -397,6 +397,23 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
     return hIcon;
 }
 
+static BOOL isTopWindowOrFileExplorerWindow(HWND hwnd)
+{
+    if (GetParent(hwnd)) return FALSE;
+    HWND hwndOwner = GetParent(hwnd);
+    if (!hwndOwner) return TRUE;
+
+    TCHAR strbuffer[BUFFER_LEN] = { 0 };
+    if (!GetClassName(hwndOwner, strbuffer, BUFFER_LEN))
+        strbuffer[0] = TEXT('\0');
+    String str_class = strbuffer;
+    if (str_class.find(FILEEXPLORERWINDOWCLASSNAME) != string::npos) {
+        return TRUE;
+    }
+    return FALSE;
+
+}
+
 // fill task bar with buttons for enumerated top level windows
 BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 {
@@ -406,7 +423,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
     DWORD ex_style = GetWindowExStyle(hwnd);
 
     if ((style & WS_VISIBLE) && !(ex_style & WS_EX_TOOLWINDOW) &&
-        !GetParent(hwnd) && !GetWindow(hwnd, GW_OWNER)) {
+        isTopWindowOrFileExplorerWindow(hwnd)) {
         TCHAR title[BUFFER_LEN] = {0};
         TCHAR strbuffer[BUFFER_LEN] = {0};
 

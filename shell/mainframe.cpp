@@ -37,18 +37,6 @@ extern HWND create_webchildwindow(const WebChildWndInfo &info);
 
 #include "../dialogs/settings.h"    // for MdiSdiDlg
 
-#define CLSID_MyComputerName     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
-#define CLSID_RecycleBinName     TEXT("::{645FF040-5081-101B-9F08-00AA002F954E}")
-#define CLSID_UsersFilesName     TEXT("::{59031A47-3F72-44A7-89C5-5595FE6B30EE}")
-#define CLSID_MyDocumentsName    TEXT("::"STR_MYDOCS_CLSID)
-//"{450D8FBA-AD25-11D0-98A8-0800361B1103}"
-
-#define DEF_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        EXTERN_C const GUID DECLSPEC_SELECTANY name \
-                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-
-DEF_GUID(CLSID_UsersFiles, 0x59031a47, 0x3f72, 0x44a7, 0x89, 0xc5, 0x55, 0x95, 0xfe, 0x6b, 0x30, 0xee);//59031A47-3F72-44A7-89c5-5595fe6b30ee
-DEF_GUID(CLSID_MyDocuments, 0x450d8fba, 0xad25, 0x11d0, 0x98, 0xa8, 0x08, 0x95, 0x00, 0x36, 0x1b, 0x03);//450d8fba-ad25-11d0-98a8-0800361b1103
 
 //#define _NO_REBAR
 
@@ -123,42 +111,16 @@ int MainFrameBase::OpenShellFolders(LPIDA pida, HWND hFrameWnd)
                         if (SendMessage(hFrameWnd, PM_OPEN_WINDOW, flags, (LPARAM)(LPCITEMIDLIST)pidl_abs))
                             ++cnt;
                     } else {
-                        String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("%s")).ToString();
-                        if (!explorer_path.empty()) {
-                            String explorer_open = JCFG2_DEF("JS_DESKTOP", "3rd_open_arguments", TEXT("%s")).ToString();
-                            String explorer_parameters;
-                            SHDESCRIPTIONID desc = {0};
-                            SHGetDataFromIDList(parentfolder, pidl, SHGDFIL_DESCRIPTIONID, &desc, sizeof(desc));
-                            if (desc.dwDescriptionId == SHDID_ROOT_REGITEM) {
-                                /*LPOLESTR strclsid = NULL;
-                                StringFromCLSID(desc.clsid, &strclsid);
-                                CoTaskMemFree(strclsid);*/
-                                if (IsEqualCLSID(desc.clsid, CLSID_MyComputer)) {
-                                    explorer_parameters = FmtString(explorer_open, CLSID_MyComputerName);
-                                } else if (IsEqualCLSID(desc.clsid, CLSID_RecycleBin)) {
-                                    explorer_parameters = FmtString(explorer_open, CLSID_RecycleBinName);
-                                } else if (IsEqualCLSID(desc.clsid, CLSID_MyDocuments)) {
-                                    explorer_parameters = FmtString(explorer_open, CLSID_MyDocumentsName);
-                                } else if (IsEqualCLSID(desc.clsid, CLSID_UsersFiles)) {
-                                    explorer_parameters = FmtString(explorer_open, CLSID_UsersFilesName);
-                                }
-                            } else {
-                                explorer_parameters = FmtString(explorer_open, (LPCTSTR)FileSysShellPath(pidl_abs));
-                            }
-                            launch_file(g_Globals._hwndShellView, explorer_path.c_str(), SW_SHOWNORMAL, explorer_parameters.c_str());
-                            ++cnt;
-                        } else {
-                            HWND hwnd;
+                        HWND hwnd;
 #ifndef _NO_MDI
-                            if (mdi)
-                                hwnd = MDIMainFrame::Create(pidl_abs, 0);
-                            else
+                        if (mdi)
+                            hwnd = MDIMainFrame::Create(pidl_abs, 0);
+                        else
 #endif
-                                hwnd = SDIMainFrame::Create(pidl_abs, 0);
+                            hwnd = SDIMainFrame::Create(pidl_abs, 0);
 
-                            if (hwnd)
-                                ++cnt;
-                        }
+                        if (hwnd)
+                            ++cnt;
                     }
                 } catch (COMException &e) {
                     HandleException(e, g_Globals._hMainWnd);

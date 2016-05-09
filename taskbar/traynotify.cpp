@@ -1425,10 +1425,6 @@ bool ClockWindow::FormatTime()
     return false; //no change
 }
 
-#include <uxtheme.h>
-#include <vsstyle.h>
-#pragma comment(lib, "uxtheme.lib")
-
 void ClockWindow::Paint()
 {
     static bool inited = false;

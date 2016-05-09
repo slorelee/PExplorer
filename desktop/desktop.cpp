@@ -88,7 +88,8 @@ static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
     list<MinimizeStruct> &minimized = *(list<MinimizeStruct> *)lparam;
 
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
-    if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
+    DWORD ex_style = GetWindowExStyle(hwnd);
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && !(ex_style & WS_EX_TOPMOST)) {
         if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
@@ -112,7 +113,8 @@ static BOOL CALLBACK UnminimizedDesktopEnumFct(HWND hwnd, LPARAM lparam)
     list<MinimizeStruct> &unminimized = *(list<MinimizeStruct> *)lparam;
 
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
-    if (IsWindowVisible(hwnd) && !IsIconic(hwnd)) {
+    DWORD ex_style = GetWindowExStyle(hwnd);
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && !(ex_style & WS_EX_TOPMOST)) {
         if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
@@ -641,14 +643,13 @@ default: def:
     return 0;
 }
 
-
+extern int OpenShellFolders(HWND hwnd, LPIDA pida);
 HRESULT DesktopWindow::OnDefaultCommand(LPIDA pida)
 {
 #ifndef ROSSHELL    // in shell-only-mode fall through and let shell32 handle the command
-    if (MainFrameBase::OpenShellFolders(pida, 0))
+    if (OpenShellFolders(NULL, pida))
         return S_OK;
 #endif
-
     return E_NOTIMPL;
 }
 

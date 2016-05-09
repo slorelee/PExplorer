@@ -94,22 +94,25 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
 void ExplorerGlobals::load_config()
 {
     TCHAR szFile[MAX_PATH + 1] = { 0 };
-    String str = TEXT("");
+    String strPath = TEXT("");
+    String strFileName = TEXT("");
     DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
     if (dwRet != 0) {
-        str = szFile;
-        size_t nPos = str.rfind(TEXT('\\'));
+        strPath = szFile;
+        size_t nPos = strPath.rfind(TEXT('\\'));
         if (nPos != -1) {
-            str = str.substr(0, nPos);
+            strFileName = strPath.substr(nPos + 1);
+            strPath = strPath.substr(0, nPos);
         }
     }
-    JVAR("JVAR_MODULEPATH") = str;
+    JVAR("JVAR_MODULEPATH") = strPath;
+    JVAR("JVAR_MODULENAME") = strFileName;
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
 #ifdef _DEBUG
     String cfgfile = TEXT("PExlorer.jcfg");
 #else
-    String cfgfile = str + TEXT("\\PExlorer.jcfg");
+    String cfgfile = strPath + TEXT("\\PExlorer.jcfg");
 #endif
     Load_JCfg(cfgfile);
 }
@@ -771,54 +774,8 @@ ResBitmap::ResBitmap(UINT nid)
     _hBmp = LoadBitmap(g_Globals._hInstance, MAKEINTRESOURCE(nid));
 }
 
-int explorer_open_frame(int cmdShow, LPTSTR lpCmdLine, int mode)
-{
-    String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("")).ToString();
-
-    if (explorer_path.empty()) {
-        explorer_show_frame(cmdShow, lpCmdLine);
-        return 1;
-    }
-
-    String explorer_open;
-    if (mode == EXPLORER_OPEN_NORMAL) {
-        explorer_open = JCFG2_DEF("JS_FILEEXPLORER", "3rd_open_arguments", TEXT("%s")).ToString();
-    } else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
-        explorer_open = JCFG2_DEF("JS_QUICKLAUNCH", "3rd_open_arguments", TEXT("")).ToString();
-    }
-    if (lpCmdLine == NULL) lpCmdLine = TEXT("");
-    String explorer_parameters = FmtString(explorer_open, lpCmdLine);
-    launch_file(g_Globals._hwndShellView, explorer_path.c_str(), cmdShow, explorer_parameters.c_str());
-    return 0;
-}
 
 #ifndef ROSSHELL
-
-void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
-{
-    ExplorerCmd cmd;
-
-    if (g_Globals._hMainWnd) {
-        if (IsIconic(g_Globals._hMainWnd))
-            ShowWindow(g_Globals._hMainWnd, SW_RESTORE);
-        else
-            SetForegroundWindow(g_Globals._hMainWnd);
-
-        return;
-    }
-
-    g_Globals._prescan_nodes = false;
-
-    cmd._mdi =  true;
-    cmd._cmdShow = cmdShow;
-
-    // parse command line options, which may overwrite the MDI flag
-    if (lpCmdLine)
-        cmd.ParseCmdLine(lpCmdLine);
-
-    // create main window
-    MainFrameBase::Create(cmd);
-}
 
 bool ExplorerCmd::ParseCmdLine(LPCTSTR lpCmdLine)
 {
@@ -1066,7 +1023,7 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
         rc = explorer_open_frame(cmdShow, lpCmdLine, EXPLORER_OPEN_NORMAL);
     }
 #endif
-    if (g_Globals._hwndDesktop || rc == 1) {
+    if (g_Globals._desktop_mode || rc == 1) {
         Window::MessageLoop();
     }
     return 1;
@@ -1095,10 +1052,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // strip extended options from the front of the command line
     String ext_options;
 
-#ifdef _DEBUG
-    _CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG));
-    _CrtDumpMemoryLeaks();
-#endif
     while (*lpCmdLine == '-') {
         while (*lpCmdLine && !_istspace((unsigned)*lpCmdLine))
             ext_options += *lpCmdLine++;
@@ -1319,8 +1272,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (g_SHDOCVW_ShellDDEInit)
             (*g_SHDOCVW_ShellDDEInit)(FALSE);
     }
-    char *a = new char[538];
-    a[0] = 'a';a[1] = 'z';
-    _CrtDumpMemoryLeaks();
+
     return ret;
 }
