@@ -92,14 +92,17 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
 void QuickLaunchBar::ReloadShortcuts()
 {
     int cnt = 0;
-    ShellDirectory *shelldir = NULL;
+    static ShellDirectory *shelldir = NULL;
     try {
         static TCHAR path[MAX_PATH];
         SpecialFolderFSPath app_data(CSIDL_APPDATA, _hwnd); ///@todo perhaps also look into CSIDL_COMMON_APPDATA ?
         _stprintf(path, TEXT("%s\\")QUICKLAUNCH_FOLDER, (LPCTSTR)app_data);
         RecursiveCreateDirectory(path);
-        shelldir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
-        shelldir->smart_scan(SORT_NAME);
+        if (!shelldir) {
+            shelldir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
+        }
+        shelldir->_scanned = false;
+        shelldir->smart_scan(SORT_NAME, SCAN_DONT_EXTRACT_ICONS | SCAN_DONT_ACCESS | SCAN_NO_DIRECTORY);
 
         // immediatelly extract the shortcut icons
         for (Entry *entry = shelldir->_down; entry; entry = entry->_next) {
@@ -112,15 +115,12 @@ void QuickLaunchBar::ReloadShortcuts()
         cnt = 0;
     }
 
-    if (shelldir) delete shelldir;
-
     if (_entries.size() == cnt + 2) {
         return;
     }
 
     _next_id = IDC_FIRST_QUICK_ID;
     _entries.clear();
-    delete _dir;
     int btns = (int)SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
     int i = 0;
     for (i = btns;i >= 0;i--) {
@@ -144,9 +144,12 @@ void QuickLaunchBar::AddShortcuts()
         _stprintf(path, TEXT("%s\\")QUICKLAUNCH_FOLDER, (LPCTSTR)app_data);
 
         RecursiveCreateDirectory(path);
-        _dir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
 
-        _dir->smart_scan(SORT_NAME);
+        if (!_dir) {
+            _dir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
+        }
+        _dir->_scanned = false;
+        _dir->smart_scan(SORT_NAME, SCAN_DONT_ACCESS | SCAN_NO_DIRECTORY);
 
         // immediatelly extract the shortcut icons
         for (Entry *entry = _dir->_down; entry; entry = entry->_next)

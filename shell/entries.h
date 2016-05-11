@@ -52,7 +52,8 @@ enum SORT_ORDER {
 enum SCAN_FLAGS {
     SCAN_DONT_EXTRACT_ICONS = 1,
     SCAN_DONT_ACCESS        = 2,
-    SCAN_NO_FILESYSTEM      = 4
+    SCAN_NO_FILESYSTEM      = 4,
+    SCAN_NO_DIRECTORY       = 8
 };
 
 #ifndef ATTRIBUTE_SYMBOLIC_LINK

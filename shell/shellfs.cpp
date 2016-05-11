@@ -286,6 +286,10 @@ void ShellDirectory::read_directory(int scan_flags)
                 if (w32fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
                     continue;
 
+                if ((scan_flags & SCAN_NO_DIRECTORY) &&
+                    (w32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+                    continue;
+
                 // ignore directory entries "." and ".."
                 if ((w32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
                     w32fd.cFileName[0] == TEXT('.') &&
