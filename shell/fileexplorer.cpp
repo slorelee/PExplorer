@@ -145,6 +145,9 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
     GetWindowRect(hwndDialog, &rc);
     SetWindowPos(hwndDialog, HWND_NOTOPMOST, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, SWP_DRAWFRAME);
 
+    static int height = JCFG2_DEF("JS_FILEEXPLORER", "padding-bottom", 20).ToInt();
+    if (height == 0) return 1;
+
     /* hide filename label */
     HWND item = GetDlgItem(hwndDialog, 0x442);
     ShowWindow(item, SW_HIDE);
@@ -162,7 +165,6 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
     ShowWindow(item, SW_HIDE);
     GetWindowRect(item, &rc);
 
-    static int height = JCFG2_DEF("JS_FILEEXPLORER", "padding-bottom", 20).ToInt();
     /* move OK button to adjust the listview height */
     MoveWindow(item, rc.left, ((rc.bottom - rc.top) * 15 - height), rc.right - rc.left, rc.bottom - rc.top, FALSE);
 
