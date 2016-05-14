@@ -240,6 +240,44 @@ HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
     return hr;
 }
 
+
+/*
+_SCNGetWindow
+00007FFF7E053608
+...
+00007FFF7E053643  e8 xx xx xx xx call        _GetDesktop (07FFF7DFBD95Ch)
+00007FFF7E053648  48 85 c0       test        rax,rax
+00007FFF7E05364B  74             je         _SCNGetWindow+6Ch (07FFF7E053674h)
+                  74->EB ---> je->jmp
+*/
+static void Shell32DllHacker()
+{
+    static HMODULE hShell32Dll = NULL;
+    static BOOL shell32_hacker = JCFG2_DEF("JS_FILEEXPLORER", "shell32_hacker", false).ToBool();
+#ifdef _WIN64
+    static String strRVAddr = JCFG2_DEF("JS_FILEEXPLORER", "shell32x64_hacker_addr", TEXT("0x0")).ToString();
+#else
+    static String strRVAddr = JCFG2_DEF("JS_FILEEXPLORER", "shell32x86_hacker_addr", TEXT("0x0")).ToString();
+#endif
+    if (!shell32_hacker || hShell32Dll) return;
+    hShell32Dll = GetModuleHandle(TEXT("SHELL32"));
+    if (!hShell32Dll) return;
+    void *pAddr = NULL;
+    //pAddr = GetProcAddress(hShell32Dll, "SHChangeNotifyRegister");
+    int iRVAddr = std::stoi(strRVAddr, 0, 16);
+    pAddr = (unsigned char *)hShell32Dll + iRVAddr + 0xC00 - 2;
+    DWORD lpflOldProtect = 0;
+    unsigned char key[3] = {0x85, 0xC0, 0x74};
+    if (!pAddr) return;
+    if (VirtualProtect(pAddr, 10, PAGE_EXECUTE_READWRITE, &lpflOldProtect)) {
+        //memcpy(&key, (unsigned char*)pAddr + 0x40, 4);
+        if (memcmp((unsigned char *)pAddr, key, 3) == 0) {
+            (unsigned char)*((unsigned char*)pAddr + 2) = 0xEB;
+        }
+    }
+    return;
+}
+
 #ifndef ROSSHELL
 void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 {
@@ -261,6 +299,8 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 
     if (lpCmdLine)
         cmd.ParseCmdLine(lpCmdLine);
+
+    Shell32DllHacker();
 
     // create main window
     FileExplorerWindow::Create(NULL, cmd._path.c_str());

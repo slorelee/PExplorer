@@ -68,7 +68,10 @@
   "::文件管理器":
   {
     "#::第3方文件管理器":"##{JVAR_MODULEPATH}\\explorer++.exe",
-    "#padding-bottom":20
+    "#padding-bottom":20,
+    "shell32_hacker":false,
+    "shell32x64_hacker_addr":"0xC8017",
+    "shell32x86_hacker_addr":"0x19BA5F"
   },
   "::桌面":
   {
