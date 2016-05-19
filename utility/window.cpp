@@ -868,7 +868,7 @@ Button::Button(HWND parent, LPCTSTR title, int left, int top, int width, int hei
 
 SWButton::SWButton(HWND parent, LPCTSTR title, int left, int top, int width, int height,
                    int id, DWORD flags, DWORD exStyle)
-    : WindowHandle(CreateWindowEx(exStyle, TEXT("start"), title, flags, left, top, width, height,
+    : WindowHandle(CreateWindowEx(exStyle, TEXT("Start"), title, flags, left, top, width, height,
                                   parent, (HMENU)id, g_Globals._hInstance, 0))
 {
 }

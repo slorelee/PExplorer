@@ -180,7 +180,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     // create "Start" button
     static WNDCLASS wc;
     GetClassInfo(NULL, TEXT("BUTTON"), &wc);
-    wc.lpszClassName = TEXT("start");
+    wc.lpszClassName = TEXT("Start");
     wc.hInstance = NULL;
     RegisterClass(&wc);
     HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 0, 0, start_btn_width, DESKTOPBARBAR_HEIGHT, IDC_START, WS_VISIBLE | WS_CHILD | BS_OWNERDRAW);
@@ -372,6 +372,7 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
 
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
+    //if (nmsg != WM_TIMER) LOG(FmtString(TEXT("NMSG - %d"), nmsg));
     switch (nmsg) {
     case WM_NCHITTEST: {
 #ifndef TASKBAR_AT_TOP
@@ -607,12 +608,12 @@ struct TrayNotifyCDS {
     NOTIFYICONDATA nicon_data;
 };
 
-static LRESULT IconIdentifierEvent(COPYDATASTRUCT *pcd)
+static LRESULT IconIdentifierEvent(COPYDATASTRUCT *pcds)
 {
     POINT cursorPos;
     GetCursorPos(&cursorPos);
 
-    TrayNotifyCDS *ptr = (TrayNotifyCDS *)pcd->lpData;
+    TrayNotifyCDS *ptr = (TrayNotifyCDS *)pcds->lpData;
     switch (ptr->notify_code)
     {
     case 2:
@@ -624,18 +625,114 @@ static LRESULT IconIdentifierEvent(COPYDATASTRUCT *pcd)
     return 0;
 }
 
-LRESULT DesktopBar::ProcessCopyData(COPYDATASTRUCT *pcd)
+typedef struct _APPBARDATA_WIN10
+{
+    DWORD cbSize;
+    DWORD hWnd;
+    UINT uCallbackMessage;
+    UINT uEdge;
+    RECT rc;
+    LPARAM lParam; // message specific
+#ifndef _WIN64
+    DWORD  dwPadding1;
+#endif
+}APPBARDATA_WIN10, *PAPPBARDATA_WIN10;
+
+/* Win10 */
+typedef struct
+{
+    APPBARDATA_WIN10 abd;
+    DWORD  dwMessage;
+    DWORD  dwPadding1;
+    HANDLE hSharedMemory;
+#ifndef _WIN64
+    DWORD  dwPadding2;
+#endif
+    DWORD  dwSourceProcessId;
+    DWORD  dwPadding3;
+}APPBARMSGDATA_WIN10, *PAPPBARMSGDATA_WIN10;
+typedef const APPBARMSGDATA_WIN10 *PCAPPBARMSGDATA_WIN10;
+
+// Data sent with AppBar Message
+typedef struct _SHELLAPPBARDATA
+{
+    _SHELLAPPBARDATA(APPBARDATA_WIN10& abdsrc) :abd(abdsrc) {}
+
+    const APPBARDATA_WIN10& abd;
+    /**/
+    DWORD  dwMessage;
+    HANDLE hSharedMemory;
+    DWORD  dwSourceProcessId;
+    /**/
+} SHELLAPPBARDATA, *PSHELLAPPBARDATA;
+
+static LRESULT HandleAppBarMessage(PSHELLAPPBARDATA psad)
+{
+    LRESULT lResult = 0;
+    if (psad == NULL) return 0;
+    switch (psad->dwMessage) {
+    case ABM_GETSTATE:
+        /* Returns the current TaskBar state(0:autohide, 1:alwaysontop) */
+        break;
+    case ABM_GETTASKBARPOS: {
+        PAPPBARDATA_WIN10 pabd = NULL;
+        if (psad->hSharedMemory) {
+            pabd = (APPBARDATA_WIN10 *)SHLockShared(psad->hSharedMemory, psad->dwSourceProcessId);
+        }
+        if (pabd) {
+            GetWindowRect(g_Globals._hwndDesktopBar, &(pabd->rc));
+            pabd->uEdge = ABE_BOTTOM;
+            SHUnlockShared(psad);
+            lResult = 1;
+        }
+        break;
+    }
+    }
+
+    return lResult;
+}
+
+static LRESULT ProcessAppBarMessage(COPYDATASTRUCT *pcds)
+{
+    LRESULT lResult = 0;
+
+    switch (pcds->cbData) {
+    case sizeof(APPBARMSGDATA_WIN10) : {
+        PAPPBARMSGDATA_WIN10 pamd = (PAPPBARMSGDATA_WIN10)pcds->lpData;
+        //TRACE("APPBARDATA_WIN10: %u", pamd->abd.cbSize);
+        if (sizeof(APPBARDATA_WIN10) != pamd->abd.cbSize)
+            break;
+        //TRACE("dwMessage: %u", pamd->dwMessage);
+        SHELLAPPBARDATA sbd((APPBARDATA_WIN10&)(pamd->abd));
+        sbd.dwMessage = pamd->dwMessage;
+        sbd.hSharedMemory = pamd->hSharedMemory;
+        sbd.dwSourceProcessId = pamd->dwSourceProcessId;
+        lResult = HandleAppBarMessage(&sbd);
+        break;
+    }
+    default: {
+        //TRACE("Unknown APPBARMSGDATA size: %u", pcds->cbData);
+    }
+    }
+    return lResult;
+}
+
+#define SH_APPBAR_DATA 0
+#define SH_TRAY_DATA 1
+#define SH_TRAY_ICON_IDENT_DATA 3
+
+LRESULT DesktopBar::ProcessCopyData(COPYDATASTRUCT *pcds)
 {
     // Is this a tray notification message?
-    if (pcd->dwData == 1) {
-        TrayNotifyCDS *ptr = (TrayNotifyCDS *) pcd->lpData;
-
+    if (pcds->dwData == SH_APPBAR_DATA) {
+        return ProcessAppBarMessage(pcds);
+    } else if (pcds->dwData == SH_TRAY_DATA) {
+        TrayNotifyCDS *ptr = (TrayNotifyCDS *)pcds->lpData;
         NotifyArea *notify_area = GET_WINDOW(NotifyArea, _hwndNotify);
-
         if (notify_area)
             return notify_area->ProcessTrayNotification(ptr->notify_code, &ptr->nicon_data);
-    } else if (pcd->dwData == 3) {
-        return IconIdentifierEvent(pcd);
+    } else if (pcds->dwData == SH_TRAY_ICON_IDENT_DATA) {
+        return IconIdentifierEvent(pcds);
     }
 
     return FALSE;
