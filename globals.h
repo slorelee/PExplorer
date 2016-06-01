@@ -233,8 +233,6 @@ extern struct ExplorerGlobals {
     String      _cfg_dir;
     String      _cfg_path;
 
-    Favorites   _favorites;
-    String      _favorites_path;
 
 } g_Globals;
 

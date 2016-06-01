@@ -237,34 +237,3 @@ protected:
     }
 };
 
-
-#ifndef _NO_MDI
-
-struct MDIShellBrowserChild : public ExtContextMenuHandlerT <
-    ShellBrowserChildT<ChildWindow>
-    > {
-    typedef ExtContextMenuHandlerT <
-    ShellBrowserChildT<ChildWindow>
-    > super;
-
-    MDIShellBrowserChild(HWND hwnd, const ShellChildWndInfo &info);
-
-    static MDIShellBrowserChild *create(const ShellChildWndInfo &info);
-
-    LRESULT Init(LPCREATESTRUCT);
-
-    virtual String jump_to_int(LPCTSTR url);
-
-protected:
-    ShellChildWndInfo _create_info;
-    ShellPathInfo   _shellpath_info;
-
-    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
-
-    void    update_shell_browser();
-
-    // interface BrowserCallback
-    virtual void entry_selected(Entry *entry);
-};
-
-#endif

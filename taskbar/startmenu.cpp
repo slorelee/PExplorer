@@ -1711,12 +1711,12 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
     // insert hard coded start entries
     AddButton(ResString(IDS_PROGRAMS),      ICID_APPS, true, IDC_PROGRAMS);
 
-    AddButton(ResString(IDS_DOCUMENTS),     ICID_DOCUMENTS, true, IDC_DOCUMENTS);
+    //AddButton(ResString(IDS_DOCUMENTS),     ICID_DOCUMENTS, true, IDC_DOCUMENTS);
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NORECENTDOCSMENU))
-        AddButton(ResString(IDS_RECENT),    ICID_RECENT, true, IDC_RECENT);
+    //if (!g_Globals._SHRestricted || !SHRestricted(REST_NORECENTDOCSMENU))
+    //    AddButton(ResString(IDS_RECENT),    ICID_RECENT, true, IDC_RECENT);
 
-    AddButton(ResString(IDS_FAVORITES),     ICID_FAVORITES, true, IDC_FAVORITES);
+    //AddButton(ResString(IDS_FAVORITES),     ICID_FAVORITES, true, IDC_FAVORITES);
 
     AddButton(ResString(IDS_SETTINGS),      ICID_CONFIG, true, IDC_SETTINGS);
 
@@ -1725,7 +1725,7 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
     if (!g_Globals._SHRestricted || !SHRestricted(REST_NOFIND))
         AddButton(ResString(IDS_SEARCH),    ICID_SEARCH, true, IDC_SEARCH);
 
-    AddButton(ResString(IDS_START_HELP),    ICID_INFO, false, IDC_START_HELP);
+    //AddButton(ResString(IDS_START_HELP),    ICID_INFO, false, IDC_START_HELP);
 
     if (!g_Globals._SHRestricted || !SHRestricted(REST_NORUN))
         AddButton(ResString(IDS_LAUNCH),    ICID_ACTION, false, IDC_LAUNCH);
@@ -1875,11 +1875,7 @@ int StartMenuHandler::Command(int id, int code)
         break;
 
     case IDC_FAVORITES:
-#ifndef _SHELL32_FAVORITES
-        CreateSubmenu(id, ResString(IDS_FAVORITES), STARTMENU_CREATOR(FavoritesMenu), &static_cast<BookmarkList &>(g_Globals._favorites));
-#else
         CreateSubmenu(id, CSIDL_COMMON_FAVORITES, CSIDL_FAVORITES, ResString(IDS_FAVORITES));
-#endif
         break;
 
     case IDC_BROWSE:
@@ -2005,14 +2001,7 @@ int StartMenuHandler::Command(int id, int code)
         CreateSubmenu(id, CSIDL_DRIVES, ResString(IDS_DRIVES));
         break;
 
-
     // search menu
-
-    case IDC_SEARCH_PROGRAM:
-        CloseStartMenu(id);
-        Dialog::DoModal(IDD_SEARCH_PROGRAM, WINDOW_CREATOR(FindProgramDlg));
-        break;
-
     case IDC_SEARCH_FILES:
         CloseStartMenu(id);
         ShowSearchDialog();
@@ -2201,8 +2190,6 @@ void SearchMenu::AddEntries()
 
     if (!g_Globals._SHRestricted || !SHRestricted(REST_HASFINDCOMPUTERS))
         AddButton(ResString(IDS_SEARCH_COMPUTER), ICID_COMPUTER, false, IDC_SEARCH_COMPUTER);
-
-    AddButton(ResString(IDS_SEARCH_PRG),        ICID_APPS, false, IDC_SEARCH_PROGRAM);
 }
 
 
@@ -2227,81 +2214,3 @@ void RecentStartMenu::AddEntries()
     }
 }
 
-
-#ifndef _SHELL32_FAVORITES
-
-void FavoritesMenu::AddEntries()
-{
-    super::AddEntries();
-
-    String lwr_filter = _create_info._filter;
-    lwr_filter.toLower();
-
-    for (BookmarkList::iterator it = _bookmarks.begin(); it != _bookmarks.end(); ++it) {
-        BookmarkNode &node = *it;
-
-        int id = ++_next_id;
-
-        _entries[id] = node;
-
-        if (node._type == BookmarkNode::BMNT_FOLDER) {
-            BookmarkFolder &folder = *node._pfolder;
-
-            AddButton(folder._name, ICID_FOLDER, true, id);
-        } else if (node._type == BookmarkNode::BMNT_BOOKMARK) {
-            Bookmark &bookmark = *node._pbookmark;
-
-            ICON_ID icon = ICID_NONE;
-
-            if (!bookmark._icon_path.empty())
-                icon = g_Globals._icon_cache.extract(bookmark._icon_path, bookmark._icon_idx);
-
-            // filter non-directory entries
-            if (!lwr_filter.empty()) {
-                String lwr_name = bookmark._name;
-                String lwr_desc = bookmark._description;
-                String lwr_url = bookmark._url;
-
-                lwr_name.toLower();
-                lwr_desc.toLower();
-                lwr_url.toLower();
-
-                if (!_tcsstr(lwr_name, lwr_filter) && !_tcsstr(lwr_desc, lwr_filter) && !_tcsstr(lwr_url, lwr_filter))
-                    continue;
-            }
-
-            AddButton(bookmark._name, icon != ICID_NONE ? icon : ICID_BOOKMARK, false, id);
-        }
-    }
-}
-
-int FavoritesMenu::Command(int id, int code)
-{
-    BookmarkMap::iterator found = _entries.find(id);
-
-    if (found != _entries.end()) {
-        BookmarkNode &node = found->second;
-
-        if (node._type == BookmarkNode::BMNT_FOLDER) {
-            BookmarkFolder &folder = *node._pfolder;
-
-            if (CloseOtherSubmenus(id))
-                CreateSubmenu(id, folder._name, STARTMENU_CREATOR(FavoritesMenu), &static_cast<BookmarkList &>(folder._bookmarks));
-        } else if (node._type == BookmarkNode::BMNT_BOOKMARK) {
-            Bookmark &bookmark = *node._pbookmark;
-
-            String url = bookmark._url;
-            HWND hparent = GetParent(_hwnd);
-
-            CloseStartMenu(id);
-
-            launch_file(hparent, url, SW_SHOWNORMAL);
-        }
-
-        return 0;
-    }
-
-    return super::Command(id, code);
-}
-
-#endif

@@ -132,55 +132,13 @@ void ExplorerGlobals::get_systeminfo()
 void ExplorerGlobals::read_persistent()
 {
     // read configuration file
-    _cfg_dir.printf(TEXT("%s\\ReactOS"), (LPCTSTR)SpecialFolderFSPath(CSIDL_APPDATA, 0));
-    _cfg_path.printf(TEXT("%s\\ros-explorer-cfg.xml"), _cfg_dir.c_str());
-
-    //if (!_cfg.read_file(_cfg_path)) {
-    //    if (!_cfg._errors.empty()) {
-    //        MessageBox(_hwndDesktop,
-    //                   _cfg._errors.str(),
-    //                   TEXT("PExlorer - reading user settings"),
-    //                   MB_OK);
-    //    }
-    //    _cfg.read_file(TEXT("explorer-cfg-template.xml"));
-    //}
-
-    // read bookmarks
-    _favorites_path.printf(TEXT("%s\\ros-explorer-bookmarks.xml"), _cfg_dir.c_str());
-
-    if (!_favorites.read(_favorites_path)) {
-        _favorites.import_IE_favorites(0);
-        _favorites.write(_favorites_path);
-    }
 }
 
 void ExplorerGlobals::write_persistent()
 {
     // write configuration file
-    RecursiveCreateDirectory(_cfg_dir);
-    _favorites.write(_favorites_path);
+    //RecursiveCreateDirectory(_cfg_dir);
 }
-
-
-//XMLPos ExplorerGlobals::get_cfg()
-//{
-//    XMLPos cfg_pos(&_cfg);
-//
-//    cfg_pos.smart_create("explorer-cfg");
-//
-//    return cfg_pos;
-//}
-//
-//XMLPos ExplorerGlobals::get_cfg(const char* path)
-//{
-//    XMLPos cfg_pos(&_cfg);
-//
-//    cfg_pos.smart_create("explorer-cfg");
-//    cfg_pos.create_relative(path);
-//
-//    return cfg_pos;
-//}
-
 
 void _log_(LPCTSTR txt)
 {

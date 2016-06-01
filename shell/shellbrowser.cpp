@@ -484,6 +484,7 @@ HRESULT STDMETHODCALLTYPE ShellBrowser::MessageSFVCB(UINT uMsg, WPARAM wParam, L
     return E_NOTIMPL;
 }
 
+extern int OpenShellFolders(HWND hwnd, LPIDA pida);
 HRESULT ShellBrowser::OnDefaultCommand(LPIDA pida)
 {
     CONTEXT("ShellBrowser::OnDefaultCommand()");
@@ -515,7 +516,7 @@ HRESULT ShellBrowser::OnDefaultCommand(LPIDA pida)
                 }
             }
         } else { // no tree control
-            if (MainFrameBase::OpenShellFolders(pida, _hwndFrame))
+            if (OpenShellFolders(NULL, pida))
                 return S_OK;
 
             /* create new Frame Window
@@ -638,172 +639,3 @@ void ShellBrowser::refresh()
 {
     ///@todo
 }
-
-
-#ifndef _NO_MDI
-
-MDIShellBrowserChild::MDIShellBrowserChild(HWND hwnd, const ShellChildWndInfo &info)
-    :  super(hwnd, info),
-       _create_info(info),
-       _shellpath_info(info)   //@@ copies info -> no reference to _create_info !
-{
-    /**todo Conversion of shell path into path string -> store into URL history
-        const String& path = GetDesktopFolder().get_name(info._shell_path, SHGDN_FORADDRESSBAR);
-        const String& parsingpath = GetDesktopFolder().get_name(info._shell_path, SHGDN_FORPARSING);
-
-         // store path into history
-        if (info._path && *info._path)
-            _url_history.push(info._path);
-    */
-}
-
-
-MDIShellBrowserChild *MDIShellBrowserChild::create(const ShellChildWndInfo &info)
-{
-    ChildWindow *child = ChildWindow::create(info,
-                         info._pos.rcNormalPosition,
-                         WINDOW_CREATOR_INFO(MDIShellBrowserChild, ShellChildWndInfo),
-                         CLASSNAME_CHILDWND,
-                         NULL,
-                         WS_CLIPCHILDREN | (info._pos.showCmd == SW_SHOWMAXIMIZED ? WS_MAXIMIZE : 0));
-
-    return static_cast<MDIShellBrowserChild *>(child);
-}
-
-
-LRESULT MDIShellBrowserChild::Init(LPCREATESTRUCT pcs)
-{
-    CONTEXT("MDIShellBrowserChild::Init()");
-
-    if (super::Init(pcs))
-        return 1;
-
-    update_shell_browser();
-
-    return 0;
-}
-
-
-LRESULT MDIShellBrowserChild::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
-{
-    switch (nmsg) {
-    case PM_DISPATCH_COMMAND: {
-        switch (LOWORD(wparam)) {
-        case ID_WINDOW_NEW: {
-            CONTEXT("MDIShellBrowserChild PM_DISPATCH_COMMAND ID_WINDOW_NEW");
-            MDIShellBrowserChild::create(_create_info);
-            break;
-        }
-
-        case ID_REFRESH:
-            ///@todo refresh shell child
-            _shellBrowser->invalidate_cache();
-            break;
-
-        case ID_VIEW_SDI:
-            MainFrameBase::Create(ExplorerCmd(_url, false));
-            break;
-
-        default:
-            return super::WndProc(nmsg, wparam, lparam);
-        }
-        return TRUE;
-    }
-
-    case WM_SYSCOLORCHANGE:
-        /* Forward WM_SYSCOLORCHANGE to common controls */
-        SendMessage(_left_hwnd, WM_SYSCOLORCHANGE, 0, 0);
-        SendMessage(_right_hwnd, WM_SYSCOLORCHANGE, 0, 0);
-        break;
-
-    case PM_TRANSLATE_MSG:
-        return _shellBrowser->TranslateAccelerator((MSG *)lparam);
-
-    default:
-        return super::WndProc(nmsg, wparam, lparam);
-    }
-
-    return 0;
-}
-
-void MDIShellBrowserChild::update_shell_browser()
-{
-    int split_pos = DEFAULT_SPLIT_POS;
-
-    if (_shellBrowser.get()) {
-        split_pos = _split_pos;
-        delete _shellBrowser.release();
-    }
-
-    // create explorer treeview
-    if (_create_info._open_mode & OWM_EXPLORE) {
-        if (!_left_hwnd) {
-            ClientRect rect(_hwnd);
-
-            _left_hwnd = CreateWindowEx(0, WC_TREEVIEW, NULL,
-                                        WS_CHILD | WS_TABSTOP | WS_VISIBLE | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS, //|TVS_NOTOOLTIPS
-                                        0, rect.top, split_pos - SPLIT_WIDTH / 2, rect.bottom - rect.top,
-                                        _hwnd, (HMENU)IDC_FILETREE, g_Globals._hInstance, 0);
-        }
-    } else {
-        if (_left_hwnd) {
-            DestroyWindow(_left_hwnd);
-            _left_hwnd = 0;
-        }
-    }
-
-    _shellBrowser = auto_ptr<ShellBrowser>(new ShellBrowser(_hwnd, _hwndFrame, _left_hwnd, _right_hwnd,
-                                           _shellpath_info, this, _cm_ifs));
-
-    _shellBrowser->Init();
-}
-
-
-String MDIShellBrowserChild::jump_to_int(LPCTSTR url)
-{
-    String dir, fname;
-
-    if (!_tcsnicmp(url, TEXT("shell://"), 8)) {
-        if (_shellBrowser->jump_to_pidl(ShellPath(url + 8)))
-            return url;
-    }
-
-    if (SplitFileSysURL(url, dir, fname)) {
-
-        ///@todo use fname
-
-        if (_shellBrowser->jump_to_pidl(ShellPath(dir)))
-            return FmtString(TEXT("file://%s"), (LPCTSTR)dir);
-    }
-
-    return String();
-}
-
-
-void MDIShellBrowserChild::entry_selected(Entry *entry)
-{
-    if (_left_hwnd)
-        _shellBrowser->select_folder(entry, false);
-
-    _shellBrowser->UpdateFolderView(entry->get_shell_folder());
-
-    // set size of new created shell view windows
-    ClientRect rt(_hwnd);
-    resize_children(rt.right, rt.bottom);
-
-    // set new URL
-    TCHAR path[MAX_PATH];
-
-    if (entry->get_path(path, COUNTOF(path))) {
-        String url;
-
-        if (path[0] == ':')
-            url.printf(TEXT("shell://%s"), path);
-        else
-            url.printf(TEXT("file://%s"), path);
-
-        set_url(url);
-    }
-}
-
-#endif

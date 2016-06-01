@@ -18,29 +18,11 @@
     <ClCompile Include="shell\entries.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="shell\fatfs.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="taskbar\favorites.cpp">
-      <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\mainframe.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\filechild.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="shell\pane.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\ntobjfs.cpp">
       <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="taskbar\quicklaunch.cpp">
       <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\regfs.cpp">
-      <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="shell\shellbrowser.cpp">
       <Filter>shell</Filter>
@@ -63,9 +45,6 @@
     <ClCompile Include="services\startup.c">
       <Filter>services</Filter>
     </ClCompile>
-    <ClCompile Include="dialogs\searchprogram.cpp">
-      <Filter>dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="dialogs\settings.cpp">
       <Filter>dialogs</Filter>
     </ClCompile>
@@ -80,9 +59,6 @@
     </ClCompile>
     <ClCompile Include="utility\utility.cpp">
       <Filter>utility</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\webchild.cpp">
-      <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="shell\winfs.cpp">
       <Filter>shell</Filter>
@@ -115,29 +91,11 @@
     <ClInclude Include="shell\entries.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="shell\fatfs.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="taskbar\favorites.h">
-      <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\mainframe.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\filechild.h">
-      <Filter>shell</Filter>
-    </ClInclude>
     <ClInclude Include="shell\pane.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\ntobjfs.h">
       <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="taskbar\quicklaunch.h">
       <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\regfs.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="shell\shellbrowser.h">
       <Filter>shell</Filter>
@@ -157,9 +115,6 @@
     <ClInclude Include="services\shellservices.h">
       <Filter>services</Filter>
     </ClInclude>
-    <ClInclude Include="dialogs\searchprogram.h">
-      <Filter>dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="dialogs\settings.h">
       <Filter>dialogs</Filter>
     </ClInclude>
@@ -174,9 +129,6 @@
     </ClInclude>
     <ClInclude Include="utility\utility.h">
       <Filter>utility</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\webchild.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="shell\winfs.h">
       <Filter>shell</Filter>

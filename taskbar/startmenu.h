@@ -437,27 +437,3 @@ protected:
     virtual void AddEntries();
 };
 
-
-#ifndef _SHELL32_FAVORITES
-
-typedef map<int, BookmarkNode> BookmarkMap;
-
-/// Bookmarks sub-startmenu
-struct FavoritesMenu : public StartMenu {
-    typedef StartMenu super;
-
-    FavoritesMenu(HWND hwnd, const StartMenuCreateInfo &create_info)
-        :  super(hwnd, create_info),
-           _bookmarks(*(BookmarkList *)create_info._info)
-    {
-    }
-
-protected:
-    virtual int Command(int id, int code);
-    virtual void AddEntries();
-
-    BookmarkList _bookmarks;
-    BookmarkMap _entries;
-};
-
-#endif
