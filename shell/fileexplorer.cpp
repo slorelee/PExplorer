@@ -256,8 +256,10 @@ static void Shell32DllHacker()
     static BOOL shell32_hacker = JCFG2_DEF("JS_FILEEXPLORER", "shell32_hacker", false).ToBool();
 #ifdef _WIN64
     static String strRVAddr = JCFG2_DEF("JS_FILEEXPLORER", "shell32x64_hacker_addr", TEXT("0x0")).ToString();
+    static String strCode = JCFG2_DEF("JS_FILEEXPLORER", "shell32x64_hacker_code", TEXT("\u00EB")).ToString();
 #else
     static String strRVAddr = JCFG2_DEF("JS_FILEEXPLORER", "shell32x86_hacker_addr", TEXT("0x0")).ToString();
+    static String strCode = JCFG2_DEF("JS_FILEEXPLORER", "shell32x86_hacker_code", TEXT("\u00EB")).ToString();
 #endif
     if (!shell32_hacker || hShell32Dll) return;
     hShell32Dll = GetModuleHandle(TEXT("SHELL32"));
@@ -265,14 +267,15 @@ static void Shell32DllHacker()
     void *pAddr = NULL;
     //pAddr = GetProcAddress(hShell32Dll, "SHChangeNotifyRegister");
     int iRVAddr = std::stoi(strRVAddr, 0, 16);
-    pAddr = (unsigned char *)hShell32Dll + iRVAddr + 0xC00 - 2;
+    pAddr = (unsigned char *)hShell32Dll + iRVAddr + 0xC00;
     DWORD lpflOldProtect = 0;
-    unsigned char key[3] = {0x85, 0xC0, 0x74};
     if (!pAddr) return;
-    if (VirtualProtect(pAddr, 10, PAGE_EXECUTE_READWRITE, &lpflOldProtect)) {
-        //memcpy(&key, (unsigned char*)pAddr + 0x40, 4);
-        if (memcmp((unsigned char *)pAddr, key, 3) == 0) {
-            (unsigned char)*((unsigned char*)pAddr + 2) = 0xEB;
+    if (VirtualProtect(pAddr, 16, PAGE_EXECUTE_READWRITE, &lpflOldProtect)) {
+        size_t iCodeLen = strCode.length();
+        LPCTSTR pCode = strCode.c_str();
+        //a little trick for UNICODE
+        for (int i = 0;i < iCodeLen;i++) {
+            memcpy(((unsigned char *)pAddr) + i, pCode + i, 1);
         }
     }
     return;
