@@ -397,20 +397,25 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
     return hIcon;
 }
 
-static BOOL isTopWindowOrFileExplorerWindow(HWND hwnd)
+enum WindowType {
+    WINTYPE_TOP = 1,
+    WINTYPE_FILEEXPLORER
+};
+
+static int isTopWindowOrFileExplorerWindow(HWND hwnd)
 {
-    if (GetParent(hwnd)) return FALSE;
-    HWND hwndOwner = GetParent(hwnd);
-    if (!hwndOwner) return TRUE;
+    if (GetParent(hwnd)) return 0;
+    HWND hwndOwner = GetWindow(hwnd, GW_OWNER);
+    if (!hwndOwner) return WINTYPE_TOP;
 
     TCHAR strbuffer[BUFFER_LEN] = { 0 };
     if (!GetClassName(hwndOwner, strbuffer, BUFFER_LEN))
         strbuffer[0] = TEXT('\0');
     String str_class = strbuffer;
     if (str_class.find(FILEEXPLORERWINDOWCLASSNAME) != string::npos) {
-        return TRUE;
+        return WINTYPE_FILEEXPLORER;
     }
-    return FALSE;
+    return 0;
 
 }
 
@@ -426,6 +431,9 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
         isTopWindowOrFileExplorerWindow(hwnd)) {
         TCHAR title[BUFFER_LEN] = {0};
         TCHAR strbuffer[BUFFER_LEN] = {0};
+
+         int winType = isTopWindowOrFileExplorerWindow(hwnd);
+        if (winType == 0) return TRUE;
 
         if (!GetWindowText(hwnd, title, BUFFER_LEN))
             title[0] = '\0';
@@ -460,8 +468,12 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
             BOOL delete_icon = FALSE;
 
             if (!hIcon) {
-                hIcon = LoadIcon(0, IDI_APPLICATION);
-                delete_icon = TRUE;
+                if (winType == WINTYPE_FILEEXPLORER) {
+                    hIcon = g_Globals._icon_cache.get_icon(ICID_COMPUTER).get_hicon();
+                } else {
+                    hIcon = LoadIcon(0, IDI_APPLICATION);
+                    delete_icon = TRUE;
+                }
             }
 
             if (hIcon) {

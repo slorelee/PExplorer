@@ -1173,7 +1173,7 @@ void StartMenu::AddButton(LPCTSTR title, ICON_ID icon_id, bool hasSubmenu, int i
     MoveWindow(_hwnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
     StartMenuCtrl(_hwnd, _border_left, clnt.bottom, rect.right - rect.left - _border_left,
-                  title, id, g_Globals._icon_cache.get_icon(icon_id)._hIcon, hasSubmenu, style);
+                  title, id, g_Globals._icon_cache.get_icon(icon_id).get_hicon(), hasSubmenu, style);
 #endif
 }
 
