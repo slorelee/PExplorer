@@ -42,7 +42,7 @@ HWND FileExplorerWindow::Create()
     HWND hFrame = Window::Create(WINDOW_CREATOR(FileExplorerWindow), 0,
         wcFileExplorer, TEXT("File Explorer"),
         WS_OVERLAPPEDWINDOW, //WS_VISIBLE | WS_CHILD | SS_SIMPLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0);
+        CW_USEDEFAULT, CW_USEDEFAULT, 100, 100, 0);
     //ShowWindow(hFrame, SW_SHOW);
     return hFrame;
 }
@@ -240,6 +240,65 @@ HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
     return hr;
 }
 
+HWND WINAPI MyGetShellWindow()
+{
+    return 0;
+}
+
+/*
+    Hook the GetShellWindow() function for forcing this return 0,
+    so the SHChangeNotifyRegisterThread() will create a thread for
+    dealing with shell change notifification that would autorefresh
+    the OpenFileDialg's content when you add, rename, copy or delete
+    files/folders.
+
+    hackercode for x86 (5 bytes):
+    --------------------------------
+    JMP <user function addr> - <hook system function addr> - 5
+    --------------------------------
+
+    hackercode for x64 (12 bytes):
+    --------------------------------
+    mov rax, <user function addr>
+    push rax
+    ret
+    --------------------------------
+
+ */
+static void HookGetShellWindow()
+{
+    static HMODULE hUser32Dll = NULL;
+    static BOOL hookAPI = JCFG2_DEF("JS_FILEEXPLORER", "hook_GetShellWindow", true).ToBool();
+#ifdef _WIN64
+    int shellcode_len = 12;
+#else
+    int shellcode_len = 5;
+#endif
+    if (!hookAPI || hUser32Dll) return;
+    hUser32Dll = GetModuleHandle(TEXT("USER32"));
+    if (!hUser32Dll) return;
+    void *pAddr = NULL;
+    pAddr = GetProcAddress(hUser32Dll, "GetShellWindow");
+
+    DWORD lpflOldProtect = 0;
+    if (!pAddr) return;
+    if (VirtualProtect(pAddr, 32, PAGE_EXECUTE_READWRITE, &lpflOldProtect)) {
+        if (lpflOldProtect < shellcode_len) return;
+#ifdef _WIN64
+        BYTE HackCode[12] = { 0x48, 0xb8 };
+        HackCode[10] = 0x50;
+        HackCode[11] = 0xc3;
+        long long dwJmpAddr = (long long)MyGetShellWindow;
+        memcpy(&HackCode[2], &dwJmpAddr, 8);
+#else
+        BYTE HackCode[5] = { 0xe9 };
+        DWORD dwJmpAddr = (DWORD)MyGetShellWindow - (DWORD)pAddr - 5;
+        memcpy(&HackCode[1], &dwJmpAddr, 4);
+#endif
+        memcpy(((unsigned char *)pAddr), HackCode, shellcode_len);
+    }
+    return;
+}
 
 /*
 _SCNGetWindow
@@ -250,6 +309,7 @@ _SCNGetWindow
 00007FFF7E05364B  74             je         _SCNGetWindow+6Ch (07FFF7E053674h)
                   74->EB ---> je->jmp
 */
+/*
 static void Shell32DllHacker()
 {
     static HMODULE hShell32Dll = NULL;
@@ -280,6 +340,7 @@ static void Shell32DllHacker()
     }
     return;
 }
+*/
 
 #ifndef ROSSHELL
 void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
@@ -303,7 +364,9 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
     if (lpCmdLine)
         cmd.ParseCmdLine(lpCmdLine);
 
-    Shell32DllHacker();
+    if (g_Globals._hwndDesktopBar == (HWND)0) {
+        HookGetShellWindow();
+    }
 
     // create main window
     FileExplorerWindow::Create(NULL, cmd._path.c_str());
