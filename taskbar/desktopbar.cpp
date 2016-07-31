@@ -442,6 +442,9 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         p.y = HIWORD(lparam);
         PopupMenu menu(IDM_DESKTOPBAR);
         SetMenuDefaultItem(menu, 0, MF_BYPOSITION);
+        if (GetKeyState(VK_SHIFT) < 0) {
+            menu.Append(FCIDM_SHVIEWLAST - 1, ResString(IDS_TERMINATE));
+        }
         menu.TrackPopupMenu(_hwnd, p);
         break;
     }
@@ -561,6 +564,11 @@ int DesktopBar::Command(int id, int code)
     case ID_TASKMGR:
         launch_file(_hwnd, TEXT("taskmgr.exe"), SW_SHOWNORMAL);
         break;
+    case FCIDM_SHVIEWLAST - 1: {
+        DestroyWindow(g_Globals._hwndDesktopBar);
+        DestroyWindow(g_Globals._hwndDesktop);
+        break;
+    }
 
 #ifdef __REACTOS__
     case ID_TRAY_VOLUME:

@@ -1718,31 +1718,37 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
 
     //AddButton(ResString(IDS_FAVORITES),     ICID_FAVORITES, true, IDC_FAVORITES);
 
-    AddButton(ResString(IDS_SETTINGS),      ICID_CONFIG, true, IDC_SETTINGS);
+    if (!JCFG2_DEF("JS_STARTMENU", "nosettings", true).ToBool())
+        AddButton(ResString(IDS_SETTINGS),      ICID_CONFIG, true, IDC_SETTINGS);
 
-    AddButton(ResString(IDS_BROWSE),        ICID_FOLDER, true, IDC_BROWSE);
+    if (!JCFG2_DEF("JS_STARTMENU", "nobrowse", false).ToBool())
+        AddButton(ResString(IDS_BROWSE),        ICID_FOLDER, true, IDC_BROWSE);
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NOFIND))
+    //if (!g_Globals._SHRestricted || !SHRestricted(REST_NOFIND))
+    if (!JCFG2_DEF("JS_STARTMENU", "nofind", true).ToBool())
         AddButton(ResString(IDS_SEARCH),    ICID_SEARCH, true, IDC_SEARCH);
 
     //AddButton(ResString(IDS_START_HELP),    ICID_INFO, false, IDC_START_HELP);
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NORUN))
+    //if (!g_Globals._SHRestricted || !SHRestricted(REST_NORUN))
+    if (!JCFG2_DEF("JS_STARTMENU", "norun", false).ToBool())
         AddButton(ResString(IDS_LAUNCH),    ICID_ACTION, false, IDC_LAUNCH);
 
     AddSeparator();
 
-    if (!g_Globals._SHRestricted || SHRestricted(REST_STARTMENULOGOFF) != 1)
+    //if (!g_Globals._SHRestricted || SHRestricted(REST_STARTMENULOGOFF) != 1)
+    if (!JCFG2_DEF("JS_STARTMENU", "nologoff", true).ToBool())
         AddButton(ResString(IDS_LOGOFF),    ICID_LOGOFF, false, IDC_LOGOFF);
 
-    AddButton(ResString(IDS_RESTART), ICID_RESTART, false, IDC_RESTART);
+    if (!JCFG2_DEF("JS_STARTMENU", "norestart", false).ToBool())
+        AddButton(ResString(IDS_RESTART), ICID_RESTART, false, IDC_RESTART);
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NOCLOSE))
+    //if (!g_Globals._SHRestricted || !SHRestricted(REST_NOCLOSE))
+    if (!JCFG2_DEF("JS_STARTMENU", "noshutdown", false).ToBool())
         AddButton(ResString(IDS_SHUTDOWN),  ICID_SHUTDOWN, false, IDC_SHUTDOWN);
 
-#ifndef __REACTOS__
-    AddButton(ResString(IDS_TERMINATE), ICID_TERMINATE, false, IDC_TERMINATE);
-#endif
+    if (!JCFG2_DEF("JS_STARTMENU", "noterm", true).ToBool())
+        AddButton(ResString(IDS_TERMINATE), ICID_TERMINATE, false, IDC_TERMINATE);
 
 #ifdef _LIGHT_STARTMENU
     // set the window size to fit all buttons
@@ -2172,7 +2178,8 @@ void BrowseMenu::AddEntries()
 {
     super::AddEntries();
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NONETHOOD))  // or REST_NOENTIRENETWORK ?
+    //if (!g_Globals._SHRestricted || !SHRestricted(REST_NONETHOOD))  // or REST_NOENTIRENETWORK ?
+    if (!JCFG2_DEF("JS_STARTMENU", "nobrowse_network", true).ToBool())
 #if defined(ROSSHELL) || defined(__REACTOS__)   // __REACTOS__ to be removed when printer/network will be implemented
         AddButton(ResString(IDS_NETWORK),       ICID_NETWORK, false, IDC_NETWORK);
 #else
