@@ -61,8 +61,8 @@ BEGIN
     END
     POPUP "ヘルプ(&H)"
     BEGIN
-        MENUITEM "Explorer FAQ (&F)...",            ID_EXPLORER_FAQ
-        MENUITEM "Explorer について(&A)...",    ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer FAQ (&F)...",            ID_EXPLORER_FAQ
+        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
         MENUITEM "OS について(&O)...",          ID_ABOUT_WINDOWS
     END
 END
@@ -74,7 +74,7 @@ BEGIN
         MENUITEM "設定(&S)...",                 ID_DESKTOPBAR_SETTINGS
         MENUITEM "タスク マネージャ(&T)...",    ID_TASKMGR
         MENUITEM SEPARATOR
-        MENUITEM "Explorer について(&A)...",    ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
     END
 END
 
@@ -96,7 +96,7 @@ BEGIN
         MENUITEM "通知のカスタマイズ(&C)...",   ID_CONFIG_NOTIFYAREA
         MENUITEM "日付と時刻の調整(&T)...",     ID_CONFIG_TIME
         MENUITEM SEPARATOR
-        MENUITEM "Explorer について(&A)...",    ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
     END
 END
 
@@ -124,8 +124,8 @@ BEGIN
     END
     POPUP "ヘルプ(&H)"
     BEGIN
-        MENUITEM "Explorer FAQ (&F)...",            ID_EXPLORER_FAQ
-        MENUITEM "Explorer について(&A)...",    ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer FAQ (&F)...",            ID_EXPLORER_FAQ
+        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
         MENUITEM "OS について(&O)...",          ID_ABOUT_WINDOWS
     END
 END
@@ -277,19 +277,17 @@ BEGIN
     PUSHBUTTON      "キャンセル(&C)",IDCANCEL,106,136,50,14
 END
 
-IDD_ABOUT_EXPLORER DIALOGEX DISCARDABLE  0, 0, 199, 106
-STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "ReactOS Explorer について"
+IDD_ABOUT_EXPLORER DIALOGEX 0, 0, 255, 110
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PExlorer について"
 FONT 9, "MS UI Gothic"
 BEGIN
-    LTEXT           "ReactOS Explorer",IDC_ROS_EXPLORER,91,13,104,11
-    LTEXT           "V 0.9",IDC_VERSION_TXT,91,27,104,8
-    LTEXT           "(c) 2003-2005 Martin Fuchs",IDC_STATIC,91,42,104,8
-    LTEXT           "",IDC_WIN_VERSION,91,58,98,22
-    LTEXT           "http://www.sky.franken.de/explorer/",IDC_WWW,17,84,129,
-                    8
-    CONTROL         "OK (&O)",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,
-                    154,90,38,12
+    LTEXT           "PExlorer",IDC_PE_EXPLORER,100,15,100,12
+    LTEXT           "V2.0 RC4",IDC_VERSION_TXT,100,30,100,12
+    LTEXT           "(c) 2015-2016 Slore",IDC_STATIC,100,45,100,12
+    LTEXT           "",IDC_WIN_VERSION,100,60,145,22
+    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,10,90,0,12
+    CONTROL         "&OK",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,200,90,40,12
 END
 
 
@@ -326,7 +324,7 @@ END
 
 STRINGTABLE DISCARDABLE
 BEGIN
-    IDS_TITLE               "ReactOS Explorer"
+    IDS_TITLE               "PExlorer"
     IDS_START               "スタート"
     IDS_LOGOFF              "ログオフ..."
     IDS_SHUTDOWN            "シャットダウン..."
@@ -359,7 +357,7 @@ BEGIN
     IDS_NOTIFY_AUTOHIDE     "自動的に隠す"
     IDS_SHOW_HIDDEN_ICONS   "隠れているアイコンも表示する"
     IDS_HIDE_ICONS          "アイコンを隠す"
-    IDS_TERMINATE           "ROS Explorer を終了する"
+    IDS_TERMINATE           "PExlorer を終了する"
 END
 
 STRINGTABLE DISCARDABLE
@@ -375,7 +373,7 @@ BEGIN
     IDS_SEARCH_PRG          "プログラムを検索..."
     IDS_ALL_USERS           "All Users\\"
     IDS_SEARCH              "検索"
-    IDS_ABOUT_EXPLORER      "Explorer について(&A)..."
+    IDS_ABOUT_EXPLORER      "PExlorer について(&A)..."
     IDS_LAUNCH_MANY_PROGRAMS
                             "二つ以上のプログラムが選択されました。\nすべてのプログラムを実行しますか?"
     IDS_DESKTOPBAR_SETTINGS "デスクトップの設定"

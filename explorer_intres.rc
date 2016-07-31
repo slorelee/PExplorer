@@ -98,11 +98,11 @@ BEGIN
     "LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL\r\n"
     "STRINGTABLE DISCARDABLE \r\n"
     "BEGIN\r\n"
-    "IDS_VERSION_STR """"\r\n"
+    "IDS_VERSION_STR ""V2.0 RC4""\r\n"
     "#ifdef UNICODE\r\n"
-    "IDS_EXPLORER_VERSION_STR ""PExlorer%0s""\r\n"
+    "IDS_EXPLORER_VERSION_STR ""PExlorer %0s""\r\n"
     "#else\r\n"
-    "IDS_EXPLORER_VERSION_STR ""PExlorer Ansi%0s""\r\n"
+    "IDS_EXPLORER_VERSION_STR ""PExlorer Ansi %0s""\r\n"
     "#endif\r\n"
     "END\r\n"
     "#endif\r\n"
@@ -236,11 +236,11 @@ IDB_TOOLBAR BITMAP DISCARDABLE "res/toolbar.bmp"
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 STRINGTABLE DISCARDABLE 
 BEGIN
-IDS_VERSION_STR ""
+IDS_VERSION_STR "V2.0 RC4"
 #ifdef UNICODE
-IDS_EXPLORER_VERSION_STR "PExlorer%0s"
+IDS_EXPLORER_VERSION_STR "PExlorer %0s"
 #else
-IDS_EXPLORER_VERSION_STR "PExlorer Ansi%0s"
+IDS_EXPLORER_VERSION_STR "PExlorer Ansi %0s"
 #endif
 END
 #endif

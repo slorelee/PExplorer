@@ -59,8 +59,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "Explorer &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About Explorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer &FAQ...",            ID_EXPLORER_FAQ
+        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END
@@ -72,7 +72,7 @@ BEGIN
         MENUITEM "&Settings...",                ID_DESKTOPBAR_SETTINGS
         MENUITEM "&Task Manager...",            ID_TASKMGR
         MENUITEM SEPARATOR
-        MENUITEM "&About Explorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
     END
 END
 
@@ -94,7 +94,7 @@ BEGIN
         MENUITEM "&Configure Notifications...", ID_CONFIG_NOTIFYAREA
         MENUITEM "Adjust Date/&Time...",        ID_CONFIG_TIME
         MENUITEM SEPARATOR
-        MENUITEM "&About Explorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
     END
 END
 
@@ -122,8 +122,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "Explorer &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About Explorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "PExlorer &FAQ...",            ID_EXPLORER_FAQ
+        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END
@@ -247,10 +247,10 @@ CAPTION "About PExlorer"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "PExlorer",IDC_PE_EXPLORER,100,15,100,12
-    LTEXT           "V 1.0 RC1",IDC_VERSION_TXT,100,30,100,12
-    LTEXT           "(c) 2015 Slore",IDC_STATIC,100,45,100,12
+    LTEXT           "V2.0 RC4",IDC_VERSION_TXT,100,30,100,12
+    LTEXT           "(c) 2015-2016 Slore",IDC_STATIC,100,45,100,12
     LTEXT           "",IDC_WIN_VERSION,100,60,145,22
-    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,10,90,145,12
+    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,10,90,0,12
     CONTROL         "&OK",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,200,90,40,12
 END
 
@@ -392,7 +392,7 @@ BEGIN
     IDS_SEARCH_PRG          "Search Program..."
     IDS_ALL_USERS           "All Users\\"
     IDS_SEARCH              "Search"
-    IDS_ABOUT_EXPLORER      "&About Explorer..."
+    IDS_ABOUT_EXPLORER      "&About PExlorer..."
     IDS_LAUNCH_MANY_PROGRAMS 
                             "You have selected more than one program.\nAre you sure you want to launch all of them?"
     IDS_DESKTOPBAR_SETTINGS "Desktop Settings"
