@@ -469,7 +469,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 
             if (!hIcon) {
                 if (winType == WINTYPE_FILEEXPLORER) {
-                    hIcon = g_Globals._icon_cache.get_icon(ICID_COMPUTER).get_hicon();
+                    hIcon = g_Globals._icon_cache.get_icon(ICID_EXPLORER).get_hicon();
                 } else {
                     hIcon = LoadIcon(0, IDI_APPLICATION);
                     delete_icon = TRUE;

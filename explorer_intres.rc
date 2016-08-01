@@ -128,8 +128,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_COMPUTER            ICON                    "res/computer.ico"
 IDI_EXPLORER            ICON                    "res/explorer.ico"
+IDI_COMPUTER            ICON                    "res/computer.ico"
 IDI_STARTMENU_W         ICON                    "res/startmenu_w.ico"
 IDI_STARTMENU_B         ICON                    "res/startmenu_b.ico"
 IDI_LOGOFF              ICON                    "res/logoff.ico"

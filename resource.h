@@ -52,8 +52,8 @@
 #define IDS_NAMECOLUMN                  47
 #define IDS_PATHCOLUMN                  48
 #define IDS_MENUCOLUMN                  49
-#define IDI_COMPUTER                    100
-#define IDI_EXPLORER                    101
+#define IDI_EXPLORER                    100
+#define IDI_COMPUTER                    101
 #define IDB_TB_SH_DEF_16                101
 #define IDI_STARTMENU_W                 210
 #define IDI_STARTMENU_B                 211
