@@ -26,8 +26,8 @@ HBRUSH g_JCfg_taskbar_bkbrush = NULL;
 
 //default jcfg data
 const wstring def_jcfg = L"{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},"
-                         L"\"JS_VERBMENUNAME\":{\"2052\":{\"refresh\":\"刷新(&E)\",\"rename\":\"重命名(&M)\","
-                         L"\"cmdhere\":\"在此处打开命令窗口(&W)\"}},"
+                         L"\"JS_VERBMENUNAME\":{\"2052\":{\"refresh\":\"Refresh(&E)\",\"rename\":\"Rename(&M)\","
+                         L"\"cmdhere\":\"Open command window here(&W)\"}},"
                          L"\"JS_VERBMENUCOMMAND\":{\"cmdhere\":{\"command\":\"cmd.exe\",\"parameters\":\"/k \\\"CD /D %s\\\"\"}},"
                          L"\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},"
                          L"\"JS_DESKTOP\":{\"bkcolor\": [0,0,0],\"wallpaperstyle\":0,\"wallpaper\":\"##{JVAR_MODULEPATH}\\\\wallpaper.bmp\"},"
