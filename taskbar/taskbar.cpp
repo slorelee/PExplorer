@@ -273,7 +273,7 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                 (it = _map.find_id(btninfo.idCommand)) != _map.end()) {
                 //TaskBarEntry& entry = it->second;
 
-                ActivateApp(it, false, false);  // don't restore minimized windows on right button click
+                //ActivateApp(it, false, false);  // don't restore minimized windows on right button click
 
                 static DynamicFct<DWORD(STDAPICALLTYPE *)(RESTRICTIONS)> pSHRestricted(TEXT("SHELL32"), "SHRestricted");
                 if (pSHRestricted && !(*pSHRestricted)(REST_NOTRAYCONTEXTMENU))
@@ -329,19 +329,46 @@ void TaskBar::ActivateApp(TaskBarMap::iterator it, bool can_minimize, bool can_r
     Refresh();
 }
 
+#define ENABLESYSMENUITEM(m, item, cond) EnableMenuItem((m), (item), \
+MF_BYCOMMAND | ((cond)?MF_ENABLED:MF_GRAYED))
+
 void TaskBar::ShowAppSystemMenu(TaskBarMap::iterator it)
 {
+    HWND hTaskWindow = it->first;
     HMENU hmenu = GetSystemMenu(it->first, FALSE);
 
     if (hmenu) {
         POINT pt;
-
         GetCursorPos(&pt);
-        int cmd = TrackPopupMenu(hmenu, TPM_LEFTBUTTON | TPM_RIGHTBUTTON | TPM_RETURNCMD, pt.x, pt.y, 0, _hwnd, NULL);
+
+        WINDOWPLACEMENT wndpl;
+        wndpl.length = sizeof(WINDOWPLACEMENT);
+        GetWindowPlacement(hTaskWindow, &wndpl);
+        UINT showCmd = wndpl.showCmd;
+        DWORD taskbarThreadID = GetWindowThreadProcessId(_hwnd, NULL);
+        DWORD taskWindowThreadID = GetWindowThreadProcessId(hTaskWindow, NULL);
+
+        AttachThreadInput(taskbarThreadID, taskWindowThreadID, TRUE);
+        SetWindowPos(hTaskWindow, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+        AttachThreadInput(taskbarThreadID, taskWindowThreadID, FALSE);
+
+        if (GetClassLongPtr(hTaskWindow, GCL_STYLE) & CS_NOCLOSE)
+            DeleteMenu(hmenu, SC_CLOSE, MF_BYCOMMAND);
+
+        ENABLESYSMENUITEM(hmenu, SC_RESTORE, showCmd != SW_SHOWNORMAL);
+        ENABLESYSMENUITEM(hmenu, SC_MOVE, showCmd == SW_SHOWNORMAL);
+        ENABLESYSMENUITEM(hmenu, SC_SIZE, showCmd == SW_SHOWNORMAL);
+        ENABLESYSMENUITEM(hmenu, SC_MINIMIZE, showCmd != SW_SHOWMINIMIZED);
+        ENABLESYSMENUITEM(hmenu, SC_MAXIMIZE, showCmd != SW_SHOWMAXIMIZED);
+
+        SendMessage(hTaskWindow, WM_INITMENUPOPUP, (WPARAM)hmenu, MAKELPARAM(0, TRUE));
+        SendMessage(hTaskWindow, WM_INITMENU, (WPARAM)hmenu, 0);
+
+        int cmd = TrackPopupMenu(hmenu, TPM_RETURNCMD | TPM_RECURSE, pt.x, pt.y, 0, _hwnd, NULL);
 
         if (cmd) {
-            ActivateApp(it, false, false);  // reactivate window after the context menu has closed
-            PostMessage(it->first, WM_SYSCOMMAND, cmd, 0);
+            //ActivateApp(it, false, false);  // reactivate window after the context menu has closed
+            PostMessage(hTaskWindow, WM_SYSCOMMAND, cmd, 0);
         }
     }
 }
@@ -412,7 +439,7 @@ static int isTopWindowOrFileExplorerWindow(HWND hwnd)
     if (!GetClassName(hwndOwner, strbuffer, BUFFER_LEN))
         strbuffer[0] = TEXT('\0');
     String str_class = strbuffer;
-    if (str_class.find(FILEEXPLORERWINDOWCLASSNAME) != string::npos) {
+    if (str_class.find(FILEEXPLORERWINDOWCLASSNAME) != String::npos) {
         return WINTYPE_FILEEXPLORER;
     }
     return 0;
@@ -441,7 +468,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
         //do not show 'Windows Shell Experience Host' Window
         //TODO:check not only titlename but processname
         String str_title = title;
-        if (str_title.find(TEXT("Windows Shell Experience ")) != string::npos) {
+        if (str_title.find(TEXT("Windows Shell Experience ")) != String::npos) {
             return TRUE;
         }
 
@@ -449,8 +476,8 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
         if (!GetClassName(hwnd, strbuffer, BUFFER_LEN))
             strbuffer[0] = '\0';
         str_title = strbuffer;
-        if (str_title.find(TEXT("ApplicationFrameWindow")) != string::npos ||
-            str_title.find(TEXT("Windows.UI.Core.CoreWindow")) != string::npos) {
+        if (str_title.find(TEXT("ApplicationFrameWindow")) != String::npos ||
+            str_title.find(TEXT("Windows.UI.Core.CoreWindow")) != String::npos) {
             return TRUE;
         }
 
