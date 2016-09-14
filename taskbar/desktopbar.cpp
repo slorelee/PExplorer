@@ -370,6 +370,64 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
 }
 
 
+static void HideForFullScreenWindow(HWND hwnd)
+{
+    static bool hiddenState = false;
+    bool hasFullScreenWindow = false;
+
+    HMONITOR hwndMonitor, taskbarMonitor;
+    MONITORINFO hwndMonitorInfo;
+    hwndMonitorInfo.cbSize = sizeof(MONITORINFO);
+    RECT wndRect;
+    HWND hTopWindow = GetForegroundWindow();
+    if (!hTopWindow) return;
+    taskbarMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    hwndMonitor = MonitorFromWindow(hTopWindow, MONITOR_DEFAULTTONEAREST);
+    GetMonitorInfo(hwndMonitor, &hwndMonitorInfo);
+
+    // Get the class name
+    TCHAR windowClass[BUFFER_LEN] = { 0 };
+    if (!GetClassName(hTopWindow, windowClass, BUFFER_LEN))
+        windowClass[0] = TEXT('\0');
+    String str_class = windowClass;
+
+
+    GetWindowRect(hTopWindow, &wndRect);
+
+    // A full screen window is on the same monitor as the taskbar...
+    if ((hwndMonitor == taskbarMonitor) &&
+        // and hwnd is not an taskbar...
+        (hwnd != hTopWindow) &&
+        // and hwnd is not the Explorer desktop...
+        (g_Globals._hwndDesktop != hTopWindow) &&
+        //and hwnd is visible...
+        IsWindowVisible(hTopWindow) &&
+        // and the hwnd is not InstallShield...
+        (str_class.find(TEXT("InstallShield_Win")) == String::npos) &&
+        // and hwnd size is greater than the resolution of the monitor which the
+        // applet is on, hwnd is full screen.
+        (wndRect.left <= hwndMonitorInfo.rcMonitor.left) &&
+        (wndRect.top <= hwndMonitorInfo.rcMonitor.top) &&
+        (wndRect.right >= hwndMonitorInfo.rcMonitor.right) &&
+        (wndRect.bottom >= hwndMonitorInfo.rcMonitor.bottom)) {
+        hasFullScreenWindow = true;
+    }
+
+    if (hasFullScreenWindow) {
+        if (!hiddenState) {
+            SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER |
+                SWP_NOACTIVATE | SWP_HIDEWINDOW);
+            hiddenState = true;
+        }
+    } else {
+        if (hiddenState) {
+            SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER |
+                SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            hiddenState = false;
+        }
+    }
+}
+
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     //if (nmsg != WM_TIMER) LOG(FmtString(TEXT("NMSG - %d"), nmsg));
@@ -461,6 +519,9 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case WM_TIMER:
         if (wparam == 0) {
             SendMessage(_hwndQuickLaunch, PM_RELOAD_BUTTONS, 0, 0);
+            if (JCFG2_DEF("JS_TASKBAR", "hideforfullscreenwindow", true).ToBool() != FALSE) {
+                HideForFullScreenWindow(_hwnd);
+            }
         } else if (wparam == ID_TRAY_VOLUME) {
             KillTimer(_hwnd, wparam);
             launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL, TEXT("-t"));    // launch volume control in small mode
