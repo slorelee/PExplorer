@@ -73,11 +73,6 @@
 #define CLASSNAME_WINEFILETREE  TEXT("WFS_Tree")
 
 
-#include "shell/pane.h"
-#include "shell/filechild.h"
-#include "shell/shellbrowser.h"
-
-
 #ifndef ROSSHELL
 
 /// Explorer command line parser
@@ -114,6 +109,5 @@ struct ExplorerCmd {
 };
 
 #include "shell/fileexplorer.h"
-#include "shell/mainframe.h"
 
 #endif

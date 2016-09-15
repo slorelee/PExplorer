@@ -6,9 +6,6 @@
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
     <ClCompile Include="precomp.cpp" />
-    <ClCompile Include="utility\dragdropimpl.cpp">
-      <Filter>utility</Filter>
-    </ClCompile>
     <ClCompile Include="desktop\desktop.cpp">
       <Filter>desktop</Filter>
     </ClCompile>
@@ -18,32 +15,8 @@
     <ClCompile Include="shell\entries.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="shell\fatfs.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="taskbar\favorites.cpp">
-      <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\mainframe.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\filechild.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\pane.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\ntobjfs.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="taskbar\quicklaunch.cpp">
       <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\regfs.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\shellbrowser.cpp">
-      <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="shell\shellfs.cpp">
       <Filter>shell</Filter>
@@ -63,9 +36,6 @@
     <ClCompile Include="services\startup.c">
       <Filter>services</Filter>
     </ClCompile>
-    <ClCompile Include="dialogs\searchprogram.cpp">
-      <Filter>dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="dialogs\settings.cpp">
       <Filter>dialogs</Filter>
     </ClCompile>
@@ -81,9 +51,6 @@
     <ClCompile Include="utility\utility.cpp">
       <Filter>utility</Filter>
     </ClCompile>
-    <ClCompile Include="shell\webchild.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="shell\winfs.cpp">
       <Filter>shell</Filter>
     </ClCompile>
@@ -93,6 +60,9 @@
     <ClCompile Include="jconfig\jcfg.cpp">
       <Filter>jconfig</Filter>
     </ClCompile>
+    <ClCompile Include="shell\fileexplorer.cpp">
+      <Filter>shell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -100,9 +70,6 @@
     <ClInclude Include="externals.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="precomp.h" />
-    <ClInclude Include="utility\dragdropimpl.h">
-      <Filter>utility</Filter>
-    </ClInclude>
     <ClInclude Include="desktop\desktop.h">
       <Filter>desktop</Filter>
     </ClInclude>
@@ -112,32 +79,8 @@
     <ClInclude Include="shell\entries.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="shell\fatfs.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="taskbar\favorites.h">
-      <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\mainframe.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\filechild.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\pane.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\ntobjfs.h">
-      <Filter>shell</Filter>
-    </ClInclude>
     <ClInclude Include="taskbar\quicklaunch.h">
       <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\regfs.h">
-      <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\shellbrowser.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="shell\shellfs.h">
       <Filter>shell</Filter>
@@ -154,9 +97,6 @@
     <ClInclude Include="services\shellservices.h">
       <Filter>services</Filter>
     </ClInclude>
-    <ClInclude Include="dialogs\searchprogram.h">
-      <Filter>dialogs</Filter>
-    </ClInclude>
     <ClInclude Include="dialogs\settings.h">
       <Filter>dialogs</Filter>
     </ClInclude>
@@ -172,20 +112,17 @@
     <ClInclude Include="utility\utility.h">
       <Filter>utility</Filter>
     </ClInclude>
-    <ClInclude Include="shell\webchild.h">
-      <Filter>shell</Filter>
-    </ClInclude>
     <ClInclude Include="shell\winfs.h">
       <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="utility\treedroptarget.h">
-      <Filter>utility</Filter>
     </ClInclude>
     <ClInclude Include="vendor\json.h">
       <Filter>vendor</Filter>
     </ClInclude>
     <ClInclude Include="jconfig\jcfg.h">
       <Filter>jconfig</Filter>
+    </ClInclude>
+    <ClInclude Include="shell\fileexplorer.h">
+      <Filter>shell</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

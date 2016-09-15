@@ -294,7 +294,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="shell\fileexplorer.cpp" />
-    <ClCompile Include="utility\dragdropimpl.cpp" />
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
     <ClCompile Include="utility\utility.cpp" />
@@ -306,8 +305,6 @@
     <ClCompile Include="taskbar\traynotify.cpp" />
     <ClCompile Include="desktop\desktop.cpp" />
     <ClCompile Include="shell\entries.cpp" />
-    <ClCompile Include="shell\pane.cpp" />
-    <ClCompile Include="shell\shellbrowser.cpp" />
     <ClCompile Include="shell\shellfs.cpp" />
     <ClCompile Include="shell\winfs.cpp" />
     <ClCompile Include="dialogs\settings.cpp" />
@@ -339,10 +336,8 @@
   <ItemGroup>
     <ClInclude Include="jconfig\jcfg.h" />
     <ClInclude Include="shell\fileexplorer.h" />
-    <ClInclude Include="utility\dragdropimpl.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
-    <ClInclude Include="utility\treedroptarget.h" />
     <ClInclude Include="utility\utility.h" />
     <ClInclude Include="utility\window.h" />
     <ClInclude Include="resource.h" />
@@ -353,8 +348,6 @@
     <ClInclude Include="taskbar\traynotify.h" />
     <ClInclude Include="desktop\desktop.h" />
     <ClInclude Include="shell\entries.h" />
-    <ClInclude Include="shell\pane.h" />
-    <ClInclude Include="shell\shellbrowser.h" />
     <ClInclude Include="shell\shellfs.h" />
     <ClInclude Include="shell\winfs.h" />
     <ClInclude Include="dialogs\settings.h" />

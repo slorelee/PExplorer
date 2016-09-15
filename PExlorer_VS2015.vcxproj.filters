@@ -6,9 +6,6 @@
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
     <ClCompile Include="precomp.cpp" />
-    <ClCompile Include="utility\dragdropimpl.cpp">
-      <Filter>utility</Filter>
-    </ClCompile>
     <ClCompile Include="desktop\desktop.cpp">
       <Filter>desktop</Filter>
     </ClCompile>
@@ -18,14 +15,8 @@
     <ClCompile Include="shell\entries.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="shell\pane.cpp">
-      <Filter>shell</Filter>
-    </ClCompile>
     <ClCompile Include="taskbar\quicklaunch.cpp">
       <Filter>taskbar</Filter>
-    </ClCompile>
-    <ClCompile Include="shell\shellbrowser.cpp">
-      <Filter>shell</Filter>
     </ClCompile>
     <ClCompile Include="shell\shellfs.cpp">
       <Filter>shell</Filter>
@@ -79,9 +70,6 @@
     <ClInclude Include="externals.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="precomp.h" />
-    <ClInclude Include="utility\dragdropimpl.h">
-      <Filter>utility</Filter>
-    </ClInclude>
     <ClInclude Include="desktop\desktop.h">
       <Filter>desktop</Filter>
     </ClInclude>
@@ -91,14 +79,8 @@
     <ClInclude Include="shell\entries.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="shell\pane.h">
-      <Filter>shell</Filter>
-    </ClInclude>
     <ClInclude Include="taskbar\quicklaunch.h">
       <Filter>taskbar</Filter>
-    </ClInclude>
-    <ClInclude Include="shell\shellbrowser.h">
-      <Filter>shell</Filter>
     </ClInclude>
     <ClInclude Include="shell\shellfs.h">
       <Filter>shell</Filter>
@@ -132,9 +114,6 @@
     </ClInclude>
     <ClInclude Include="shell\winfs.h">
       <Filter>shell</Filter>
-    </ClInclude>
-    <ClInclude Include="utility\treedroptarget.h">
-      <Filter>utility</Filter>
     </ClInclude>
     <ClInclude Include="vendor\json.h">
       <Filter>vendor</Filter>

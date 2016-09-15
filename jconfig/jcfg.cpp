@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <windows.h>
-#include "..\vendor\json.h"
+#include "../vendor/json.h"
 #include "jcfg.h"
 
 using namespace std;

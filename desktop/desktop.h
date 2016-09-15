@@ -24,6 +24,7 @@
 //
 // Martin Fuchs, 09.08.2003
 //
+#include "utility/shellbrowserimpl.h"
 
 #define PM_SET_ICON_ALGORITHM   (WM_APP+0x19)
 #define PM_GET_ICON_ALGORITHM   (WM_APP+0x1A)

@@ -3,6 +3,14 @@
 
 #include <ShObjIdl.h>
 
+enum OPEN_WINDOW_MODE {
+    OWM_EXPLORE = 1, /// window in explore mode
+    OWM_ROOTED = 2, /// "rooted" window with special shell namespace root
+    OWM_DETAILS = 4, /// view files in detail mode
+    OWM_PIDL = 8,   /// path is given as PIDL, otherwise as LPCTSTR
+    OWM_SEPARATE = 16 /// open separate subfolder windows
+};
+
 class CFileDialogEventHandler :
     public IFileDialogEvents
 {
