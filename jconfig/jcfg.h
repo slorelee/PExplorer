@@ -32,6 +32,9 @@ extern int JCfg_GetDesktopBarHeight();
 #define JCFG3(key1, key2, key3) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), TEXT(key3), Value())
 
 #define JCFG2_DEF(key1, key2, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), Value((defval)))
+#define JCFG3_DEF(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), TEXT(key3), Value((defval)))
+
+#define JCFG_CMD(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), key2, TEXT(key3), Value((defval)))
 
 #define SET_JCFG1(key1) g_JCfg[TEXT(key1)]
 #define SET_JCFG2(key1, key2) g_JCfg[TEXT(key1)][TEXT(key2)]

@@ -566,6 +566,22 @@ int DesktopBar::Notify(int id, NMHDR *pnmh)
     return 0;
 }
 
+static int CommandHook(HWND hwnd, const TCHAR *act)
+{
+    String cmd = TEXT("");
+    INT showflags = SW_SHOWNORMAL;
+    String parameters = TEXT("");
+    if (!hwnd) return 0;
+    cmd = JCFG_CMD("JS_TASKBAR", act, "command", TEXT("")).ToString();
+    if (cmd != TEXT("")) {
+        showflags = JCFG_CMD("JS_TASKBAR", act, "showflags", showflags).ToInt();
+        parameters = JCFG_CMD("JS_TASKBAR", act, "parameters", TEXT("")).ToString();
+        launch_file(hwnd, cmd, showflags, parameters);
+        return 1;
+    }
+    return 0;
+}
+
 void DesktopBar::Resize(int cx, int cy)
 {
     ///@todo general children resizing algorithm
@@ -596,6 +612,7 @@ void DesktopBar::Resize(int cx, int cy)
         PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
         SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
         _work_area = work_area;
+        CommandHook(g_Globals._hwndDesktop, TEXT("onDisplayChanged"));
     }
 }
 
