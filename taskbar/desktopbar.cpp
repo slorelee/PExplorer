@@ -369,6 +369,38 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
     }
 }
 
+//is not PECMD TEXT window
+#define DEF_IGNORE_WINDOWS TEXT(";[PECMD;#32770]")
+//is not InstallShield...
+#define DEF_IGNORE_WINDOW_CLASSES TEXT(";InstallShield_Win")
+
+static BOOL IsIgnoredWindow(HWND hwnd)
+{
+    String ignore_window_titles = JCFG2_DEF("JS_TASKBAR", "IGNORE_WINDOW_TITLES", TEXT("")).ToString();
+    String ignore_window_classes = JCFG2_DEF("JS_TASKBAR", "IGNORE_WINDOW_CLASSES", TEXT("")).ToString();
+    String ignore_windows = JCFG2_DEF("JS_TASKBAR", "IGNORE_WINDOWS", TEXT("")).ToString();
+    ignore_window_classes.append(DEF_IGNORE_WINDOW_CLASSES);
+    ignore_windows.append(DEF_IGNORE_WINDOWS);
+    TCHAR title_buffer[BUFFER_LEN] = { 0 };
+    TCHAR class_buffer[BUFFER_LEN] = { 0 };
+    String strWindow;
+    if (!GetWindowText(hwnd, title_buffer, BUFFER_LEN))
+        title_buffer[0] = '\0';
+    if (!ignore_window_titles.empty() && ignore_window_titles.find(title_buffer) != String::npos) {
+        return TRUE;
+    }
+    if (!GetClassName(hwnd, class_buffer, BUFFER_LEN))
+        class_buffer[0] = '\0';
+    if (!ignore_window_classes.empty() && ignore_window_classes.find(class_buffer) != String::npos) {
+        return TRUE;
+    }
+    strWindow.printf(TEXT("[%s;%s]"), title_buffer, class_buffer);
+    LOG(strWindow);
+    if (!ignore_windows.empty() && ignore_windows.find(strWindow) != String::npos) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
 static void HideForFullScreenWindow(HWND hwnd)
 {
@@ -385,13 +417,6 @@ static void HideForFullScreenWindow(HWND hwnd)
     hwndMonitor = MonitorFromWindow(hTopWindow, MONITOR_DEFAULTTONEAREST);
     GetMonitorInfo(hwndMonitor, &hwndMonitorInfo);
 
-    // Get the class name
-    TCHAR windowClass[BUFFER_LEN] = { 0 };
-    if (!GetClassName(hTopWindow, windowClass, BUFFER_LEN))
-        windowClass[0] = TEXT('\0');
-    String str_class = windowClass;
-
-
     GetWindowRect(hTopWindow, &wndRect);
 
     // A full screen window is on the same monitor as the taskbar...
@@ -400,27 +425,29 @@ static void HideForFullScreenWindow(HWND hwnd)
         (hwnd != hTopWindow) &&
         // and hwnd is not the Explorer desktop...
         (g_Globals._hwndDesktop != hTopWindow) &&
-        //and hwnd is visible...
+        // and hwnd is visible...
         IsWindowVisible(hTopWindow) &&
-        // and the hwnd is not InstallShield...
-        (str_class.find(TEXT("InstallShield_Win")) == String::npos) &&
         // and hwnd size is greater than the resolution of the monitor which the
         // applet is on, hwnd is full screen.
         (wndRect.left <= hwndMonitorInfo.rcMonitor.left) &&
         (wndRect.top <= hwndMonitorInfo.rcMonitor.top) &&
         (wndRect.right >= hwndMonitorInfo.rcMonitor.right) &&
-        (wndRect.bottom >= hwndMonitorInfo.rcMonitor.bottom)) {
+        (wndRect.bottom >= hwndMonitorInfo.rcMonitor.bottom) &&
+        // and is not ignore window.
+        !IsIgnoredWindow(hTopWindow)) {
         hasFullScreenWindow = true;
     }
 
     if (hasFullScreenWindow) {
         if (!hiddenState) {
+            LOG(FmtString(TEXT("EXSTYLE:0x%x"), GetWindowExStyle(hTopWindow)));
             SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER |
                 SWP_NOACTIVATE | SWP_HIDEWINDOW);
             hiddenState = true;
         }
     } else {
         if (hiddenState) {
+            LOG(FmtString(TEXT("EXSTYLE:0x%x"), GetWindowExStyle(hTopWindow)));
             SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER |
                 SWP_NOACTIVATE | SWP_SHOWWINDOW);
             hiddenState = false;
