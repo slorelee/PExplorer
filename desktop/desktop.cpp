@@ -643,6 +643,8 @@ default: def:
     return 0;
 }
 
+CRITICAL_SECTION wpcs;
+
 extern int OpenShellFolders(HWND hwnd, LPIDA pida);
 HRESULT DesktopWindow::OnDefaultCommand(LPIDA pida)
 {
@@ -681,7 +683,7 @@ DesktopShellView::DesktopShellView(HWND hwnd, IShellView *pShellView)
     _hbrWallp = NULL;
     SetRect(&_rcWp, 0, 0, 0, 0);
     SetRect(&_rcBitmapWp, 0, 0, 0, 0);
-
+    InitializeCriticalSection(&wpcs);
     LoadWallpaper(TRUE);
     _icon_algo = ICON_ALGORITHM_DEF;    // default icon arrangement (top/left)
     //SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 1000, NULL);
@@ -834,6 +836,7 @@ DesktopShellView::StretchWallpaper()
 
 LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 {
+    EnterCriticalSection(&wpcs);
     if (fInitial) {
         if (_hbmWallp) {
             DeleteObject(_hbmWallp);
@@ -857,16 +860,16 @@ LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
         }
     }
 
-    // need to repaint whole thing, so invalidate entire desktop window
-    //InvalidateRect(_hwnd, NULL, TRUE);
-
     if (_hbmWallp) {
         HBITMAP hbmp = StretchWallpaper();
         if (_hbrWallp) DeleteObject(_hbrWallp);
         _hbrWallp = CreatePatternBrush(hbmp);
         if (hbmp != _hbmWallp) DeleteObject(hbmp);
     }
+    LeaveCriticalSection(&wpcs);
 
+    // need to repaint whole thing, so invalidate entire desktop window
+    //InvalidateRect(_hwnd, NULL, TRUE);
     return TRUE;
 }
 
@@ -899,7 +902,7 @@ void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
 {
     RECT rc;
     GetClipBox(hdc, &rc);
-
+    EnterCriticalSection(&wpcs);
     if (!_hbrWallp || _fStyleWallp == STYLE_WP_CENTER) {
         HBRUSH hBkBrush = CreateSolidBrush(DESKTOP_BKCOLOR());
         FillRect(hdc, &rc, hBkBrush);
@@ -916,7 +919,20 @@ void DesktopShellView::DrawDesktopBkgnd(HDC hdc)
             DrawDesktopWallpaper(hdc, _hbrWallp, rc, _work_area);
         }
     }
+    LeaveCriticalSection(&wpcs);
+}
 
+static BOOL UpdateWallpaper()
+{
+    static TCHAR lastWPPath[MAX_PATH] = { 0 };
+    TCHAR wpPath[MAX_PATH] = { 0 };
+    if (!SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, wpPath, 0)) return FALSE;
+    if (lstrcmpi(lastWPPath, wpPath) == 0) return FALSE;
+    lstrcpy(lastWPPath, wpPath);
+    LOG(lastWPPath);
+    String strWallpaper(wpPath);
+    SET_JCFG2("JS_DESKTOP", "wallpaper") = strWallpaper;
+    return TRUE;
 }
 
 LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
@@ -934,20 +950,30 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         return super::WndProc(nmsg, wparam, lparam);
     }
     case WM_SETTINGCHANGE: {
-        RECT work_area;
-        //UINT nWorkArea;
-        //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
-        SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
-        _work_area = work_area;
-        ListView_SetWorkAreas(_hwndListView, 1, &work_area);
-        break;
+        switch (wparam) {
+        case SPI_SETWORKAREA:
+            RECT work_area;
+            //UINT nWorkArea;
+            //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
+            SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
+            _work_area = work_area;
+            ListView_SetWorkAreas(_hwndListView, 1, &work_area);
+            break;
+        case SPI_SETDESKWALLPAPER:
+            //I don't know why get this message twice
+            if (!UpdateWallpaper()) return 0;
+            LoadWallpaper(TRUE);
+            break;
+        }
+        //make cause WM_ERASEBKGND after wallpaper changed
+        return super::WndProc(nmsg, wparam, lparam);
     }
     case WM_DISPLAYCHANGE: {
         LoadWallpaper(FALSE);
         if (JCFG_TB(2, "notaskbar").ToBool() == TRUE) {
             NotifySetWorkArea();
         }
-        break;
+        return super::WndProc(nmsg, wparam, lparam);
     }
     case WM_ERASEBKGND:
         DrawDesktopBkgnd((HDC)wparam);
