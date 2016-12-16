@@ -215,6 +215,28 @@ BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow, LPCSTR parameters)
 #endif
 
 
+BOOL HandleEnvChangeBroadcast(LPARAM lparam)
+{
+    static BOOL(WINAPI *RegenerateUserEnvironment)(void **, BOOL) = NULL;
+    //
+    // Check if the user's environment variables have changed, if so
+    // regenerate the environment, so that new apps started from
+    // taskman will have the latest environment.
+    //
+    if (lparam && (!lstrcmpi((LPTSTR)lparam, (LPTSTR)TEXT("Environment")))) {
+        PVOID pEnv;
+        if (!RegenerateUserEnvironment) {
+            RegenerateUserEnvironment = (BOOL(WINAPI *)(void **, BOOL))
+                GetProcAddress(GetModuleHandle(TEXT("SHELL32")), "RegenerateUserEnvironment");
+        }
+        if (RegenerateUserEnvironment) {
+            RegenerateUserEnvironment(&pEnv, TRUE);
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
 /* search for already running instance */
 
 static int g_foundPrevInstance = 0;

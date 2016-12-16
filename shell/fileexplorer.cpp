@@ -65,6 +65,8 @@ LRESULT FileExplorerWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         delete path;
         PostMessage((HWND)wparam, WM_CLOSE, 0, 0);
         return S_OK;
+    } else if (nmsg == WM_SETTINGCHANGE) {
+        HandleEnvChangeBroadcast(lparam);
     }
     return super::WndProc(nmsg, wparam, lparam);
 }

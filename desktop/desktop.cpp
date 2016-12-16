@@ -950,20 +950,22 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         return super::WndProc(nmsg, wparam, lparam);
     }
     case WM_SETTINGCHANGE: {
-        switch (wparam) {
-        case SPI_SETWORKAREA:
-            RECT work_area;
-            //UINT nWorkArea;
-            //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
-            SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
-            _work_area = work_area;
-            ListView_SetWorkAreas(_hwndListView, 1, &work_area);
-            break;
-        case SPI_SETDESKWALLPAPER:
-            //I don't know why get this message twice
-            if (!UpdateWallpaper()) return 0;
-            LoadWallpaper(TRUE);
-            break;
+        if (!HandleEnvChangeBroadcast(lparam)) {
+            switch (wparam) {
+            case SPI_SETWORKAREA:
+                RECT work_area;
+                //UINT nWorkArea;
+                //ListView_GetNumberOfWorkAreas(_hwndListView, &nWorkArea);
+                SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
+                _work_area = work_area;
+                ListView_SetWorkAreas(_hwndListView, 1, &work_area);
+                break;
+            case SPI_SETDESKWALLPAPER:
+                //I don't know why get this message twice
+                if (!UpdateWallpaper()) return 0;
+                LoadWallpaper(TRUE);
+                break;
+            }
         }
         //make cause WM_ERASEBKGND after wallpaper changed
         return super::WndProc(nmsg, wparam, lparam);

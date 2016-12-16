@@ -253,6 +253,8 @@ extern BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow = SW_SHOWNORMAL, LP
 #define launch_fileA launch_file
 #endif
 
+extern BOOL HandleEnvChangeBroadcast(LPARAM lparam);
+
 // call an DLL export like rundll32
 extern BOOL RunDLL(HWND hwnd, LPCTSTR dllname, LPCSTR procname, LPCTSTR cmdline, UINT nCmdShow);
 
