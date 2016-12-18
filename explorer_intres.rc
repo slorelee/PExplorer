@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// ｷﾇﾌﾘｶｨﾓ・?resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
@@ -62,7 +62,7 @@ END
 
 IDA_DESKTOP ACCELERATORS
 BEGIN
-VK_F5, ID_REFRESH, VIRTKEY, NOINVERT
+    VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
 END
 
 IDA_TRAYNOTIFY ACCELERATORS
@@ -169,12 +169,13 @@ IDI_DESKSETTING         ICON                    "res/desktop-settings.ico"
 IDI_NETCONNS            ICON                    "res/network-conns.ico"
 IDI_ADMIN               ICON                    "res/administration.ico"
 IDI_RECENT              ICON                    "res/recent-documents.ico"
-#endif    // ｷﾇﾌﾘｶｨﾓ・?resources
+IDI_EMPTY               ICON                    "res/empty.ico"
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// ﾓ｢ﾓ・ﾃﾀｹ・ resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -218,7 +219,7 @@ BEGIN
     END
 END
 
-#endif    // ﾓ｢ﾓ・ﾃﾀｹ・ resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

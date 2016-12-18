@@ -376,6 +376,7 @@
     <Image Include="res\dot_red.ico" />
     <Image Include="res\dot_trans.ico" />
     <Image Include="res\drivebar.bmp" />
+    <Image Include="res\empty.ico" />
     <Image Include="res\explorer.ico" />
     <Image Include="res\favorites.ico" />
     <Image Include="res\floating.ico" />

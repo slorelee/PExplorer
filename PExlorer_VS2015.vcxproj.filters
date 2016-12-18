@@ -314,6 +314,9 @@
     <Image Include="res\pexlorer.ico">
       <Filter>res</Filter>
     </Image>
+    <Image Include="res\empty.ico">
+      <Filter>res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">

@@ -174,9 +174,14 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE | DT_CALCRECT);
 
     _deskbar_pos_y = DESKTOPBAR_TOP;
-    int start_btn_width = DPI_SX(rect.right) + TASKBAR_ICON_SIZE + (TASKBAR_ICON_SIZE / 4); // rect.right+16+8
+    int start_btn_width = TASKBAR_ICON_SIZE + DPI_SX(rect.right) + (TASKBAR_ICON_SIZE / 4);
 
-    _taskbar_pos = start_btn_width + 1;
+    int start_btn_padding = 0;
+    BOOL isEmptyStartIcon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("")).ToString().compare(TEXT("empty")) == 0;
+    if (isEmptyStartIcon) {
+        start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
+    }
+    _taskbar_pos = start_btn_width + DPI_SX(start_btn_padding) + 1;
     // create "Start" button
     static WNDCLASS wc;
     GetClassInfo(NULL, TEXT("BUTTON"), &wc);
@@ -185,9 +190,14 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     RegisterClass(&wc);
     HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 0, 0, start_btn_width, DESKTOPBARBAR_HEIGHT, IDC_START, WS_VISIBLE | WS_CHILD | BS_OWNERDRAW);
     SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
+
     UINT idStartIcon = IDI_STARTMENU_B;
-    if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
-        idStartIcon = IDI_STARTMENU_W;
+    if (isEmptyStartIcon) {
+        idStartIcon = IDI_EMPTY;
+    } else {
+        if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+            idStartIcon = IDI_STARTMENU_W;
+        }
     }
     new StartButton(hwndStart, idStartIcon, TASKBAR_TEXTCOLOR(), true);
 
@@ -645,11 +655,23 @@ void DesktopBar::Resize(int cx, int cy)
 
 int DesktopBar::Command(int id, int code)
 {
+    static int isStartButtonHooked = -1;
     switch (id) {
-    case IDC_START:
-            ShowOrHideStartMenu();
+    case IDC_START: {
+        if (isStartButtonHooked == -1) {
+            String def_value = TEXT("");
+            BOOL isEmptyStartIcon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("")).ToString().compare(TEXT("empty")) == 0;
+            if (isEmptyStartIcon) {
+                def_value = TEXT("none");
+            }
+            isStartButtonHooked = 0;
+            if (JCFG2_DEF("JS_STARTMENU", "start_command", def_value).ToString().compare(TEXT("none")) == 0) {
+                isStartButtonHooked = 1;
+            }
+        }
+        if (!isStartButtonHooked) ShowOrHideStartMenu();
         break;
-
+    }
     case ID_ABOUT_EXPLORER:
         explorer_about(g_Globals._hwndDesktop);
         break;

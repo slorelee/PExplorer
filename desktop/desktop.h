@@ -29,6 +29,12 @@
 #define PM_SET_ICON_ALGORITHM   (WM_APP+0x19)
 #define PM_GET_ICON_ALGORITHM   (WM_APP+0x1A)
 
+struct AM_DesktopShellWindow : public Window {
+    typedef Window super;
+    AM_DesktopShellWindow(HWND hwnd);
+    static HWND Create();
+};
+
 /*
  /// subclassed background window behind the visible desktop window
 struct BackgroundWindow : public SubclassedWindow

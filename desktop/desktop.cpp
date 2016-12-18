@@ -249,6 +249,20 @@ static void NotifySetWorkArea() {
     SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
 }
 
+AM_DesktopShellWindow::AM_DesktopShellWindow(HWND hwnd)
+    : super(hwnd)
+{
+}
+
+HWND AM_DesktopShellWindow::Create()
+{
+    static WindowClass wcDesktopShellWindow(TEXT("ApplicationManager_DesktopShellWindow"));
+    HWND hwndAM = Window::Create(WINDOW_CREATOR(AM_DesktopShellWindow),
+        WS_EX_NOACTIVATE, wcDesktopShellWindow, TEXT(""), WS_POPUP,
+        0, 0, 0, 0, 0);
+    return hwndAM;
+}
+
 DesktopWindow::DesktopWindow(HWND hwnd)
     :  super(hwnd)
 {

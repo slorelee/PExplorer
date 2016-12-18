@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ 生成的包含文件。
-// 供 explorer_intres.rc 使用
+// Microsoft Visual C++ generated include file.
+// Used by explorer_intres.rc
 //
 #define IDS_TITLE                       1
 #define MANIFEST_RESOURCE_ID            1
@@ -55,9 +55,8 @@
 #define IDI_EXPLORER                    100
 #define IDI_COMPUTER                    101
 #define IDB_TB_SH_DEF_16                101
-#define IDI_STARTMENU_W                 210
-#define IDI_STARTMENU_B                 211
 #define IDB_TOOLBAR                     103
+#define IDI_EMPTY                       103
 #define IDA_EXPLORER                    104
 #define ID_ACTIVATE                     105
 #define IDD_SEARCH_PROGRAM              105
@@ -121,10 +120,6 @@
 #define IDI_DOT_RED                     165
 #define IDI_ARROW_UP                    166
 #define IDI_ARROW_DOWN                  167
-#define IDI_NOTIFY_L_W                  200
-#define IDI_NOTIFY_R_W                  201
-#define IDI_NOTIFY_L_B                  202
-#define IDI_NOTIFY_R_B                  203
 #define IDB_MDI                         170
 #define IDB_SDI                         171
 #define IDI_MINIMIZE                    172
@@ -134,6 +129,12 @@
 #define IDI_ADMIN                       176
 #define IDI_RECENT                      178
 #define IDI_RESTART                     179
+#define IDI_NOTIFY_L_W                  200
+#define IDI_NOTIFY_R_W                  201
+#define IDI_NOTIFY_L_B                  202
+#define IDI_NOTIFY_R_B                  203
+#define IDI_STARTMENU_W                 210
+#define IDI_STARTMENU_B                 211
 #define ID_VIEW_NAME                    401
 #define ID_VIEW_ALL_ATTRIBUTES          402
 #define ID_VIEW_SELECTED_ATTRIBUTES     403
@@ -232,10 +233,10 @@
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        103
+#define _APS_NEXT_RESOURCE_VALUE        104
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
