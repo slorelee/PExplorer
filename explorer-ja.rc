@@ -73,8 +73,6 @@ BEGIN
     BEGIN
         MENUITEM "設定(&S)...",                 ID_DESKTOPBAR_SETTINGS
         MENUITEM "タスク マネージャ(&T)...",    ID_TASKMGR
-        MENUITEM SEPARATOR
-        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
     END
 END
 
@@ -95,8 +93,6 @@ BEGIN
         MENUITEM "アイコン ボタンを表示する(&B)",  ID_SHOW_ICON_BUTTON
         MENUITEM "通知のカスタマイズ(&C)...",   ID_CONFIG_NOTIFYAREA
         MENUITEM "日付と時刻の調整(&T)...",     ID_CONFIG_TIME
-        MENUITEM SEPARATOR
-        MENUITEM "PExlorer について(&A)...",    ID_ABOUT_EXPLORER
     END
 END
 

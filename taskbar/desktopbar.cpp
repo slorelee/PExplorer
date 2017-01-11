@@ -538,6 +538,8 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         PopupMenu menu(IDM_DESKTOPBAR);
         SetMenuDefaultItem(menu, 0, MF_BYPOSITION);
         if (GetKeyState(VK_SHIFT) < 0) {
+            menu.Append(0, NULL, MF_SEPARATOR);
+            menu.Append(ID_ABOUT_EXPLORER, ResString(IDS_ABOUT_EXPLORER));
             menu.Append(FCIDM_SHVIEWLAST - 1, ResString(IDS_TERMINATE));
         }
         menu.TrackPopupMenu(_hwnd, p);

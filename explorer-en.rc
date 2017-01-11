@@ -71,8 +71,6 @@ BEGIN
     BEGIN
         MENUITEM "&Settings...",                ID_DESKTOPBAR_SETTINGS
         MENUITEM "&Task Manager...",            ID_TASKMGR
-        MENUITEM SEPARATOR
-        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
     END
 END
 
@@ -93,8 +91,6 @@ BEGIN
         MENUITEM "Show Icon &Button",           ID_SHOW_ICON_BUTTON
         MENUITEM "&Configure Notifications...", ID_CONFIG_NOTIFYAREA
         MENUITEM "Adjust Date/&Time...",        ID_CONFIG_TIME
-        MENUITEM SEPARATOR
-        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
     END
 END
 

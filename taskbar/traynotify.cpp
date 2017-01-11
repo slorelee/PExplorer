@@ -465,6 +465,10 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (IconHitTest(pt) == _sorted_icons.end()) { // display menu only when no icon clicked
             PopupMenu menu(IDM_NOTIFYAREA);
             SetMenuDefaultItem(menu, 0, MF_BYPOSITION);
+            if (GetKeyState(VK_SHIFT) < 0) {
+                menu.Append(0, NULL, MF_SEPARATOR);
+                menu.Append(ID_ABOUT_EXPLORER, ResString(IDS_ABOUT_EXPLORER));
+            }
             CheckMenuItem(menu, ID_SHOW_HIDDEN_ICONS, MF_BYCOMMAND | (_show_hidden ? MF_CHECKED : MF_UNCHECKED));
             CheckMenuItem(menu, ID_SHOW_ICON_BUTTON, MF_BYCOMMAND | (_show_button ? MF_CHECKED : MF_UNCHECKED));
             menu.TrackPopupMenu(_hwnd, p);

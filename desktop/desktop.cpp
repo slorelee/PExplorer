@@ -1125,9 +1125,10 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
             if (SUCCEEDED(hr)) {
                 _menu_pt = { x, y };
                 SetMenuDefaultItem(hmenu, -1, FALSE);
-                AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
-                AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST - 1, ResString(IDS_ABOUT_EXPLORER));
-
+                if (GetKeyState(VK_SHIFT) < 0) {
+                    AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
+                    AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST - 1, ResString(IDS_ABOUT_EXPLORER));
+                }
                 UINT idCmd = TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, _hwnd, NULL);
 
                 _cm_ifs.reset();
