@@ -1143,12 +1143,21 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
                         menuname = namebuffer;
                     }
 
-                    if (_wcsicmp(namebuffer, L"cmd") == 0 || menuname == JCFG_VMN("cmdhere")) {
+                    if (_wcsicmp(namebuffer, L"cmd") == 0
+                        || menuname == JCFG_VMN("cmdhere")
+                        || _wcsicmp(namebuffer, L"Powershell") == 0) {
                         static TCHAR sDesktopPath[MAX_PATH + 1];
                         String parameters;
                         SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
-                        parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
-                        launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
+                        if (_wcsicmp(namebuffer, L"Powershell") == 0
+                            && JCFG2_DEF("JS_DESKTOP", "force_cmdhere", true).ToBool() == FALSE)
+                        {
+                            parameters.printf(JCFG_VMC("powershell", "parameters").ToString().c_str(), sDesktopPath);
+                            launch_file(g_Globals._hwndShellView, JCFG_VMC("powershell", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
+                        } else {
+                            parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
+                            launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
+                        }
                         //} else if (_wcsicmp(namebuffer, L"refresh") == 0 || menuname == JCFG_VMN("refresh")) {
                         //	DoInvokeCommand(_hwnd, pcm, idCmd);
                         //	SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 100, NULL);

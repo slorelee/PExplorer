@@ -634,7 +634,7 @@ BOOL Window::dispatch_dialog_msg(MSG *pmsg)
 int Window::MessageLoop()
 {
     MSG msg;
-
+    static BOOL isNoDesktopItems = JCFG2_DEF("JS_DESKTOP", "no_items", false).ToBool();
     while (GetMessage(&msg, 0, 0, 0)) {
         try {
             if (pretranslate_msg(&msg))
@@ -646,7 +646,10 @@ int Window::MessageLoop()
             TranslateMessage(&msg);
 
             try {
-                DispatchMessage(&msg);
+                if (!isNoDesktopItems
+                    || msg.message != WM_USER + 0x00b5) { //Collect Desktop items
+                    DispatchMessage(&msg);
+                }
             } catch (COMException &e) {
                 HandleException(e, 0);
             }

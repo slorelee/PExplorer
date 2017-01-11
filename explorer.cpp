@@ -1133,8 +1133,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             (*g_SHDOCVW_ShellDDEInit)(TRUE);
     }
 
-    if (_tcsstr(ext_options, TEXT("-debug")))
+    if (_tcsstr(ext_options, TEXT("-debug"))) {
         DebugMode = true;
+        Sleep(10000);
+    }
 
     if (_tcsstr(ext_options, TEXT("-break"))) {
         LOG(TEXT("debugger breakpoint"));
