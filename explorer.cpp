@@ -52,6 +52,8 @@
 #include "services/shellservices.h"
 #include "jconfig/jcfg.h"
 
+#include "DUI\UIManager.h"
+
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
 boolean DebugMode = FALSE;
@@ -1044,6 +1046,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // strip extended options from the front of the command line
     String ext_options;
 
+    LPTSTR lpCmdLineOrg = lpCmdLine;
     while (*lpCmdLine == '-') {
         while (*lpCmdLine && !_istspace((unsigned)*lpCmdLine))
             ext_options += *lpCmdLine++;
@@ -1108,6 +1111,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifdef _DEBUG    //MF: disabled for debugging
     autostart = false;
 #endif
+
+    if (_tcsstr(ext_options, TEXT("-ui"))) {
+        UIProcess(hInstance, lpCmdLineOrg);
+        return 0;
+    }
 
     // If there is given the command line option "-desktop", create desktop window anyways
     if (_tcsstr(ext_options, TEXT("-desktop")))
@@ -1241,6 +1249,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._desktop_mode = true;
 #endif
 
+    if (startup_desktop) {
+        CUIManager *pUIManager = new CUIManager(hInstance, TRUE);
+    }
 
     int ret = explorer_main(hInstance, lpCmdLine, nShowCmd);
 
@@ -1260,4 +1271,53 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     return ret;
+}
+
+String GetUIParameter(String cmdline, String key, BOOL hasValue = TRUE)
+{
+    key = _T(" ") + key + _T(" ");
+    String::size_type pos = cmdline.find(key);
+    String::size_type startPos = 0;
+    String::size_type endPos = 0;
+    if (pos != String::npos) {
+        if (!hasValue) return key;
+        startPos = pos + key.length();
+        endPos = cmdline.find(_T(" "), startPos);
+        if (endPos != String::npos) {
+            return cmdline.substr(startPos, endPos - startPos);
+        }
+    }
+    return "";
+}
+
+void UIProcess(HINSTANCE hInst, String cmdline) {
+    cmdline.append(_T(" "));
+    String suiClassName = GetUIParameter(cmdline, _T("-class"));
+    String suiName = GetUIParameter(cmdline, _T("-name"));
+    String suiEntry = GetUIParameter(cmdline, _T("-entry"));
+    if (suiEntry.empty()) suiEntry = _T("main.xml");
+    if (suiClassName.empty()) suiClassName =  _T("WinXShell-") + suiName + _T("-Wnd");
+
+    String pathName = suiName + _T("\\") + suiEntry;
+
+    TCHAR absPathBuff[MAX_PATH] = {0};
+    GetFullPathName(pathName.c_str(), MAX_PATH, absPathBuff, NULL);
+    if (!PathFileExists(absPathBuff)) return;
+
+#if _DEBUG
+    suiName = _T("..\\..\\") + suiName;
+#endif
+
+    CUIParameter uiParam(hInst, (TCHAR *)suiClassName.c_str(),
+        (TCHAR *)suiName.c_str(), (TCHAR *)suiEntry.c_str());
+
+    uiParam.m_bSingleton = (!GetUIParameter(cmdline, _T("-singleton"), FALSE).empty());
+    uiParam.m_bNoShadow = (!GetUIParameter(cmdline, _T("-noshadow"), FALSE).empty());
+    HWND hwnd = CUIManager::GetUIManager();
+    if (hwnd == NULL) {
+        CUIManager::CreateUI(uiParam);
+    } else {
+        SendMessage(hwnd, WM_UICREATE, 0, (LPARAM)(&uiParam));
+    }
+    return;
 }
