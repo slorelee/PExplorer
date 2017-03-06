@@ -109,7 +109,6 @@ void ExplorerGlobals::load_config()
     }
     JVAR("JVAR_MODULEPATH") = strPath;
     JVAR("JVAR_MODULENAME") = strFileName;
-    _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
 #ifdef _DEBUG
     String cfgfile = TEXT("WinXShell.jcfg");
@@ -1112,6 +1111,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     autostart = false;
 #endif
 
+    _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
+
     if (_tcsstr(ext_options, TEXT("-ui"))) {
         UIProcess(hInstance, lpCmdLineOrg);
         return 0;
@@ -1292,27 +1293,38 @@ String GetUIParameter(String cmdline, String key, BOOL hasValue = TRUE)
 
 void UIProcess(HINSTANCE hInst, String cmdline) {
     cmdline.append(_T(" "));
-    String suiClassName = GetUIParameter(cmdline, _T("-class"));
-    String suiName = GetUIParameter(cmdline, _T("-name"));
-    String suiEntry = GetUIParameter(cmdline, _T("-entry"));
-    if (suiEntry.empty()) suiEntry = _T("main.xml");
-    if (suiClassName.empty()) suiClassName =  _T("WinXShell-") + suiName + _T("-Wnd");
+    String suiJCfg = GetUIParameter(cmdline, _T("-jcfg"));
+    String suiClassName = _T("");
+    String suiName = _T("");
+    String suiEntry = _T("");
+    CUIParameter uiParam(hInst);
+    TCHAR absPathBuff[MAX_PATH] = { 0 };
 
+    if (!suiJCfg.empty()) {
+        GetFullPathName(suiJCfg.c_str(), MAX_PATH, absPathBuff, NULL);
+        if (!PathFileExists(absPathBuff)) return;
+        Object jcfg = Load_JsonCfg(suiJCfg);
+        uiParam.m_suiJCfg = jcfg;
+    } else {
+        suiClassName = GetUIParameter(cmdline, _T("-class"));
+        suiName = GetUIParameter(cmdline, _T("-name"));
+        suiEntry = GetUIParameter(cmdline, _T("-entry"));
+        if (suiEntry.empty()) suiEntry = _T("main.xml");
+        if (suiClassName.empty()) suiClassName = _T("WinXShell-") + suiName + _T("-Wnd");
+    }
     String pathName = suiName + _T("\\") + suiEntry;
 
-    TCHAR absPathBuff[MAX_PATH] = {0};
+    ZeroMemory(absPathBuff, sizeof(TCHAR) * MAX_PATH);
     GetFullPathName(pathName.c_str(), MAX_PATH, absPathBuff, NULL);
     if (!PathFileExists(absPathBuff)) return;
 
-#if _DEBUG
-    suiName = _T("..\\..\\") + suiName;
-#endif
+    if (suiJCfg.empty()) {
+        uiParam = CUIParameter(hInst, (TCHAR *)suiClassName.c_str(),
+            (TCHAR *)suiName.c_str(), (TCHAR *)suiEntry.c_str());
+        uiParam.m_bSingleton = (!GetUIParameter(cmdline, _T("-singleton"), FALSE).empty());
+        uiParam.m_bNoShadow = (!GetUIParameter(cmdline, _T("-noshadow"), FALSE).empty());
+    }
 
-    CUIParameter uiParam(hInst, (TCHAR *)suiClassName.c_str(),
-        (TCHAR *)suiName.c_str(), (TCHAR *)suiEntry.c_str());
-
-    uiParam.m_bSingleton = (!GetUIParameter(cmdline, _T("-singleton"), FALSE).empty());
-    uiParam.m_bNoShadow = (!GetUIParameter(cmdline, _T("-noshadow"), FALSE).empty());
     HWND hwnd = CUIManager::GetUIManager();
     if (hwnd == NULL) {
         CUIManager::CreateUI(uiParam);

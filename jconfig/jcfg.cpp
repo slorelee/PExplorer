@@ -185,35 +185,41 @@ JCfg_init() {
 }
 
 Object
-Load_JCfg(string_t filename)
+Load_JsonCfg(string_t filename)
 {
     string istr = ReadTextFile(filename);
-    string_t defstr = TEXT("");
     string_t cstr = TEXT("");
     const char *pstr = istr.c_str();
 
-    StringCodeChange((LPCCH)def_jcfg.c_str(), CP_UNICODE, defstr, CP_ACP);
-    Object def_config = Deserialize(defstr).ToObject();
-    Object jcfg = def_config;
+    Object jcfg;
 
     if (strlen(pstr) > 3) {
         if ((unsigned char)pstr[0] == (unsigned char)0xEF &&
             (unsigned char)pstr[1] == (unsigned char)0xBB &&
              (unsigned char)pstr[2] == (unsigned char)0xBF) {
-            StringCodeChange((LPCCH)pstr + 3, CP_UTF8, cstr, CP_ACP);
-        } else {
-             StringCodeChange((LPCCH)pstr, CP_UTF8, cstr, CP_ACP);
+            pstr += 3;
         }
+        StringCodeChange((LPCCH)pstr, CP_UTF8, cstr, CP_ACP);
         jcfg = Deserialize(cstr).ToObject();
         Update_KeyName(&jcfg);
-        Merge_JCfg(&jcfg, &def_config, JCFG_MERGEFLAG_NONE);
     }
-    Object test = jcfg[TEXT("JS_DESKTOP")].ToObject();
-    g_JCfg = jcfg;
+    return jcfg;
+}
 
+
+Object
+Load_JCfg(string_t filename)
+{
+    string_t defstr = TEXT("");
+    StringCodeChange((LPCCH)def_jcfg.c_str(), CP_UNICODE, defstr, CP_ACP);
+    Object def_config = Deserialize(defstr).ToObject();
+    Object jcfg = Load_JsonCfg(filename);
+    Merge_JCfg(&jcfg, &def_config, JCFG_MERGEFLAG_NONE);
+    g_JCfg = jcfg;
     JCfg_init();
     return jcfg;
 }
+
 
 inline void
 string_replace(string_t &s1, const string_t &s2, const string_t &s3)

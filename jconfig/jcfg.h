@@ -16,6 +16,7 @@ extern int g_JCfg_DPI_SY;
 
 extern HBRUSH g_JCfg_taskbar_bkbrush;
 
+extern Object Load_JsonCfg(string_t filename);
 extern Object Load_JCfg(string_t filename);
 extern COLORREF JValueToColor(Value val);
 
@@ -25,6 +26,9 @@ extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t 
 extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, string_t key4, Value defval);
 
 extern int JCfg_GetDesktopBarHeight();
+
+#define FILE_JCFG1(fileobj, key1) JCfg_GetValue(&fileobj, TEXT(key1), Value())
+#define FILE_JCFG1_DEF(fileobj, key1, defval) JCfg_GetValue(&fileobj, TEXT(key1), Value(defval))
 
 #define JVAR(key) (g_JVARMap[TEXT(key)])
 #define JCFG1(key1) JCfg_GetValue(&g_JCfg, TEXT(key1), Value())
