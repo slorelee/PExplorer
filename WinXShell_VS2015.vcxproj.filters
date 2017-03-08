@@ -69,6 +69,9 @@
     <ClCompile Include="DUI\UICreator.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
+    <ClCompile Include="DUI\SUIParser.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -134,6 +137,9 @@
       <Filter>DUI</Filter>
     </ClInclude>
     <ClInclude Include="DUI\UIManager.h">
+      <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\SUIParser.h">
       <Filter>DUI</Filter>
     </ClInclude>
   </ItemGroup>
