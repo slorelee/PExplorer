@@ -185,14 +185,15 @@ int MonitorAdapter::ChangeMonitorReselotion(HMONITOR hMonitor, const int nWidth,
         DeviceMode.dmFields |= DM_BITSPERPEL;
     }
 
-    int nRet = ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_NORESET | CDS_UPDATEREGISTRY, NULL);
+    int nRet = ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_UPDATEREGISTRY, NULL);
     if (DISP_CHANGE_BADMODE == nRet)
     {
-        ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_NORESET | CDS_UPDATEREGISTRY, NULL);
+        ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_UPDATEREGISTRY, NULL);
 
     }
     if (DISP_CHANGE_SUCCESSFUL == nRet)
     {
+        ChangeDisplaySettingsEx(NULL, NULL, NULL, 0, NULL);
         return 0;
     }
     return -1;

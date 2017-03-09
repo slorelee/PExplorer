@@ -29,6 +29,7 @@ extern int JCfg_GetDesktopBarHeight();
 
 #define FILE_JCFG1(fileobj, key1) JCfg_GetValue(&fileobj, TEXT(key1), Value())
 #define FILE_JCFG1_DEF(fileobj, key1, defval) JCfg_GetValue(&fileobj, TEXT(key1), Value(defval))
+#define FILE_JCFG2_DEF(fileobj, key1, key2, defval) JCfg_GetValue(&fileobj, TEXT(key1), key2, Value(defval))
 
 #define JVAR(key) (g_JVARMap[TEXT(key)])
 #define JCFG1(key1) JCfg_GetValue(&g_JCfg, TEXT(key1), Value())
