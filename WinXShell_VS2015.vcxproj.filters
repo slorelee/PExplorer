@@ -72,6 +72,12 @@
     <ClCompile Include="DUI\SUIParser.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
+    <ClCompile Include="systemsettings\MonitorAdapter.cpp">
+      <Filter>systemsettings</Filter>
+    </ClCompile>
+    <ClCompile Include="DUI\SUIInterpreter.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -140,6 +146,12 @@
       <Filter>DUI</Filter>
     </ClInclude>
     <ClInclude Include="DUI\SUIParser.h">
+      <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="systemsettings\MonitorAdapter.h">
+      <Filter>systemsettings</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\SUIInterpreter.h">
       <Filter>DUI</Filter>
     </ClInclude>
   </ItemGroup>
@@ -366,6 +378,9 @@
     </Filter>
     <Filter Include="DUI">
       <UniqueIdentifier>{88849217-311a-4746-b089-fd7c92968594}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="systemsettings">
+      <UniqueIdentifier>{5aaa6406-ca64-4d33-bbc5-068ff26a18a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
