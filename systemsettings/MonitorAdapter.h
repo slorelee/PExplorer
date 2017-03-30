@@ -54,12 +54,12 @@ public:
     void GetCurrentDisplayMode(VEC_MONITORMODE_INFO& m_vecMonitorListInfo);
 
     //得到屏幕当前分辨率
-    void GetCurrentReselotion(int& nWidth, int& nHeight, int& nFreq, int& nBits);
+    void GetCurrentResolution(int& nWidth, int& nHeight, int& nFreq, int& nBits);
 
     //根据屏幕ID取获取屏幕的对应分辨率
-    void GetCurrentReselotion(LPCWSTR lpszDeviceName, int& nWidth, int& nHeight, int& nFreq, int& nBits);
+    void GetCurrentResolution(LPCWSTR lpszDeviceName, int& nWidth, int& nHeight, int& nFreq, int& nBits);
 
     //修改分辨率
-    int ChangeMonitorReselotion(HMONITOR hMonitor, const int nWidth, const int nHeight, const int nFre = -1, const int nColorBits = -1);
+    int ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth, const int nHeight, const int nFre = -1, const int nColorBits = -1);
 
 };

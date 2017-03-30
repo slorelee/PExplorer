@@ -137,7 +137,21 @@ void GetCurrentMonitorInfo(HMONITOR hMonitor, MONITORINFOEX *pmi)
     GetMonitorInfo(hMonitor, pmi);
 }
 
-int MonitorAdapter::ChangeMonitorReselotion(HMONITOR hMonitor, const int nWidth, const int nHeight, const int nFre, const int nColorBits)
+HRESULT SetNewResolution(DEVMODE &dmOld, DEVMODE &dmNew)
+{
+    if (!(ChangeDisplaySettings(&dmNew, CDS_UPDATEREGISTRY)))
+    {
+        EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dmOld);
+        dmNew = dmOld;
+        return S_OK;
+    } else {
+        ChangeDisplaySettings(&dmOld, CDS_UPDATEREGISTRY);
+        dmNew = dmOld;
+        return S_FALSE;
+    }
+}
+
+int MonitorAdapter::ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth, const int nHeight, const int nFre, const int nColorBits)
 {
     TCHAR *pszDevice = NULL;
     MONITORINFOEX mi;
@@ -146,60 +160,35 @@ int MonitorAdapter::ChangeMonitorReselotion(HMONITOR hMonitor, const int nWidth,
     {
         GetCurrentMonitorInfo(hMonitor, &mi);
         pszDevice = mi.szDevice;
-    } else {
-        DISPLAY_DEVICE device;
-        device.cb = sizeof(DISPLAY_DEVICE);
-        if (!EnumDisplayDevices(NULL, 0, &device, 0))
-        {
-            return -1;
-        }
-        pszDevice = device.DeviceName;
     }
 
-    DEVMODE DeviceMode = { 0 };
-    DeviceMode.dmSize = sizeof(DEVMODE);
-
+    DEVMODE dmOld = { 0 };
+    dmOld.dmSize = sizeof(DEVMODE);
 
     BOOL bFlag = TRUE;
-    bFlag = EnumDisplaySettings(pszDevice, ENUM_CURRENT_SETTINGS, &DeviceMode);
+    bFlag = EnumDisplaySettings(pszDevice, ENUM_CURRENT_SETTINGS, &dmOld);
     if (bFlag != TRUE)
     {
         return -1;
     }
-    if (DeviceMode.dmPelsWidth == nWidth && DeviceMode.dmPelsHeight == nHeight)
+
+    if (dmOld.dmPelsWidth == nWidth && dmOld.dmPelsHeight == nHeight)
     {
         return 0;
     }
-    DeviceMode.dmDisplayFlags = 0;
-    DeviceMode.dmPelsWidth = nWidth;
-    DeviceMode.dmPelsHeight = nHeight;
 
+    DEVMODE dmNew = dmOld;
 
-    DeviceMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+    dmNew.dmPelsWidth = nWidth;
+    dmNew.dmPelsHeight = nHeight;
 
-    if (nFre != -1) {
-        DeviceMode.dmFields |= DM_DISPLAYFREQUENCY;
-    }
-
-    if (nColorBits != -1) {
-        DeviceMode.dmFields |= DM_BITSPERPEL;
-    }
-
-    int nRet = ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_UPDATEREGISTRY, NULL);
-    if (DISP_CHANGE_BADMODE == nRet)
-    {
-        ChangeDisplaySettingsEx(pszDevice, &DeviceMode, NULL, CDS_GLOBAL | CDS_UPDATEREGISTRY, NULL);
-
-    }
-    if (DISP_CHANGE_SUCCESSFUL == nRet)
-    {
-        ChangeDisplaySettingsEx(NULL, NULL, NULL, 0, NULL);
-        return 0;
-    }
-    return -1;
+    HRESULT lResult = S_OK;
+    lResult = SetNewResolution(dmOld, dmNew);
+    if (!lResult) return -1;
+    return 0;
 }
 
-void MonitorAdapter::GetCurrentReselotion(int& nWidth, int& nHeight, int& nFreq, int& nBits)
+void MonitorAdapter::GetCurrentResolution(int& nWidth, int& nHeight, int& nFreq, int& nBits)
 {
     DEVMODE DeviceMode;
     EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &DeviceMode);
@@ -209,7 +198,7 @@ void MonitorAdapter::GetCurrentReselotion(int& nWidth, int& nHeight, int& nFreq,
     nBits = DeviceMode.dmBitsPerPel;
 }
 
-void MonitorAdapter::GetCurrentReselotion(LPCWSTR lpszDeviceName, int& nWidth, int& nHeight, int& nFreq, int& nBits)
+void MonitorAdapter::GetCurrentResolution(LPCWSTR lpszDeviceName, int& nWidth, int& nHeight, int& nFreq, int& nBits)
 {
     DEVMODE DeviceMode;
     EnumDisplaySettings(lpszDeviceName, ENUM_CURRENT_SETTINGS, &DeviceMode);
