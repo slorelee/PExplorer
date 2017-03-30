@@ -32,6 +32,14 @@
 #include <shellapi.h>
 #include <shlobj.h>
 
+#ifndef string_t
+#ifdef UNICODE
+#define string_t std::wstring
+#else
+#define string_t string
+#endif
+#endif
+
 /*@@
 #if _MSC_VER>=1300  // VS.Net
 #include <comdefsp.h>
@@ -1081,6 +1089,7 @@ struct CtxMenuInterfaces {
     bool    HandleMenuMsg(UINT nmsg, WPARAM wparam, LPARAM lparam);
     IContextMenu *query_interfaces(IContextMenu *pcm1);
 
+    IContextMenu *_pctxmenu;
     IContextMenu2  *_pctxmenu2;
     IContextMenu3  *_pctxmenu3;
 };
@@ -1132,6 +1141,63 @@ template<typename BASE> struct ExtContextMenuHandlerT
     }
 
 protected:
+    CtxMenuInterfaces _cm_ifs;
+};
+
+template<typename BASE> struct ExtMultiContextMenuHandlerT
+    : public BASE {
+    typedef BASE super;
+
+    ExtMultiContextMenuHandlerT(HWND hwnd)
+        : super(hwnd)
+    {
+    }
+
+    template<typename PARA> ExtMultiContextMenuHandlerT(HWND hwnd, const PARA &info)
+        : super(hwnd, info)
+    {
+    }
+
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
+    {
+        CtxMenuInterfaces *pcm_ifs = NULL;
+        map<HMENU, CtxMenuInterfaces *>::iterator it;
+        it = _pcmMenuMap.find((HMENU)wparam);
+        if (it != _pcmMenuMap.end()) {
+            pcm_ifs = it->second;
+        } else {
+            pcm_ifs = &_cm_ifs;
+        }
+
+        switch (nmsg) {
+        case WM_DRAWITEM:
+        case WM_MEASUREITEM:
+            if (!wparam) {   // Is the message menu-related?
+                if (pcm_ifs->HandleMenuMsg(nmsg, wparam, lparam))
+                    return TRUE;
+            }
+            break;
+
+        case WM_INITMENUPOPUP:
+            _log_(FmtString(TEXT("WM_INITMENUPOPUP 0x%x 0x%x"), wparam, lparam));
+            if (pcm_ifs->HandleMenuMsg(nmsg, wparam, lparam))
+                return 0;
+            break;
+        case WM_MENUCHAR: // only supported by IContextMenu3
+            if (pcm_ifs->_pctxmenu3) {
+                LRESULT lResult = 0;
+                pcm_ifs->_pctxmenu3->HandleMenuMsg2(nmsg, wparam, lparam, &lResult);
+                return lResult;
+            }
+            return 0;
+        }
+
+        return super::WndProc(nmsg, wparam, lparam);
+    }
+
+protected:
+    map<string_t, CtxMenuInterfaces *> _pcmMap;
+    map<HMENU, CtxMenuInterfaces *> _pcmMenuMap;
     CtxMenuInterfaces _cm_ifs;
 };
 

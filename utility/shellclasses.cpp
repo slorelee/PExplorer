@@ -483,6 +483,7 @@ SpecialFolderFSPath::SpecialFolderFSPath(int folder, HWND hwnd)
 
 void CtxMenuInterfaces::reset()
 {
+    _pctxmenu = NULL;
     _pctxmenu2 = NULL;
     _pctxmenu3 = NULL;
 }
@@ -516,9 +517,12 @@ IContextMenu *CtxMenuInterfaces::query_interfaces(IContextMenu *pcm1)
 
     if (pcm) {
         pcm1->Release();
+        _pctxmenu = pcm;
         return pcm;
-    } else
+    } else {
+        _pctxmenu = pcm1;
         return pcm1;
+    }
 }
 
 

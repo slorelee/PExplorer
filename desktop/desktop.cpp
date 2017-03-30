@@ -392,7 +392,11 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
     SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOP, &pidlDesktop);
     ps.pidl = pidlDesktop;
     ps.fRecursive = FALSE;
-    _hSHNotify = SHChangeNotifyRegister(_hwnd, SHCNRF_ShellLevel,
+    int fSources = SHCNRF_ShellLevel;
+    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString() != TEXT("")) {
+        fSources |= SHCNRF_InterruptLevel;
+    }
+    _hSHNotify = SHChangeNotifyRegister(_hwnd, fSources,
                                         SHCNE_CREATE | SHCNE_MKDIR, WM_SHNOTIFY, 1, &ps);
 
     // create the explorer bar
@@ -1086,13 +1090,18 @@ bool DesktopShellView::DoContextMenu(int x, int y)
 
 static HRESULT DoInvokeCommand(HWND hwnd, IContextMenu *pcm, UINT idCmd)
 {
+    static char sDesktopPath[MAX_PATH + 1] = {0};
+    if (sDesktopPath[0] == '\0') {
+        SHGetSpecialFolderPathA(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
+    }
     CMINVOKECOMMANDINFO cmi = { 0 };
     cmi.cbSize = sizeof(CMINVOKECOMMANDINFO);
-    cmi.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
+    cmi.fMask = CMIC_MASK_PTINVOKE;
     if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
     if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
     cmi.hwnd = hwnd;
     cmi.lpVerb = (LPCSTR)(INT_PTR)(idCmd - FCIDM_SHVIEWFIRST);
+    cmi.lpDirectory = sDesktopPath;
     cmi.nShow = SW_SHOWNORMAL;
 
     HRESULT hr = pcm->InvokeCommand(&cmi);
@@ -1109,72 +1118,296 @@ void DesktopShellView::SetMenuCursorPos(LONG x, LONG y)
     _menu_pt = { x, y };
 }
 
-HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
+void AddClassKeyToArray(const TCHAR *szClass, HKEY *array, UINT *cKeys)
 {
-    IContextMenu *pcm;
+    if (*cKeys >= 16)
+        return;
 
+    HKEY hkey;
+    LSTATUS result = RegOpenKeyEx(HKEY_CLASSES_ROOT, szClass, 0, KEY_READ | KEY_QUERY_VALUE, &hkey);
+    if (result != ERROR_SUCCESS)
+        return;
+
+    array[*cKeys] = hkey;
+    *cKeys += 1;
+}
+
+HRESULT CreateDefaultContextMenu(HWND hwnd, IContextMenu **ppcm, HKEY *aKeys, UINT cKeys)
+{
+    DEFCONTEXTMENU dcm;
+    dcm.hwnd = hwnd;
+    dcm.pcmcb = NULL;
+    dcm.pidlFolder = NULL;
+    dcm.psf = DesktopFolder().get();
+    dcm.cidl = 0;
+    dcm.apidl = NULL;
+    dcm.cKeys = cKeys;
+    dcm.aKeys = aKeys;
+    dcm.punkAssociationInfo = NULL;
+    return SHCreateDefaultContextMenu(&dcm, IID_IContextMenu, (void **)ppcm);
+}
+
+HMENU DesktopShellView::GetShellViewContextMenu()
+{
+    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("SV")];
+    IContextMenu *pcm = NULL;
+    HMENU hmenu = CreatePopupMenu();
+    if (!hmenu) {
+        return NULL;
+    }
+    //HRESULT hr = DesktopFolder()->CreateViewObject(_hwnd, IID_IContextMenu, (void **)&pcm);
     HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
-    if (SUCCEEDED(hr)) {
-        pcm = _cm_ifs.query_interfaces(pcm);
-
-        HMENU hmenu = CreatePopupMenu();
-
-        if (hmenu) {
-            hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_EXPLORE | CMF_EXTENDEDVERBS);
-
-            if (SUCCEEDED(hr)) {
-                _menu_pt = { x, y };
-                SetMenuDefaultItem(hmenu, -1, FALSE);
-                if (GetKeyState(VK_SHIFT) < 0) {
-                    AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
-                    AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST - 1, ResString(IDS_ABOUT_EXPLORER));
-                }
-                UINT idCmd = TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, _hwnd, NULL);
-
-                _cm_ifs.reset();
-
-                if (idCmd == FCIDM_SHVIEWLAST - 1) {
-                    explorer_about(_hwnd);
-                } else if (idCmd) {
-                    String menuname;
-                    WCHAR namebuffer[MAX_PATH + 1] = { 0 };
-                    pcm->GetCommandString(idCmd, GCS_VERBW, NULL, (char *)namebuffer, MAX_PATH);
-                    if (_wcsicmp(namebuffer, TEXT("")) == 0) {
-                        GetMenuString(hmenu, idCmd, namebuffer, MAX_PATH, MF_BYCOMMAND);
-                        menuname = namebuffer;
-                    }
-
-                    if (_wcsicmp(namebuffer, L"cmd") == 0
-                        || menuname == JCFG_VMN("cmdhere")
-                        || _wcsicmp(namebuffer, L"Powershell") == 0) {
-                        static TCHAR sDesktopPath[MAX_PATH + 1];
-                        String parameters;
-                        SHGetSpecialFolderPath(0, sDesktopPath, CSIDL_DESKTOPDIRECTORY, FALSE);
-                        if (_wcsicmp(namebuffer, L"Powershell") == 0
-                            && JCFG2_DEF("JS_DESKTOP", "force_cmdhere", true).ToBool() == FALSE)
-                        {
-                            parameters.printf(JCFG_VMC("powershell", "parameters").ToString().c_str(), sDesktopPath);
-                            launch_file(g_Globals._hwndShellView, JCFG_VMC("powershell", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
-                        } else {
-                            parameters.printf(JCFG_VMC("cmdhere", "parameters").ToString().c_str(), sDesktopPath);
-                            launch_file(g_Globals._hwndShellView, JCFG_VMC("cmdhere", "command").ToString().c_str(), SW_SHOWNORMAL, parameters);
-                        }
-                        //} else if (_wcsicmp(namebuffer, L"refresh") == 0 || menuname == JCFG_VMN("refresh")) {
-                        //	DoInvokeCommand(_hwnd, pcm, idCmd);
-                        //	SetTimer(_hwnd, ID_TIMER_ADJUST_ICONPOSITION, 100, NULL);
-                    } else {
-                        DoInvokeCommand(_hwnd, pcm, idCmd);
-                    }
-                }
-                _menu_pt = { -1,-1 };
-            } else
-                _cm_ifs.reset();
-            DestroyMenu(hmenu);
-        }
+    if (FAILED(hr)) {
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    pcm = pcm_ifs->query_interfaces(pcm);
+    hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_EXTENDEDVERBS);
+    if (FAILED(hr)) {
+        pcm_ifs->reset();
         pcm->Release();
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    return hmenu;
+}
+
+HMENU DesktopShellView::GetDesktopBackgroundContextMenu()
+{
+    HKEY hKeys[16];
+    UINT cKeys = 0;
+    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("BG")];
+    IContextMenu *pcm = NULL;
+    HMENU hmenu = CreatePopupMenu();
+    if (!hmenu) {
+        return NULL;
     }
 
-    return hr;
+    AddClassKeyToArray(L"Directory\\Background", hKeys, &cKeys);
+    AddClassKeyToArray(L"DesktopBackground", hKeys, &cKeys);
+    HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
+    if (FAILED(hr)) {
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    pcm = pcm_ifs->query_interfaces(pcm);
+    hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_ASYNCVERBSTATE | CMF_SYNCCASCADEMENU | CMF_EXTENDEDVERBS);
+    if (FAILED(hr)) {
+        pcm_ifs->reset();
+        pcm->Release();
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    return hmenu;
+}
+
+HMENU DesktopShellView::AppendDesktopBackgroundContextMenu(HMENU hmenu, int indexMenu)
+{
+    HKEY hKeys[16];
+    UINT cKeys = 0;
+    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("BG")];
+    IContextMenu *pcm = NULL;
+
+    AddClassKeyToArray(L"Directory\\Background", hKeys, &cKeys);
+    AddClassKeyToArray(L"DesktopBackground", hKeys, &cKeys);
+    HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
+    if (FAILED(hr)) {
+        return NULL;
+    }
+    pcm = pcm_ifs->query_interfaces(pcm);
+    hr = pcm->QueryContextMenu(hmenu, indexMenu, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_ASYNCVERBSTATE | CMF_SYNCCASCADEMENU | CMF_EXTENDEDVERBS);
+    if (FAILED(hr)) {
+        pcm_ifs->reset();
+        pcm->Release();
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    return hmenu;
+}
+
+
+HMENU DesktopShellView::GetWinXNewContextMenu()
+{
+    HKEY hKeys[16];
+    UINT cKeys = 0;
+    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("New")];
+    IContextMenu *pcm = NULL;
+    HMENU hmenu = CreatePopupMenu();
+    if (!hmenu) {
+        return NULL;
+    }
+    String menukey = JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString();
+    AddClassKeyToArray(menukey.c_str(), hKeys, &cKeys);
+    HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
+    if (FAILED(hr)) {
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    pcm = pcm_ifs->query_interfaces(pcm);
+    hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_ITEMMENU | CMF_ASYNCVERBSTATE | CMF_SYNCCASCADEMENU);
+    if (FAILED(hr)) {
+        pcm_ifs->reset();
+        pcm->Release();
+        DestroyMenu(hmenu);
+        return NULL;
+    }
+    return hmenu;
+}
+
+void PrintMenuInfo(HMENU hmenu, IContextMenu *pcm, const TCHAR *space)
+{
+    MENUITEMINFO mmi = {0};
+    mmi.cbSize = sizeof(MENUITEMINFO);
+    mmi.fMask = MIIM_ID | MIIM_SUBMENU;
+    int count = GetMenuItemCount(hmenu);
+    TCHAR verbbuffer[MAX_PATH + 1] = { 0 };
+    TCHAR namebuffer[MAX_PATH + 1] = { 0 };
+    for (int i = 0; i < count; i++)
+    {
+        if (GetMenuItemInfo(hmenu, i, TRUE, &mmi)) {
+            pcm->GetCommandString(i, GCS_VERBW, NULL, (char *)verbbuffer, MAX_PATH);
+            GetMenuString(hmenu, mmi.wID, namebuffer, MAX_PATH, MF_BYCOMMAND);
+            _log_(FmtString(TEXT("%s%d |%s|%s| %x"), space, mmi.wID, verbbuffer, namebuffer, mmi.hSubMenu));
+            if (mmi.hSubMenu) {
+                PrintMenuInfo(mmi.hSubMenu, pcm, L" ");
+            }
+        }
+    }
+}
+
+#define FCIDM_WINXNEW 2001
+
+void SetNewSubMenu(HMENU hmenu, HMENU hnewmenu, IContextMenu *pcm)
+{
+    MENUITEMINFO mmi = { 0 };
+    mmi.cbSize = sizeof(MENUITEMINFO);
+    mmi.fMask = MIIM_ID | MIIM_SUBMENU;
+    int count = GetMenuItemCount(hmenu);
+    TCHAR verbbuffer[MAX_PATH + 1] = { 0 };
+    TCHAR namebuffer[MAX_PATH + 1] = { 0 };
+    for (int i = 0; i < count; i++)
+    {
+        GetMenuItemInfo(hmenu, i, TRUE, &mmi);
+        if (mmi.hSubMenu) {
+            pcm->GetCommandString(mmi.wID, GCS_VERBW, NULL, (char *)verbbuffer, MAX_PATH);
+            if (wcscmp(verbbuffer, TEXT("WinXNew")) == 0) {
+                Shell_MergeMenus(mmi.hSubMenu, hnewmenu, 1, FCIDM_WINXNEW, 0xffff, 0);
+                RemoveMenu(mmi.hSubMenu, 0, MF_BYPOSITION);
+                break;
+                /*
+                DestroyMenu(mmi.hSubMenu);
+                mmi.hSubMenu = hnewmenu;
+                SetMenuItemInfo(hmenu, i, TRUE, &mmi);
+                */
+            }
+        }
+    }
+}
+
+void SetSubMenuMap(HMENU hmenu, CtxMenuInterfaces *pcm_ifs, map<HMENU, CtxMenuInterfaces *> *pcmMenuMap, int index)
+{
+    MENUITEMINFO mmi = { 0 };
+    mmi.cbSize = sizeof(MENUITEMINFO);
+    mmi.fMask = MIIM_ID | MIIM_SUBMENU;
+    int count = GetMenuItemCount(hmenu);
+    for (int i = index; i < count; i++)
+    {
+        GetMenuItemInfo(hmenu, i, TRUE, &mmi);
+        if (mmi.hSubMenu) {
+            (*pcmMenuMap)[mmi.hSubMenu] = pcm_ifs;
+        }
+    }
+}
+
+HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
+{
+    CtxMenuInterfaces cmSV_ifs;
+    CtxMenuInterfaces cmBG_ifs;
+    CtxMenuInterfaces cmNew_ifs;
+
+    _pcmMap[TEXT("SV")] = &cmSV_ifs;
+    _pcmMap[TEXT("BG")] = &cmBG_ifs;
+    _pcmMap[TEXT("New")] = &cmNew_ifs;
+    HMENU hmenu = NULL, hmenuSV = NULL, hmenuBG = NULL, hmenuNew = NULL;
+    
+    hmenuSV = GetShellViewContextMenu();
+    if (!hmenuSV) {
+        return S_FALSE;
+    }
+    _cm_ifs = cmSV_ifs;
+
+#if _DEBUG
+    _log_(TEXT("SV"));
+    PrintMenuInfo(hmenuSV, cmSV_ifs._pctxmenu, L"");
+#endif
+
+    //_pcmMenuMap[hmenuSV] = &cmSV_ifs;
+    //SetSubMenuMap(hmenuSV, &cmSV_ifs, &_pcmMenuMap, 0);
+
+    /*
+    int count = GetMenuItemCount(hmenuSV);
+    hmenuBG = AppendDesktopBackgroundContextMenu(hmenuSV, count);
+    if (!hmenuBG) {
+        return S_FALSE;
+    }
+
+    _log_(TEXT("GB"));
+    PrintMenuInfo(hmenuBG, cmBG_ifs._pctxmenu, L"");
+
+    SetSubMenuMap(hmenuBG, &cmBG_ifs, &_pcmMenuMap, count);
+    */
+    //Shell_MergeMenus(hmenuSV, hmenuBG, count, 1001, 0xffff, 0);
+    
+    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString() != TEXT("")) {
+        hmenuNew = GetWinXNewContextMenu();
+        if (!hmenuNew) {
+            return S_FALSE;
+        }
+        _pcmMenuMap[hmenuNew] = &cmNew_ifs;
+
+#if _DEBUG
+        _log_(FmtString(TEXT("NewMenu 0x%x"), hmenuNew));
+        _log_(TEXT("New"));
+        PrintMenuInfo(hmenuNew, cmNew_ifs._pctxmenu, L"");
+#endif
+
+        SetNewSubMenu(hmenuSV, hmenuNew, cmSV_ifs._pctxmenu);
+    }
+
+    hmenu = hmenuSV;
+
+    SetMenuCursorPos(x, y);
+    SetMenuDefaultItem(hmenu, -1, FALSE);
+    if (GetKeyState(VK_SHIFT) < 0) {
+        AppendMenu(hmenu, MF_SEPARATOR, 0, NULL);
+        AppendMenu(hmenu, 0, FCIDM_SHVIEWLAST - 1, ResString(IDS_ABOUT_EXPLORER));
+    }
+    UINT idCmd = TrackPopupMenu(hmenu, TPM_LEFTALIGN | TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, 0, _hwnd, NULL);
+
+    if (idCmd == FCIDM_SHVIEWLAST - 1) {
+        SetMenuCursorPos(-1, -1);
+        explorer_about(_hwnd);
+    } else if (idCmd) {
+        IContextMenu *pcm = _cm_ifs._pctxmenu;
+        String menuname;
+        WCHAR namebuffer[MAX_PATH + 1] = { 0 };
+        if (idCmd >= FCIDM_WINXNEW) {
+            pcm = cmNew_ifs._pctxmenu;
+            idCmd -= FCIDM_WINXNEW;
+        }
+        DoInvokeCommand(_hwnd, pcm, idCmd);
+        if (pcm != cmNew_ifs._pctxmenu) {
+            SetMenuCursorPos(-1, -1);
+        }
+    }
+
+    _pcmMap.clear();
+    _pcmMenuMap.clear();
+    _cm_ifs._pctxmenu->Release();
+    cmNew_ifs._pctxmenu->Release();
+    DestroyMenu(hmenu);
+
+    return S_OK;
 }
 
 

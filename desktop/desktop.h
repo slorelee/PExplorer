@@ -25,6 +25,15 @@
 // Martin Fuchs, 09.08.2003
 //
 #include "utility/shellbrowserimpl.h"
+#include <map>
+
+#ifndef string_t
+#ifdef UNICODE
+#define string_t std::wstring
+#else
+#define string_t string
+#endif
+#endif
 
 #define PM_SET_ICON_ALGORITHM   (WM_APP+0x19)
 #define PM_GET_ICON_ALGORITHM   (WM_APP+0x1A)
@@ -53,8 +62,8 @@ protected:
 */
 
 /// subclassed ShellView window
-typedef struct DesktopShellView : public ExtContextMenuHandlerT<SubclassedWindow> {
-    typedef ExtContextMenuHandlerT<SubclassedWindow> super;
+typedef struct DesktopShellView : public ExtMultiContextMenuHandlerT<SubclassedWindow> {
+    typedef ExtMultiContextMenuHandlerT<SubclassedWindow> super;
 
     DesktopShellView(HWND hwnd, IShellView *pShellView);
     ~DesktopShellView();
@@ -76,7 +85,10 @@ protected:
     void    DrawDesktopBkgnd(HDC hdc);
     HRESULT DoDesktopContextMenu(int x, int y);
     void    PositionIcons(int dir = 1);
-
+    HMENU GetShellViewContextMenu();
+    HMENU GetDesktopBackgroundContextMenu();
+    HMENU AppendDesktopBackgroundContextMenu(HMENU hmenu, int indexMenu);
+    HMENU GetWinXNewContextMenu();
 
     HWND    _hwndListView;
     int     _icon_algo;

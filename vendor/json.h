@@ -239,10 +239,12 @@
 #include <tchar.h>
 #include <stdexcept>
 
+#ifndef string_t
 #ifdef UNICODE
 #define string_t std::wstring
 #else
 #define string_t string
+#endif
 #endif
 
 // PLEASE SEE THE README FOR USAGE INFORMATION AND EXAMPLES. Comments will be kept to a minimum to reduce clutter.
