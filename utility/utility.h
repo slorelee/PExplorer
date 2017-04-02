@@ -992,20 +992,24 @@ template<typename FCT> struct DynamicLoadLibFct {
     DynamicLoadLibFct(LPCTSTR moduleName, UINT ordinal)
     {
         _hModule = LoadLibrary(moduleName);
-
-        _fct = (FCT) GetProcAddress(_hModule, (LPCSTR)ordinal);
+        if (_hModule) {
+            _fct = (FCT)GetProcAddress(_hModule, (LPCSTR)ordinal);
+        }
     }
 
     DynamicLoadLibFct(LPCTSTR moduleName, LPCSTR name)
     {
         _hModule = LoadLibrary(moduleName);
-
-        _fct = (FCT) GetProcAddress(_hModule, name);
+        if (_hModule) {
+            _fct = (FCT)GetProcAddress(_hModule, name);
+        }
     }
 
     ~DynamicLoadLibFct()
     {
-        FreeLibrary(_hModule);
+        if (_hModule) {
+            FreeLibrary(_hModule);
+        }
     }
 
     FCT operator*() const {return _fct;}
