@@ -85,10 +85,8 @@ protected:
     void    DrawDesktopBkgnd(HDC hdc);
     HRESULT DoDesktopContextMenu(int x, int y);
     void    PositionIcons(int dir = 1);
-    HMENU GetShellViewContextMenu();
-    HMENU GetDesktopBackgroundContextMenu();
-    HMENU AppendDesktopBackgroundContextMenu(HMENU hmenu, int indexMenu);
-    HMENU GetWinXNewContextMenu();
+    HMENU   GetShellViewContextMenu();
+    HMENU   GetWinXNewContextMenu();
 
     HWND    _hwndListView;
     int     _icon_algo;

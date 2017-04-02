@@ -1172,60 +1172,6 @@ HMENU DesktopShellView::GetShellViewContextMenu()
     return hmenu;
 }
 
-HMENU DesktopShellView::GetDesktopBackgroundContextMenu()
-{
-    HKEY hKeys[16];
-    UINT cKeys = 0;
-    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("BG")];
-    IContextMenu *pcm = NULL;
-    HMENU hmenu = CreatePopupMenu();
-    if (!hmenu) {
-        return NULL;
-    }
-
-    AddClassKeyToArray(L"Directory\\Background", hKeys, &cKeys);
-    AddClassKeyToArray(L"DesktopBackground", hKeys, &cKeys);
-    HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
-    if (FAILED(hr)) {
-        DestroyMenu(hmenu);
-        return NULL;
-    }
-    pcm = pcm_ifs->query_interfaces(pcm);
-    hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_ASYNCVERBSTATE | CMF_SYNCCASCADEMENU | CMF_EXTENDEDVERBS);
-    if (FAILED(hr)) {
-        pcm_ifs->reset();
-        pcm->Release();
-        DestroyMenu(hmenu);
-        return NULL;
-    }
-    return hmenu;
-}
-
-HMENU DesktopShellView::AppendDesktopBackgroundContextMenu(HMENU hmenu, int indexMenu)
-{
-    HKEY hKeys[16];
-    UINT cKeys = 0;
-    CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("BG")];
-    IContextMenu *pcm = NULL;
-
-    AddClassKeyToArray(L"Directory\\Background", hKeys, &cKeys);
-    AddClassKeyToArray(L"DesktopBackground", hKeys, &cKeys);
-    HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
-    if (FAILED(hr)) {
-        return NULL;
-    }
-    pcm = pcm_ifs->query_interfaces(pcm);
-    hr = pcm->QueryContextMenu(hmenu, indexMenu, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST - 1, CMF_NORMAL | CMF_ASYNCVERBSTATE | CMF_SYNCCASCADEMENU | CMF_EXTENDEDVERBS);
-    if (FAILED(hr)) {
-        pcm_ifs->reset();
-        pcm->Release();
-        DestroyMenu(hmenu);
-        return NULL;
-    }
-    return hmenu;
-}
-
-
 HMENU DesktopShellView::GetWinXNewContextMenu()
 {
     HKEY hKeys[16];
@@ -1322,13 +1268,11 @@ void SetSubMenuMap(HMENU hmenu, CtxMenuInterfaces *pcm_ifs, map<HMENU, CtxMenuIn
 HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
 {
     CtxMenuInterfaces cmSV_ifs;
-    CtxMenuInterfaces cmBG_ifs;
     CtxMenuInterfaces cmNew_ifs;
 
     _pcmMap[TEXT("SV")] = &cmSV_ifs;
-    _pcmMap[TEXT("BG")] = &cmBG_ifs;
     _pcmMap[TEXT("New")] = &cmNew_ifs;
-    HMENU hmenu = NULL, hmenuSV = NULL, hmenuBG = NULL, hmenuNew = NULL;
+    HMENU hmenu = NULL, hmenuSV = NULL, hmenuNew = NULL;
     
     hmenuSV = GetShellViewContextMenu();
     if (!hmenuSV) {
@@ -1341,23 +1285,6 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
     PrintMenuInfo(hmenuSV, cmSV_ifs._pctxmenu, L"");
 #endif
 
-    //_pcmMenuMap[hmenuSV] = &cmSV_ifs;
-    //SetSubMenuMap(hmenuSV, &cmSV_ifs, &_pcmMenuMap, 0);
-
-    /*
-    int count = GetMenuItemCount(hmenuSV);
-    hmenuBG = AppendDesktopBackgroundContextMenu(hmenuSV, count);
-    if (!hmenuBG) {
-        return S_FALSE;
-    }
-
-    _log_(TEXT("GB"));
-    PrintMenuInfo(hmenuBG, cmBG_ifs._pctxmenu, L"");
-
-    SetSubMenuMap(hmenuBG, &cmBG_ifs, &_pcmMenuMap, count);
-    */
-    //Shell_MergeMenus(hmenuSV, hmenuBG, count, 1001, 0xffff, 0);
-    
     if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString() != TEXT("")) {
         hmenuNew = GetWinXNewContextMenu();
         if (!hmenuNew) {
