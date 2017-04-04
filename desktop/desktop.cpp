@@ -539,9 +539,15 @@ static void GetDisplayNameFromPIDL(LPITEMIDLIST pidl)
     _log_(psfi.szDisplayName);
 }
 
+
+//handler create folder/file on Desktop,
+//make it be renaming in the position where contextmenu showed.
 void DesktopWindow::NotificationReceipt(WPARAM wparam, LPARAM lparam)
 {
-    HRESULT hr;
+    POINT pt = _pDesktopShellView->GetMenuCursorPos();
+    if (pt.x == -1) return;
+
+    HRESULT hr = S_OK;
     TCHAR *eventname = SHNotify_GetEventStr(lparam);
     _log_(eventname);
     SHNOTIFYSTRUCT shns;
@@ -556,15 +562,11 @@ void DesktopWindow::NotificationReceipt(WPARAM wparam, LPARAM lparam)
             }
         }
         int item = 0;
-        hr = _pFolderView->GetSelectedItem(0, &item);
-        if (hr != S_OK) {
-            // no desktop item selected
-            POINT pt = _pDesktopShellView->GetMenuCursorPos();
-            if (_pFolderView && pt.x != -1) {
+
+        if (_pFolderView) {
+            hr = _pFolderView->GetSelectedItem(0, &item);
+            if (hr != S_OK) {   // no desktop item selected
                 _pFolderView->SelectAndPositionItems(1, (LPCITEMIDLIST *)&shns.dwItem1, &pt, SVSI_EDIT | SVSI_DESELECTOTHERS);
-            }
-            else {
-                _pShellView->SelectItem(shns.dwItem1, SVSI_EDIT | SVSI_DESELECTOTHERS);
             }
         }
         _pDesktopShellView->SetMenuCursorPos(-1, -1);
