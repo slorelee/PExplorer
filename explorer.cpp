@@ -999,6 +999,40 @@ static bool SetShellReadyEvent(LPCTSTR evtName)
     return true;
 }
 
+static void CloseShellProcess()
+{
+    HWND shellWindow = GetShellWindow();
+
+    if (shellWindow) {
+        DWORD pid;
+
+        // terminate shell process for NT like systems
+        GetWindowThreadProcessId(shellWindow, &pid);
+        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+
+        // On Win 9x it's sufficient to destroy the shell window.
+        DestroyWindow(shellWindow);
+
+        if (TerminateProcess(hProcess, 0))
+            WaitForSingleObject(hProcess, 10000); //INFINITE
+
+        CloseHandle(hProcess);
+    }
+}
+
+static void ChangeUserProfileEnv()
+{
+    //HKLM\Software\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-18\ProfileImagePath
+    TCHAR userprofile[MAX_PATH + 1] = { 0 };
+    if (g_Globals._isWinPE) {
+        GetEnvironmentVariable(TEXT("USERPROFILE"), userprofile, MAX_PATH);
+        if (_tcsicmp(userprofile, TEXT("X:\\windows\\system32\\config\\systemprofile")) == 0) {
+            _tcscpy(userprofile, TEXT("X:\\Users\\Default"));
+            SetEnvironmentVariable(TEXT("USERPROFILE"), userprofile);
+        }
+    }
+}
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 {
     CONTEXT("WinMain()");
@@ -1016,6 +1050,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
         while (_istspace((unsigned)*lpCmdLine))
             ++lpCmdLine;
+    }
+
+    if (_tcsstr(ext_options, TEXT("-winpe"))) {
+        g_Globals._isWinPE = TRUE;
+        CloseShellProcess();
+        ChangeUserProfileEnv();
+        startup_desktop = TRUE;
     }
 
     // command line option "-install" to replace previous shell application with PExlorer
@@ -1044,23 +1085,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             }
         }
 
-        HWND shellWindow = GetShellWindow();
-
-        if (shellWindow) {
-            DWORD pid;
-
-            // terminate shell process for NT like systems
-            GetWindowThreadProcessId(shellWindow, &pid);
-            HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-
-            // On Win 9x it's sufficient to destroy the shell window.
-            DestroyWindow(shellWindow);
-
-            if (TerminateProcess(hProcess, 0))
-                WaitForSingleObject(hProcess, INFINITE);
-
-            CloseHandle(hProcess);
-        }
+        CloseShellProcess();
 
         startup_desktop = TRUE;
     } else {
@@ -1068,7 +1093,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         // the first explorer instance
         // MS Explorer looks additionally into the registry entry HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\shell,
         // to decide wether it is currently configured as shell application.
-        startup_desktop = !any_desktop_running;
+        if (!g_Globals._isWinPE) {
+            startup_desktop = !any_desktop_running;
+        }
     }
 
 
@@ -1155,9 +1182,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // init common controls library
     CommonControlInit usingCmnCtrl;
 
-    if (_tcsstr(ext_options, TEXT("-winpe"))) {
-        g_Globals._isWinPE = TRUE;
-    }
     g_Globals.read_persistent();
     g_Globals.load_config();
     g_Globals.get_systeminfo();
