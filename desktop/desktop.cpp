@@ -393,7 +393,7 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
     ps.pidl = pidlDesktop;
     ps.fRecursive = FALSE;
     int fSources = SHCNRF_ShellLevel;
-    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString() != TEXT("")) {
+    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("")).ToString() != TEXT("")) {
         fSources |= SHCNRF_InterruptLevel;
     }
     _hSHNotify = SHChangeNotifyRegister(_hwnd, fSources,
@@ -1180,11 +1180,17 @@ HMENU DesktopShellView::GetWinXNewContextMenu()
     UINT cKeys = 0;
     CtxMenuInterfaces *pcm_ifs = _pcmMap[TEXT("New")];
     IContextMenu *pcm = NULL;
+
+    String menukey = JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("")).ToString();
+    if (menukey == TEXT("")) {
+        return NULL;
+    }
+
     HMENU hmenu = CreatePopupMenu();
     if (!hmenu) {
         return NULL;
     }
-    String menukey = JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString();
+
     AddClassKeyToArray(menukey.c_str(), hKeys, &cKeys);
     HRESULT hr = CreateDefaultContextMenu(_hwnd, &pcm, hKeys, cKeys);
     if (FAILED(hr)) {
@@ -1287,7 +1293,7 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
     PrintMenuInfo(hmenuSV, cmSV_ifs._pctxmenu, L"");
 #endif
 
-    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("Directory\\Background\\shell\\WinXNew")).ToString() != TEXT("")) {
+    if (JCFG3_DEF("JS_DESKTOP", "cascademenu", "WinXNew", TEXT("")).ToString() != TEXT("")) {
         hmenuNew = GetWinXNewContextMenu();
         if (!hmenuNew) {
             return S_FALSE;
@@ -1333,8 +1339,10 @@ HRESULT DesktopShellView::DoDesktopContextMenu(int x, int y)
     _pcmMap.clear();
     _pcmMenuMap.clear();
     _cm_ifs._pctxmenu->Release();
-    cmNew_ifs._pctxmenu->Release();
+    if (cmNew_ifs._pctxmenu) cmNew_ifs._pctxmenu->Release();
+
     DestroyMenu(hmenu);
+    if (hmenuNew) DestroyMenu(hmenuNew);
 
     return S_OK;
 }
