@@ -61,6 +61,7 @@ boolean DebugMode = FALSE;
 ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
 
+void UIProcess(HINSTANCE hInst, String cmdline);
 
 ExplorerGlobals::ExplorerGlobals()
 {
@@ -1250,7 +1251,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._desktop_mode = true;
 #endif
 
-    if (startup_desktop) {
+    if (startup_desktop && _tcsstr(ext_options, TEXT("-uimgr"))) {
         CUIManager *pUIManager = new CUIManager(hInstance, TRUE);
     }
 
