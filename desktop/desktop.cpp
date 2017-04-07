@@ -331,9 +331,10 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 
     if (SUCCEEDED(hr)) {
         FOLDERSETTINGS fs;
-
-        fs.ViewMode = FVM_ICON;
-        fs.fFlags = FWF_DESKTOP | FWF_ALIGNLEFT | FWF_NOCLIENTEDGE | FWF_NOSCROLL | FWF_BESTFITWINDOW | FWF_SNAPTOGRID; //|FWF_AUTOARRANGE;
+        int defaultFlags = 0;
+        fs.ViewMode = JCFG2_DEF("JS_DESKTOP", "viewmode", FVM_ICON).ToInt();
+        defaultFlags = FWF_DESKTOP | FWF_ALIGNLEFT | FWF_NOCLIENTEDGE | FWF_NOSCROLL | FWF_BESTFITWINDOW | FWF_SNAPTOGRID; //|FWF_AUTOARRANGE;
+        fs.fFlags = JCFG2_DEF("JS_DESKTOP", "viewflags", defaultFlags).ToInt();
         /* PositionIcons() need remove FWF_SNAPTOGRID flag, but set the flag after the
            view be created need use IFolderView2 interface in windows vista or later. */
         ClientRect rect(_hwnd);
@@ -345,6 +346,15 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
         if (SUCCEEDED(hr)) {
             g_Globals._hwndShellView = hWndView;
 
+            int iconSize = JCFG2_DEF("JS_DESKTOP", "iconsize", 0).ToInt();
+            if (iconSize > 0) {
+                IFolderView2 *pFolderView = NULL;
+                hr = _pShellView->QueryInterface(IID_IFolderView2, (void**)&pFolderView);
+                if (SUCCEEDED(hr)) {
+                    pFolderView->SetViewModeAndIconSize(FVM_ICON, iconSize);
+                    pFolderView->Release();
+                }
+            }
             // subclass shellview window
             _pDesktopShellView = new DesktopShellView(hWndView, _pShellView);
 
@@ -365,17 +375,6 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 
                 hr = pShellView2->CreateViewWindow2(&params);
                 params.pvid;
-            */
-
-            /*
-                IFolderView* pFolderView;
-
-                hr = _pShellView->QueryInterface(IID_IFolderView, (void**)&pFolderView);
-
-                if (SUCCEEDED(hr)) {
-                    hr = pFolderView->GetAutoArrange();
-                    hr = pFolderView->SetCurrentViewMode(FVM_DETAILS);
-                }
             */
         }
     }
