@@ -59,8 +59,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "PExlorer &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "WinXShell &FAQ...",            ID_EXPLORER_FAQ
+        MENUITEM "&About WinXShell...",          ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END
@@ -118,8 +118,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "PExlorer &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About PExlorer...",          ID_ABOUT_EXPLORER
+        MENUITEM "WinXShell &FAQ...",            ID_EXPLORER_FAQ
+        MENUITEM "&About WinXShell...",          ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END
@@ -239,14 +239,14 @@ END
 
 IDD_ABOUT_EXPLORER DIALOGEX 0, 0, 255, 110
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About PExlorer"
+CAPTION "About WinXShell"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "PExlorer",IDC_PE_EXPLORER,100,15,100,12
+    LTEXT           "WinXShell",IDC_PE_EXPLORER,100,15,100,12
     LTEXT           "V2.0 RC4",IDC_VERSION_TXT,100,30,100,12
-    LTEXT           "(c) 2015-2016 Slore",IDC_STATIC,100,45,100,12
+    LTEXT           "(c) 2015-2017 Slore",IDC_STATIC,100,45,100,12
     LTEXT           "",IDC_WIN_VERSION,100,60,145,22
-    LTEXT           "https://github.com/slorelee/PExlorer",IDC_WWW,10,90,0,12
+    LTEXT           "https://github.com/slorelee/WinXShell",IDC_WWW,10,90,0,12
     CONTROL         "&OK",IDOK,"Button",BS_OWNERDRAW | BS_FLAT | WS_GROUP,200,90,40,12
 END
 
@@ -338,7 +338,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_TITLE               "PExlorer"
+    IDS_TITLE               "WinXShell"
     IDS_START               "Start"
     IDS_LOGOFF              "Log Off..."
     IDS_SHUTDOWN            "Turn Off..."
@@ -370,7 +370,7 @@ BEGIN
     IDS_NOTIFY_AUTOHIDE     "Autohide"
     IDS_SHOW_HIDDEN_ICONS   "Show hidden icons"
     IDS_HIDE_ICONS          "Hide icons"
-    IDS_TERMINATE           "Terminate PExlorer"
+    IDS_TERMINATE           "Terminate WinXShell"
     IDS_RESTART             "Restart..."
     IDS_NAMECOLUMN          "Name"
 END
@@ -388,7 +388,7 @@ BEGIN
     IDS_SEARCH_PRG          "Search Program..."
     IDS_ALL_USERS           "All Users\\"
     IDS_SEARCH              "Search"
-    IDS_ABOUT_EXPLORER      "&About PExlorer..."
+    IDS_ABOUT_EXPLORER      "&About WinXShell..."
     IDS_LAUNCH_MANY_PROGRAMS 
                             "You have selected more than one program.\nAre you sure you want to launch all of them?"
     IDS_DESKTOPBAR_SETTINGS "Desktop Settings"

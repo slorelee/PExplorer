@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BFBAE588-8C68-4303-9BF6-C830087D8F25}</ProjectGuid>
-    <RootNamespace>PExlorer</RootNamespace>
+    <RootNamespace>WinXShell</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>PExlorer</ProjectName>
+    <ProjectName>WinXShell</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -133,7 +133,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>PExlorer.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>WinXShell.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -182,7 +182,7 @@
       </DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>PExlorer.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>WinXShell.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -230,7 +230,7 @@
       <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>PExlorer.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>WinXShell.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -279,7 +279,7 @@
       <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>PExlorer.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>WinXShell.exe.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -406,8 +406,8 @@
     <Image Include="res\notify_l_w.ico" />
     <Image Include="res\notify_r_b.ico" />
     <Image Include="res\notify_r_w.ico" />
-    <Image Include="res\pexlorer-big.ico" />
-    <Image Include="res\pexlorer.ico" />
+    <Image Include="res\winxshell-big.ico" />
+    <Image Include="res\winxshell.ico" />
     <Image Include="res\printer.ico" />
     <Image Include="res\recent-documents.ico" />
     <Image Include="res\restart.ico" />
@@ -428,7 +428,7 @@
     <ResourceCompile Include="explorer_intres.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="PExlorer.exe.manifest" />
+    <Manifest Include="WinXShell.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

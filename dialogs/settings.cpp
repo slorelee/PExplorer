@@ -41,8 +41,8 @@ void ExplorerPropertySheet(HWND hparent)
     PropertySheetDialog ps(hparent);
 
     ps.dwFlags |= PSH_USEICONID | PSH_PROPTITLE;
-    ps.pszIcon = MAKEINTRESOURCE(IDI_PEXLORER);
-    ps.pszCaption = TEXT("Explorer");
+    ps.pszIcon = MAKEINTRESOURCE(IDI_WINXSHELL);
+    ps.pszCaption = TEXT("WinXShell");
 
     PropSheetPage psp1(IDD_DESKBAR_DESKTOP, WINDOW_CREATOR(DesktopSettingsDlg));
     psp1.dwFlags |= PSP_USETITLE;

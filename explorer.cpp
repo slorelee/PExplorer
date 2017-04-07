@@ -110,9 +110,9 @@ void ExplorerGlobals::load_config()
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
 #ifdef _DEBUG
-    String cfgfile = TEXT("PExlorer.jcfg");
+    String cfgfile = TEXT("WinXShell.jcfg");
 #else
-    String cfgfile = strPath + TEXT("\\PExlorer.jcfg");
+    String cfgfile = strPath + TEXT("\\WinXShell.jcfg");
 #endif
     Load_JCfg(cfgfile);
 }
@@ -878,7 +878,7 @@ struct ExplorerAboutDlg : public
     ExplorerAboutDlg(HWND hwnd)
         :    super(hwnd)
     {
-        SetWindowIcon(hwnd, IDI_PEXLORER);
+        SetWindowIcon(hwnd, IDI_WINXSHELL);
 
         new FlatButton(hwnd, IDOK);
 
@@ -920,7 +920,7 @@ struct ExplorerAboutDlg : public
     {
         PaintCanvas canvas(_hwnd);
 
-        HICON hicon = (HICON) LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(IDI_PEXLORER_BIG), IMAGE_ICON, 0, 0, LR_SHARED);
+        HICON hicon = (HICON) LoadImage(g_Globals._hInstance, MAKEINTRESOURCE(IDI_WINXSHELL_BIG), IMAGE_ICON, 0, 0, LR_SHARED);
 
         DrawIconEx(canvas, 20, 10, hicon, 0, 0, 0, 0, DI_NORMAL);
     }
@@ -1059,9 +1059,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         startup_desktop = TRUE;
     }
 
-    // command line option "-install" to replace previous shell application with PExlorer
+    // command line option "-install" to replace previous shell application with WinXShell
     if (_tcsstr(ext_options, TEXT("-install"))) {
-        // install PExlorer into the registry
+        // install WinXShell into the registry
         TCHAR path[MAX_PATH];
 
         int l = GetModuleFileName(0, path, COUNTOF(path));
@@ -1210,7 +1210,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
                     "-nodesktop    disable desktop mode\r\n"
                     "-explorer        display cabinet window regardless of enabled desktop mode\r\n"
                     "\r\n"
-                    "-install        replace previous shell application with PExlorer\r\n"
+                    "-install        replace previous shell application with WinXShell\r\n"
                     "\r\n"
                     "-noautostart    disable autostarts\r\n"
                     "-autostart    enable autostarts regardless of debug build\r\n"
@@ -1219,7 +1219,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
                     "\r\n"
                     "-debug        activate GDB remote debugging stub\r\n"
                     "-break        activate debugger breakpoint\r\n",
-                    "PExlorer - command line options", MB_OK);
+                    "WinXShell - command line options", MB_OK);
     }
 
     Thread *pSSOThread = NULL;

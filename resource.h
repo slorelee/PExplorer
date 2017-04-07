@@ -82,7 +82,7 @@
 #define IDI_FLOATING                    135
 #define IDA_TRAYNOTIFY                  135
 #define IDD_ABOUT_EXPLORER              135
-#define IDI_PEXLORER_BIG                137
+#define IDI_WINXSHELL_BIG                137
 #define IDI_DOCUMENTS                   138
 #define IDI_CONFIG                      139
 #define IDI_FAVORITES                   140
@@ -94,7 +94,7 @@
 #define IDI_SEARCH_DOC                  146
 #define IDI_PRINTER                     147
 #define IDI_NETWORK                     148
-#define IDI_PEXLORER                    149
+#define IDI_WINXSHELL                    149
 #define IDM_DESKTOPBAR                  150
 #define IDM_VOLUME                      151
 #define IDM_NOTIFYAREA                  152

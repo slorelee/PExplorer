@@ -287,7 +287,7 @@ DesktopWindow::~DesktopWindow()
 
 HWND DesktopWindow::Create()
 {
-    static IconWindowClass wcDesktop(TEXT("Progman"), IDI_PEXLORER, CS_DBLCLKS);
+    static IconWindowClass wcDesktop(TEXT("Progman"), IDI_WINXSHELL, CS_DBLCLKS);
     /* (disabled because of small ugly temporary artefacts when hiding start menu)
     wcDesktop.hbrBackground = (HBRUSH)(COLOR_BACKGROUND+1); */
     wcDesktop.hbrBackground = CreateSolidBrush(DESKTOP_BKCOLOR());

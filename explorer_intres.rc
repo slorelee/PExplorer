@@ -100,9 +100,9 @@ BEGIN
     "BEGIN\r\n"
     "IDS_VERSION_STR ""V2.0 RC4""\r\n"
     "#ifdef UNICODE\r\n"
-    "IDS_EXPLORER_VERSION_STR ""PExlorer %0s""\r\n"
+    "IDS_EXPLORER_VERSION_STR ""WinXShell %0s""\r\n"
     "#else\r\n"
-    "IDS_EXPLORER_VERSION_STR ""PExlorer Ansi %0s""\r\n"
+    "IDS_EXPLORER_VERSION_STR ""WinXShell Ansi %0s""\r\n"
     "#endif\r\n"
     "END\r\n"
     "#endif\r\n"
@@ -140,7 +140,7 @@ IDI_ARROW               ICON                    "res/arrow.ico"
 IDI_ARROW_SELECTED      ICON                    "res/arrowsel.ico"
 IDI_APPICON             ICON                    "res/appicon.ico"
 IDI_FLOATING            ICON                    "res/floating.ico"
-IDI_PEXLORER_BIG        ICON                    "res/pexlorer-big.ico"
+IDI_WINXSHELL_BIG       ICON                    "res/winxshell-big.ico"
 IDI_CONFIG              ICON                    "res/config.ico"
 IDI_DOCUMENTS           ICON                    "res/documents.ico"
 IDI_FAVORITES           ICON                    "res/favorites.ico"
@@ -152,7 +152,7 @@ IDI_FOLDER              ICON                    "res/folder.ico"
 IDI_SEARCH_DOC          ICON                    "res/search-doc.ico"
 IDI_PRINTER             ICON                    "res/printer.ico"
 IDI_NETWORK             ICON                    "res/network.ico"
-IDI_PEXLORER            ICON                    "res/pexlorer.ico"
+IDI_WINXSHELL           ICON                    "res/winxshell.ico"
 IDI_SPEAKER             ICON                    "res/speaker.ico"
 IDI_DOT                 ICON                    "res/dot.ico"
 IDI_DOT_TRANS           ICON                    "res/dot_trans.ico"
@@ -204,12 +204,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "FreeMan"
-            VALUE "FileDescription", "Windows PExlorer"
+            VALUE "FileDescription", "Windows WinXShell"
             VALUE "FileVersion", "1,0,8,15"
-            VALUE "InternalName", "PExlorer"
+            VALUE "InternalName", "WinXShell"
             VALUE "LegalCopyright", "(c) FreeMan. All rights reserved."
-            VALUE "OriginalFilename", "PExlorer.exe"
-            VALUE "ProductName", "PEXLORER.EXE"
+            VALUE "OriginalFilename", "WinXShell.exe"
+            VALUE "ProductName", "WINXSHELL.EXE"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END
@@ -239,14 +239,14 @@ STRINGTABLE DISCARDABLE
 BEGIN
 IDS_VERSION_STR "V2.0 RC4"
 #ifdef UNICODE
-IDS_EXPLORER_VERSION_STR "PExlorer %0s"
+IDS_EXPLORER_VERSION_STR "WinXShell %0s"
 #else
-IDS_EXPLORER_VERSION_STR "PExlorer Ansi %0s"
+IDS_EXPLORER_VERSION_STR "WinXShell Ansi %0s"
 #endif
 END
 #endif
 #ifndef _DEBUG
-CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "PExlorer.exe.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "WinXShell.exe.manifest"
 #endif
 
 #ifdef LANGUAGE_EN_US

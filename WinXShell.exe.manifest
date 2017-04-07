@@ -3,10 +3,10 @@
 <assemblyIdentity
     version="1.0.0.0"
     processorArchitecture="*"
-    name="PExlorer"
+    name="WinXShell"
     type="win32"
 />
-<description>PExlorer</description>
+<description>WinXShell</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity
