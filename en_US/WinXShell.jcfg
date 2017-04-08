@@ -1,0 +1,74 @@
+{
+  "JS_README":
+  {
+    "can_be_omitted_section":true,
+    "description":
+    [
+    "this is WinXShell's configure file.",
+    "you can specify some settings for desktop,taskbar,etc."
+    ]
+  },
+  "JS_JMACRO":
+  {
+    "can_be_omitted_section":true,
+    "description":
+    [
+    "specify alias name for built-in paramater names which using in jcfg file.",
+    "MACRO format:<built-in paramater name>,<alias name>,<description>",
+    "<built-in paramater name>:cann't be modified.",
+    "<alias name>: specify alias name which start with [::] for built-in paramater name",
+    "<description>: the description of built-in paramater name, cann't be modified."
+    ],
+    "JKEYNAME":
+    [
+      ["JS_JMACRO", "",           "section name. define the alias name for *i18n*"],
+      ["JS_STARTMENU", "::STARTMENU",          "section name. specify some settings for startmenu."],
+      ["JS_QUICKLAUNCH", "::QL",      "section name. specify some settings for quicklanchbar."],
+      ["wallpaperstyle", "::WP_MODE",  "property name. wallpaper's style value:0-strech(default);1-tile;2-center"],
+      ["wallpaper", "::WP",            "property name."]
+      ]
+  },
+  "JS_FILEEXPLORER":
+  {
+    "#3rd_filename":"##{JVAR_MODULEPATH}\\explorer++.exe",
+    "#padding-bottom":20
+  },
+  "JS_DESKTOP":
+  {
+    "3rd_open_arguments":"\"%s\"",
+    "cascademenu": {
+      "#WinXNew":"Directory\\Background\\shell\\WinXNew"
+    },
+    "bgcolor comment":"green for eyes",
+    "bkcolor":[199,237,204],
+    "wallpaperstyle comment":"value:0-strech(default);1-tile;2-center",
+    "::WP_MODE":0,
+    "::WP":"##{JVAR_MODULEPATH}\\wallpaper.jpg"
+  },
+  "JS_TASKBAR":
+  {
+    "smallicon":false,
+    "userebar":false,
+    "theme":"dark",
+    "height": 40,
+    "bkcolor":[0,122,204]
+  },
+  "::STARTMENU":
+  {
+    "commands": {
+      "reboot": {
+         "command": "Wpeutil.exe",
+         "parameters": "Reboot"
+      },
+      "shutdown": {
+         "command": "Wpeutil.exe",
+         "parameters": "Shutdown"
+      }
+    }
+  },
+  "::QL":
+  {
+    "3rd_startup_arguments":"",
+    "maxiconsinrow":8
+  }
+}
