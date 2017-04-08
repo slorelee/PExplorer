@@ -207,3 +207,45 @@ void MonitorAdapter::GetCurrentResolution(LPCWSTR lpszDeviceName, int& nWidth, i
     nFreq = DeviceMode.dmDisplayFrequency;
     nBits = DeviceMode.dmBitsPerPel;
 }
+
+DWORD GetScreenRotation()
+{
+    DEVMODE tempdevmode;
+    EnumDisplaySettings(NULL, -1, &tempdevmode);
+    return tempdevmode.dmDisplayOrientation;
+}
+
+void SetScreenRotation(DWORD orientation)
+{
+
+    DEVMODE tempdevmode;
+    EnumDisplaySettings(NULL, -1, &tempdevmode);
+
+    //Do not rotate if the given value is the current screen orientation
+    if (tempdevmode.dmDisplayOrientation == orientation) return;
+    DWORD def_height;
+    DWORD def_width;
+
+    //Get base resolution settings
+    if ((tempdevmode.dmDisplayOrientation == DMDO_DEFAULT) || (tempdevmode.dmDisplayOrientation == DMDO_180))
+    {
+        def_height = tempdevmode.dmPelsHeight;
+        def_width = tempdevmode.dmPelsWidth;
+    } else {
+        def_height = tempdevmode.dmPelsWidth;
+        def_width = tempdevmode.dmPelsHeight;
+    }
+
+    //Rotate if necessary
+    if ((orientation == DMDO_90) || (orientation == DMDO_270))
+    {
+        tempdevmode.dmPelsWidth = def_height;
+        tempdevmode.dmPelsHeight = def_width;
+    } else {
+        tempdevmode.dmPelsWidth = def_width;
+        tempdevmode.dmPelsHeight = def_height;
+    }
+
+    tempdevmode.dmDisplayOrientation = orientation;
+    ChangeDisplaySettings(&tempdevmode, 0);
+}

@@ -63,3 +63,6 @@ public:
     int ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth, const int nHeight, const int nFre = -1, const int nColorBits = -1);
 
 };
+
+extern DWORD GetScreenRotation();
+extern void SetScreenRotation(DWORD orientation);
