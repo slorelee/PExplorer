@@ -172,15 +172,23 @@ int MonitorAdapter::ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth,
         return -1;
     }
 
-    if (dmOld.dmPelsWidth == nWidth && dmOld.dmPelsHeight == nHeight)
+    int screenWidth = nWidth;
+    int screenHight = nHeight;
+    if (dmOld.dmDisplayOrientation == DMDO_90 ||
+        dmOld.dmDisplayOrientation == DMDO_270) {
+        screenHight = nWidth;
+        screenWidth = nHeight;
+    }
+
+    if (dmOld.dmPelsWidth == screenWidth && dmOld.dmPelsHeight == screenHight)
     {
         return 0;
     }
 
     DEVMODE dmNew = dmOld;
 
-    dmNew.dmPelsWidth = nWidth;
-    dmNew.dmPelsHeight = nHeight;
+    dmNew.dmPelsWidth = screenWidth;
+    dmNew.dmPelsHeight = screenHight;
 
     HRESULT lResult = S_OK;
     lResult = SetNewResolution(dmOld, dmNew);
