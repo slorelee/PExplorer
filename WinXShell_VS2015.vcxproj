@@ -124,7 +124,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wlanapi.lib;rpcrt4.lib;shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_ud.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -173,7 +173,7 @@
       <UndefinePreprocessorDefinitions>LANGUAGE_EN_US;LANGUAGE_JA_JP;LANGUAGE_ZH_CN</UndefinePreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_ud_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wlanapi.lib;rpcrt4.lib;shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_ud_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -221,7 +221,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_u.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wlanapi.lib;rpcrt4.lib;shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_u.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -270,7 +270,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_u_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wlanapi.lib;rpcrt4.lib;shell32.lib;advapi32.lib;gdi32.lib;user32.lib;comctl32.lib;shlwapi.lib;UxTheme.lib;DuiLib_u_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -307,6 +307,7 @@
     <ClCompile Include="DUI\UIManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DUI\UI_WIFI.cpp" />
     <ClCompile Include="jconfig\jcfg.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -320,6 +321,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="systemsettings\WLAN.cpp" />
+    <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
     <ClCompile Include="utility\utility.cpp" />
@@ -364,9 +367,12 @@
     <ClInclude Include="DUI\SUIParser.h" />
     <ClInclude Include="DUI\UICreator.h" />
     <ClInclude Include="DUI\UIManager.h" />
+    <ClInclude Include="DUI\UI_WIFI.h" />
     <ClInclude Include="jconfig\jcfg.h" />
     <ClInclude Include="shell\fileexplorer.h" />
     <ClInclude Include="systemsettings\MonitorAdapter.h" />
+    <ClInclude Include="systemsettings\WLAN.h" />
+    <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
     <ClInclude Include="utility\utility.h" />

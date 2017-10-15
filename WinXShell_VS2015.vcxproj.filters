@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Manifest Include="PExlorer.exe.manifest" />
+    <Manifest Include="WinXShell.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer.cpp" />
@@ -78,6 +78,15 @@
     <ClCompile Include="DUI\SUIInterpreter.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
+    <ClCompile Include="DUI\UI_WIFI.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
+    <ClCompile Include="systemsettings\WLAN.cpp">
+      <Filter>systemsettings</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\mpool.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -153,6 +162,15 @@
     </ClInclude>
     <ClInclude Include="DUI\SUIInterpreter.h">
       <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\UI_WIFI.h">
+      <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="systemsettings\WLAN.h">
+      <Filter>systemsettings</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\mpool.h">
+      <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -338,15 +356,11 @@
     <Image Include="res\terminate.ico">
       <Filter>res</Filter>
     </Image>
-    <Image Include="res\pexlorer-big.ico">
-      <Filter>res</Filter>
-    </Image>
-    <Image Include="res\pexlorer.ico">
-      <Filter>res</Filter>
-    </Image>
     <Image Include="res\empty.ico">
       <Filter>res</Filter>
     </Image>
+    <Image Include="res\winxshell-big.ico" />
+    <Image Include="res\winxshell.ico" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">
