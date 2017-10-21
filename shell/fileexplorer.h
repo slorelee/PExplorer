@@ -71,8 +71,10 @@ HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv);
 struct FileExplorerWindow : public Window {
     typedef Window super;
     static HWND _hFrame;
+    static HHOOK HookHandle;
     FileExplorerWindow(HWND hwnd);
     ~FileExplorerWindow();
+    static void ReleaseHook();
     static HWND Create();
     static HWND Create(HWND hwnd, String path);
     static int OpenDialog(HWND hwnd, String path);

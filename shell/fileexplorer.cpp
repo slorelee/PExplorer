@@ -1,10 +1,12 @@
 
 
 #include <precomp.h>
-
+#include <Dwmapi.h>
 
 #include "../resource.h" /* IDI_EXPLORER */
 #include "fileexplorer.h"
+
+#pragma comment(lib, "Dwmapi.lib")
 
 #define CLSID_MyComputerName     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
 #define CLSID_RecycleBinName     TEXT("::{645FF040-5081-101B-9F08-00AA002F954E}")
@@ -21,6 +23,7 @@ DEF_GUID(CLSID_MyDocuments, 0x450d8fba, 0xad25, 0x11d0, 0x98, 0xa8, 0x08, 0x95, 
 
 //#include "../utility/window.h"
 
+HHOOK FileExplorerWindow::HookHandle = NULL;
 FileExplorerWindow::FileExplorerWindow(HWND hwnd)
     : super(hwnd)
 {
@@ -29,8 +32,18 @@ FileExplorerWindow::FileExplorerWindow(HWND hwnd)
 FileExplorerWindow::~FileExplorerWindow()
 {
     // don't exit desktop when closing file manager window
-    if (!g_Globals._desktop_mode)
-            PostQuitMessage(0);
+    if (!g_Globals._desktop_mode) {
+        ReleaseHook();
+        PostQuitMessage(0);
+    }
+}
+
+void FileExplorerWindow::ReleaseHook()
+{
+    if (HookHandle) {
+        UnhookWindowsHookEx(HookHandle);
+        HookHandle = NULL;
+    }
 }
 
 #define WM_OPENDIALOG (WM_USER+1)
@@ -47,9 +60,42 @@ HWND FileExplorerWindow::Create()
     return hFrame;
 }
 
+#define FILEEXPLORER_MAGICID 0x5758534d //'W', 'X', 'S', 'M' WinXShell Mark
+static int isFileExplorerWindow(HWND hwnd)
+{
+    LONG_PTR mark = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    if (mark == FILEEXPLORER_MAGICID) return 1;
+    return 0;
+}
+
+#define MINBUTTON_CLICKED MAKELONG(HTMINBUTTON, WM_LBUTTONDOWN)
+
+LRESULT MinButtonHooker(int code, WPARAM wParam, LPARAM lParam) {
+    if (code == HC_ACTION) {
+        CWPSTRUCT *pData = (CWPSTRUCT*)lParam;
+        if (pData->message == WM_SETCURSOR) {
+            if (pData->lParam == MINBUTTON_CLICKED) {
+                if (isFileExplorerWindow(pData->hwnd)) {
+                    ShowWindow(pData->hwnd, SW_SHOWMINNOACTIVE);
+                }
+            }
+        }
+    }
+    return CallNextHookEx(NULL, code, wParam, lParam);
+}
+
 HWND FileExplorerWindow::Create(HWND hwnd, String path)
 {
     HWND hFrame = Create();
+    BOOL dwmEnabled = FALSE;
+    DwmGetWindowAttribute(hFrame, DWMWA_NCRENDERING_ENABLED, &dwmEnabled, sizeof(BOOL));
+
+    //fix issue that can't minimize window when clicking minimizebox if dwm is enabled.
+    if (FileExplorerWindow::HookHandle == NULL && dwmEnabled) {
+        HookHandle = SetWindowsHookEx(WH_CALLWNDPROC,
+            (HOOKPROC)MinButtonHooker, (HINSTANCE)NULL, (DWORD)GetCurrentThreadId());
+    }
+
     String *dirpath = new String(path);
     PostMessage(hFrame, WM_OPENDIALOG, (WPARAM)hFrame, (LPARAM)dirpath);
     return hFrame;
@@ -134,12 +180,18 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
     if (FAILED(hr)) return 0;
     pWindow->Release();
 
-    LONG lStyle = 0;
-    lStyle = GetWindowStyle(hwndDialog);
-    lStyle = GetWindowLong(hwndDialog, GWL_EXSTYLE);
-    SetWindowExStyle(hwndDialog, lStyle | WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW);
+    // Disable non-client area rendering on the window.
+    //DWMNCRENDERINGPOLICY ncrp = DWMNCRP_DISABLED;
+    //DwmSetWindowAttribute(hwndDialog, DWMWA_NCRENDERING_POLICY, &ncrp, sizeof(ncrp));
 
-    SetWindowStyle(hwndDialog, WS_OVERLAPPEDWINDOW);
+    LONG lStyle = 0;
+    lStyle = GetWindowLong(hwndDialog, GWL_EXSTYLE);
+    SetWindowExStyle(hwndDialog, lStyle & ~WS_EX_DLGMODALFRAME & ~WS_EX_CONTROLPARENT |
+        WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW);
+    lStyle = GetWindowStyle(hwndDialog);
+    SetWindowStyle(hwndDialog, lStyle | WS_OVERLAPPEDWINDOW);
+    // Set magic id for MinButtonHooker() function
+    SetWindowLongPtr(hwndDialog, GWLP_USERDATA, FILEEXPLORER_MAGICID);
 
     //_log_(FmtString(TEXT("0x%x"), lStyle | ~WS_EX_DLGMODALFRAME | ~WS_EX_CONTROLPARENT));
     //SetWindowExStyle(hwndDialog, 0x110 | WS_EX_APPWINDOW);
@@ -209,6 +261,7 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChange(IFileDialog *pDlg)
 
 IFACEMETHODIMP CFileDialogEventHandler::OnFileOk(IFileDialog *pDlg)
 {
+    TCHAR path[MAX_PATH] = {0};
     IShellItem *pItem = NULL;
     HRESULT hr = pDlg->GetCurrentSelection(&pItem);
     if (SUCCEEDED(hr)) {
@@ -216,6 +269,10 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFileOk(IFileDialog *pDlg)
         hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz);
         if (SUCCEEDED(hr)) {
             LOG(pwsz);
+            //PathCchRemoveFileSpec
+            _tcscpy(path, pwsz);
+            PathRemoveFileSpec(path);
+            SetCurrentDirectory(path);
             launch_file(g_Globals._hwndDesktop, pwsz);
             CoTaskMemFree(pwsz);
         }

@@ -1253,6 +1253,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         delete pSSOThread;
     }
 
+    FileExplorerWindow::ReleaseHook();
+
     if (!any_desktop_running) {
         // shutdown the shell DDE server
         if (g_SHDOCVW_ShellDDEInit)
