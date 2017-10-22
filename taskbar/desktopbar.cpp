@@ -60,8 +60,6 @@ DesktopBar::~DesktopBar()
     SystemParametersInfo(SPI_SETWORKAREA, 0, &_work_area_org, 0);
     PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
 
-    UnloadSSO();
-
     // exit application after destroying desktop window
     PostQuitMessage(0);
 }
@@ -107,58 +105,6 @@ CreateSolidBitmap(HDC hdc, int width, int height, COLORREF cref)
     SetBitmapDimensionEx(hbmp, width, height, NULL);
 
     return hbmp;
-}
-
-static IOleCommandTarget *StartSSO(CLSID clsid)
-{
-    LPVOID lpVoid;
-    IOleCommandTarget *target = NULL;
-
-    // The SSO might have a custom manifest.
-    // Activate it before loading the object.
-    //ULONG_PTR ulCookie;
-    //HANDLE hContext = ELActivateActCtxForClsid(clsid, &ulCookie);
-
-    if (SUCCEEDED(CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER, IID_IOleCommandTarget,
-        &lpVoid)))
-    {
-        // Start ShellServiceObject
-        reinterpret_cast <IOleCommandTarget*> (lpVoid)->Exec(&CGID_ShellServiceObject,
-            OLECMDID_NEW,
-            OLECMDEXECOPT_DODEFAULT,
-            NULL, NULL);
-        target = reinterpret_cast <IOleCommandTarget*>(lpVoid);
-    }
-
-    //if (hContext != INVALID_HANDLE_VALUE)
-    //ELDeactivateActCtx(hContext, &ulCookie);
-
-    return target;
-}
-
-//Purpose: Loads the system icons
-void DesktopBar::LoadSSO()
-{
-    CLSID /*clsid,*/ clsidTray;
-    IOleCommandTarget *target = NULL;
-
-    CLSIDFromString(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}", &clsidTray);
-    target = StartSSO(clsidTray);
-    if (target)
-        _ssoIconList.push_back(target);
-}
-
-// Purpose: Unload the system icons
-void DesktopBar::UnloadSSO()
-{
-    // Go through each element of the array and stop it...
-    while (!_ssoIconList.empty())
-    {
-        if (_ssoIconList.back()->Exec(&CGID_ShellServiceObject, OLECMDID_SAVE,
-            OLECMDEXECOPT_DODEFAULT, NULL, NULL) == S_OK)
-            _ssoIconList.back()->Release();
-        _ssoIconList.pop_back();
-    }
 }
 
 LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
