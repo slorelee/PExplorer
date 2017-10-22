@@ -82,45 +82,21 @@ static BOOL IsIgnoredWindow(HWND hwnd)
     return FALSE;
 }
 
-static BOOL CALLBACK MinimizeDesktopEnumFct(HWND hwnd, LPARAM lparam)
+static BOOL CALLBACK MinimizeWindowEnumFct(HWND hwnd, LPARAM lparam)
 {
     BOOL rc = FALSE;
     list<MinimizeStruct> &minimized = *(list<MinimizeStruct> *)lparam;
 
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
+    DWORD style = GetWindowStyle(hwnd);
     DWORD ex_style = GetWindowExStyle(hwnd);
-    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && !(ex_style & WS_EX_TOPMOST)) {
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && (style & WS_MINIMIZEBOX) && !(ex_style & WS_EX_TOPMOST)) {
         if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
             if (rect.right > 0 && rect.bottom > 0 &&
                 rect.right > rect.left && rect.bottom > rect.top) {
-                minimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
-                rc = ShowWindowAsync(hwnd, SW_SHOWMINIMIZED);
-                if (rc == FALSE) {
-                    PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);  //Some apps like TaskManager can't be minimized by ShowWindowAsync()
-                }
-            }
-        }
-    }
-
-    return TRUE;
-}
-
-static BOOL CALLBACK UnminimizedDesktopEnumFct(HWND hwnd, LPARAM lparam)
-{
-    BOOL rc = FALSE;
-    list<MinimizeStruct> &unminimized = *(list<MinimizeStruct> *)lparam;
-
-    if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
-    DWORD ex_style = GetWindowExStyle(hwnd);
-    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && !(ex_style & WS_EX_TOPMOST)) {
-        if (IsIgnoredWindow(hwnd)) return TRUE;
-        RECT rect;
-        if (GetWindowRect(hwnd, &rect)) {
-            if (rect.right > 0 && rect.bottom > 0 &&
-                rect.right > rect.left && rect.bottom > rect.top) {
-                unminimized.push_back(MinimizeStruct(hwnd, GetWindowStyle(hwnd)));
+                minimized.push_back(MinimizeStruct(hwnd, style));
             }
         }
     }
@@ -128,26 +104,25 @@ static BOOL CALLBACK UnminimizedDesktopEnumFct(HWND hwnd, LPARAM lparam)
 }
 
 // flag = SW_SHOWMINIMIZED or SW_SHOWNORMAL
-static void ToggleWindows(list<MinimizeStruct> *windows, int flag, list<MinimizeStruct> *minimized = NULL)
+static void ToggleWindows(list<MinimizeStruct> *windows, int flag)
 {
     BOOL rc = FALSE;
+    if (windows->empty()) return;
     for (list<MinimizeStruct>::const_reverse_iterator it = windows->rbegin();
     it != windows->rend(); ++it) {
         if (flag == SW_SHOWMINIMIZED) {
-            minimized->push_back(MinimizeStruct(it->first, GetWindowStyle(it->first)));
-            rc = ShowWindowAsync(it->first, SW_SHOWMINIMIZED);
-            if (rc == FALSE) {
+            rc = ShowWindow(it->first, SW_SHOWMINNOACTIVE);
+            if (rc == FALSE) {  //Some apps like TaskManager can't be minimized by ShowWindowAsync()
                 PostMessage(it->first, WM_SYSCOMMAND, SC_MINIMIZE, 0);
             }
         } else {
-            rc = ShowWindowAsync(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
+            rc = ShowWindow(it->first, it->second & WS_MAXIMIZE ? SW_MAXIMIZE : SW_RESTORE);
             if (rc == FALSE) {
                 PostMessage(it->first, WM_SYSCOMMAND, it->second & WS_MAXIMIZE ? SC_MAXIMIZE : SC_RESTORE, 0);
             }
         }
         Sleep(20);
     }
-    windows->clear();
 }
 
 // minimize/restore all windows on the desktop
@@ -162,17 +137,15 @@ void Desktop::ToggleMinimize()
     SystemParametersInfo(SPI_SETANIMATION, sizeof(ami), &ami, FALSE);
 
     list<MinimizeStruct> &minimized = _minimized;
-    if (minimized.empty()) {
-        EnumWindows(MinimizeDesktopEnumFct, (LPARAM)&minimized);
+    list<MinimizeStruct> new_minimized;
+    EnumWindows(MinimizeWindowEnumFct, (LPARAM)&new_minimized);
+    if (new_minimized.empty()) {
+        //restore minimized windows
+        ToggleWindows(&minimized, SW_SHOWNORMAL);
+        minimized.clear();
     } else {
-        list<MinimizeStruct> unminimized;
-        EnumWindows(UnminimizedDesktopEnumFct, (LPARAM)&unminimized);
-        if (!unminimized.empty()) {
-            minimized.clear();
-            ToggleWindows(&unminimized, SW_SHOWMINIMIZED, &minimized);
-        } else {
-            ToggleWindows(&minimized, SW_SHOWNORMAL);
-        }
+        ToggleWindows(&new_minimized, SW_SHOWMINIMIZED);
+        minimized = new_minimized;
     }
 
     ami.iMinAnimate = iAnimate;
