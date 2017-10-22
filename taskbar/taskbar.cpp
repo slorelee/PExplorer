@@ -27,7 +27,7 @@
 
 
 #include <precomp.h>
-
+#include <WinUser.h>
 #include "taskbar.h"
 #include "traynotify.h" // for NOTIFYAREA_WIDTH_DEF
 
@@ -227,9 +227,12 @@ LRESULT TaskBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 #ifdef HSHELL_FLASH
             case HSHELL_FLASH:
 #endif
+/*
+already be handled by HSHELL_WINDOWCREATED
 #ifdef HSHELL_RUDEAPPACTIVATED
             case HSHELL_RUDEAPPACTIVATED:
 #endif
+*/
                 Refresh();
                 break;
             }
