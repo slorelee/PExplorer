@@ -153,7 +153,14 @@ static void ToggleWindows(list<MinimizeStruct> *windows, int flag, list<Minimize
 // minimize/restore all windows on the desktop
 void Desktop::ToggleMinimize()
 {
-    BOOL rc = FALSE;
+    LONG iAnimate;
+    ANIMATIONINFO ami;
+    ami.cbSize = sizeof(ANIMATIONINFO);
+    SystemParametersInfo(SPI_GETANIMATION, sizeof(ami), &ami, FALSE);
+    iAnimate = ami.iMinAnimate;
+    ami.iMinAnimate = FALSE;
+    SystemParametersInfo(SPI_SETANIMATION, sizeof(ami), &ami, FALSE);
+
     list<MinimizeStruct> &minimized = _minimized;
     if (minimized.empty()) {
         EnumWindows(MinimizeDesktopEnumFct, (LPARAM)&minimized);
@@ -167,6 +174,9 @@ void Desktop::ToggleMinimize()
             ToggleWindows(&minimized, SW_SHOWNORMAL);
         }
     }
+
+    ami.iMinAnimate = iAnimate;
+    SystemParametersInfo(SPI_SETANIMATION, sizeof(ami), &ami, FALSE);
 }
 
 
