@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <vector>
 
 //
 // Explorer clone
@@ -29,11 +30,13 @@
 // launch start programs
 extern "C" int startup(int argc, const TCHAR *argv[]);
 
+typedef std::vector<IOleCommandTarget *> SSOVector;
+
 // load Shell Service Objects (volume control, printer/network icons, ...)
 struct SSOThread : public Thread {
     int Run();
 private:
-    std::vector<IOleCommandTarget *> _ssoIconList;
+    SSOVector _ssoIconList;
     void LoadSSO();
     void UnloadSSO();
 };

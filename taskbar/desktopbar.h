@@ -96,10 +96,6 @@ protected:
     int     Notify(int id, NMHDR *pnmh);
     int     Command(int id, int code);
 
-
-    void    LoadSSO();
-    void    UnloadSSO();
-
     void    Resize(int cx, int cy);
     void    ControlResize(WPARAM wparam, LPARAM lparam);
     void    RegisterHotkeys(BOOL unreg = FALSE);
@@ -126,8 +122,6 @@ protected:
 #else
     const UINT WM_TASKBARCREATED;
 #endif
-
-    std::vector<IOleCommandTarget*> _ssoIconList;
 };
 
 

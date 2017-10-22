@@ -32,10 +32,13 @@
 #include <ole2.h>
 #include "shellservices.h"
 
-static IOleCommandTarget *StartSSO(CLSID clsid)
+static IOleCommandTarget *StartSSO(TCHAR *strClsid)
 {
+    CLSID clsid;
     LPVOID lpVoid;
     IOleCommandTarget *target = NULL;
+
+    CLSIDFromString(strClsid, &clsid);
 
     // The SSO might have a custom manifest.
     // Activate it before loading the object.
@@ -63,13 +66,30 @@ static IOleCommandTarget *StartSSO(CLSID clsid)
 //Purpose: Loads the system icons
 void SSOThread::LoadSSO()
 {
-    CLSID /*clsid,*/ clsidTray;
     IOleCommandTarget *target = NULL;
+    /*
+    HKEY hkey;
+    CLSID clsid;
+    TCHAR name[MAX_PATH];
 
-    CLSIDFromString(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}", &clsidTray);
-    target = StartSSO(clsidTray);
-    if (target)
+    if (!RegOpenKey(HKEY_LOCAL_MACHINE,
+        TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellServiceObjects"), &hkey)) {
+        for (int idx = 0; ; ++idx) {
+            if (ERROR_SUCCESS != RegEnumKey(hkey, idx, name, MAX_PATH))
+                break;
+
+            if (!_alive)
+                break;
+
+            if (target = StartSSO(name))
+                _ssoIconList.push_back(target);
+        }
+        RegCloseKey(hkey);
+    }
+    */
+    if (target = StartSSO(L"{35CEC8A3-2BE6-11D2-8773-92E220524153}")) {
         _ssoIconList.push_back(target);
+    }
 }
 
 // Purpose: Unload the system icons
