@@ -41,11 +41,8 @@
 
 DesktopBar::DesktopBar(HWND hwnd)
     :  super(hwnd),
-#ifdef __REACTOS__
-       _trayIcon(hwnd, ID_TRAY_VOLUME)
-#else
-       WM_TASKBARCREATED(RegisterWindowMessage(WINMSG_TASKBARCREATED))
-#endif
+    _traySndVolIcon(hwnd, ID_TRAY_VOLUME),
+    _trayNetworkIcon(hwnd, ID_TRAY_NETWORK)
 {
     SetWindowIcon(hwnd, IDI_WINXSHELL);
 
@@ -411,6 +408,19 @@ static void HideForFullScreenWindow(HWND hwnd)
     }
 }
 
+static void OnTraySndVol(HWND hwnd, UINT id)
+{
+    if (hwnd) KillTimer(hwnd, id); // finish one-click timer
+    //launch volume control in rightbottom(x:4096, y:4096)
+    launch_file(hwnd, TEXT("SndVol.exe"), SW_SHOWNORMAL, TEXT("-m 268439552"));
+}
+
+static void OnTrayNetwork(HWND hwnd, UINT id)
+{
+    if (hwnd) KillTimer(hwnd, id);
+    launch_file(hwnd, TEXT("winxshell.exe"), SW_SHOWNORMAL, _T("-ui -jcfg UI_WIFI\\main.jcfg"));
+}
+
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     //if (nmsg != WM_TIMER) LOG(FmtString(TEXT("NMSG - %d"), nmsg));
@@ -508,8 +518,9 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
                 HideForFullScreenWindow(_hwnd);
             }
         } else if (wparam == ID_TRAY_VOLUME) {
-            KillTimer(_hwnd, wparam);
-            launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL, TEXT("-t"));    // launch volume control in small mode
+            OnTraySndVol(_hwnd, (UINT)wparam);
+        } else if (wparam == ID_TRAY_NETWORK) {
+            OnTrayNetwork(_hwnd, (UINT)wparam);
         }
         break;
 
@@ -644,16 +655,13 @@ int DesktopBar::Command(int id, int code)
         DestroyWindow(g_Globals._hwndDesktop);
         break;
     }
-
-#ifdef __REACTOS__
     case ID_TRAY_VOLUME:
-        launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL);    // launch volume control application
+        OnTraySndVol(NULL, 0);
         break;
 
     case ID_VOLUME_PROPERTIES:
         launch_cpanel(_hwnd, TEXT("mmsys.cpl"));
         break;
-#endif
 
     default:
         if (_hwndQuickLaunch)
@@ -851,23 +859,29 @@ void DesktopBar::ControlResize(WPARAM wparam, LPARAM lparam)
 }
 
 
-#ifdef __REACTOS__
-
 void DesktopBar::AddTrayIcons()
 {
-    _trayIcon.Add(SmallIcon(IDI_SPEAKER), ResString(IDS_VOLUME));
+    HICON icon = g_Globals._icon_cache.get_icon(ICID_TRAY_SND_NONE).get_hicon();
+    _traySndVolIcon.Add(icon, ResString(IDS_VOLUME));
+    icon = g_Globals._icon_cache.get_icon(ICID_TRAY_NET_WIRED_LAN).get_hicon();
+    _trayNetworkIcon.Add(icon, ResString(IDS_NETWORK));
 }
 
 void DesktopBar::TrayClick(UINT id, int btn)
 {
     switch (id) {
     case ID_TRAY_VOLUME:
-        if (btn == TRAYBUTTON_LEFT)
+        if (btn == TRAYBUTTON_LEFT) {
             SetTimer(_hwnd, ID_TRAY_VOLUME, 500, NULL); // wait a bit to correctly handle double clicks
-        else {
+        } else {
             PopupMenu menu(IDM_VOLUME);
             SetMenuDefaultItem(menu, 0, MF_BYPOSITION);
             menu.TrackPopupMenuAtPos(_hwnd, GetMessagePos());
+        }
+        break;
+    case ID_TRAY_NETWORK:
+        if (btn == TRAYBUTTON_LEFT) {
+            SetTimer(_hwnd, ID_TRAY_NETWORK, 500, NULL); // wait a bit to correctly handle double clicks
         }
         break;
     }
@@ -877,10 +891,11 @@ void DesktopBar::TrayDblClick(UINT id, int btn)
 {
     switch (id) {
     case ID_TRAY_VOLUME:
-        KillTimer(_hwnd, ID_TRAY_VOLUME);   // finish one-click timer
-        launch_file(_hwnd, TEXT("sndvol32.exe"), SW_SHOWNORMAL);    // launch volume control application
+        OnTraySndVol(_hwnd, id);
+        break;
+    case ID_TRAY_NETWORK:
+        OnTrayNetwork(_hwnd, id);
         break;
     }
 }
 
-#endif

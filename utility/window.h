@@ -1049,31 +1049,31 @@ template<typename BASE> struct TrayIconControllerTemplate : public BASE {
         if (nmsg == PM_TRAYICON) {
             switch (lparam) {
             case WM_MOUSEMOVE:
-                TrayMouseOver(wparam);
+                TrayMouseOver((UINT)wparam);
                 break;
 
             case WM_LBUTTONDOWN:
-                TrayClick(wparam, TRAYBUTTON_LEFT);
+                TrayClick((UINT)wparam, TRAYBUTTON_LEFT);
                 break;
 
             case WM_LBUTTONDBLCLK:
-                TrayDblClick(wparam, TRAYBUTTON_LEFT);
+                TrayDblClick((UINT)wparam, TRAYBUTTON_LEFT);
                 break;
 
             case WM_RBUTTONDOWN:
-                TrayClick(wparam, TRAYBUTTON_RIGHT);
+                TrayClick((UINT)wparam, TRAYBUTTON_RIGHT);
                 break;
 
             case WM_RBUTTONDBLCLK:
-                TrayDblClick(wparam, TRAYBUTTON_RIGHT);
+                TrayDblClick((UINT)wparam, TRAYBUTTON_RIGHT);
                 break;
 
             case WM_MBUTTONDOWN:
-                TrayClick(wparam, TRAYBUTTON_MIDDLE);
+                TrayClick((UINT)wparam, TRAYBUTTON_MIDDLE);
                 break;
 
             case WM_MBUTTONDBLCLK:
-                TrayDblClick(wparam, TRAYBUTTON_MIDDLE);
+                TrayDblClick((UINT)wparam, TRAYBUTTON_MIDDLE);
                 break;
             }
 
