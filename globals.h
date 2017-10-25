@@ -220,6 +220,7 @@ extern struct ExplorerGlobals {
     void    write_persistent();
 
     void    load_config();
+    void    get_modulepath();
     void    get_systeminfo();
 
     HINSTANCE   _hInstance;

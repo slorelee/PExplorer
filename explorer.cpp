@@ -94,14 +94,16 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
     _icon_cache.init();
 }
 
-void ExplorerGlobals::load_config()
+void ExplorerGlobals::get_modulepath()
 {
     TCHAR szFile[MAX_PATH + 1] = { 0 };
     String strPath = TEXT("");
     String strFileName = TEXT("");
+    JVAR("JVAR_MODULEFILENAME") = TEXT("");
     DWORD dwRet = GetModuleFileName(NULL, szFile, COUNTOF(szFile));
     if (dwRet != 0) {
         strPath = szFile;
+        JVAR("JVAR_MODULEFILENAME") = strPath;
         size_t nPos = strPath.rfind(TEXT('\\'));
         if (nPos != -1) {
             strFileName = strPath.substr(nPos + 1);
@@ -110,11 +112,16 @@ void ExplorerGlobals::load_config()
     }
     JVAR("JVAR_MODULEPATH") = strPath;
     JVAR("JVAR_MODULENAME") = strFileName;
+}
+
+void ExplorerGlobals::load_config()
+{
+    get_modulepath();
 
 #ifdef _DEBUG
     String cfgfile = TEXT("WinXShell.jcfg");
 #else
-    String cfgfile = strPath + TEXT("\\WinXShell.jcfg");
+    String cfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\WinXShell.jcfg");
 #endif
     Load_JCfg(cfgfile);
 }
@@ -1132,6 +1139,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
     if (_tcsstr(ext_options, TEXT("-ui"))) {
+        g_Globals.get_modulepath();
+        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
         UIProcess(hInstance, lpCmdLineOrg);
         return 0;
     }

@@ -418,7 +418,8 @@ static void OnTraySndVol(HWND hwnd, UINT id)
 static void OnTrayNetwork(HWND hwnd, UINT id)
 {
     if (hwnd) KillTimer(hwnd, id);
-    launch_file(hwnd, TEXT("winxshell.exe"), SW_SHOWNORMAL, _T("-ui -jcfg UI_WIFI\\main.jcfg"));
+    LPCTSTR selfexe = JVAR("JVAR_MODULEFILENAME").ToString().c_str();
+    launch_file(hwnd, selfexe, SW_SHOWNORMAL, _T("-ui -jcfg UI_WIFI\\main.jcfg"));
 }
 
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
