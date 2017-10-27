@@ -34,6 +34,9 @@
 
 #include "traynotify.h"
 
+#include "../DUI/UICreator.h"
+#define Point UtilPoint
+
 #ifdef USE_NOTIFYHOOK
 #include "../notifyhook/notifyhook.h"
 
@@ -168,6 +171,135 @@ NotifyIconIndex::NotifyIconIndex()
     _uID = 0;
 }
 
+typedef struct _TrayNotifyInfo
+{
+    String strTitle;
+    String strInfo;
+    UINT uTimeout;
+    DWORD dwFlags;
+    HICON hIcon;
+}TrayNotifyInfo;
+
+class CNotifyInfoWindow :
+    public CDUIWindow
+{
+public:
+    TrayNotifyInfo m_Info;
+    int m_n;
+    int m_Height;
+    CNotifyInfoWindow(LPCTSTR pszClassName, LPCTSTR pszUIName, LPCTSTR pszUIEntry = _T("main.xml"));
+protected:
+    void OnPrepare();
+    LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled);
+    void CloseMe();
+};
+
+CNotifyInfoWindow::CNotifyInfoWindow(LPCTSTR pszClassName,
+    LPCTSTR pszUIName, LPCTSTR pszUIEntry) :
+    CDUIWindow(pszClassName, pszUIName, pszUIEntry)
+{
+    m_Info = {_T(""), _T("") , 0};
+    m_Height = 0;
+    m_n = 0;
+}
+
+#define IDT_TIMEOUT 0
+
+int GetTextHeight(HWND hwnd, int width, LPCTSTR text)
+{
+    HDC hdc = GetDC(hwnd);
+    RECT  rect = {0, 0, 0, 0};
+    rect.right = width;
+    DrawText(hdc, text, -1, &rect, DT_CALCRECT | DT_WORDBREAK | DT_EDITCONTROL);
+    ReleaseDC(hwnd, hdc);
+    return rect.bottom;
+}
+
+void CNotifyInfoWindow::OnPrepare()
+{
+    CControlUI *pIcon = m_PaintManager.FindControl(_T("$icon"));
+    CControlUI *pTitle = m_PaintManager.FindControl(_T("$title"));
+    CControlUI *pInfo = m_PaintManager.FindControl(_T("$info"));
+    TCHAR *pIconName = _T("info.png");
+    if (m_Info.dwFlags == NIIF_NONE) {
+        if (pIcon) pIcon->SetVisible(false);
+        pIcon = NULL; 
+    } else if (m_Info.dwFlags & NIIF_INFO) {
+        pIconName = _T("info.png");
+    } else if (m_Info.dwFlags & NIIF_WARNING) {
+        pIconName = _T("warn.png");
+    } else if (m_Info.dwFlags & NIIF_ERROR) {
+        pIconName = _T("error.png");
+    }
+    if (pIcon) pIcon->SetBkImage(pIconName);
+
+    if (pTitle) pTitle->SetText(m_Info.strTitle);
+    if (pInfo) pInfo->SetText(m_Info.strInfo);
+    int textHeight = GetTextHeight(GetHWND(), pInfo->GetWidth(), m_Info.strInfo.c_str());
+    //LOG(FmtString(_T("SetText: %d %d\n") , pInfo->GetHeight(), textHeight));
+    int infoHeight = pInfo->GetHeight();
+    if (textHeight > infoHeight) {
+        RECT rcClient = { 0 };
+        HWND hWndPaint = m_PaintManager.GetPaintWindow();
+        ::GetClientRect(hWndPaint, &rcClient);
+        m_Height = rcClient.bottom - infoHeight + textHeight;
+        ::SetWindowPos(hWndPaint, NULL, rcClient.left, rcClient.top,
+            rcClient.right, m_Height + 32, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+    }
+
+    int dHeight = -100;
+    if (m_Height > 0) {
+        dHeight = -20 - m_Height;
+    }
+    this->RightBottomWindow(-5, -10 + dHeight * (m_n % 3));
+
+    UINT timeout = m_Info.uTimeout;
+    if (timeout <= 0) timeout = 3000;
+    SetTimer(GetHWND(), IDT_TIMEOUT, timeout, NULL);
+    if ((m_Info.dwFlags & NIIF_NOSOUND) == 0) {
+        MessageBeep(MB_ICONASTERISK);
+    }
+}
+
+LRESULT CNotifyInfoWindow::HandleCustomMessage(
+    UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+    switch (uMsg) {
+    case WM_TIMER:
+        if (wParam == IDT_TIMEOUT) {
+            KillTimer(GetHWND(), IDT_TIMEOUT);
+            bHandled = TRUE;
+            CloseMe();
+            return 0;
+        }
+    }
+    bHandled = FALSE;
+    return 0;
+}
+
+void CNotifyInfoWindow::CloseMe()
+{
+    Close();
+}
+
+void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
+{
+    static int n = 0;
+
+    DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
+    DWORD dwExStyle = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+    CNotifyInfoWindow *pFrame = new CNotifyInfoWindow(
+        _T("WinXShell-NOTITYINFO-Wnd"), _T("UI_NotifyInfo"));
+
+    if (pFrame == NULL) return;
+    pFrame->m_Info = *pTrayInfo;
+    pFrame->m_n = n;
+    pFrame->Create(NULL, _T("UI_NotifyInfo"), dwStyle, dwExStyle);
+    pFrame->ShowWindow();
+    n++;
+    if (n >= 999) n = 0;
+}
+
 NotifyInfo::NotifyInfo()
 {
     _idx = -1;
@@ -250,6 +382,17 @@ bool NotifyInfo::_modify(NID_T *pnid)
             _tipText = new_text;
             changes = true;
         }
+    }
+
+    // show info window
+    if (pnid->uFlags & NIF_INFO) {
+        TrayNotifyInfo TrayInfo;
+        TrayInfo.strTitle.assign(pnid->szInfoTitle, 64);
+        TrayInfo.strInfo.assign(pnid->szInfo, 256);
+        TrayInfo.uTimeout = pnid->uTimeout;
+        TrayInfo.dwFlags = pnid->dwInfoFlags;
+        CreateNotifyInfoWindow(&TrayInfo);
+        changes = false;
     }
 
     return changes;

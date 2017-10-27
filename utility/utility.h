@@ -460,6 +460,11 @@ struct Point : public POINT {
     operator LPPOINT() {return this;}
 };
 
+//fix error C2872: 'Point' : ambiguous symbol (gdiplustypes.h)
+struct UtilPoint : public Point {
+    UtilPoint(LONG x_, LONG y_) : Point(x_, y_) {};
+    UtilPoint(LPARAM lparam) : Point(lparam) {};
+};
 
 /// transform coordinates in a RECT from client to screen coordiantes
 inline void ClientToScreen(HWND hwnd, RECT *prect)
