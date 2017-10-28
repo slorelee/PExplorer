@@ -386,13 +386,14 @@ bool NotifyInfo::_modify(NID_T *pnid)
 
     // show info window
     if (pnid->uFlags & NIF_INFO) {
-        TrayNotifyInfo TrayInfo;
-        TrayInfo.strTitle.assign(pnid->szInfoTitle, 64);
-        TrayInfo.strInfo.assign(pnid->szInfo, 256);
-        TrayInfo.uTimeout = pnid->uTimeout;
-        TrayInfo.dwFlags = pnid->dwInfoFlags;
-        CreateNotifyInfoWindow(&TrayInfo);
-        changes = false;
+        if (pnid->uTimeout > 0) {
+            TrayNotifyInfo TrayInfo;
+            TrayInfo.strTitle.assign(pnid->szInfoTitle, 64);
+            TrayInfo.strInfo.assign(pnid->szInfo, 256);
+            TrayInfo.uTimeout = pnid->uTimeout;
+            TrayInfo.dwFlags = pnid->dwInfoFlags;
+            CreateNotifyInfoWindow(&TrayInfo);
+        }
     }
 
     return changes;
