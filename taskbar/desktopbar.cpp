@@ -862,10 +862,15 @@ void DesktopBar::ControlResize(WPARAM wparam, LPARAM lparam)
 
 void DesktopBar::AddTrayIcons()
 {
-    HICON icon = g_Globals._icon_cache.get_icon(ICID_TRAY_SND_NONE).get_hicon();
-    _traySndVolIcon.Add(icon, ResString(IDS_VOLUME));
-    icon = g_Globals._icon_cache.get_icon(ICID_TRAY_NET_WIRED_LAN).get_hicon();
-    _trayNetworkIcon.Add(icon, ResString(IDS_NETWORK));
+    HICON icon = NULL;
+    if (JCFG2_DEF("JS_TRAYNOTIFY", "soundicon", true).ToBool() != FALSE) {
+        icon = g_Globals._icon_cache.get_icon(ICID_TRAY_SND_NONE).get_hicon();
+        _traySndVolIcon.Add(icon, ResString(IDS_VOLUME));
+    }
+    if (JCFG2_DEF("JS_TRAYNOTIFY", "networkicon", true).ToBool() != FALSE) {
+        icon = g_Globals._icon_cache.get_icon(ICID_TRAY_NET_WIRED_LAN).get_hicon();
+        _trayNetworkIcon.Add(icon, ResString(IDS_NETWORK));
+    }
 }
 
 void DesktopBar::TrayClick(UINT id, int btn)
