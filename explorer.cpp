@@ -1140,7 +1140,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (_tcsstr(ext_options, TEXT("-ui"))) {
         g_Globals.get_modulepath();
+#ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+#endif
         UIProcess(hInstance, lpCmdLineOrg);
         return 0;
     }
