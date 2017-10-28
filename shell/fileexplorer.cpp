@@ -23,6 +23,31 @@ DEF_GUID(CLSID_MyDocuments, 0x450d8fba, 0xad25, 0x11d0, 0x98, 0xa8, 0x08, 0x95, 
 
 //#include "../utility/window.h"
 
+/*
+#ifndef _WIN64
+typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+LPFN_ISWOW64PROCESS fnIsWow64Process;
+BOOL IsWow64()
+{
+    BOOL bIsWow64 = FALSE;
+
+    //IsWow64Process is not available on all supported versions of Windows.
+    //Use GetModuleHandle to get a handle to the DLL that contains the function
+    //and GetProcAddress to get a pointer to the function if available.
+
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(
+        GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
+
+    if (NULL != fnIsWow64Process) {
+        if (!fnIsWow64Process(GetCurrentProcess(), &bIsWow64)) {
+            //handle error
+        }
+    }
+    return bIsWow64;
+}
+#endif
+*/
+
 HHOOK FileExplorerWindow::HookHandle = NULL;
 FileExplorerWindow::FileExplorerWindow(HWND hwnd)
     : super(hwnd)
@@ -88,7 +113,21 @@ HWND FileExplorerWindow::Create(HWND hwnd, String path)
 {
     HWND hFrame = Create();
     BOOL dwmEnabled = FALSE;
+
     DwmGetWindowAttribute(hFrame, DWMWA_NCRENDERING_ENABLED, &dwmEnabled, sizeof(BOOL));
+    if (dwmEnabled) {
+        TCHAR sysPathBuff[MAX_PATH] = {0};
+        GetWindowsDirectory(sysPathBuff, MAX_PATH);
+        String dwmPath = sysPathBuff;
+#ifdef _WIN64
+        dwmPath.append(_T("\\System32\\dwm.exe"));
+#else
+        dwmPath.append(_T("\\SysNative\\dwm.exe"));
+#endif
+        if (!PathFileExists(dwmPath)) {
+            dwmEnabled = FALSE;
+        }
+    }
 
     //fix issue that can't minimize window when clicking minimizebox if dwm is enabled.
     if (FileExplorerWindow::HookHandle == NULL && dwmEnabled) {
