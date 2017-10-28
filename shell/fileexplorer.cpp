@@ -95,7 +95,7 @@ static int isFileExplorerWindow(HWND hwnd)
 
 #define MINBUTTON_CLICKED MAKELONG(HTMINBUTTON, WM_LBUTTONDOWN)
 
-LRESULT MinButtonHooker(int code, WPARAM wParam, LPARAM lParam) {
+LRESULT WINAPI MinButtonHooker(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION) {
         CWPSTRUCT *pData = (CWPSTRUCT*)lParam;
         if (pData->message == WM_SETCURSOR) {
