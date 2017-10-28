@@ -1227,6 +1227,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (startup_desktop) {
         WaitCursor wait;
 
+// for loading UI Resources
+#ifndef _DEBUG
+        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+#endif
+
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();
