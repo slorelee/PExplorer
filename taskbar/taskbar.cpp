@@ -427,6 +427,14 @@ HICON get_window_icon_big(HWND hwnd, bool allow_from_class)
     return hIcon;
 }
 
+
+static int isTopWindow(HWND hwnd)
+{
+    if (GetParent(hwnd)) return 0;
+    if (GetWindow(hwnd, GW_OWNER)) return 0;
+    return 1;
+}
+
 // fill task bar with buttons for enumerated top level windows
 BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 {
@@ -436,7 +444,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
     DWORD ex_style = GetWindowExStyle(hwnd);
 
     if ((style & WS_VISIBLE) && !(ex_style & WS_EX_TOOLWINDOW) &&
-        ((ex_style & WS_EX_APPWINDOW) | !GetParent(hwnd))) {
+        ((ex_style & WS_EX_APPWINDOW) | isTopWindow(hwnd))) {
         TCHAR title[BUFFER_LEN] = {0};
         TCHAR strbuffer[BUFFER_LEN] = {0};
 
