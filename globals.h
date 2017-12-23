@@ -229,6 +229,7 @@ extern struct ExplorerGlobals {
     BOOL        _isWinPE;
     BOOL        _isNT5;
     String      _langID;
+    String      _locale;
 #ifndef ROSSHELL
     ATOM        _hframeClass;
     HWND        _hMainWnd;

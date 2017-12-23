@@ -1138,12 +1138,27 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
+    TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
+    GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH);
+    g_Globals._locale = locale_buf;
+
+    CUIManager *pUIManager = NULL;
+    if (_tcsstr(ext_options, TEXT("-uimgr"))) {
+        HWND hwnd = CUIManager::GetUIManager();
+        if (hwnd == NULL) {
+            pUIManager = new CUIManager(hInstance, TRUE);
+       }
+    }
+
     if (_tcsstr(ext_options, TEXT("-ui"))) {
         g_Globals.get_modulepath();
 #ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
         UIProcess(hInstance, lpCmdLineOrg);
+        if (pUIManager) {
+            Window::MessageLoop();
+        }
         return 0;
     }
 
@@ -1284,8 +1299,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._desktop_mode = true;
 #endif
 
-    if (startup_desktop && _tcsstr(ext_options, TEXT("-uimgr"))) {
-        CUIManager *pUIManager = new CUIManager(hInstance, TRUE);
+    /* UIManager Process */
+    if (!startup_desktop && pUIManager) {
+         Window::MessageLoop();
+         return 0;
     }
 
     int ret = explorer_main(hInstance, lpCmdLine, nShowCmd);
@@ -1310,62 +1327,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     return ret;
 }
 
-String GetUIParameter(String cmdline, String key, BOOL hasValue = TRUE)
-{
-    key = _T(" ") + key + _T(" ");
-    String::size_type pos = cmdline.find(key);
-    String::size_type startPos = 0;
-    String::size_type endPos = 0;
-    if (pos != String::npos) {
-        if (!hasValue) return key;
-        startPos = pos + key.length();
-        endPos = cmdline.find(_T(" "), startPos);
-        if (endPos != String::npos) {
-            return cmdline.substr(startPos, endPos - startPos);
-        }
-    }
-    return "";
-}
-
 void UIProcess(HINSTANCE hInst, String cmdline) {
-    cmdline.append(_T(" "));
-    String suiJCfg = GetUIParameter(cmdline, _T("-jcfg"));
-    String suiClassName = _T("");
-    String suiName = _T("");
-    String suiEntry = _T("");
-    CUIParameter uiParam(hInst);
-    TCHAR absPathBuff[MAX_PATH] = { 0 };
-
-    if (!suiJCfg.empty()) {
-        GetFullPathName(suiJCfg.c_str(), MAX_PATH, absPathBuff, NULL);
-        if (!PathFileExists(absPathBuff)) return;
-        Object jcfg = Load_JsonCfg(suiJCfg);
-        uiParam.m_suiJCfg = jcfg;
-    } else {
-        suiClassName = GetUIParameter(cmdline, _T("-class"));
-        suiName = GetUIParameter(cmdline, _T("-name"));
-        suiEntry = GetUIParameter(cmdline, _T("-entry"));
-        if (suiEntry.empty()) suiEntry = _T("main.xml");
-        if (suiClassName.empty()) suiClassName = _T("WinXShell-") + suiName + _T("-Wnd");
-    }
-    String pathName = suiName + _T("\\") + suiEntry;
-
-    ZeroMemory(absPathBuff, sizeof(TCHAR) * MAX_PATH);
-    GetFullPathName(pathName.c_str(), MAX_PATH, absPathBuff, NULL);
-    if (!PathFileExists(absPathBuff)) return;
-
-    if (suiJCfg.empty()) {
-        uiParam = CUIParameter(hInst, (TCHAR *)suiClassName.c_str(),
-            (TCHAR *)suiName.c_str(), (TCHAR *)suiEntry.c_str());
-        uiParam.m_bSingleton = (!GetUIParameter(cmdline, _T("-singleton"), FALSE).empty());
-        uiParam.m_bNoShadow = (!GetUIParameter(cmdline, _T("-noshadow"), FALSE).empty());
-    }
 
     HWND hwnd = CUIManager::GetUIManager();
     if (hwnd == NULL) {
-        CUIManager::CreateUI(uiParam);
+        CUIManager::CreateUI(hInst, cmdline);
     } else {
-        SendMessage(hwnd, WM_UICREATE, 0, (LPARAM)(&uiParam));
+        SendMessage(hwnd, WM_UICREATE, 0, (LPARAM)(cmdline.c_str()));
     }
     return;
 }
