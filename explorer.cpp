@@ -1139,8 +1139,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
-    GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH);
-    g_Globals._locale = locale_buf;
+    g_Globals._locale = _T("en-US");
+    if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
+        g_Globals._locale = locale_buf;
+    }
 
     CUIManager *pUIManager = NULL;
     if (_tcsstr(ext_options, TEXT("-uimgr"))) {
