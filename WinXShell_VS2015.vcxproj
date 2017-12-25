@@ -325,6 +325,12 @@
     <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
+    <ClCompile Include="utility\TrayHelper.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="utility\utility.cpp" />
     <ClCompile Include="utility\window.cpp" />
     <ClCompile Include="taskbar\desktopbar.cpp" />
@@ -375,6 +381,7 @@
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
+    <ClInclude Include="utility\TrayHelper.h" />
     <ClInclude Include="utility\utility.h" />
     <ClInclude Include="utility\window.h" />
     <ClInclude Include="resource.h" />
@@ -443,6 +450,7 @@
     <Image Include="res\notify_l_w.ico" />
     <Image Include="res\notify_r_b.ico" />
     <Image Include="res\notify_r_w.ico" />
+    <Image Include="res\tray_network_wireless_noconn.ico" />
     <Image Include="res\winxshell-big.ico" />
     <Image Include="res\winxshell.ico" />
     <Image Include="res\printer.ico" />

@@ -91,11 +91,6 @@
     "height": 40,
     "bkcolor":[0,122,204]
   },
-  "JS_TRAYNOTIFY":
-  {
-    "soundicon":true,
-    "networkicon":true
-  },
   "::开始菜单":
   {
     "commands": {

@@ -87,6 +87,9 @@
     <ClCompile Include="utility\mpool.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="utility\TrayHelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -170,6 +173,9 @@
       <Filter>systemsettings</Filter>
     </ClInclude>
     <ClInclude Include="utility\mpool.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\TrayHelper.h">
       <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
@@ -361,6 +367,9 @@
     </Image>
     <Image Include="res\winxshell-big.ico" />
     <Image Include="res\winxshell.ico" />
+    <Image Include="res\tray_network_wireless_noconn.ico">
+      <Filter>res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">

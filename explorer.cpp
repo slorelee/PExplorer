@@ -434,6 +434,7 @@ void IconCache::init()
     _icons[ICID_TRAY_NET_WIRED_LAN] = Icon(IT_STATIC, ICID_TRAY_NET_WIRED_LAN, SmallIcon(IDI_TRAY_NET_WIRED_LAN));
     _icons[ICID_TRAY_NET_WIRED_INTERNET] = Icon(IT_STATIC, ICID_TRAY_NET_WIRED_INTERNET, SmallIcon(IDI_TRAY_NET_WIRED_INTERNET));
     _icons[ICID_TRAY_NET_WIRELESS_DIS] = Icon(IT_STATIC, ICID_TRAY_NET_WIRELESS_DIS, SmallIcon(IDI_TRAY_NET_WIRELESS_DIS));
+    _icons[ICID_TRAY_NET_WIRELESS_NOCONN] = Icon(IT_STATIC, ICID_TRAY_NET_WIRELESS_NOCONN, SmallIcon(IDI_TRAY_NET_WIRELESS_NOCONN));
     _icons[ICID_TRAY_NET_WIRELESS_LAN] = Icon(IT_STATIC, ICID_TRAY_NET_WIRELESS_LAN, SmallIcon(IDI_TRAY_NET_WIRELESS_LAN));
 //    _icons[ICID_TRAY_NET_WIRELESS_INTERNET] = Icon(IT_STATIC, ICID_TRAY_NET_WIRELESS_INTERNET, SmallIcon(IDI_TRAY_NET_WIRELESS_INTERNET));
     _icons[ICID_TRAY_NET_SIGNAL_NONE] = Icon(IT_STATIC, ICID_TRAY_NET_SIGNAL_NONE, SmallIcon(IDI_TRAY_NET_SIGNAL_NONE));
@@ -1138,6 +1139,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
+    g_Globals.init(hInstance); /* init icon_cache for UI process */
+
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
     g_Globals._locale = _T("en-US");
     if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
@@ -1228,8 +1231,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         asm("int3");
 #endif
     }
-
-    g_Globals.init(hInstance);
 
     // initialize COM and OLE before creating the desktop window
     OleInit usingCOM;
