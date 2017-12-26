@@ -204,8 +204,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 1 VERSIONINFO
- FILEVERSION 20,17,10,28
- PRODUCTVERSION 2.0.6.0
+ FILEVERSION 20,17,12,26
+ PRODUCTVERSION 2.0.7.0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -222,12 +222,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "FreeMan"
             VALUE "FileDescription", "Windows WinXShell"
-            VALUE "FileVersion", "20,17,10,28"
+            VALUE "FileVersion", "20,17,12,26"
             VALUE "InternalName", "WinXShell"
             VALUE "LegalCopyright", "(c) FreeMan. All rights reserved."
             VALUE "OriginalFilename", "WinXShell.exe"
             VALUE "ProductName", "WINXSHELL.EXE"
-            VALUE "ProductVersion", "2.0.6.0"
+            VALUE "ProductVersion", "2.0.7.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -254,7 +254,7 @@ IDB_TOOLBAR BITMAP DISCARDABLE "res/toolbar.bmp"
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 STRINGTABLE DISCARDABLE 
 BEGIN
-IDS_VERSION_STR "V2.0 RC6"
+IDS_VERSION_STR "V2.0 RC7"
 #ifdef UNICODE
 IDS_EXPLORER_VERSION_STR "WinXShell %0s"
 #else
