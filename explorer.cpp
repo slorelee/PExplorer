@@ -156,7 +156,9 @@ void _log_(LPCTSTR txt)
     if (g_Globals._log)
         _fputts(msg, g_Globals._log);
 
+#ifdef _DEBUG
     OutputDebugString(msg);
+#endif
 }
 
 
@@ -1141,6 +1143,21 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     g_Globals.init(hInstance); /* init icon_cache for UI process */
 
+#ifndef __WINE__
+    if (_tcsstr(ext_options, TEXT("-console"))) {
+        AllocConsole();
+
+        _dup2(_open_osfhandle((long)GetStdHandle(STD_INPUT_HANDLE), _O_RDONLY), 0);
+        _dup2(_open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), 0), 1);
+        _dup2(_open_osfhandle((long)GetStdHandle(STD_ERROR_HANDLE), 0), 2);
+
+        g_Globals._log = _tfdopen(1, TEXT("w"));
+        setvbuf(g_Globals._log, 0, _IONBF, 0);
+
+        LOG(TEXT("starting winxshell debug log\n"));
+    }
+#endif
+
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
     g_Globals._locale = _T("en-US");
     if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
@@ -1183,22 +1200,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         autostart = false;
     else if (_tcsstr(ext_options, TEXT("-autostart")))
         autostart = true;
-
-#ifndef __WINE__
-    if (_tcsstr(ext_options, TEXT("-console"))) {
-        AllocConsole();
-
-        _dup2(_open_osfhandle((long)GetStdHandle(STD_INPUT_HANDLE), _O_RDONLY), 0);
-        _dup2(_open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), 0), 1);
-        _dup2(_open_osfhandle((long)GetStdHandle(STD_ERROR_HANDLE), 0), 2);
-
-        g_Globals._log = _tfdopen(1, TEXT("w"));
-        setvbuf(g_Globals._log, 0, _IONBF, 0);
-
-        LOG(TEXT("starting explorer debug log\n"));
-    }
-#endif
-
 
     if (startup_desktop) {
         // hide the XP login screen (Credit to Nicolas Escuder)
