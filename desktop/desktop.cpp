@@ -34,6 +34,8 @@
 #include "../taskbar/desktopbar.h"
 #include "../taskbar/taskbar.h" // for PM_GET_LAST_ACTIVE
 
+#include <VersionHelpers.h>
+
 enum WallPaperStyle {
     STYLE_WP_STRETCH = 0,
     STYLE_WP_TILE,
@@ -294,6 +296,15 @@ HWND DesktopWindow::Create()
 
 #define WM_SHNOTIFY  (WM_USER+0x1)
 
+#ifndef _WIN32_WINNT_WIN10
+#define _WIN32_WINNT_WIN10                  0x0A00
+VERSIONHELPERAPI
+IsWindows10OrGreater()
+{
+    return IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN10), LOBYTE(_WIN32_WINNT_WIN10), 0);
+}
+#endif
+
 LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 {
     if (super::Init(pcs))
@@ -328,6 +339,17 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
 
         if (SUCCEEDED(hr)) {
             g_Globals._hwndShellView = hWndView;
+
+            /* init context menu object before SetShellWindow() for Windows 7,8,8.1 */
+            if (!IsWindows10OrGreater() && IsWindows7OrGreater()) {
+                IContextMenu *pcm = NULL;
+                LOG(TEXT("init context menu object"));
+                hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
+                if (SUCCEEDED(hr)) {
+                    pcm->Release();
+                    LOG(TEXT("inited context menu object"));
+                }
+            }
 
             int iconSize = JCFG2_DEF("JS_DESKTOP", "iconsize", 0).ToInt();
             if (iconSize > 0) {
