@@ -100,7 +100,7 @@ extern "C" {
 
 
 extern void _log_(LPCTSTR txt);
-
+#define LOGT(txt) _log_(TEXT(txt))
 #define LOG(txt) _log_(txt)
 
 
@@ -898,9 +898,20 @@ struct String
 
 #define _STRING_DEFINED
 
+struct FmtStringA : public string {
+    FmtStringA(LPCSTR fmt, ...)
+    {
+        va_list l;
+        char b[BUFFER_LEN];
+        va_start(l, fmt);
+        _vsnprintf(b, COUNTOF(b), fmt, l);
+        string::assign(b);
+        va_end(l);
+    }
+};
 
 struct FmtString : public String {
-    FmtString(LPCTSTR fmt, ...)
+    FmtString(LPCWSTR fmt, ...)
     {
         va_list l;
 
