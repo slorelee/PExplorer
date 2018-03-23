@@ -90,6 +90,12 @@
     <ClCompile Include="utility\TrayHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="DUI\LuaEngine.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DUI\SUIModule.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -177,6 +183,12 @@
     </ClInclude>
     <ClInclude Include="utility\TrayHelper.h">
       <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\LuaEngine.h">
+      <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\SUIModule.h">
+      <Filter>DUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
