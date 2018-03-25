@@ -186,7 +186,7 @@ int MonitorAdapter::ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth,
     }
 
     DEVMODE dmNew = dmOld;
-
+    dmNew.dmSize = sizeof(DEVMODE);
     dmNew.dmPelsWidth = screenWidth;
     dmNew.dmPelsHeight = screenHight;
 
