@@ -1182,6 +1182,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
         g_Globals._locale = locale_buf;
     }
+    SetEnvironmentVariable(TEXT("USERDEFAULT_LOCALENAME"), g_Globals._locale);
 
     CUIManager *pUIManager = NULL;
     if (_tcsstr(ext_options, TEXT("-uimgr"))) {
@@ -1191,11 +1192,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
        }
     }
 
+#ifdef _DEBUG
+    SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
+#endif
+
     if (_tcsstr(ext_options, TEXT("-ui"))) {
         g_Globals.get_modulepath();
+        String mpath = JVAR("JVAR_MODULEPATH").ToString();
+        SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
 #ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
+
         UIProcess(hInstance, lpCmdLineOrg);
         if (pUIManager) {
             Window::MessageLoop();
