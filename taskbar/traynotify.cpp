@@ -280,6 +280,34 @@ LRESULT CNotifyInfoWindow::HandleCustomMessage(
 void CNotifyInfoWindow::CloseMe()
 {
     Close();
+    m_Height = -1;
+    /* delete this */;
+}
+
+#include <list>
+#include <mutex>
+
+std::list<CNotifyInfoWindow *> NotifyInfoWindowList;
+std::mutex niw_mutex;
+
+void add_NotifyInfoWindow(CNotifyInfoWindow *ptr)
+{
+    std::lock_guard<std::mutex> guard(niw_mutex);
+    NotifyInfoWindowList.push_back(ptr);
+}
+
+void gc_NotifyInfoWindow()
+{
+    CNotifyInfoWindow *ptr = NULL;
+    std::lock_guard<std::mutex> guard(niw_mutex);
+    for (list<CNotifyInfoWindow *>::const_reverse_iterator it = NotifyInfoWindowList.rbegin();
+         it != NotifyInfoWindowList.rend(); ++it) {
+         ptr = *it;
+         if (ptr->m_Height == -1) {
+            NotifyInfoWindowList.remove(ptr);
+            delete ptr;
+         }
+    }
 }
 
 void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
@@ -288,10 +316,23 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
 
     DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
     DWORD dwExStyle = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
+
+    gc_NotifyInfoWindow();
+
     CNotifyInfoWindow *pFrame = new CNotifyInfoWindow(
         _T("WinXShell-NOTITYINFO-Wnd"), _T("UI_NotifyInfo"));
 
     if (pFrame == NULL) return;
+    CPaintManagerUI *pMgr = pFrame->GetPaintManager();
+    if (pMgr) {
+        String entry = pMgr->GetResourcePath() + _T("main.xml");
+        if (!PathFileExists(entry.c_str())) pMgr = NULL;
+    }
+    if (!pMgr) {
+        delete pFrame;
+        return;
+    }
+    add_NotifyInfoWindow(pFrame);
     pFrame->m_Info = *pTrayInfo;
     pFrame->m_n = n;
     pFrame->Create(NULL, _T("UI_NotifyInfo"), dwStyle, dwExStyle);
