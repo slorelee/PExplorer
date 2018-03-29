@@ -14,15 +14,17 @@ print("lua_helper_loading ...")
 -- load all lua files in this folder except this file
 local path = '.'
 local __this__ = os.getenv('WINXSHELL_MODULEPATH')
-if  os.getenv('WINXSHELL_DEBUG') then
-  __this__ = __this__ .. [[\..\..\dummy.lua]]
+if __this__ then
+  if  os.getenv('WINXSHELL_DEBUG') then
+    __this__ = __this__ .. [[\..\..\dummy.lua]]
+  else
+    __this__ = __this__ .. [[\dummy.lua]]
+  end
 else
-  __this__ = __this__ .. [[\dummy.lua]]
-end
-
-suilib.print(__this__)
-if __this__:find('\\') then
-  path, __this__ = __this__:match("(.+)\\([^\\]*)$")
+  __this__ = arg[0]
+  if arg[0]:find('\\') then
+    path, __this__ = arg[0]:match("(.+)\\([^\\]*)$")
+  end
 end
 
 HELPERPATH = ''
@@ -44,7 +46,11 @@ package.cpath = str.format('.\\%s%s\\?.dll;' .. package.cpath, HELPERPATH, ARCH)
 local f = io.popen('@dir /b '.. path .. '\\*.lua')
 for line in f:lines() do
   if line ~= __this__ then
-    suilib.print(line)
+    if suilib then
+      suilib.print(line)
+    else
+      print(line)
+    end
     require(line:sub(1, -5))
   end
 end
@@ -52,5 +58,5 @@ f:close()
 
 --[[
 require('reg_helper')
-require('os_helper')
-]]
+--require('os_helper')
+--]]

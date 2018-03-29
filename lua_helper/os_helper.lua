@@ -29,14 +29,19 @@ function localename()
   return ln
 end
 
-function mui_str(file, id)
-  LN = LN or localename()
+function res_str(file, id)
   local bin = string.format([[%sc_helper_%s.exe load_resstr %s %s]], HELPERPATH, ARCH, file, id)
   local prompt = io.popen(bin)
   p(bin)
   local res = prompt:read('*line')
   prompt:close()
   return res
+end
+
+function mui_str(file, id)
+  LN = LN or localename()
+  local mui_file = string.format('%s\\%s.mui', LN, file)
+  return res_str(mui_file, id)
 end
 
 function win_copyright()
