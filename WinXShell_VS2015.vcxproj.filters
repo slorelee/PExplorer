@@ -99,6 +99,9 @@
     <ClCompile Include="DUI\Helper.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
+    <ClCompile Include="systemsettings\Volume.cpp">
+      <Filter>systemsettings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -195,6 +198,9 @@
     </ClInclude>
     <ClInclude Include="DUI\Helper.h">
       <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="systemsettings\Volume.h">
+      <Filter>systemsettings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
