@@ -46,6 +46,7 @@
 #define SHELLPATH_PRINTERS          TEXT("::{2227A280-3AEA-1069-A2DE-08002B30309D}")
 #define SHELLPATH_NET_CONNECTIONS   TEXT("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}")
 
+static int CommandHook(HWND hwnd, const TCHAR *act);
 
 StartMenu::StartMenu(HWND hwnd, int icon_size)
     :  super(hwnd),
@@ -1934,11 +1935,11 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_CONTROL_PANEL: {
         CloseStartMenu(id);
-#ifndef ROSSHELL
-        explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_CONTROL_PANEL);
-#else
+
+        if (CommandHook(_hwnd, TEXT("control")) == 1) break;
+
+        //explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_CONTROL_PANEL);
         launch_file(_hwnd, SHELLPATH_CONTROL_PANEL);
-#endif
         break;
     }
 
