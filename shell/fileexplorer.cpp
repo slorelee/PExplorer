@@ -268,13 +268,36 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
     return 1;
 }
 
+
+extern std::wstring s2w(const std::string& str, UINT cp = CP_ACP);
+extern std::string w2s(const std::wstring& wstr);
+extern std::string w2s(const wchar_t *wstr);
+
+#ifndef LOGA
+extern void _logA_(LPCSTR txt);
+
+#define LOGA(txt) _logA_(txt)
+#endif
+
 IFACEMETHODIMP CFileDialogEventHandler::OnFolderChanging(IFileDialog *pDlg, IShellItem *pItem)
 {
     LPOLESTR pwsz = NULL;
     HRESULT hr = pItem->GetDisplayName(SIGDN_PARENTRELATIVEFORUI, &pwsz);
-
     if (SUCCEEDED(hr)) {
-        LOG(pwsz);
+        LOGA(w2s(pwsz).c_str());
+        CoTaskMemFree(pwsz);
+        pwsz = NULL;
+    }
+
+    hr = pItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pwsz);
+    if (SUCCEEDED(hr)) {
+       string abspath = w2s(pwsz);
+       const char *ptr = abspath.c_str();
+        LOGA(ptr);
+        if (strcmp(ptr, "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}") == 0 ||
+            strcmp(ptr, "::{26EE0668-A00A-44D7-9371-BEB064C98683}") == 0) {
+            launch_file(g_Globals._hwndDesktop, TEXT("control.exe"));
+        }
         CoTaskMemFree(pwsz);
     }
     return S_OK; 
