@@ -50,15 +50,15 @@ void meminfo() {
     GlobalMemoryStatus( &memStatus );
     SIZE_T zt = memStatus.dwTotalPhys;
     GetPhysicallyInstalledSystemMemory(&memInstalled);
+    int err = GetLastError();
+    char *fmt = "%ld\n";
 #ifdef _WIN64
-    printf("%lld\n", memInstalled);
-    printf("%lld\n", memStatus.dwTotalPhys);
-    printf("%lld\n", memStatus.dwAvailPhys);
-#else
-    printf("%ld\n", memInstalled);
-    printf("%ld\n", memStatus.dwTotalPhys);
-    printf("%ld\n", memStatus.dwAvailPhys);
+    fmt = "%lld\n";
 #endif
+    printf(fmt, memInstalled);
+    printf(fmt, memStatus.dwTotalPhys);
+    printf(fmt, memStatus.dwAvailPhys);
+    if (err) printf("GetPhysicallyInstalledSystemMemory error(ec=%d).\n", err);
 }
 
 

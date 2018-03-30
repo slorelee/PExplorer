@@ -13,13 +13,12 @@ print("lua_helper_loading ...")
 
 -- load all lua files in this folder except this file
 local path = '.'
-local __this__ = os.getenv('WINXSHELL_MODULEPATH')
-if __this__ then
-  if  os.getenv('WINXSHELL_DEBUG') then
-    __this__ = __this__ .. [[\..\..\dummy.lua]]
-  else
-    __this__ = __this__ .. [[\dummy.lua]]
+local root = os.getenv('WINXSHELL_MODULEPATH')
+if root then
+  if os.getenv('WINXSHELL_DEBUG') then
+    root = root .. [[\..\..]]
   end
+  __this__ = root .. [[\dummy.lua]]
 else
   __this__ = arg[0]
   if arg[0]:find('\\') then
@@ -41,7 +40,11 @@ if os.getenv('PROCESSOR_ARCHITECTURE') == 'AMD64' then
 else
   ARCH = 'x86'
 end
-package.cpath = str.format('.\\%s%s\\?.dll;' .. package.cpath, HELPERPATH, ARCH)
+local dllpath = str.format('.\\%s%s\\?.dll;', HELPERPATH, ARCH)
+if root then
+  dllpath = str.format(root .. '\\%s%s\\?.dll;', HELPERPATH, ARCH)
+end
+package.cpath = dllpath .. package.cpath
 
 local f = io.popen('@dir /b '.. path .. '\\*.lua')
 for line in f:lines() do
