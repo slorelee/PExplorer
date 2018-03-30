@@ -325,6 +325,7 @@
     <ClCompile Include="DUI\UIManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DUI\UI_Volume.cpp" />
     <ClCompile Include="DUI\UI_WIFI.cpp" />
     <ClCompile Include="jconfig\jcfg.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -400,6 +401,7 @@
     <ClInclude Include="DUI\SUIParser.h" />
     <ClInclude Include="DUI\UICreator.h" />
     <ClInclude Include="DUI\UIManager.h" />
+    <ClInclude Include="DUI\UI_Volume.h" />
     <ClInclude Include="DUI\UI_WIFI.h" />
     <ClInclude Include="jconfig\jcfg.h" />
     <ClInclude Include="shell\fileexplorer.h" />
