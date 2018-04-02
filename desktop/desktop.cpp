@@ -1161,9 +1161,19 @@ HMENU DesktopShellView::GetShellViewContextMenu()
     if (!hmenu) {
         return NULL;
     }
-    //HRESULT hr = DesktopFolder()->CreateViewObject(_hwnd, IID_IContextMenu, (void **)&pcm);
-    HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
-    if (FAILED(hr)) {
+
+    HRESULT hr = -1;
+    String cm = JCFG2_DEF("JS_DESKTOP", "ContextMenu", TEXT("")).ToString();
+    if (cm.empty()) {
+        hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
+    } else if (cm == TEXT("view")) {
+        hr = _pShellView->GetItemObject(SVGIO_FLAG_VIEWORDER, IID_IContextMenu, (LPVOID *)&pcm);
+    } else if (cm == TEXT("basic")) {
+        hr = DesktopFolder()->CreateViewObject(_hwnd, IID_IContextMenu, (LPVOID *)&pcm);
+    }
+    //HRESULT hr = DesktopFolder()->GetUIObjectOf(_hwnd, 0, NULL, IID_IContextMenu, NULL, (LPVOID*)&pcm);
+    //HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
+    if (cm == TEXT("none") || FAILED(hr)) {
         DestroyMenu(hmenu);
         return NULL;
     }
