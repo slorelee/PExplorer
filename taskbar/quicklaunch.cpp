@@ -108,6 +108,10 @@ void QuickLaunchBar::ReloadShortcuts()
         for (Entry *entry = shelldir->_down; entry; entry = entry->_next) {
             if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
                 continue;
+            if (lstrcmpi(entry->_display_name, TEXT("Shows Desktop")) == 0)
+                continue;
+            if (lstrcmpi(entry->_display_name, TEXT("Window Switcher")) == 0)
+                continue;
             if (!(entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
                 cnt++;
         }
@@ -171,11 +175,20 @@ void QuickLaunchBar::AddShortcuts()
     TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP, { 0, 0 }, 0, 0 };
     SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
 
+    int ignore = 0;
     for (Entry *entry = _dir->_down; entry; entry = entry->_next) {
         // hide files like "desktop.ini"
         if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
             continue;
 
+        if (lstrcmpi(entry->_display_name, TEXT("Shows Desktop")) == 0) {
+            ignore++;
+            continue;
+        }
+        if (lstrcmpi(entry->_display_name, TEXT("Window Switcher")) == 0) {
+            ignore++;
+            continue;
+        }
         // hide subfolders
         if (!(entry->_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
             HBITMAP hbmp = g_Globals._icon_cache.get_icon(entry->_icon_id).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE);
@@ -186,6 +199,7 @@ void QuickLaunchBar::AddShortcuts()
 
     _btn_dist = LOWORD(SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0));
     _size = (int)(_entries.size() * _btn_dist + 5 + 3); // 3 for BTNS_SEP
+    _size -= ignore;
     if (JCFG_TB(2, "userebar").ToBool() == TRUE) _size += 20;
 
     //adjust QuickLaunchBar width
