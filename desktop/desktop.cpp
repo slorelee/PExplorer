@@ -1170,9 +1170,9 @@ HMENU DesktopShellView::GetShellViewContextMenu()
         hr = _pShellView->GetItemObject(SVGIO_FLAG_VIEWORDER, IID_IContextMenu, (LPVOID *)&pcm);
     } else if (cm == TEXT("basic")) {
         hr = DesktopFolder()->CreateViewObject(_hwnd, IID_IContextMenu, (LPVOID *)&pcm);
+    } else if (cm == TEXT("origin")) {
+        hr = DesktopFolder()->GetUIObjectOf(_hwnd, 0, NULL, IID_IContextMenu, NULL, (LPVOID*)&pcm);
     }
-    //HRESULT hr = DesktopFolder()->GetUIObjectOf(_hwnd, 0, NULL, IID_IContextMenu, NULL, (LPVOID*)&pcm);
-    //HRESULT hr = _pShellView->GetItemObject(SVGIO_BACKGROUND, IID_IContextMenu, (LPVOID *)&pcm);
     if (cm == TEXT("none") || FAILED(hr)) {
         DestroyMenu(hmenu);
         return NULL;
