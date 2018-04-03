@@ -94,16 +94,28 @@ static int isFileExplorerWindow(HWND hwnd)
 }
 
 #define MINBUTTON_CLICKED MAKELONG(HTMINBUTTON, WM_LBUTTONDOWN)
+#define MINBUTTON_MOUSEMOVED MAKELONG(HTMINBUTTON, WM_MOUSEMOVE)
 
-LRESULT WINAPI MinButtonHooker(int code, WPARAM wParam, LPARAM lParam) {
+LRESULT WINAPI MinButtonHooker(int code, WPARAM wParam, LPARAM lParam)
+{
+    static int seq = 0;
     if (code == HC_ACTION) {
         CWPSTRUCT *pData = (CWPSTRUCT*)lParam;
         if (pData->message == WM_SETCURSOR) {
             if (pData->lParam == MINBUTTON_CLICKED) {
                 if (isFileExplorerWindow(pData->hwnd)) {
+                    LOG(TEXT("MINBUTTON_DOWN"));
+                    seq = 1;
+                }
+            } else if (seq == 2 && HIWORD(pData->lParam) == WM_MOUSEMOVE) {
+                seq = 0;
+                if (LOWORD(pData->lParam) == HTMINBUTTON) {
+                    LOG(TEXT("MINBUTTON_UP"));
                     ShowWindow(pData->hwnd, SW_SHOWMINNOACTIVE);
                 }
             }
+        } else if (seq == 1 && pData->message == WM_CAPTURECHANGED) {
+            seq = 2;
         }
     }
     return CallNextHookEx(NULL, code, wParam, lParam);
@@ -114,23 +126,28 @@ HWND FileExplorerWindow::Create(HWND hwnd, String path)
     HWND hFrame = Create();
     BOOL dwmEnabled = FALSE;
 
+    BOOL minbutton_hook = JCFG2_DEF("JS_FILEEXPLORER", "minbutton_hook", false).ToBool();
+
     DwmGetWindowAttribute(hFrame, DWMWA_NCRENDERING_ENABLED, &dwmEnabled, sizeof(BOOL));
-    if (dwmEnabled) {
-        TCHAR sysPathBuff[MAX_PATH] = {0};
+    if (!minbutton_hook && dwmEnabled) {
+        TCHAR sysPathBuff[MAX_PATH] = { 0 };
         GetWindowsDirectory(sysPathBuff, MAX_PATH);
         String dwmPath = sysPathBuff;
+        LOG(TEXT("dwmEnabled:TRUE"));
 #ifdef _WIN64
         dwmPath.append(_T("\\System32\\dwm.exe"));
 #else
         dwmPath.append(_T("\\SysNative\\dwm.exe"));
 #endif
         if (!PathFileExists(dwmPath)) {
+            LOG(TEXT("!FileExists(dwm.exe) => dwmEnabled:FALSE"));
             dwmEnabled = FALSE;
         }
     }
 
     //fix issue that can't minimize window when clicking minimizebox if dwm is enabled.
-    if (FileExplorerWindow::HookHandle == NULL && dwmEnabled) {
+    if (FileExplorerWindow::HookHandle == NULL && (minbutton_hook || dwmEnabled)) {
+        LOG(TEXT("MinButtonHooker:ON"));
         HookHandle = SetWindowsHookEx(WH_CALLWNDPROC,
             (HOOKPROC)MinButtonHooker, (HINSTANCE)NULL, (DWORD)GetCurrentThreadId());
     }
