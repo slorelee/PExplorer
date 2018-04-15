@@ -540,7 +540,8 @@ HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int 
         HMENU hmenu = CreatePopupMenu();
 
         if (hmenu) {
-            UINT flags = CMF_NORMAL | CMF_EXPLORE | CMF_EXTENDEDVERBS;
+            UINT flags = CMF_NORMAL | CMF_EXPLORE;
+            if (GetKeyState(VK_SHIFT) < 0) flags |= CMF_EXTENDEDVERBS;
             if (!g_Globals._isNT5) flags |= CMF_CANRENAME;
 
             hr = pcm->QueryContextMenu(hmenu, 0, FCIDM_SHVIEWFIRST, FCIDM_SHVIEWLAST, flags);
