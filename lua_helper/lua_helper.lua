@@ -27,7 +27,7 @@ else
 end
 
 HELPERPATH = ''
-if __this__ ~= 'lua_helper.lua' then
+if str.lower(__this__) ~= 'lua_helper.lua' then
   path = path .. '\\lua_helper'
   __this__ = 'lua_helper.lua'
   package.path = '.\\lua_helper\\?.lua;' .. package.path
@@ -48,7 +48,7 @@ package.cpath = dllpath .. package.cpath
 
 local f = io.popen('@dir /b '.. path .. '\\*.lua')
 for line in f:lines() do
-  if line ~= __this__ then
+  if str.lower(line) ~= str.lower(__this__) then
     if suilib then
       suilib.print(line)
     else
