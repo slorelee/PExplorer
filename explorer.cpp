@@ -1213,7 +1213,7 @@ static void execute_open_command(String &cmd)
     size_t param_startpos = 0;
     String bin;
     String param;
-    if (cmd[0] == TEXT('\"')) {
+    if (cmd[0U] == TEXT('\"')) {
         size_t pos = cmd.find(TEXT("\""), 1);
         if (pos == String::npos) return;
         bin = cmd.substr(1, pos - 1);
@@ -1341,7 +1341,7 @@ static void OpenContainingFolder(LPTSTR pszCmdline)
     String lnkfile;
     size_t pos = cmdline.find(_T("-ocf"));
     lnkfile = cmdline.substr(pos + 5);
-    if (lnkfile[0] == TEXT('\"')) lnkfile = lnkfile.substr(1, lnkfile.length() - 2);
+    if (lnkfile[0U] == TEXT('\"')) lnkfile = lnkfile.substr(1, lnkfile.length() - 2);
     TCHAR path[MAX_PATH];
     GetShortcutPath(lnkfile.c_str(), path, MAX_PATH);
     String open_command = JCFG2_DEF("JS_DAEMON",
