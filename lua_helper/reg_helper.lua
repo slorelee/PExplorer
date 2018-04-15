@@ -4,7 +4,7 @@ function reg_read(key, values)
   local res = {}
   local data = nil
   k,err = winapi.open_reg_key(key, true)
-  if not k then return res end
+  if not k then return nil end
 
   if not (type(values) == 'table') then
     data = k:get_value(values)

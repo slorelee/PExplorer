@@ -1227,6 +1227,65 @@ static void execute_open_command(String &cmd)
     launch_file(NULL, bin, SW_SHOWNORMAL, param);
 }
 
+
+class CReg {
+public:
+    HKEY m_hkey;
+    CReg::CReg(HKEY hKey, LPCTSTR lpSubKey) {
+        m_Res = 0; m_hkey = NULL;
+        m_Res = RegOpenKey(hKey, lpSubKey, &m_hkey);
+    }
+    CReg::~CReg() { if (m_hkey) RegCloseKey(m_hkey); }
+    LSTATUS CReg::Write(TCHAR *value, TCHAR *data) {
+        String buff = data;
+        if (m_Res) return m_Res;
+        return RegSetValueEx(m_hkey, value, 0, REG_SZ, (LPBYTE)buff.c_str(), buff.length() * sizeof(TCHAR));
+    }
+    LSTATUS CReg::Write(TCHAR *value, DWORD data) {
+        if (m_Res) return m_Res;
+        return RegSetValueEx(m_hkey, value, 0, REG_DWORD, (LPBYTE)(&data), sizeof(DWORD));
+    }
+private:
+    LONG m_Res;
+};
+
+/*
+[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Property]
+"Position"="Bottom"
+@="@comctl32.dll,-4177"
+;@="&Property" I don't found out the resource with shortcut for every language now, use 4177 instead.
+
+[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Property\command]
+@="WinXShell.exe -ui -jcfg UI_SystemInfo\\main.jcfg"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+"NoPropertiesMyComputer"=dword:00000001
+*/
+static void update_property_handler()
+{
+    CReg reg_prop(HKEY_CLASSES_ROOT, TEXT("CLSID\\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\shell\\Property"));
+    if (!reg_prop.m_hkey) return;
+    TCHAR namebuffer[MAX_PATH];
+    HINSTANCE res = LoadLibrary(TEXT("shell32.dll"));
+    if (!res) return;
+    HMENU menu = LoadMenu(res, MAKEINTRESOURCE(220));
+    if (!menu) return;
+    if (!GetMenuString(menu, 0, namebuffer, MAX_PATH, MF_BYCOMMAND)) {
+        FreeLibrary(res);
+        return;
+    }
+    FreeLibrary(res);
+    reg_prop.Write(NULL, namebuffer);
+
+    /*reg_prop.Write(TEXT("Position"), TEXT("Bottom"));
+
+    CReg reg_prop_cmd(HKEY_CLASSES_ROOT, TEXT("CLSID\\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\shell\\Property\\command"));
+    reg_prop_cmd.Write(NULL, TEXT("WinXShell.exe -ui -jcfg UI_SystemInfo\\main.jcfg"));
+
+    CReg reg_no_default_prop(HKEY_LOCAL_MACHINE, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"));
+    reg_no_default_prop.Write(TEXT("NoPropertiesMyComputer"), 1);*/
+}
+
 static void ocf(const TCHAR *szPath)
 {
     LPITEMIDLIST  pidl;
@@ -1530,6 +1589,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", false).ToBool() != FALSE) {
             InitHook(daemon);
         }
+        update_property_handler();
         Window::MessageLoop();
         return 0;
     }
@@ -1538,6 +1598,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         WaitCursor wait;
 
         WinXShell_DaemonWindow::Create();
+        update_property_handler();
 
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
