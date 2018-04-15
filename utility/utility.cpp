@@ -214,6 +214,40 @@ BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow, LPCSTR parameters)
 }
 #endif
 
+void GetShortcutPath(const TCHAR *lnk, TCHAR *path, DWORD cchBuffer)
+{
+    IShellLink *psl = NULL;
+    HRESULT hr = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+    if (SUCCEEDED(hr)) {
+        IPersistFile *ppf = NULL;
+        hr = psl->QueryInterface(IID_IPersistFile, (LPVOID *)&ppf);
+        if (SUCCEEDED(hr)) {
+            hr = ppf->Load(lnk, STGM_READ);
+            if (SUCCEEDED(hr)) {
+                WIN32_FIND_DATA wfd;
+                psl->GetPath(path, cchBuffer, &wfd, SLGP_UNCPRIORITY | SLGP_RAWPATH);
+            }
+            ppf->Release();
+        }
+        psl->Release();
+    }
+}
+
+int CommandHook(HWND hwnd, const TCHAR *act, const TCHAR *sect)
+{
+    String cmd = TEXT("");
+    INT showflags = SW_SHOWNORMAL;
+    String parameters = TEXT("");
+    if (!hwnd) return 0;
+    cmd = JCFG_CMDW(sect, act, "command", TEXT("")).ToString();
+    if (cmd != TEXT("")) {
+        showflags = JCFG_CMDW(sect, act, "showflags", showflags).ToInt();
+        parameters = JCFG_CMDW(sect, act, "parameters", TEXT("")).ToString();
+        launch_file(hwnd, cmd, showflags, parameters);
+        return 1;
+    }
+    return 0;
+}
 
 BOOL HandleEnvChangeBroadcast(LPARAM lparam)
 {
@@ -557,3 +591,53 @@ bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out)
         return false;
 }
 
+#ifdef _DEBUG
+static char *getmsgstr(UINT msgid)
+{
+    char *msg = NULL;
+    static char buff[200];
+    switch (msgid) {
+    case WM_COMMAND:msg = ("WM_COMMAND"); break;
+    case WM_NOTIFY:msg = ("WM_NOTIFY"); break;
+    case WM_CONTEXTMENU: msg = ("WM_CONTEXTMENU"); break;
+    case WM_INITDIALOG: msg = ("WM_INITDIALOG"); break;
+    case WM_ACTIVATEAPP: msg = ("WM_ACTIVATEAPP"); break;
+    case WM_STYLECHANGING: msg = ("WM_STYLECHANGING"); break;
+    case WM_STYLECHANGED: msg = ("WM_STYLECHANGED"); break;
+    case WM_NCPAINT: msg = ("WM_NCPAINT"); break;
+    case WM_NCACTIVATE: msg = ("WM_NCACTIVATE"); break;
+    case WM_CHANGEUISTATE: msg = ("WM_CHANGEUISTATE"); break;
+    case WM_ACTIVATE: msg = ("WM_ACTIVATE"); break;
+    case WM_SHOWWINDOW: msg = ("WM_SHOWWINDOW"); break;
+    case WM_CTLCOLORDLG: msg = ("WM_CTLCOLORDLG"); break;
+    case WM_PRINTCLIENT: msg = ("WM_PRINTCLIENT"); break;
+    case WM_SETCURSOR: msg = ("WM_SETCURSOR"); break;
+    case WM_LBUTTONUP: msg = ("WM_LBUTTONUP"); break;
+    case WM_LBUTTONDBLCLK: msg = ("WM_LBUTTONDBLCLK"); break;
+    case WM_RBUTTONDOWN: msg = ("WM_RBUTTONDOWN"); break;
+    case WM_RBUTTONUP: msg = ("WM_RBUTTONUP"); break;
+    case WM_RBUTTONDBLCLK: msg = ("WM_RBUTTONDBLCLK"); break;
+    case WM_MBUTTONDOWN: msg = ("WM_MBUTTONDOWN"); break;
+    case WM_MBUTTONUP: msg = ("WM_MBUTTONUP"); break;
+    case WM_NCHITTEST: msg = ("WM_NCHITTEST"); break;
+    default:
+        sprintf_s(buff, 200, "0x%x", msgid);
+        return buff;
+    }
+    return msg;
+}
+
+#ifndef LOGA
+extern void _logA_(LPCSTR txt);
+
+#define LOGA(txt) _logA_(txt)
+#endif
+void PrintMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    char buff[200];
+    if (message != WM_SETCURSOR && message != WM_NCMOUSEMOVE && message != WM_MOUSEMOVE) {
+        sprintf_s(buff, 200, "hWnd:0x%x %s 0x%x 0x%x\r\n", hWnd, getmsgstr(message), wParam, lParam);
+        LOGA(buff);
+    }
+}
+#endif

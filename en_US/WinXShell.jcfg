@@ -28,6 +28,16 @@
       ["wallpaper", "::WP",            "property name."]
       ]
   },
+  "JS_DAEMON":
+  {
+    "clockarea_click": {
+      "command": "##{JVAR_MODULEPATH}\\WinXShell.exe",
+      "parameters": "-ui -jcfg UI_Calendar\\Calendar.jcfg"
+    },
+    "clockarea_dbclick": {
+      "command": "timedate.cpl"
+    }
+  },
   "JS_FILEEXPLORER":
   {
     "#3rd_filename":"##{JVAR_MODULEPATH}\\explorer++.exe",

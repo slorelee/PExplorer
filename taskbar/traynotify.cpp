@@ -1547,17 +1547,39 @@ HWND ClockWindow::Create(HWND hwndParent)
                           clnt.right - clockwindowWidth, clnt.top + 1, clockwindowWidth, clnt.bottom - 2, hwndParent);
 }
 
+#define CLOCKAREA_CLICK_TIMER 1001
+
+static void ClockArea_OnClick(HWND hwnd, int isDbClick)
+{
+    if (hwnd) KillTimer(hwnd, CLOCKAREA_CLICK_TIMER);
+    if (isDbClick) {
+        CommandHook(hwnd, TEXT("clockarea_dbclick"), TEXT("JS_DAEMON"));
+    } else {
+        CommandHook(hwnd, TEXT("clockarea_click"), TEXT("JS_DAEMON"));
+    }
+}
+
 LRESULT ClockWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
+    static int isDbClick = 0;
     switch (nmsg) {
     case WM_PAINT:
         Paint();
         break;
 
-    case WM_LBUTTONDBLCLK:
-        launch_cpanel(_hwnd, TEXT("timedate.cpl"));
+    case WM_LBUTTONUP:
+        //launch_cpanel(_hwnd, TEXT("timedate.cpl"));
+        //KillTimer(_hwnd, CLOCKAREA_CLICK_TIMER);
+        SetTimer(_hwnd, CLOCKAREA_CLICK_TIMER, 300, NULL);
+        isDbClick++;
         break;
-
+    case  WM_TIMER:
+        if (wparam == CLOCKAREA_CLICK_TIMER) {
+            ClockArea_OnClick(_hwnd, (isDbClick>1) ? 1 : 0);
+            isDbClick = 0;
+            return S_OK;
+        }
+        /* fallthough */
     default:
         return super::WndProc(nmsg, wparam, lparam);
     }

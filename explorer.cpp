@@ -1079,6 +1079,249 @@ extern "C"
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+
+/* for MessageHook */
+typedef BOOL(*pSetHook)(DWORD, int);
+typedef BOOL(*pRemoveHook)(void);
+
+pSetHook SetHook = NULL;
+pRemoveHook RemoveHook = NULL;
+UINT *pUWM_HOOKMESSAGE = 0;
+
+}
+
+extern void InstallHook(HWND hwnd, int reHook);
+void InitHook(HWND hwnd)
+{
+#ifdef _WIN64
+    TCHAR DllPath[] = TEXT("wxsStub.dll");
+#else
+    TCHAR DllPath[] = TEXT("wxsStub32.dll");
+#endif
+    HINSTANCE Hook_Dll = LoadLibrary(DllPath);
+    if (Hook_Dll) {
+        SetHook = (pSetHook)GetProcAddress(Hook_Dll, "SetHook");
+        RemoveHook = (pRemoveHook)GetProcAddress(Hook_Dll, "RemoveHook");
+        pUWM_HOOKMESSAGE = (UINT *)GetProcAddress(Hook_Dll, "UWM_HOOKMESSAGE");
+
+        InstallHook(hwnd, 0);
+    } else {
+        MessageBox(NULL, TEXT("LoadLibrary Error"), TEXT("Error"), MB_ICONERROR);
+    }
+}
+
+void InstallHook(HWND hwnd, int reHook)
+{
+    BOOL rc = FALSE;
+    HWND hObjWnd = NULL;
+    DWORD dwObjThreadId = 0;
+
+    if (!SetHook) return;
+    //Progman Shell_TrayWnd TrayClockWClass
+    hObjWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+    if (!hObjWnd) return;
+    hObjWnd = FindWindowEx(hObjWnd, 0, TEXT("TrayNotifyWnd"), NULL);
+    if (!hObjWnd) return;
+    hObjWnd = FindWindowEx(hObjWnd, 0, TEXT("TrayClockWClass"), NULL);
+    if (!hObjWnd) return;
+    dwObjThreadId = GetWindowThreadProcessId(hObjWnd, NULL);
+
+    if (dwObjThreadId != 0) {
+        rc = SetHook(dwObjThreadId, reHook);
+    }
+
+    if (rc) {
+        /*if (dwObjThreadId)
+        MessageBox(NULL, "Thread Hook", "Success", MB_OK);
+        else
+        MessageBox(NULL, "System Hook", "Success", MB_OK);*/
+        PostMessage(hObjWnd, *pUWM_HOOKMESSAGE, (WPARAM)hwnd, (LPARAM)hObjWnd);
+    }
+}
+
+struct WinXShell_DaemonWindow : public Window {
+    typedef Window super;
+    WinXShell_DaemonWindow(HWND hwnd);
+    ~WinXShell_DaemonWindow();
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    static HWND Create();
+protected:
+    const UINT WM_TASKBARCREATED;
+};
+
+
+WinXShell_DaemonWindow::WinXShell_DaemonWindow(HWND hwnd)
+    : super(hwnd), WM_TASKBARCREATED(RegisterWindowMessage(WINMSG_TASKBARCREATED))
+{
+}
+
+WinXShell_DaemonWindow::~WinXShell_DaemonWindow()
+{
+    RemoveHook();
+}
+
+
+HWND WinXShell_DaemonWindow::Create()
+{
+    static WindowClass wcDaemonWindow(TEXT("WINXSHELL_DAEMONWINDOW"));
+    HWND hwnd = Window::Create(WINDOW_CREATOR(WinXShell_DaemonWindow),
+        WS_EX_NOACTIVATE, wcDaemonWindow, TEXT("WINXSHELL_DAEMONWINDOW"), WS_POPUP,
+        0, 0, 0, 0, 0);
+    return hwnd;
+}
+
+#define HM_CLOCKAREA_CLICKED 1
+#define CLOCKAREA_CLICK_TIMER 1001
+
+static void ClockArea_OnClick(HWND hwnd, int isDbClick)
+{
+    if (hwnd) KillTimer(hwnd, CLOCKAREA_CLICK_TIMER);
+    if (isDbClick) {
+        CommandHook(hwnd, TEXT("clockarea_dbclick"), TEXT("JS_DAEMON"));
+    } else {
+        CommandHook(hwnd, TEXT("clockarea_click"), TEXT("JS_DAEMON"));
+    }
+}
+
+LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
+{
+    static int isDbClick = 0;
+    if (nmsg == WM_TASKBARCREATED) {
+        InstallHook(_hwnd, 1);
+    } else if (pUWM_HOOKMESSAGE && nmsg == *pUWM_HOOKMESSAGE) {
+#ifdef _DEBUG
+        PrintMessage(0, wparam, 0, 0);
+#endif
+        if (wparam == HM_CLOCKAREA_CLICKED) {
+            //MessageBox(NULL, TEXT("HM_CLOCKAREA_CLICKED"), TEXT(""), 0);
+            SetTimer(_hwnd, CLOCKAREA_CLICK_TIMER, 500, NULL);
+            isDbClick++;
+        }
+        return S_OK;
+    } else if (nmsg == WM_TIMER) {
+        if (wparam == CLOCKAREA_CLICK_TIMER) {
+            ClockArea_OnClick(_hwnd, (isDbClick>1) ? 1 : 0);
+            isDbClick = 0;
+            return S_OK;
+        }
+    }
+    return super::WndProc(nmsg, wparam, lparam);
+}
+
+static void execute_open_command(String &cmd)
+{
+    size_t param_startpos = 0;
+    String bin;
+    String param;
+    if (cmd[0] == TEXT('\"')) {
+        size_t pos = cmd.find(TEXT("\""), 1);
+        if (pos == String::npos) return;
+        bin = cmd.substr(1, pos - 1);
+        param = cmd.substr(pos + 1);
+    } else {
+        size_t pos = cmd.find(TEXT(" "));
+        if (pos == String::npos) return;
+        bin = cmd.substr(0, pos);
+        param = cmd.substr(pos + 1);
+    }
+    launch_file(NULL, bin, SW_SHOWNORMAL, param);
+}
+
+static void ocf(const TCHAR *szPath)
+{
+    LPITEMIDLIST  pidl;
+    LPCITEMIDLIST cpidl_dir;
+    LPCITEMIDLIST cpidl_file;
+    LPSHELLFOLDER pDesktopFolder;
+    ULONG         chEaten;
+    ULONG         dwAttributes;
+    HRESULT       hr;
+    TCHAR          szDirPath[MAX_PATH];
+
+    // 
+    // Get a pointer to the Desktop's IShellFolder interface.
+    // 
+    if (SUCCEEDED(SHGetDesktopFolder(&pDesktopFolder))) {
+        StrCpy(szDirPath, szPath);
+        PathRemoveFileSpec(szDirPath);
+
+        hr = pDesktopFolder->ParseDisplayName(NULL, 0, szDirPath, &chEaten, &pidl, &dwAttributes);
+        if (FAILED(hr)) {
+            pDesktopFolder->Release();
+            return;
+            // Handle error.
+        }
+        cpidl_dir = pidl;
+
+        // 
+        // Convert the path to an ITEMIDLIST.
+        // 
+        hr = pDesktopFolder->ParseDisplayName(NULL, 0, (LPWSTR)szPath, &chEaten, &pidl, &dwAttributes);
+        if (FAILED(hr)) {
+            pDesktopFolder->Release();
+            return;
+            // Handle error.
+        }
+        cpidl_file = pidl;
+        HRESULT RE = CoInitialize(NULL);
+        int re = SHOpenFolderAndSelectItems(cpidl_dir, 1, &cpidl_file, NULL);
+
+        //
+        // pidl now contains a pointer to an ITEMIDLIST.
+        // This ITEMIDLIST needs to be freed using the IMalloc allocator
+        // returned from SHGetMalloc().
+        //
+        //release the desktop folder object
+        pDesktopFolder->Release();
+    }
+}
+
+static void OpenContainingFolder(LPTSTR pszCmdline)
+{
+    String cmdline = pszCmdline;
+    String lnkfile;
+    size_t pos = cmdline.find(_T("-ocf"));
+    lnkfile = cmdline.substr(pos + 5);
+    if (lnkfile[0] == TEXT('\"')) lnkfile = lnkfile.substr(1, lnkfile.length() - 2);
+    TCHAR path[MAX_PATH];
+    GetShortcutPath(lnkfile.c_str(), path, MAX_PATH);
+    String open_command = JCFG2_DEF("JS_DAEMON",
+        "open_containing_folder", TEXT("")).ToString();
+    String strPath = path;
+    if (open_command == TEXT("")) {
+        //if (!PathIsDirectory(path)) {
+            //size_t nPos = strPath.rfind(TEXT('\\'));
+            //if (nPos == String::npos) return;
+            //strPath = strPath.substr(0, nPos);
+        //}
+        if (cmdline.find(_T("-explorer")) != String::npos) {
+            ocf(strPath.c_str());
+            return;
+        }
+        strPath = TEXT("/select,") + strPath;
+        explorer_show_frame(SW_SHOWNORMAL, (LPTSTR)(strPath.c_str()));
+        Window::MessageLoop();
+        return;
+    }
+    String expanded_open_command = open_command;
+    size_t rep_pos = open_command.find(TEXT("%1"));
+    while (rep_pos != String::npos) {
+        open_command = open_command.replace(rep_pos, 2, TEXT("%s"));
+        expanded_open_command = FmtString(open_command.c_str(), strPath.c_str());
+        rep_pos = open_command.find(TEXT("%1"));
+    }
+
+    size_t dir_pos = strPath.rfind(TEXT('\\'));
+    if (dir_pos != String::npos) {
+        String dir = strPath.substr(0, dir_pos);
+        rep_pos = open_command.find(TEXT("%p"));
+        while (rep_pos != String::npos) {
+            open_command = open_command.replace(rep_pos, 2, TEXT("%s"));
+            expanded_open_command = FmtString(open_command.c_str(), dir.c_str());
+            rep_pos = open_command.find(TEXT("%p"));
+        }
+    }
+    execute_open_command(expanded_open_command);
 }
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
@@ -1270,13 +1513,31 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     g_Globals.load_config();
     g_Globals.get_systeminfo();
 
+    // for loading UI Resources
+#ifndef _DEBUG
+    SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+#endif
+
+    if (_tcsstr(ext_options, TEXT("-ocf"))) {
+        OpenContainingFolder(lpCmdLineOrg);
+        return 0;
+    }
+
+    if (_tcsstr(ext_options, TEXT("-daemon"))) {
+        HWND daemon = WinXShell_DaemonWindow::Create();
+
+        //hijack clockarea click event
+        if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", false).ToBool() != FALSE) {
+            InitHook(daemon);
+        }
+        Window::MessageLoop();
+        return 0;
+    }
+
     if (startup_desktop) {
         WaitCursor wait;
 
-// for loading UI Resources
-#ifndef _DEBUG
-        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
-#endif
+        WinXShell_DaemonWindow::Create();
 
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();

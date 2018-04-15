@@ -66,6 +66,16 @@
       ["JT_STARTMENU_FOLDER", "::开始菜单_文件夹类型", ""]
     ]
   },
+  "JS_DAEMON":
+  {
+    "clockarea_click": {
+      "command": "##{JVAR_MODULEPATH}\\WinXShell.exe",
+      "parameters": "-ui -jcfg UI_Calendar\\Calendar.jcfg"
+    },
+    "clockarea_dbclick": {
+      "command": "timedate.cpl"
+    }
+  },
   "::文件管理器":
   {
     "#::第3方文件管理器":"##{JVAR_MODULEPATH}\\explorer++.exe",

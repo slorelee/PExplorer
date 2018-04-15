@@ -253,6 +253,9 @@ extern BOOL launch_fileA(HWND hwnd, LPSTR cmd, UINT nCmdShow = SW_SHOWNORMAL, LP
 #define launch_fileA launch_file
 #endif
 
+extern int CommandHook(HWND hwnd, const TCHAR *act, const TCHAR *sect);
+extern void GetShortcutPath(const TCHAR *lnk, TCHAR *path, DWORD cchBuffer);
+
 extern BOOL HandleEnvChangeBroadcast(LPARAM lparam);
 
 // call an DLL export like rundll32
@@ -1099,5 +1102,8 @@ protected:
 
 extern bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out);
 
+#ifdef _DEBUG
+void PrintMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+#endif
 
 #endif // __cplusplus
