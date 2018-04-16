@@ -1250,20 +1250,21 @@ private:
 };
 
 /*
-[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Property]
+;override system properties
+[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]
 "Position"="Bottom"
-@="@comctl32.dll,-4177"
+@="@shell32.dll,-33555"
 ;@="&Property" I don't found out the resource with shortcut for every language now, use 4177 instead.
 
-[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\Property\command]
+[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]
 @="WinXShell.exe -ui -jcfg UI_SystemInfo\\main.jcfg"
-
-[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
-"NoPropertiesMyComputer"=dword:00000001
 */
 static void update_property_handler()
 {
-    CReg reg_prop(HKEY_CLASSES_ROOT, TEXT("CLSID\\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\shell\\Property"));
+    if (JCFG2_DEF("JS_DAEMON", "update_properties_name", true).ToBool() == FALSE) {
+        return;
+    }
+    CReg reg_prop(HKEY_CLASSES_ROOT, TEXT("CLSID\\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\shell\\properties"));
     if (!reg_prop.m_hkey) return;
     TCHAR namebuffer[MAX_PATH];
     HINSTANCE res = LoadLibrary(TEXT("shell32.dll"));
