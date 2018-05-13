@@ -1384,6 +1384,44 @@ static void OpenContainingFolder(LPTSTR pszCmdline)
     execute_open_command(expanded_open_command);
 }
 
+extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
+
+static DWORD GetColorRef(String color)
+{
+    DWORD clrColor = 0;
+    LPCTSTR pstrValue = color.c_str();
+    LPTSTR pstr = NULL;
+    if (color != TEXT("") && color.length() >= 8) {
+        pstrValue = ::CharNext(pstrValue);
+        pstrValue = ::CharNext(pstrValue);
+        TCHAR buff[10] = { 0 };
+        buff[0] = pstrValue[4];buff[1] = pstrValue[5];
+        buff[2] = pstrValue[2];buff[3] = pstrValue[3];
+        buff[4] = pstrValue[0];buff[5] = pstrValue[1];
+        clrColor = _tcstoul(buff, &pstr, 16);
+        return clrColor;
+    }
+    return 0;
+}
+
+static void UpdateSysColor(LPTSTR pszCmdline)
+{
+    String cmdline = pszCmdline;
+    cmdline += TEXT(" ");
+    String hl = GetParameter(cmdline, TEXT("color_highlight"), TRUE);
+    INT elements[2] = { COLOR_HIGHLIGHT, COLOR_HOTLIGHT };
+    if (hl != TEXT("")) {
+        DWORD clrColor = GetColorRef(hl);
+        SetSysColors(1, elements, &clrColor);
+    }
+
+    hl = GetParameter(cmdline, TEXT("color_selection"), TRUE);
+    if (hl != TEXT("")) {
+        DWORD clrColor = GetColorRef(hl);
+        SetSysColors(1, elements + 1, &clrColor);
+    }
+}
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 {
     CONTEXT("WinMain()");
@@ -1577,6 +1615,14 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifndef _DEBUG
     SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
+
+    if (_tcsstr(ext_options, TEXT("-color"))) {
+        UpdateSysColor(lpCmdLineOrg);
+    }
+
+    if (_tcsstr(ext_options, TEXT("-settings"))) {
+        return 0;
+    }
 
     if (_tcsstr(ext_options, TEXT("-ocf"))) {
         OpenContainingFolder(lpCmdLineOrg);
