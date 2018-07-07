@@ -284,6 +284,7 @@ void CNotifyInfoWindow::CloseMe()
     /* delete this */;
 }
 
+/*
 #include <list>
 #include <mutex>
 
@@ -300,15 +301,19 @@ void gc_NotifyInfoWindow()
 {
     CNotifyInfoWindow *ptr = NULL;
     std::lock_guard<std::mutex> guard(niw_mutex);
-    for (list<CNotifyInfoWindow *>::const_reverse_iterator it = NotifyInfoWindowList.rbegin();
-         it != NotifyInfoWindowList.rend(); ++it) {
-         ptr = *it;
-         if (ptr->m_Height == -1) {
-            NotifyInfoWindowList.remove(ptr);
-            delete ptr;
-         }
+    list<CNotifyInfoWindow *>::iterator it; list<CNotifyInfoWindow *>::iterator it2;
+    for (it = NotifyInfoWindowList.begin(); it != NotifyInfoWindowList.end();) {
+        ptr = *it;
+        if (ptr->m_Height == -1) {
+            ptr->Close();
+            it = NotifyInfoWindowList.erase(it);
+        } else {
+            ++it;
+        }
+        it2 = NotifyInfoWindowList.end();
     }
 }
+*/
 
 void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
 {
@@ -317,14 +322,22 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
     DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
     DWORD dwExStyle = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
-    gc_NotifyInfoWindow();
+    String uiname = JCFG2_DEF("JS_TRAYAREA", "ui_notifyinfo", _T("UI_NotifyInfo")).ToString();
 
     CNotifyInfoWindow *pFrame = new CNotifyInfoWindow(
-        _T("WinXShell-NOTITYINFO-Wnd"), _T("UI_NotifyInfo"));
+        _T("WinXShell-NOTITYINFO-Wnd"), uiname);
 
     if (pFrame == NULL) return;
     CPaintManagerUI *pMgr = pFrame->GetPaintManager();
     if (pMgr) {
+        if (pMgr->GetResourcePath() == _T("")) {
+#ifndef _DEBUG
+            String path = JVAR("JVAR_MODULEPATH").ToString() + _T("\\") + uiname;
+#else
+            String path = uiname + _T("\\");
+#endif
+            pMgr->SetResourcePath(path.c_str());
+        }
         String entry = pMgr->GetResourcePath() + _T("main.xml");
         if (!PathFileExists(entry.c_str())) pMgr = NULL;
     }
@@ -332,10 +345,9 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
         delete pFrame;
         return;
     }
-    add_NotifyInfoWindow(pFrame);
     pFrame->m_Info = *pTrayInfo;
     pFrame->m_n = n;
-    pFrame->Create(NULL, _T("UI_NotifyInfo"), dwStyle, dwExStyle);
+    pFrame->Create(NULL, uiname, dwStyle, dwExStyle);
     pFrame->ShowWindow();
     n++;
     if (n >= 999) n = 0;
