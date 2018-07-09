@@ -114,9 +114,21 @@ void ExplorerGlobals::get_modulepath()
     JVAR("JVAR_MODULENAME") = strFileName;
 }
 
+void ExplorerGlobals::get_uifolder()
+{
+    TCHAR uifolder[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_UIFOLDER"), uifolder, MAX_PATH);
+    if (dw == 0) {
+        g_Globals._uifolder = TEXT("wxsUI");
+    } else {
+        g_Globals._uifolder = uifolder;
+    }
+}
+
 void ExplorerGlobals::load_config()
 {
     get_modulepath();
+    get_uifolder();
 
 #ifdef _DEBUG
     String cfgfile = TEXT("WinXShell.jcfg");
@@ -1544,7 +1556,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
-
+        g_Globals.get_uifolder();
         UIProcess(hInstance, lpCmdLineOrg);
         if (pUIManager) {
             Window::MessageLoop();

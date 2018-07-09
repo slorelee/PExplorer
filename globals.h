@@ -223,6 +223,7 @@ extern struct ExplorerGlobals {
     void    load_config();
     void    get_modulepath();
     void    get_systeminfo();
+    void    get_uifolder();
 
     HINSTANCE   _hInstance;
     UINT        _cfStrFName;
@@ -254,6 +255,7 @@ extern struct ExplorerGlobals {
     String      _cfg_dir;
     String      _cfg_path;
 
+    String      _uifolder;
 
 } g_Globals;
 
