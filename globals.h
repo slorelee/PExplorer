@@ -28,6 +28,7 @@
 #include "vendor/json.h"
 #include "taskbar/favorites.h"
 #include "jconfig/jcfg.h"
+#include "utility/LuaAppEngine.h"
 
 /// management of file types
 struct FileTypeInfo {
@@ -228,6 +229,7 @@ extern struct ExplorerGlobals {
     HINSTANCE   _hInstance;
     UINT        _cfStrFName;
 
+    String      _cmdline;
     BOOL        _isWinPE;
     BOOL        _isNT5;
     String      _langID;
@@ -256,7 +258,7 @@ extern struct ExplorerGlobals {
     String      _cfg_path;
 
     String      _uifolder;
-
+    LuaAppEngine    *_lua;
 } g_Globals;
 
 /// convenient loading of string resources

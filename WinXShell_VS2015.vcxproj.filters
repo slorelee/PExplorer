@@ -105,6 +105,9 @@
     <ClCompile Include="DUI\UI_Volume.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
+    <ClCompile Include="utility\LuaAppEngine.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -207,6 +210,9 @@
     </ClInclude>
     <ClInclude Include="DUI\UI_Volume.h">
       <Filter>DUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\LuaAppEngine.h">
+      <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

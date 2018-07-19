@@ -286,10 +286,6 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
 }
 
 
-extern std::wstring s2w(const std::string& str, UINT cp = CP_ACP);
-extern std::string w2s(const std::wstring& wstr);
-extern std::string w2s(const wchar_t *wstr);
-
 #ifndef LOGA
 extern void _logA_(LPCSTR txt);
 

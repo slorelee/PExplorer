@@ -53,6 +53,7 @@
 #include "jconfig/jcfg.h"
 
 #include "DUI\UIManager.h"
+#include "utility/LuaAppEngine.h"
 
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
@@ -68,6 +69,7 @@ ExplorerGlobals::ExplorerGlobals()
     _hInstance = 0;
     _cfStrFName = 0;
 
+    _cmdline = _T("");
 #ifndef ROSSHELL
     _hframeClass = 0;
     _hMainWnd = 0;
@@ -82,6 +84,7 @@ ExplorerGlobals::ExplorerGlobals()
     _hwndDesktop = 0;
 
     _isWinPE = FALSE;
+    _lua = NULL;
 }
 
 
@@ -1514,6 +1517,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
     g_Globals.init(hInstance); /* init icon_cache for UI process */
+    g_Globals._cmdline = lpCmdLine;
+    string_t file(_T("WinXShell.lua"));
+    g_Globals._lua = new LuaAppEngine(file);
 
 #ifndef __WINE__
     if (_tcsstr(ext_options, TEXT("-console"))) {
@@ -1548,6 +1554,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifdef _DEBUG
     SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
 #endif
+
+   if (g_Globals._lua) g_Globals._lua->onLoad();
 
     if (_tcsstr(ext_options, TEXT("-ui"))) {
         g_Globals.get_modulepath();
@@ -1662,6 +1670,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();
+        if (g_Globals._lua) g_Globals._lua->onShell();
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
 #endif
