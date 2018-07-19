@@ -133,12 +133,17 @@ void ExplorerGlobals::load_config()
     get_modulepath();
     get_uifolder();
 
-#ifdef _DEBUG
-    String cfgfile = TEXT("WinXShell.jcfg");
-#else
-    String cfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\WinXShell.jcfg");
+    String jcfgfile = TEXT("WinXShell.jcfg");
+#ifndef _DEBUG
+    TCHAR buff[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_JCFGFILE"), buff, MAX_PATH);
+    if (dw == 0) {
+        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\WinXShell.jcfg");
+    } else {
+        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\") + buff;
+    }
 #endif
-    Load_JCfg(cfgfile);
+    Load_JCfg(jcfgfile);
 }
 
 void ExplorerGlobals::get_systeminfo()
