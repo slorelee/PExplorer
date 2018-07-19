@@ -10,6 +10,7 @@ public:
     LuaAppEngine(string_t& file);
     ~LuaAppEngine();
     void *getFrame() { return _frame; };
+    void call(const char *funcname);
     void onLoad();
     void onFirstRun();
     void onShell();
@@ -17,7 +18,6 @@ public:
     void onTimer(int id);
 private:
     void init(string_t& file);
-    void callFunc(const char *funcname);
     void *_frame;
     lua_State *L;
 };

@@ -77,7 +77,7 @@ LRESULT LuaAppWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     if (nmsg == WM_TIMER) {
         if (_lua) {
-            _lua->onTimer(wparam);
+            _lua->onTimer((int)wparam);
             return S_OK;
         }
     }
@@ -123,62 +123,64 @@ extern "C" {
     {
         int ret = 0;
         Token v = { TOK_UNSET };
-        int top = lua_gettop(L);
-        luaL_checktype(L, 1, LUA_TSTRING);
-        std::string func = lua_tostring(L, 1);
+        int base = 0;
+
+        if (lua_type(L, 1) == LUA_TTABLE) {
+            //skip self for app:call
+            base++;
+        }
+        luaL_checktype(L, base + 1, LUA_TSTRING);
+        std::string func = lua_tostring(L, base + 1);
+
+        LuaAppEngine *lua = g_Globals._lua;
 
         if (func == "GetResolutionList") {
  
         } else if ((func == "SetTimer") || (func == "KillTimer")) {
-            LuaAppEngine *lua = NULL;
             LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
             if (func == "SetTimer") {
-                SetTimer(frame->GetHWND(), lua_tointeger(L, 2), lua_tointeger(L, 3), NULL);
+                SetTimer(frame->GetHWND(), (UINT_PTR)lua_tointeger(L, base + 2), (UINT)lua_tointeger(L, base + 3), NULL);
             } else {
-                KillTimer(frame->GetHWND(), lua_tointeger(L, 2));
+                KillTimer(frame->GetHWND(), lua_tointeger(L, base + 2));
             }
         } else if (func == "GetTickCount") {
             v.iVal = GetTickCount();
             PUSH_INT(v);
         } else if (func == "sleep") {
-            if (lua_isinteger(L, 2)) {
-                int ms = lua_tointeger(L, 2);
+            if (lua_isinteger(L, base + 2)) {
+                int ms = (int)lua_tointeger(L, base + 2);
                 Sleep(ms);
             }
         } else if (func == "beep") {
-            if (lua_isinteger(L, 2)) {
-                int type = lua_tointeger(L, 2);
+            if (lua_isinteger(L, base + 2)) {
+                int type = (int)lua_tointeger(L, base + 2);
                 MessageBeep(type);
             }
         } else if (func == "resstr") {
-            v.str = s2w(lua_tostring(L, 2));
+            v.str = s2w(lua_tostring(L, base + 2));
             resstr_expand(v.str);
             PUSH_STR(v);
         } else if (func == "run") {
-            string_t cmd = s2w(lua_tostring(L, 2));
-            LuaAppEngine *lua = (LuaAppEngine *)g_Globals._lua;
-            LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
-
+            string_t cmd = s2w(lua_tostring(L, base + 2));
             string_t param = TEXT("");
             LPCTSTR param_ptr = NULL;
             int showflags = SW_SHOWNORMAL;
-            if (lua_isstring(L, 3)) {
-                param = s2w(lua_tostring(L, 3));
+            if (lua_isstring(L, base + 3)) {
+                param = s2w(lua_tostring(L, base + 3));
                 param_ptr = param.c_str();
             }
-            if (lua_isnumber(L, 4)) showflags = lua_tointeger(L, 4);
-            launch_file(frame->GetHWND(), cmd.c_str(), showflags, param_ptr);
+            if (lua_isnumber(L, base + 4)) showflags = (int)lua_tointeger(L, base + 4);
+            launch_file(g_Globals._hwndDesktop, cmd.c_str(), showflags, param_ptr);
             v.iVal = 0;
-
             PUSH_INT(v);
         } else if (func == "band") {
-            UINT s = lua_tointeger(L, 2);
-            UINT b = lua_tointeger(L, 3);
+            UINT s = (UINT)lua_tointeger(L, base + 2);
+            UINT b = (UINT)lua_tointeger(L, base + 3);
             v.iVal = (s & b);
             PUSH_INT(v);
         } else {
             char buff[100];
-            sprintf(buff, "error:fcuntion %s() is not implemented", func);
+            sprintf(buff, "error:fcuntion %s() is not implemented", func.c_str());
             LOGA(buff);
         }
         return ret;
@@ -188,9 +190,14 @@ extern "C" {
     {
         int ret = 0;
         Token v = { TOK_UNSET };
-        int top = lua_gettop(L);
-        luaL_checktype(L, 1, LUA_TSTRING);
-        std::string name = lua_tostring(L, 1);
+        int base = 0;
+
+        if (lua_type(L, 1) == LUA_TTABLE) {
+            //skip self for app:call
+            base++;
+        }
+        luaL_checktype(L, base + 1, LUA_TSTRING);
+        std::string name = lua_tostring(L, base + 1);
         if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
@@ -203,6 +210,9 @@ extern "C" {
         } else if (name == "iswinpe") {
             v.iVal = g_Globals._isWinPE;
             PUSH_INT(v);
+        } else if (name == "path") {
+            v.str = JVAR("JVAR_MODULEPATH").ToString();
+            PUSH_STR(v);
         }
         return ret;
     }
@@ -295,7 +305,7 @@ static int reg_errorfunc(lua_State *L)
     return errfunc;
 }
 
-void LuaAppEngine::callFunc(const char *funcname)
+void LuaAppEngine::call(const char *funcname)
 {
     char buff[1024] = { 0 };
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
@@ -304,7 +314,7 @@ void LuaAppEngine::callFunc(const char *funcname)
 
     lua_getglobal(L, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA("[LUA ERROR] can't find onload() function");
+        LOGA(buff);
         return;
     }
     int rel = lua_pcall(L, 0, 0, errfunc);
@@ -312,17 +322,17 @@ void LuaAppEngine::callFunc(const char *funcname)
 }
 void LuaAppEngine::onLoad()
 {
-    callFunc("onload");
+    call("onload");
 }
 
 void LuaAppEngine::onFirstRun()
 {
-    callFunc("onfirstrun");
+    call("onfirstrun");
 }
 
 void LuaAppEngine::onShell()
 {
-    callFunc("onshell");
+    call("onshell");
 }
 
 void LuaAppEngine::onClick(string_t& ctrl)
