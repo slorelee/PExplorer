@@ -1518,8 +1518,15 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     g_Globals.init(hInstance); /* init icon_cache for UI process */
     g_Globals._cmdline = lpCmdLine;
+
     string_t file(_T("WinXShell.lua"));
-    g_Globals._lua = new LuaAppEngine(file);
+    TCHAR luascript[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_LUASCRIPT"), luascript, MAX_PATH);
+    if (dw != 0) file = luascript;
+
+    if (PathFileExists(file.c_str())) {
+        g_Globals._lua = new LuaAppEngine(file);
+    }
 
 #ifndef __WINE__
     if (_tcsstr(ext_options, TEXT("-console"))) {
@@ -1715,16 +1722,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         pSSOThread->Start();
     }
 
+    bool isfirstrun = true;
     /**TODO launching autostart programs can be moved into a background thread. */
     if (autostart) {
         const TCHAR *argv[] = {TEXT(""), TEXT("s")};    // call startup routine in SESSION_START mode
-        startup(2, argv);
+        isfirstrun = startup(2, argv) != 1;
     }
 
-#ifndef ROSSHELL
-    if (g_Globals._hwndDesktop)
+
+    if (g_Globals._hwndDesktop) {
         g_Globals._desktop_mode = true;
-#endif
+        if (isfirstrun && g_Globals._lua) g_Globals._lua->onFirstRun();
+    }
 
     /* UIManager Process */
     if (!startup_desktop && pUIManager) {

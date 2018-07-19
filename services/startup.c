@@ -428,7 +428,7 @@ int startup(int argc, const TCHAR *argv[])
             RegCloseKey(hKey);
             if (dwDisp == REG_OPENED_EXISTING_KEY) {
                 /* Startup programs has already been run */
-                return 0;
+                return 1;
             }
         }
     }
