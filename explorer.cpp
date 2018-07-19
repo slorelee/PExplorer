@@ -1590,10 +1590,16 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         autostart = true;
 
     if (startup_desktop) {
-        // hide the XP login screen (Credit to Nicolas Escuder)
-        // another undocumented event: "Global\\msgina: ReturnToWelcome"
-        if (!SetShellReadyEvent(TEXT("msgina: ShellReadyEvent")))
-            SetShellReadyEvent(TEXT("Global\\msgina: ShellReadyEvent"));
+        if (IsWindowsVistaOrGreater()) {
+            // for Vista later
+            if (!SetShellReadyEvent(TEXT("ShellDesktopSwitchEvent")))
+                SetShellReadyEvent(TEXT("Global\\ShellDesktopSwitchEvent"));
+        } else {
+            // hide the XP login screen (Credit to Nicolas Escuder)
+            // another undocumented event: "Global\\msgina: ReturnToWelcome"
+            if (!SetShellReadyEvent(TEXT("msgina: ShellReadyEvent")))
+                SetShellReadyEvent(TEXT("Global\\msgina: ShellReadyEvent"));
+        }
     }
 #ifdef ROSSHELL
     else
