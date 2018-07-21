@@ -20,3 +20,16 @@ function reg_read(key, values)
   k:close()
   return res
 end
+
+function reg_write(key, name, value, type)
+  k,err = winapi.open_reg_key(key, true)
+  if not k then -- create the key if the key isn't exists
+    winapi.create_reg_key(key)
+    k,err = winapi.open_reg_key(key, true) -- open again
+    if not k then return nil end
+  end
+  if type == nil then type = winapi.REG_SZ end
+  k:set_value(name, value, type)
+  k:close()
+  return 1
+end

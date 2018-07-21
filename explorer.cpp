@@ -130,7 +130,6 @@ void ExplorerGlobals::get_uifolder()
 
 void ExplorerGlobals::load_config()
 {
-    get_modulepath();
     get_uifolder();
 
     String jcfgfile = TEXT("WinXShell.jcfg");
@@ -1228,26 +1227,6 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     return super::WndProc(nmsg, wparam, lparam);
 }
 
-static void execute_open_command(String &cmd)
-{
-    size_t param_startpos = 0;
-    String bin;
-    String param;
-    if (cmd[0U] == TEXT('\"')) {
-        size_t pos = cmd.find(TEXT("\""), 1);
-        if (pos == String::npos) return;
-        bin = cmd.substr(1, pos - 1);
-        param = cmd.substr(pos + 1);
-    } else {
-        size_t pos = cmd.find(TEXT(" "));
-        if (pos == String::npos) return;
-        bin = cmd.substr(0, pos);
-        param = cmd.substr(pos + 1);
-    }
-    launch_file(NULL, bin, SW_SHOWNORMAL, param);
-}
-
-
 class CReg {
 public:
     HKEY m_hkey;
@@ -1284,12 +1263,13 @@ static void update_property_handler()
     if (JCFG2_DEF("JS_DAEMON", "update_properties_name", true).ToBool() == FALSE) {
         return;
     }
+    int mid = JCFG2_DEF("JS_DAEMON", "properties_menu", 220).ToInt();
     CReg reg_prop(HKEY_CLASSES_ROOT, TEXT("CLSID\\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\shell\\properties"));
     if (!reg_prop.m_hkey) return;
     TCHAR namebuffer[MAX_PATH];
     HINSTANCE res = LoadLibrary(TEXT("shell32.dll"));
     if (!res) return;
-    HMENU menu = LoadMenu(res, MAKEINTRESOURCE(220));
+    HMENU menu = LoadMenu(res, MAKEINTRESOURCE(mid));
     if (!menu) return;
     if (!GetMenuString(menu, 0, namebuffer, MAX_PATH, MF_BYCOMMAND)) {
         FreeLibrary(res);
@@ -1365,43 +1345,29 @@ static void OpenContainingFolder(LPTSTR pszCmdline)
     if (lnkfile[0U] == TEXT('\"')) lnkfile = lnkfile.substr(1, lnkfile.length() - 2);
     TCHAR path[MAX_PATH];
     GetShortcutPath(lnkfile.c_str(), path, MAX_PATH);
-    String open_command = JCFG2_DEF("JS_DAEMON",
-        "open_containing_folder", TEXT("")).ToString();
+
     String strPath = path;
-    if (open_command == TEXT("")) {
-        //if (!PathIsDirectory(path)) {
-            //size_t nPos = strPath.rfind(TEXT('\\'));
-            //if (nPos == String::npos) return;
-            //strPath = strPath.substr(0, nPos);
-        //}
-        if (cmdline.find(_T("-explorer")) != String::npos) {
-            ocf(strPath.c_str());
+    if (g_Globals._lua) {
+        if (g_Globals._lua->hasfunc("do_ocf")) {
+            g_Globals._lua->call("do_ocf", lnkfile, strPath);
             return;
         }
-        strPath = TEXT("/select,") + strPath;
-        explorer_show_frame(SW_SHOWNORMAL, (LPTSTR)(strPath.c_str()));
-        Window::MessageLoop();
-        return;
-    }
-    String expanded_open_command = open_command;
-    size_t rep_pos = open_command.find(TEXT("%1"));
-    while (rep_pos != String::npos) {
-        open_command = open_command.replace(rep_pos, 2, TEXT("%s"));
-        expanded_open_command = FmtString(open_command.c_str(), strPath.c_str());
-        rep_pos = open_command.find(TEXT("%1"));
     }
 
-    size_t dir_pos = strPath.rfind(TEXT('\\'));
-    if (dir_pos != String::npos) {
-        String dir = strPath.substr(0, dir_pos);
-        rep_pos = open_command.find(TEXT("%p"));
-        while (rep_pos != String::npos) {
-            open_command = open_command.replace(rep_pos, 2, TEXT("%s"));
-            expanded_open_command = FmtString(open_command.c_str(), dir.c_str());
-            rep_pos = open_command.find(TEXT("%p"));
-        }
+    //if (!PathIsDirectory(path)) {
+        //size_t nPos = strPath.rfind(TEXT('\\'));
+        //if (nPos == String::npos) return;
+        //strPath = strPath.substr(0, nPos);
+    //}
+    if (cmdline.find(_T("-explorer")) != String::npos) {
+        ocf(strPath.c_str());
+        return;
     }
-    execute_open_command(expanded_open_command);
+    strPath = TEXT("/select,") + strPath;
+    explorer_show_frame(SW_SHOWNORMAL, (LPTSTR)(strPath.c_str()));
+    Window::MessageLoop();
+    return;
+
 }
 
 extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
@@ -1442,6 +1408,11 @@ static void UpdateSysColor(LPTSTR pszCmdline)
     }
 }
 
+
+EXTERN_C {
+    extern int ShellHasBeenRun();
+}
+
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nShowCmd)
 {
     CONTEXT("WinMain()");
@@ -1466,6 +1437,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._isWinPE = TRUE;
         CloseShellProcess();
         ChangeUserProfileEnv();
+        startup_desktop = TRUE;
+    } else if (_tcsstr(ext_options, TEXT("-wes"))) {
+        CloseShellProcess();
         startup_desktop = TRUE;
     }
 
@@ -1522,15 +1496,28 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
     g_Globals.init(hInstance); /* init icon_cache for UI process */
-    g_Globals._cmdline = lpCmdLine;
+
+    g_Globals.read_persistent();
+    g_Globals.get_modulepath();
+    g_Globals.load_config();
+    g_Globals.get_systeminfo();
+    g_Globals._cmdline = lpCmdLineOrg;
 
     string_t file(_T("WinXShell.lua"));
     TCHAR luascript[MAX_PATH + 1] = { 0 };
     DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_LUASCRIPT"), luascript, MAX_PATH);
     if (dw != 0) file = luascript;
 
-    if (PathFileExists(file.c_str())) {
-        g_Globals._lua = new LuaAppEngine(file);
+#ifdef _DEBUG
+    SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
+#endif
+
+    String mpath = JVAR("JVAR_MODULEPATH").ToString();
+    SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
+    if (_tcsstr(ext_options, TEXT("-ui")) == 0) {
+        if (PathFileExists(file.c_str())) {
+            g_Globals._lua = new LuaAppEngine(file);
+        }
     }
 
 #ifndef __WINE__
@@ -1563,16 +1550,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
        }
     }
 
-#ifdef _DEBUG
-    SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
-#endif
-
    if (g_Globals._lua) g_Globals._lua->onLoad();
 
     if (_tcsstr(ext_options, TEXT("-ui"))) {
-        g_Globals.get_modulepath();
-        String mpath = JVAR("JVAR_MODULEPATH").ToString();
-        SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
 #ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
@@ -1645,10 +1625,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // init common controls library
     CommonControlInit usingCmnCtrl;
 
-    g_Globals.read_persistent();
-    g_Globals.load_config();
-    g_Globals.get_systeminfo();
-
     // for loading UI Resources
 #ifndef _DEBUG
     SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
@@ -1669,7 +1645,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
         HWND daemon = WinXShell_DaemonWindow::Create();
-
+        if (g_Globals._lua) g_Globals._lua->call("ondaemon");
         //hijack clockarea click event
         if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", false).ToBool() != FALSE) {
             InitHook(daemon);
@@ -1683,12 +1659,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         WaitCursor wait;
 
         WinXShell_DaemonWindow::Create();
-        update_property_handler();
-
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();
+
         if (g_Globals._lua) g_Globals._lua->onShell();
+        update_property_handler();
+
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
 #endif
@@ -1696,10 +1673,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (_tcsstr(ext_options, TEXT("-?"))) {
         MessageBoxA(g_Globals._hwndDesktop,
-                    "/e        open cabinet window in explorer mode\r\n"
-                    "/root        open cabinet window in rooted mode\r\n"
-                    "/mdi        open cabinet window in MDI mode\r\n"
-                    "/sdi        open cabinet window in SDI mode\r\n"
                     "\r\n"
                     "-?        display command line options\r\n"
                     "\r\n"
@@ -1727,16 +1700,17 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         pSSOThread->Start();
     }
 
-    bool isfirstrun = true;
+
     /**TODO launching autostart programs can be moved into a background thread. */
     if (autostart) {
         const TCHAR *argv[] = {TEXT(""), TEXT("s")};    // call startup routine in SESSION_START mode
-        isfirstrun = startup(2, argv) != 1;
+        startup(2, argv);
     }
 
 
     if (g_Globals._hwndDesktop) {
         g_Globals._desktop_mode = true;
+        bool isfirstrun = (ShellHasBeenRun() == 0);
         if (isfirstrun && g_Globals._lua) g_Globals._lua->onFirstRun();
     }
 

@@ -305,6 +305,15 @@ static int reg_errorfunc(lua_State *L)
     return errfunc;
 }
 
+int LuaAppEngine::hasfunc(const char *funcname)
+{
+    lua_getglobal(L, funcname);
+    if (lua_type(L, -1) != LUA_TFUNCTION) {
+        return 0;
+    }
+    return 1;
+}
+
 void LuaAppEngine::call(const char *funcname)
 {
     char buff[1024] = { 0 };
@@ -320,6 +329,25 @@ void LuaAppEngine::call(const char *funcname)
     int rel = lua_pcall(L, 0, 0, errfunc);
     if (rel == -1) return;
 }
+
+void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
+{
+    char buff[1024] = { 0 };
+    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+    int errfunc = reg_errorfunc(L);
+    if (errfunc == MININT) return;
+
+    lua_getglobal(L, funcname);
+    if (lua_type(L, -1) != LUA_TFUNCTION) {
+        LOGA(buff);
+        return;
+    }
+    lua_pushstring(L, w2s(p1).c_str());
+    lua_pushstring(L, w2s(p1).c_str());
+    int rel = lua_pcall(L, 2, 0, errfunc);
+    if (rel == -1) return;
+}
+
 void LuaAppEngine::onLoad()
 {
     call("onload");
@@ -335,19 +363,20 @@ void LuaAppEngine::onShell()
     call("onshell");
 }
 
-void LuaAppEngine::onClick(string_t& ctrl)
+int LuaAppEngine::onClick(string_t& ctrl)
 {
     int errfunc = reg_errorfunc(L);
-    if (errfunc == MININT) return;
+    if (errfunc == MININT) return -1;
 
     lua_getglobal(L, "onclick");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA("[LUA ERROR] can't find onclick() function");
-        return;
+        return -1;
     }
     lua_pushstring(L, w2s(ctrl).c_str());
     int rel = lua_pcall(L, 1, 0, errfunc);
-    if (rel == -1) return;
+    if (rel == -1) return -1;
+    return (int)lua_tointeger(L, 1);
 }
 
 void LuaAppEngine::onTimer(int id)

@@ -1904,11 +1904,21 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_LOGOFF:
         CloseStartMenu(id);
-        ShowLogoffDialog(g_Globals._hwndDesktopBar);
+        if (g_Globals._lua) {
+            string_t btn = TEXT("startmenu_logoff");
+            if (g_Globals._lua->onClick(btn) == 0) break;
+        }
+        if (CommandHook(g_Globals._hwndDesktop, TEXT("logoff")) == 1) break;
+        ShowLogoffDialog(g_Globals._hwndDesktop);
         break;
 
     case IDC_RESTART:
         CloseStartMenu(id);
+        if (g_Globals._lua) {
+            string_t btn = TEXT("startmenu_reboot");
+            if (g_Globals._lua->onClick(btn) == 0) break;
+        }
+        if (CommandHook(g_Globals._hwndDesktop, TEXT("reboot")) == 1) break;
         ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
         /* An alternative way to do restart without shell32 help */
         //launch_file(_hwnd, TEXT("shutdown.exe"), SW_HIDE, TEXT("-r"));
@@ -1916,6 +1926,11 @@ int StartMenuHandler::Command(int id, int code)
 
     case IDC_SHUTDOWN:
         CloseStartMenu(id);
+        if (g_Globals._lua) {
+            string_t btn = TEXT("startmenu_shutdown");
+            if (g_Globals._lua->onClick(btn) == 0) break;
+        }
+        if (CommandHook(g_Globals._hwndDesktop, TEXT("shutdown")) == 1) break;
         ShowExitWindowsDialog(g_Globals._hwndDesktop);
         break;
 
@@ -1936,6 +1951,10 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_CONTROL_PANEL: {
         CloseStartMenu(id);
 
+        if (g_Globals._lua) {
+            string_t btn = TEXT("startmenu_controlpanel");
+            if (g_Globals._lua->onClick(btn) == 0) break;
+        }
         if (CommandHook(_hwnd, TEXT("control")) == 1) break;
 
         //explorer_open_frame(SW_SHOWNORMAL, SHELLPATH_CONTROL_PANEL);
@@ -2118,7 +2137,6 @@ void ShowLogoffDialog(HWND hwndOwner)
 {
     static DynamicFct<LOGOFFWINDOWSDIALOG> LogoffWindowsDialog(TEXT("SHELL32"), 54);
     //  static DynamicFct<RESTARTWINDOWSDLG> RestartDialog(TEXT("SHELL32"), 59);
-    if (CommandHook(hwndOwner, TEXT("logoff")) == 1) return;
 
     if (LogoffWindowsDialog)
         (*LogoffWindowsDialog)(0);
@@ -2133,7 +2151,7 @@ void ShowLogoffDialog(HWND hwndOwner)
 void ShowExitWindowsDialog(HWND hwndOwner)
 {
     static DynamicFct<EXITWINDOWSDLG> ExitWindowsDialog(TEXT("SHELL32"), 60);
-    if (CommandHook(hwndOwner, TEXT("shutdown")) == 1) return;
+
     if (ExitWindowsDialog)
         (*ExitWindowsDialog)(hwndOwner);
     else
@@ -2143,7 +2161,7 @@ void ShowExitWindowsDialog(HWND hwndOwner)
 void StartMenuHandler::ShowRestartDialog(HWND hwndOwner, UINT flags)
 {
     static DynamicFct<RESTARTWINDOWSDLG> RestartDlg(TEXT("SHELL32"), 59);
-    if (CommandHook(hwndOwner, TEXT("reboot")) == 1) return;
+
     if (RestartDlg)
         (*RestartDlg)(hwndOwner, (LPWSTR)L"You selected restart.\n\n", flags);
     else

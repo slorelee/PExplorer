@@ -400,19 +400,15 @@ static const struct op_mask
 
 static HRESULT (WINAPI *SHCreateSessionKey)(REGSAM samDesired, PHKEY phKey);
 
-int startup(int argc, const TCHAR *argv[])
+static int SessionKeyCreated(TCHAR *key)
 {
-    struct op_mask ops; /* Which of the ops do we want to perform? */
-    /* First, set the current directory to SystemRoot */
-    TCHAR gen_path[MAX_PATH];
-    DWORD res;
     HKEY hSessionKey, hKey;
     HRESULT hr;
 
-    /* 
-       DWORD dwSessionId;
-       ProcessIdToSessionId(GetCurrentProcessId(), &dwSessionId);
-       HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\<dwSessionId>
+    /*
+    DWORD dwSessionId;
+    ProcessIdToSessionId(GetCurrentProcessId(), &dwSessionId);
+    HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\<dwSessionId>
     */
     HMODULE hModule = GetModuleHandle(TEXT("SHELL32"));
     SHCreateSessionKey = (HRESULT(WINAPI *)(REGSAM, PHKEY))GetProcAddress(hModule, (LPCSTR)723);
@@ -422,7 +418,7 @@ int startup(int argc, const TCHAR *argv[])
         LONG Error;
         DWORD dwDisp;
 
-        Error = RegCreateKeyEx(hSessionKey, L"StartupHasBeenRun", 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp);
+        Error = RegCreateKeyEx(hSessionKey, key, 0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, &dwDisp);
         RegCloseKey(hSessionKey);
         if (Error == ERROR_SUCCESS) {
             RegCloseKey(hKey);
@@ -431,6 +427,24 @@ int startup(int argc, const TCHAR *argv[])
                 return 1;
             }
         }
+    }
+    return 0;
+}
+
+int ShellHasBeenRun()
+{
+    return SessionKeyCreated(TEXT("ShellHasBeenRun"));
+}
+
+int startup(int argc, const TCHAR *argv[])
+{
+    struct op_mask ops; /* Which of the ops do we want to perform? */
+    /* First, set the current directory to SystemRoot */
+    TCHAR gen_path[MAX_PATH];
+    DWORD res;
+
+    if (SessionKeyCreated(TEXT("StartupHasBeenRun"))) {
+        return 0;
     }
 
     res = GetWindowsDirectory(gen_path, sizeof(gen_path));
