@@ -1419,7 +1419,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     BOOL any_desktop_running = IsAnyDesktopRunning();
 
-    BOOL startup_desktop;
+    BOOL startup_desktop = FALSE;
 
     // strip extended options from the front of the command line
     String ext_options;
@@ -1437,10 +1437,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._isWinPE = TRUE;
         CloseShellProcess();
         ChangeUserProfileEnv();
-        startup_desktop = TRUE;
+        any_desktop_running = FALSE;
     } else if (_tcsstr(ext_options, TEXT("-wes"))) {
         CloseShellProcess();
-        startup_desktop = TRUE;
+        any_desktop_running = FALSE;
     }
 
     // command line option "-install" to replace previous shell application with WinXShell
@@ -1477,9 +1477,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         // the first explorer instance
         // MS Explorer looks additionally into the registry entry HKCU\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\shell,
         // to decide wether it is currently configured as shell application.
-        if (!g_Globals._isWinPE) {
-            startup_desktop = !any_desktop_running;
-        }
+        startup_desktop = !any_desktop_running;
     }
 
 
