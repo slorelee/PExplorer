@@ -1647,8 +1647,14 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
         HWND daemon = WinXShell_DaemonWindow::Create();
         if (g_Globals._lua) g_Globals._lua->call("ondaemon");
+        bool instHook = false;
+        //default install the hook if running in WinPE
+        TCHAR drv[MAX_PATH + 1] = { 0 };
+        DWORD dw = GetEnvironmentVariable(TEXT("SystemDrive"), drv, MAX_PATH);
+        if (drv[0] == TEXT('x') || drv[0] == TEXT('X')) instHook = true;
+
         //hijack clockarea click event
-        if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", false).ToBool() != FALSE) {
+        if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", instHook).ToBool() != FALSE) {
             InitHook(daemon);
         }
         update_property_handler();
