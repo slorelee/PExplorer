@@ -1513,6 +1513,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     String mpath = JVAR("JVAR_MODULEPATH").ToString();
     SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
     if (_tcsstr(ext_options, TEXT("-ui")) == 0) {
+#ifndef _DEBUG
+        file = mpath + TEXT("\\") + file;
+#endif
         if (PathFileExists(file.c_str())) {
             g_Globals._lua = new LuaAppEngine(file);
         }
