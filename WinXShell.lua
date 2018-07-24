@@ -8,6 +8,7 @@ ICP_TIMER_ID = 10001 -- init control panel timer
 
 cmd_line = app:info('cmdline')
 app_path = app:info('path')
+win_ver = app:info('winver')
 is_pe = (app:info('iswinpe') == 1)                              -- Windows Preinstallation Environment
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
@@ -38,11 +39,14 @@ function onshell()
 end
 
 function onfirstrun()
-  VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]]
-    , 'CurrentVersion')
+  -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   if is_wes then
     app:call('SetTimer', ICP_TIMER_ID, 200) -- use timer to make main shell running
   end
+end
+
+function ms_settings(url)
+    app:print(url)
 end
 
 function onclick(ctrl)
@@ -52,6 +56,10 @@ function onclick(ctrl)
     return onclick_startmenu_shutdown()
   elseif ctrl == 'startmenu_controlpanel' then
     return onclick_startmenu_controlpanel()
+  elseif ctrl == 'tray_clockarea' then
+    return onclick_tray_clockarea()
+  elseif ctrl == 'tray_clockarea(double)' then
+    return onclick_tray_clockarea(true)
   end
   return 1 -- continue shell action
 end
@@ -78,9 +86,27 @@ function onclick_startmenu_shutdown()
   return 1
 end
 
+function onclick_startmenu_controlpanel()
+  if is_wes then
+    app:run('control.exe')
+    return 0
+  end
+  return 1
+end
+
+function onclick_tray_clockarea(isdouble)
+  if isdouble then
+    app:run('timedate.cpl')
+  else
+    app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Calendar\\Calendar.jcfg')
+  end
+  return 0
+end
+
+
 function ontimer(tid)
   if tid == ICP_TIMER_ID then
-    initcontrolpanel(VERSTR)
+    initcontrolpanel(win_ver)
     app:call('KillTimer', tid)
   end
 end

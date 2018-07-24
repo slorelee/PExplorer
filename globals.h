@@ -230,6 +230,7 @@ extern struct ExplorerGlobals {
     UINT        _cfStrFName;
 
     String      _cmdline;
+    String      _winver;
     BOOL        _isWinPE;
     BOOL        _isNT5;
     String      _langID;

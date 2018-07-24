@@ -201,6 +201,9 @@ extern "C" {
         if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
+        } else if (name == "winver") {
+            v.str = g_Globals._winver;
+            PUSH_STR(v);
         } else if (name == "langid") {
             v.str = g_Globals._langID;
             PUSH_STR(v);

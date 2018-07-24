@@ -70,6 +70,7 @@ ExplorerGlobals::ExplorerGlobals()
     _cfStrFName = 0;
 
     _cmdline = _T("");
+    _winver = _T("");
 #ifndef ROSSHELL
     _hframeClass = 0;
     _hMainWnd = 0;
@@ -147,6 +148,10 @@ void ExplorerGlobals::load_config()
 
 void ExplorerGlobals::get_systeminfo()
 {
+    OSVERSIONINFO osInfo;
+    osInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    GetVersionEx(&osInfo);
+    g_Globals._winver = FmtString(TEXT("%d.%d"), osInfo.dwMajorVersion, osInfo.dwMinorVersion);
     g_Globals._isNT5 = !IsWindowsVistaOrGreater();
 
     Value v = JCFG2("JS_SYSTEMINFO", "langid");
@@ -1195,6 +1200,11 @@ HWND WinXShell_DaemonWindow::Create()
 static void ClockArea_OnClick(HWND hwnd, int isDbClick)
 {
     if (hwnd) KillTimer(hwnd, CLOCKAREA_CLICK_TIMER);
+    if (g_Globals._lua) {
+        string_t btn = TEXT("tray_clockarea");
+        if (isDbClick) btn = TEXT("tray_clockarea(double)");
+        if (g_Globals._lua->onClick(btn) == 0) return;
+    }
     if (isDbClick) {
         CommandHook(hwnd, TEXT("clockarea_dbclick"), TEXT("JS_DAEMON"));
     } else {
