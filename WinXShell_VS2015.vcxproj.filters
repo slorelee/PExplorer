@@ -108,6 +108,9 @@
     <ClCompile Include="utility\LuaAppEngine.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="commandverb\ExecuteCommandVerb.cpp">
+      <Filter>commandverb</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -213,6 +216,12 @@
     </ClInclude>
     <ClInclude Include="utility\LuaAppEngine.h">
       <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="commandverb\ShellHelpers.h">
+      <Filter>commandverb</Filter>
+    </ClInclude>
+    <ClInclude Include="commandverb\VerbHelpers.h">
+      <Filter>commandverb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -440,6 +449,9 @@
     </Filter>
     <Filter Include="systemsettings">
       <UniqueIdentifier>{5aaa6406-ca64-4d33-bbc5-068ff26a18a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="commandverb">
+      <UniqueIdentifier>{02871a87-905e-44a5-bec2-e31725a08fe6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

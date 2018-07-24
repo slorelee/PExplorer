@@ -83,6 +83,7 @@ ExplorerGlobals::ExplorerGlobals()
     _hwndDesktopBar = 0;
     _hwndShellView = 0;
     _hwndDesktop = 0;
+    _hwndDaemon = 0;
 
     _isWinPE = FALSE;
     _lua = NULL;
@@ -146,12 +147,38 @@ void ExplorerGlobals::load_config()
     Load_JCfg(jcfgfile);
 }
 
+DWORD PASCAL ReadKernelVersion(void)
+{
+    DWORD dwVersion = 0;
+    HMODULE hinstDLL = LoadLibraryExW(L"kernel32.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
+    if (hinstDLL != NULL) {
+        HRSRC hResInfo = FindResource(hinstDLL, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+        if (hResInfo != NULL) {
+            HGLOBAL hResData = LoadResource(hinstDLL, hResInfo);
+            if (hResData != NULL) {
+                static const WCHAR wszVerInfo[] = L"VS_VERSION_INFO";
+                struct VS_VERSIONINFO {
+                    WORD wLength;
+                    WORD wValueLength;
+                    WORD wType;
+                    WCHAR szKey[ARRAYSIZE(wszVerInfo)];
+                    VS_FIXEDFILEINFO Value;
+                    WORD Children[];
+                } *lpVI = (struct VS_VERSIONINFO *)LockResource(hResData);
+                if ((lpVI != NULL) && (lstrcmpiW(lpVI->szKey, wszVerInfo) == 0) && (lpVI->wValueLength > 0)) {
+                    dwVersion = lpVI->Value.dwFileVersionMS;
+                }
+            }
+        }
+        FreeLibrary(hinstDLL);
+    }
+    return dwVersion;
+}
+
 void ExplorerGlobals::get_systeminfo()
 {
-    OSVERSIONINFO osInfo;
-    osInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osInfo);
-    g_Globals._winver = FmtString(TEXT("%d.%d"), osInfo.dwMajorVersion, osInfo.dwMinorVersion);
+    DWORD dwVer = ReadKernelVersion();
+    g_Globals._winver = FmtString(TEXT("%d.%d"), HIWORD(dwVer), LOWORD(dwVer));
     g_Globals._isNT5 = !IsWindowsVistaOrGreater();
 
     Value v = JCFG2("JS_SYSTEMINFO", "langid");
@@ -1418,6 +1445,37 @@ static void UpdateSysColor(LPTSTR pszCmdline)
     }
 }
 
+extern int handle_ms_settings_url();
+#define EmbeddinglWindowClass TEXT("WinXShell_EmbeddinglWindow")
+struct EmbeddinglWindow : public Window {
+    typedef Window super;
+    EmbeddinglWindow(HWND hwnd);
+    static HWND Create();
+};
+
+EmbeddinglWindow::EmbeddinglWindow(HWND hwnd)
+    : super(hwnd)
+{
+}
+
+HWND EmbeddinglWindow::Create()
+{
+    static WindowClass wcDesktopShellWindow(EmbeddinglWindowClass);
+    HWND hwnd = Window::Create(WINDOW_CREATOR(AM_DesktopShellWindow),
+        WS_EX_NOACTIVATE, wcDesktopShellWindow, TEXT(""), WS_POPUP,
+        0, 0, 0, 0, 0);
+    return hwnd;
+}
+
+void send_ms_settings_url(PWSTR pszName)
+{
+    if (g_Globals._lua) {
+        string_t url = pszName;
+        string_t dmy = TEXT("");
+        g_Globals._lua->call("ms_settings", url, dmy);
+    }
+}
+
 
 EXTERN_C {
     extern int ShellHasBeenRun();
@@ -1656,6 +1714,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
         HWND daemon = WinXShell_DaemonWindow::Create();
+        g_Globals._hwndDaemon = daemon;
         if (g_Globals._lua) g_Globals._lua->call("ondaemon");
         bool instHook = false;
         //default install the hook if running in WinPE
@@ -1672,10 +1731,21 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         return 0;
     }
 
+    if (_tcsstr(ext_options, TEXT("-Embedding"))) {
+        if (JCFG2_DEF("JS_DAEMON", "handle_ms-settings_url", true).ToBool() != FALSE) {
+            if (FindWindow(EmbeddinglWindowClass, NULL)) return 0;
+            EmbeddinglWindow::Create();
+            handle_ms_settings_url();
+            return 0;
+        }
+        return 0;
+    }
+
     if (startup_desktop) {
         WaitCursor wait;
 
-        WinXShell_DaemonWindow::Create();
+        HWND daemon = WinXShell_DaemonWindow::Create();
+        g_Globals._hwndDaemon = daemon;
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();

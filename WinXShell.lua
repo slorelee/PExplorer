@@ -31,11 +31,13 @@ end
 function ondaemon()
   regist_shortcut_ocf()
   regist_system_property()
+  regist_ms_settings_url()
 end
 
 function onshell()
   regist_shortcut_ocf()
   regist_system_property()
+  regist_ms_settings_url()
 end
 
 function onfirstrun()
@@ -47,6 +49,16 @@ end
 
 function ms_settings(url)
     app:print(url)
+    local exe = app_path .. '\\WinXShell.exe'
+    if url == "ms-settings:dateandtime" then
+      app:run('timedate.cpl')
+    elseif  url == "ms-settings:display" then
+      app:run(exe, ' -ui -jcfg wxsUI\\UI_Resolution\\main.jcfg')
+    elseif url == "ms-settings:personalization-background" then
+      app:run('control.exe')
+    else
+      app:run('control.exe')
+    end
 end
 
 function onclick(ctrl)
@@ -127,6 +139,19 @@ function initcontrolpanel(ver)
   local cp_win = winapi.find_window('CabinetWClass', ctrlpanel_title)
   app:print(string.format("Control Panel Handle:0x%x", cp_win:get_handle()))
   cp_win:send_message(WM_SYSCOMMAND, SC_CLOSE, 0)
+end
+
+function regist_ms_settings_url()
+  if win_ver ~= "10.0" then return end
+  local key = [[HKEY_CLASSES_ROOT\ms-settings]]
+  local val = reg_read(key .. [[\Shell\Open\Command\DelegateExecute]], 'DelegateExecute')
+  app:print(val)
+  if val == nil or val ~= '{C59C9814-F038-4B71-A341-6024882458AF}' then
+    reg_write(key, '', 'URL:ms-settings')
+    reg_write(key, 'URL Protocol', '')
+    reg_write(key .. [[\Shell\Open\Command\DelegateExecute]], 'DelegateExecute', '{C59C9814-F038-4B71-A341-6024882458AF}')
+  end
+  app:run(app_path .. '\\WinXShell.exe', ' -Embedding')
 end
 
 function regist_system_property() -- handle This PC's property menu

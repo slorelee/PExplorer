@@ -252,6 +252,7 @@ extern struct ExplorerGlobals {
     HWND        _hwndDesktopBar;
     HWND        _hwndShellView;
     HWND        _hwndDesktop;
+    HWND        _hwndDaemon;
 
     Desktop     _desktop;
 
