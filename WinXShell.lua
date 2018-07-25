@@ -108,7 +108,7 @@ end
 
 function onclick_tray_clockarea(isdouble)
   if isdouble then
-    app:run('timedate.cpl')
+    app:run('control.exe', 'timedate.cpl')
   else
     app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Calendar\\Calendar.jcfg')
   end
