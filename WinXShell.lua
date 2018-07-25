@@ -9,6 +9,7 @@ ICP_TIMER_ID = 10001 -- init control panel timer
 cmd_line = app:info('cmdline')
 app_path = app:info('path')
 win_ver = app:info('winver')
+is_x = (os.getenv("SystemDrive") == 'X:')
 is_pe = (app:info('iswinpe') == 1)                              -- Windows Preinstallation Environment
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
@@ -144,12 +145,12 @@ end
 function regist_ms_settings_url()
   if win_ver ~= "10.0" then return end
   local key = [[HKEY_CLASSES_ROOT\ms-settings]]
-  local val = reg_read(key .. [[\Shell\Open\Command\DelegateExecute]], 'DelegateExecute')
+  local val = reg_read(key .. [[\Shell\Open\Command]], 'DelegateExecute')
   app:print(val)
   if val == nil or val ~= '{C59C9814-F038-4B71-A341-6024882458AF}' then
     reg_write(key, '', 'URL:ms-settings')
     reg_write(key, 'URL Protocol', '')
-    reg_write(key .. [[\Shell\Open\Command\DelegateExecute]], 'DelegateExecute', '{C59C9814-F038-4B71-A341-6024882458AF}')
+    reg_write(key .. [[\Shell\Open\Command]], 'DelegateExecute', '{C59C9814-F038-4B71-A341-6024882458AF}')
   end
   app:run(app_path .. '\\WinXShell.exe', ' -Embedding')
 end
@@ -161,7 +162,7 @@ function regist_system_property() -- handle This PC's property menu
     local key = [[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]]
     if reg_read(key, '') then return end -- already exists
     -- show This PC on the Desktop
-    reg_write([[HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel]], '{20D04FE0-3AEA-1069-A2D8-08002B30309D}', 1, winapi.REG_DWORD)
+    reg_write([[HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel]], '{20D04FE0-3AEA-1069-A2D8-08002B30309D}', 0, winapi.REG_DWORD)
     -- handle Property menu to UI_SystemInfo
     reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], '', '@shell32.dll,-33555')
     reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], 'Position', 'Bottom')
