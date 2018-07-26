@@ -156,8 +156,8 @@ function regist_ms_settings_url()
 end
 
 function regist_system_property() -- handle This PC's property menu
-    if not is_pe then return end
-    if File.exists('X:\\Windows\\explorer.exe') then return end
+    if not is_x then return end
+    --if File.exists('X:\\Windows\\explorer.exe') then return end
 
     local key = [[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]]
     if reg_read(key, '') then return end -- already exists
@@ -171,7 +171,7 @@ function regist_system_property() -- handle This PC's property menu
 end
 
 function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
-    if not is_pe then return end
+    if not is_x then return end
     if File.exists('X:\\Windows\\System32\\ieframe.dll') then return end
 
     local key = [[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub]]
