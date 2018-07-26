@@ -14,11 +14,13 @@ is_pe = (app:info('iswinpe') == 1)                              -- Windows Prein
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
 
-
--- function do_ocf(lnkfile, realfile) -- handle open containing folder menu
---  app:run('X:\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A ' .. realfile)
--- end
-
+--[[ add one more '-' to be '---', will enable this function
+function do_ocf(lnkfile, realfile) -- handle open containing folder menu
+  -- local path = realfile:match('(.+)\\')
+  -- app:run('cmd', '/k echo ' .. path)
+  app:run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
+end
+--]]
 
 function onload()
   -- app:call('run', 'notepad.exe')

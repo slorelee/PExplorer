@@ -346,7 +346,7 @@ void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
         return;
     }
     lua_pushstring(L, w2s(p1).c_str());
-    lua_pushstring(L, w2s(p1).c_str());
+    lua_pushstring(L, w2s(p2).c_str());
     int rel = lua_pcall(L, 2, 0, errfunc);
     if (rel == -1) return;
 }
