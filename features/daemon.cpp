@@ -1,6 +1,7 @@
 
 
 #include <Windows.h>
+#include <oleacc.h>
 #include "../utility/utility.h"
 #include "../utility/window.h"
 #include "../jconfig/jcfg.h"
@@ -8,49 +9,23 @@
 
 extern ExplorerGlobals g_Globals;
 
-extern "C"
-{
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+#define WM_CLOCKAREA_EVENT (WM_USER + 100)
+#define HM_CLOCKAREA_CLICKED 1
 
-    /* for MessageHook */
-    typedef BOOL(*pSetHook)(DWORD, int);
-    typedef BOOL(*pRemoveHook)(void);
+void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
+                             LONG idObject, LONG idChild,
+                             DWORD dwEventThread, DWORD dwmsEventTime);
 
-    pSetHook SetHook = NULL;
-    pRemoveHook RemoveHook = NULL;
-    UINT *pUWM_HOOKMESSAGE = 0;
+// Global variable.
+static HWINEVENTHOOK g_evthook = NULL;
+static HWND g_daemon = NULL;
+static HWND g_clockarea = NULL;
 
-}
-
-extern void InstallHook(HWND hwnd, int reHook);
-void InitHook(HWND hwnd)
-{
-#ifdef _WIN64
-    TCHAR DllPath[] = TEXT("wxsStub.dll");
-#else
-    TCHAR DllPath[] = TEXT("wxsStub32.dll");
-#endif
-    HINSTANCE Hook_Dll = LoadLibrary(DllPath);
-    if (Hook_Dll) {
-        SetHook = (pSetHook)GetProcAddress(Hook_Dll, "SetHook");
-        RemoveHook = (pRemoveHook)GetProcAddress(Hook_Dll, "RemoveHook");
-        pUWM_HOOKMESSAGE = (UINT *)GetProcAddress(Hook_Dll, "UWM_HOOKMESSAGE");
-
-        InstallHook(hwnd, 0);
-    } else {
-        MessageBox(NULL, TEXT("LoadLibrary Error"), TEXT("Error"), MB_ICONERROR);
-    }
-}
-
-void InstallHook(HWND hwnd, int reHook)
+void InstallEventHook(HWND hwnd)
 {
     BOOL rc = FALSE;
     HWND hObjWnd = NULL;
-    DWORD dwObjThreadId = 0;
-
-    if (!SetHook) return;
+    DWORD dwObjProcessId = 0;
     //Progman Shell_TrayWnd TrayClockWClass
     hObjWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
     if (!hObjWnd) return;
@@ -58,21 +33,40 @@ void InstallHook(HWND hwnd, int reHook)
     if (!hObjWnd) return;
     hObjWnd = FindWindowEx(hObjWnd, 0, TEXT("TrayClockWClass"), NULL);
     if (!hObjWnd) return;
-    dwObjThreadId = GetWindowThreadProcessId(hObjWnd, NULL);
+    GetWindowThreadProcessId(hObjWnd, &dwObjProcessId);
 
-    if (dwObjThreadId != 0) {
-        rc = SetHook(dwObjThreadId, reHook);
+    if (g_evthook != NULL) {
+        UnhookWinEvent(g_evthook);
+        g_evthook = NULL;
     }
 
-    if (rc) {
-        /*if (dwObjThreadId)
-        MessageBox(NULL, "Thread Hook", "Success", MB_OK);
-        else
-        MessageBox(NULL, "System Hook", "Success", MB_OK);*/
-        PostMessage(hObjWnd, *pUWM_HOOKMESSAGE, (WPARAM)hwnd, (LPARAM)hObjWnd);
+    g_daemon = hwnd;
+    g_clockarea = hObjWnd;
+
+    if (dwObjProcessId != 0) {
+        g_evthook = SetWinEventHook(
+            EVENT_SYSTEM_CAPTUREEND, EVENT_SYSTEM_CAPTUREEND,  // only EVENT_SYSTEM_CAPTUREEND event (9).
+            NULL,                                          // Handle to DLL.
+            HandleWinEvent,                                // The callback.
+            dwObjProcessId, 0,              // Process and thread IDs of interest (0 = all)
+            WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS); // Flags.
     }
 }
 
+// Callback function that handles events.
+//
+void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
+                             LONG idObject, LONG idChild,
+                             DWORD dwEventThread, DWORD dwmsEventTime)
+{
+#ifdef _DEBUG
+    char buff[100];
+    sprintf_s(buff, "event=0x%x, hwnd=0x%Ix, id=0x%x\r\n", event, (UINT_PTR)hwnd, idChild);
+    OutputDebugStringA(buff);
+#endif // _DEBUG
+    if (hwnd != g_clockarea) return;
+    SendMessage(g_daemon, WM_CLOCKAREA_EVENT, HM_CLOCKAREA_CLICKED, 0);
+}
 
 struct WinXShell_DaemonWindow : public Window {
     typedef Window super;
@@ -92,7 +86,7 @@ WinXShell_DaemonWindow::WinXShell_DaemonWindow(HWND hwnd)
 
 WinXShell_DaemonWindow::~WinXShell_DaemonWindow()
 {
-    RemoveHook();
+    if (g_evthook) UnhookWinEvent(g_evthook);
 }
 
 
@@ -105,7 +99,6 @@ HWND WinXShell_DaemonWindow::Create()
     return hwnd;
 }
 
-#define HM_CLOCKAREA_CLICKED 1
 #define CLOCKAREA_CLICK_TIMER 1001
 
 static void ClockArea_OnClick(HWND hwnd, int isDbClick)
@@ -127,8 +120,8 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDbClick = 0;
     if (nmsg == WM_TASKBARCREATED) {
-        InstallHook(_hwnd, 1);
-    } else if (pUWM_HOOKMESSAGE && nmsg == *pUWM_HOOKMESSAGE) {
+        InstallEventHook(_hwnd);
+    } else if (nmsg == WM_CLOCKAREA_EVENT) {
 #ifdef _DEBUG
         PrintMessage(0, nmsg, wparam, lparam);
 #endif
@@ -218,6 +211,8 @@ HWND create_daemonwindow()
 
 int daemon_entry()
 {
+    // Initializes COM
+    CoInitialize(NULL);
     HWND daemon = create_daemonwindow();
     g_Globals._hwndDaemon = daemon;
     if (g_Globals._lua) g_Globals._lua->call("ondaemon");
@@ -229,9 +224,11 @@ int daemon_entry()
 
     //hijack clockarea click event
     if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", instHook).ToBool() != FALSE) {
-        InitHook(daemon);
+        // sets up the event hook.
+        InstallEventHook(daemon);
     }
     update_property_handler();
     Window::MessageLoop();
+    CoUninitialize();
     return 0;
 }
