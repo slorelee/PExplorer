@@ -111,6 +111,22 @@
     <ClCompile Include="commandverb\ExecuteCommandVerb.cpp">
       <Filter>commandverb</Filter>
     </ClCompile>
+    <ClCompile Include="features\console.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\reshelper.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\daemon.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp" />
+    <ClCompile Include="features\embedding.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\snippet.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -222,6 +238,12 @@
     </ClInclude>
     <ClInclude Include="commandverb\VerbHelpers.h">
       <Filter>commandverb</Filter>
+    </ClInclude>
+    <ClInclude Include="features\reshelper.h">
+      <Filter>features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\features.h">
+      <Filter>features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -452,6 +474,9 @@
     </Filter>
     <Filter Include="commandverb">
       <UniqueIdentifier>{02871a87-905e-44a5-bec2-e31725a08fe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="features">
+      <UniqueIdentifier>{5377e3fb-b9a8-42db-88a9-6e9223ec7f1f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

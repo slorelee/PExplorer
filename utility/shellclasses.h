@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Copyright 2003, 2004, 2005 Martin Fuchs
  *
