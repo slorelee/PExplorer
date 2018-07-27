@@ -243,7 +243,7 @@ CAPTION "About WinXShell"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "WinXShell",IDC_PE_EXPLORER,100,15,100,12
-    LTEXT           "RC 3.0.0",IDC_VERSION_TXT,100,30,100,12
+    LTEXT           "RC 3.2.0",IDC_VERSION_TXT,100,30,100,12
     LTEXT           "(c) 2015-2018 Slore",IDC_STATIC,100,45,100,12
     LTEXT           "",IDC_WIN_VERSION,100,60,145,22
     LTEXT           "https://github.com/slorelee/WinXShell",IDC_WWW,10,90,0,12
