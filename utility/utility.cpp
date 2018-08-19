@@ -557,3 +557,33 @@ bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out)
         return false;
 }
 
+std::string w2s(const std::wstring& wstr)
+{
+    int len = 0;
+    const wchar_t *srcTemp = wstr.c_str();
+    char *destTemp = NULL;
+
+    len = WideCharToMultiByte(CP_ACP, 0, srcTemp, -1, NULL, 0, NULL, NULL);
+    destTemp = new char[len];
+    WideCharToMultiByte(CP_ACP, 0, srcTemp, -1, destTemp, len, NULL, NULL);
+
+    std::string str = destTemp;
+    delete[]destTemp;
+    return str;
+}
+
+std::string w2s(const wchar_t *wstr)
+{
+    int len = 0;
+    const wchar_t *srcTemp = wstr;
+    char *destTemp = NULL;
+
+    len = WideCharToMultiByte(CP_ACP, 0, srcTemp, -1, NULL, 0, NULL, NULL);
+    destTemp = new char[len];
+    WideCharToMultiByte(CP_ACP, 0, srcTemp, -1, destTemp, len, NULL, NULL);
+
+    std::string str = destTemp;
+    delete[]destTemp;
+    return str;
+}
+

@@ -150,6 +150,17 @@ void _log_(LPCTSTR txt)
     OutputDebugString(msg);
 }
 
+void _logA_(LPCSTR txt)
+{
+    FmtStringA msg("%s\n", txt);
+
+    if (g_Globals._log)
+        fputs(msg.c_str(), g_Globals._log);
+
+#ifdef _DEBUG
+    OutputDebugStringA(msg.c_str());
+#endif
+}
 
 bool FileTypeManager::is_exe_file(LPCTSTR ext)
 {
