@@ -1,6 +1,9 @@
 # What's me?
 The shell part's source code of WinXShell. It is a freely available program intended as replacement of MS Windows Explorer for Windows(PE). It is based on the [ROS Explorer](http://www.foxplanet.de/explorer/index.html).
 
+![Taskbar](https://github.com/slorelee/wimbuilder_sample/blob/master/winxshell/WinXShell_Taskbar.jpg)
+![UI](https://github.com/slorelee/wimbuilder_sample/blob/master/winxshell/WinXShell_UI_Stuffs.jpg)
+
 # Improved features:
 * works for x64 environment
 * support wallpaper for Windows Vista later
