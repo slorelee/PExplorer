@@ -278,6 +278,8 @@ function wxs:run(...)\n\
   \n\
 end";
 
+static int lua_errorfunc = MININT;
+
 void LuaAppEngine::init(string_t& file)
 {
     L = luaL_newstate();
@@ -293,8 +295,10 @@ void LuaAppEngine::init(string_t& file)
     luaL_dofile(L, w2s(file).c_str());
 }
 
-static int reg_errorfunc(lua_State *L)
+static int fetch_errorfunc(lua_State *L)
 {
+    if (lua_errorfunc != MININT) return lua_errorfunc;
+
     int top = lua_gettop(L);
     lua_getglobal(L, "__G__TRACKBACK__");
 
@@ -305,6 +309,7 @@ static int reg_errorfunc(lua_State *L)
     }
 
     int errfunc = lua_gettop(L);
+    lua_errorfunc = errfunc;
     return errfunc;
 }
 
@@ -321,15 +326,15 @@ void LuaAppEngine::call(const char *funcname)
 {
     char buff[1024] = { 0 };
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-    int errfunc = reg_errorfunc(L);
-    if (errfunc == MININT) return;
+    fetch_errorfunc(L);
+    if (lua_errorfunc == MININT) return;
 
     lua_getglobal(L, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
         return;
     }
-    int rel = lua_pcall(L, 0, 0, errfunc);
+    int rel = lua_pcall(L, 0, 0, lua_errorfunc);
     if (rel == -1) return;
 }
 
@@ -337,8 +342,8 @@ void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
 {
     char buff[1024] = { 0 };
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-    int errfunc = reg_errorfunc(L);
-    if (errfunc == MININT) return;
+    fetch_errorfunc(L);
+    if (lua_errorfunc == MININT) return;
 
     lua_getglobal(L, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
@@ -347,7 +352,7 @@ void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
     }
     lua_pushstring(L, w2s(p1).c_str());
     lua_pushstring(L, w2s(p2).c_str());
-    int rel = lua_pcall(L, 2, 0, errfunc);
+    int rel = lua_pcall(L, 2, 0, lua_errorfunc);
     if (rel == -1) return;
 }
 
@@ -368,8 +373,8 @@ void LuaAppEngine::onShell()
 
 int LuaAppEngine::onClick(string_t& ctrl)
 {
-    int errfunc = reg_errorfunc(L);
-    if (errfunc == MININT) return -1;
+    fetch_errorfunc(L);
+    if (lua_errorfunc == MININT) return -1;
 
     lua_getglobal(L, "onclick");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
@@ -377,15 +382,15 @@ int LuaAppEngine::onClick(string_t& ctrl)
         return -1;
     }
     lua_pushstring(L, w2s(ctrl).c_str());
-    int rel = lua_pcall(L, 1, 0, errfunc);
+    int rel = lua_pcall(L, 1, 0, lua_errorfunc);
     if (rel == -1) return -1;
     return (int)lua_tointeger(L, 1);
 }
 
 void LuaAppEngine::onTimer(int id)
 {
-    int errfunc = reg_errorfunc(L);
-    if (errfunc == MININT) return;
+    fetch_errorfunc(L);
+    if (lua_errorfunc == MININT) return;
 
     lua_getglobal(L, "ontimer");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
@@ -393,6 +398,6 @@ void LuaAppEngine::onTimer(int id)
         return;
     }
     lua_pushinteger(L, id);
-    int rel = lua_pcall(L, 1, 0, errfunc);
+    int rel = lua_pcall(L, 1, 0, lua_errorfunc);
     if (rel == -1) return;
 }
