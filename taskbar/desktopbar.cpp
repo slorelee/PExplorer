@@ -163,6 +163,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
     //LoadSSO(); /* load in main() by SSOThread */
 
+    _iQuickLaunchPadding = JCFG2_DEF("JS_QUICKLAUNCH", "padding", 4).ToInt();
     _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
 
     SetTimer(_hwnd, 0, 1000, NULL);
@@ -590,6 +591,7 @@ void DesktopBar::Resize(int cx, int cy)
     if (_hwndrebar)
         DeferWindowPos(hdwp, _hwndrebar, 0, _taskbar_pos, 1, cx - _taskbar_pos - (notifyarea_width + 1), cy - 2, SWP_NOZORDER | SWP_NOACTIVATE);
     else {
+        if (quicklaunch_width > 0) quicklaunch_width += _iQuickLaunchPadding;
         if (_hwndQuickLaunch)
             DeferWindowPos(hdwp, _hwndQuickLaunch, 0, _taskbar_pos, 1, quicklaunch_width, cy - 2, SWP_NOZORDER | SWP_NOACTIVATE);
 

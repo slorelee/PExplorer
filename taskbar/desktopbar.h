@@ -105,7 +105,7 @@ protected:
     struct StartMenuRoot *_startMenuRoot;
 
     HBITMAP _hbmQuickLaunchBack;
-
+    int     _iQuickLaunchPadding;
     TrayIcon    _traySndVolIcon;
     TrayIcon    _trayNetworkIcon;
     void    AddTrayIcons();
