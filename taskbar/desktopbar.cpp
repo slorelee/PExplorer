@@ -37,6 +37,7 @@
 #include "quicklaunch.h"
 
 #include "../dialogs/settings.h"
+#include "../customization/startbutton.h"
 
 
 DesktopBar::DesktopBar(HWND hwnd)
@@ -117,13 +118,11 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE | DT_CALCRECT);
 
     _deskbar_pos_y = DESKTOPBAR_TOP;
-    int start_btn_width = TASKBAR_ICON_SIZE + DPI_SX(rect.right) + (TASKBAR_ICON_SIZE / 4);
+    int start_btn_width = DESKTOPBARBAR_HEIGHT + 8; //TASKBAR_ICON_SIZE + DPI_SX(rect.right) + (TASKBAR_ICON_SIZE / 4);
 
-    int start_btn_padding = 0;
-    BOOL isEmptyStartIcon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("")).ToString().compare(TEXT("empty")) == 0;
-    if (isEmptyStartIcon) {
-        start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
-    }
+    string_t start_icon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("custom")).ToString();
+    int start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
+
     _taskbar_pos = start_btn_width + DPI_SX(start_btn_padding) + 1;
     // create "Start" button
     static WNDCLASS wc;
@@ -135,8 +134,10 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
 
     UINT idStartIcon = IDI_STARTMENU_B;
-    if (isEmptyStartIcon) {
+    if (start_icon.compare(TEXT("empty")) == 0) {
         idStartIcon = IDI_EMPTY;
+    } else if (start_icon.compare(TEXT("custom")) == 0) {
+        idStartIcon = IDI_SM_CUSTOM_1;
     } else {
         if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
             idStartIcon = IDI_STARTMENU_W;
@@ -230,7 +231,9 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
 
 StartButton::StartButton(HWND hwnd, UINT nid, COLORREF textcolor, bool flat)
-    :  PictureButton(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(), textcolor, flat)
+    :  PictureButton2(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE),
+        SizeIcon(nid + 1, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(),
+        CreateSolidBrush(RGB(51, 53, 55)), textcolor, flat)
 {
 }
 

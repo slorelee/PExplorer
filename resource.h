@@ -58,6 +58,7 @@
 #define IDB_TOOLBAR                     103
 #define IDI_EMPTY                       103
 #define IDA_EXPLORER                    104
+#define IDI_EMPTY2                      104
 #define ID_ACTIVATE                     105
 #define IDD_SEARCH_PROGRAM              105
 #define IDB_DRIVEBAR                    106
@@ -135,6 +136,8 @@
 #define IDI_NOTIFY_R_B                  203
 #define IDI_STARTMENU_W                 210
 #define IDI_STARTMENU_B                 211
+#define IDI_SM_CUSTOM_1                 212
+#define IDI_SM_CUSTOM_2                 213
 #define IDI_TRAY_SND_NONE               220
 #define IDI_TRAY_SND_MUTE               221
 #define IDI_TRAY_SND_SMALL              222

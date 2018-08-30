@@ -297,6 +297,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="customization\powermenu.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="customization\startbutton.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="DUI\Helper.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -439,6 +451,8 @@
   <ItemGroup>
     <ClInclude Include="commandverb\ShellHelpers.h" />
     <ClInclude Include="commandverb\VerbHelpers.h" />
+    <ClInclude Include="customization\powermenu.h" />
+    <ClInclude Include="customization\startbutton.h" />
     <ClInclude Include="DUI\Helper.h" />
     <ClInclude Include="DUI\LuaEngine.h" />
     <ClInclude Include="DUI\SUIInterpreter.h" />
@@ -528,6 +542,8 @@
     <Image Include="res\notify_l_w.ico" />
     <Image Include="res\notify_r_b.ico" />
     <Image Include="res\notify_r_w.ico" />
+    <Image Include="res\sm_custom_1.ico" />
+    <Image Include="res\sm_custom_2.ico" />
     <Image Include="res\tray_network_wireless_noconn.ico" />
     <Image Include="res\winxshell-big.ico" />
     <Image Include="res\winxshell.ico" />

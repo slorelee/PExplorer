@@ -25,6 +25,7 @@
 // Martin Fuchs, 23.07.2003
 //
 
+#pragma once
 
 typedef set<HWND> WindowSet;
 

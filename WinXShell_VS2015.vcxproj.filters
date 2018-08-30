@@ -127,6 +127,12 @@
     <ClCompile Include="features\snippet.cpp">
       <Filter>features</Filter>
     </ClCompile>
+    <ClCompile Include="customization\powermenu.cpp">
+      <Filter>customization</Filter>
+    </ClCompile>
+    <ClCompile Include="customization\startbutton.cpp">
+      <Filter>customization</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -244,6 +250,12 @@
     </ClInclude>
     <ClInclude Include="features\features.h">
       <Filter>features</Filter>
+    </ClInclude>
+    <ClInclude Include="customization\powermenu.h">
+      <Filter>customization</Filter>
+    </ClInclude>
+    <ClInclude Include="customization\startbutton.h">
+      <Filter>customization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -437,6 +449,12 @@
     <Image Include="res\tray_network_wireless_noconn.ico">
       <Filter>res</Filter>
     </Image>
+    <Image Include="res\sm_custom_1.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="res\sm_custom_2.ico">
+      <Filter>res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">
@@ -477,6 +495,9 @@
     </Filter>
     <Filter Include="features">
       <UniqueIdentifier>{5377e3fb-b9a8-42db-88a9-6e9223ec7f1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="customization">
+      <UniqueIdentifier>{c97ad327-f251-42a8-9d1d-c106f26bf713}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

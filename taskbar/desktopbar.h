@@ -25,6 +25,7 @@
 // Martin Fuchs, 22.08.2003
 //
 
+#include "../customization/startbutton.h"
 
 #define CLASSNAME_EXPLORERBAR   TEXT("Shell_TrayWnd")
 #define TITLE_EXPLORERBAR       TEXT("")    // use an empty window title, so windows taskmanager does not show the window in its application list
@@ -115,8 +116,8 @@ protected:
 
 
 /// special "Start" button with one click activation
-struct StartButton : public PictureButton {
-    typedef PictureButton super;
+struct StartButton : public PictureButton2 {
+    typedef PictureButton2 super;
 
     StartButton(HWND hwnd, UINT nid, COLORREF textcolor = -1, bool flat = false);
 
