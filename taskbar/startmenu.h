@@ -299,7 +299,7 @@ protected:
 
 
 // declare shell32's "Run..." dialog export function
-typedef void (WINAPI *RUNFILEDLG)(HWND hwndOwner, HICON hIcon, LPCSTR lpstrDirectory, LPCSTR lpstrTitle, LPCSTR lpstrDescription, UINT uFlags);
+typedef void (WINAPI *RUNFILEDLG)(HWND hwndOwner, HICON hIcon, LPCTSTR lpstrDirectory, LPCTSTR lpstrTitle, LPCTSTR lpstrDescription, UINT uFlags);
 
 //
 // Flags for RunFileDlg

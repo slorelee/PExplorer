@@ -2091,8 +2091,10 @@ int RunDialogThread::Run()
     Static dlgOwner(0, 0, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, 0, 0);
     _hwnd = dlgOwner;
     // Show "Run..." dialog
+    TCHAR home_dir[MAX_PATH] = { 0 };
+    GetEnvironmentVariable(TEXT("USERPROFILE"), home_dir, MAX_PATH);
     if (RunFileDlg) {
-        (*RunFileDlg)(dlgOwner, 0, NULL, NULL, NULL, RFF_CALCDIRECTORY);
+        (*RunFileDlg)(dlgOwner, 0, home_dir, NULL, NULL, RFF_CALCDIRECTORY);
     }
     DestroyWindow(dlgOwner);
     return 0;
