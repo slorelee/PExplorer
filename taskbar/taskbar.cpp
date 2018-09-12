@@ -131,7 +131,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
                CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT;
 
     _htoolbar = CreateToolbarEx(_hwnd, ws /* |TBSTYLE_AUTOSIZE */, IDW_TASKTOOLBAR, 0, 0, 0, NULL,
-                                0, 0, 0, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE, sizeof(TBBUTTON));
+                                0, 0, 0, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT, sizeof(TBBUTTON));
 
     SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
     //RECT rc;
@@ -486,7 +486,8 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
             }
 
             if (hIcon) {
-                hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar), TASKBAR_ICON_SIZE);
+                RECT rect = {0, -2, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT };
+                hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar), TASKBAR_ICON_SIZE, rect);
                 if (delete_icon)
                     DestroyIcon(hIcon); // some icons can be freed, some not - so ignore any error return of DestroyIcon()
             } else

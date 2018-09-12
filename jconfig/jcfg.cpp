@@ -18,8 +18,8 @@ Object  g_JVARMap;
 Object  g_JCfg;
 
 #define DEF_TASKBARHEIGHT 40
-int g_JCfg_taskbar_iconsize = 32;
-int g_JCfg_taskbar_startmenu_iconsize = 32;
+int g_JCfg_taskbar_iconsize = 24;
+int g_JCfg_taskbar_startmenu_iconsize = 24;
 int g_JCfg_DPI_SX = 96;
 int g_JCfg_DPI_SY = 96;
 HBRUSH g_JCfg_taskbar_bkbrush = NULL;

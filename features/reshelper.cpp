@@ -70,6 +70,28 @@ HBITMAP    Icon::create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd, 
         return create_bitmap_from_icon(_hicon, hbrBkgnd, hdc_wnd, icon_size);
 }
 
+HBITMAP    Icon::create_bitmap(COLORREF bk_color, HBRUSH hbrBkgnd, HDC hdc_wnd, int icon_size, RECT rect) const
+{
+    if (_itype == IT_SYSCACHE) {
+        HIMAGELIST himl = g_Globals._icon_cache.get_sys_imagelist();
+
+        int cx, cy;
+        ImageList_GetIconSize(himl, &cx, &cy);
+
+        int w = rect.right;
+        int h = rect.bottom;
+
+        HBITMAP hbmp = CreateCompatibleBitmap(hdc_wnd, w, h);
+        HDC hdc = CreateCompatibleDC(hdc_wnd);
+        HBITMAP hbmp_old = SelectBitmap(hdc, hbmp);
+        ImageList_DrawEx(himl, _sys_idx, hdc, (w - cx) / 2 + rect.left, (h - cy) / 2 + rect.top, cx, cy, bk_color, CLR_DEFAULT, ILD_NORMAL);
+        SelectBitmap(hdc, hbmp_old);
+        DeleteDC(hdc);
+
+        return hbmp;
+    } else
+        return create_bitmap_from_icon(_hicon, hbrBkgnd, hdc_wnd, icon_size, rect);
+}
 
 int Icon::add_to_imagelist(HIMAGELIST himl, HDC hdc_wnd, COLORREF bk_color, HBRUSH bk_brush) const
 {
@@ -130,6 +152,26 @@ HBITMAP create_small_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_
 
     return hbmp;
 }
+
+HBITMAP create_bitmap_from_icon(HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd, int icon_size, RECT rect)
+{
+    int w = rect.right;
+    int h = rect.bottom;
+
+    HBITMAP hbmp = CreateCompatibleBitmap(hdc_wnd, w, h);
+
+    MemCanvas canvas;
+    BitmapSelection sel(canvas, hbmp);
+
+    RECT rect2 = { 0, 0, w, h };
+    FillRect(canvas, &rect2, hbrush_bkgnd);
+
+    DrawIconEx(canvas, (w - icon_size) / 2 + rect.left, (h - icon_size) / 2 + rect.top,
+        hIcon, icon_size, icon_size, 0, hbrush_bkgnd, DI_NORMAL);
+
+    return hbmp;
+}
+
 
 int ImageList_AddAlphaIcon(HIMAGELIST himl, HICON hIcon, HBRUSH hbrush_bkgnd, HDC hdc_wnd)
 {
