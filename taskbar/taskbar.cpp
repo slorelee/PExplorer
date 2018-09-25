@@ -152,8 +152,12 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT - 8, DESKTOPBARBAR_HEIGHT - 6 - 2));
     SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELPARAM(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
 
-    // show only icons
-    //SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
+    if (JCFG2_DEF("JS_TASKBAR", "no_task_title", false).ToBool() != FALSE) {
+        // show only icons
+        SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
+        SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT, DESKTOPBARBAR_HEIGHT - 6 - 2));
+    }
+
     //SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
     //SetWindowFont(_htoolbar, GetStockFont(DEFAULT_GUI_FONT), FALSE);
     //SendMessage(_htoolbar, TB_SETPADDING, 0, MAKELPARAM(8,8));
