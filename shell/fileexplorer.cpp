@@ -21,6 +21,8 @@
 DEF_GUID(CLSID_UsersFiles, 0x59031a47, 0x3f72, 0x44a7, 0x89, 0xc5, 0x55, 0x95, 0xfe, 0x6b, 0x30, 0xee);//59031A47-3F72-44A7-89c5-5595fe6b30ee
 DEF_GUID(CLSID_MyDocuments, 0x450d8fba, 0xad25, 0x11d0, 0x98, 0xa8, 0x08, 0x95, 0x00, 0x36, 0x1b, 0x03);//450d8fba-ad25-11d0-98a8-0800361b1103
 
+DEFINE_GUID(BHID_SFUIObject, 0x3981e225, 0xf559, 0x11d3, 0x8e, 0x3a, 0x00, 0xc0, 0x4f, 0x68, 0x37, 0xd5);
+
 //#include "../utility/window.h"
 
 /*
@@ -338,24 +340,56 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChange(IFileDialog *pDlg)
     return S_OK;
 }
 
+static int ChangedFolderFromShortcut(IFileDialog *pDlg, IShellItem *pItem)
+{
+    SFGAOF sfgAttribute = 0;
+    pItem->GetAttributes(SFGAO_LINK, &sfgAttribute);
+    if ((sfgAttribute & SFGAO_LINK) == 0) return 0; // not shortcut
+
+    IShellLink *pLink = NULL;
+    HRESULT hr = pItem->BindToHandler(NULL, BHID_SFUIObject, IID_PPV_ARGS(&pLink));
+    if (FAILED(hr)) return 0;
+
+    TCHAR sz[MAX_PATH] = {0};
+    WIN32_FIND_DATA wfd = {0};
+    hr = pLink->GetPath(sz, MAX_PATH, &wfd, SLGP_UNCPRIORITY | SLGP_RAWPATH);
+    pLink->Release();
+    if (FAILED(hr)) return 0;
+    if ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) return 0; // not directory
+
+    IShellItem *psi = NULL;
+    hr = SHCreateItemFromParsingName(sz, NULL, IID_PPV_ARGS(&psi));
+    if (SUCCEEDED(hr)) {
+        pDlg->SetFolder(psi);
+        psi->Release();
+        return 1;
+    }
+    return 0;
+}
+
 IFACEMETHODIMP CFileDialogEventHandler::OnFileOk(IFileDialog *pDlg)
 {
-    TCHAR path[MAX_PATH] = {0};
     IShellItem *pItem = NULL;
     HRESULT hr = pDlg->GetCurrentSelection(&pItem);
+    if (FAILED(hr)) return S_FALSE;
+
+    if (ChangedFolderFromShortcut(pDlg, pItem) == 1) {
+        pItem->Release(); 
+        return S_FALSE;
+    }
+
+    LPOLESTR pwsz = NULL;
+    hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz);
+    pItem->Release();
     if (SUCCEEDED(hr)) {
-        LPOLESTR pwsz = NULL;
-        hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz);
-        if (SUCCEEDED(hr)) {
-            LOG(pwsz);
-            //PathCchRemoveFileSpec
-            _tcscpy(path, pwsz);
-            PathRemoveFileSpec(path);
-            SetCurrentDirectory(path);
-            launch_file(g_Globals._hwndDesktop, pwsz);
-            CoTaskMemFree(pwsz);
-        }
-        pItem->Release();
+        TCHAR path[MAX_PATH] = {0};
+        LOG(pwsz);
+        //PathCchRemoveFileSpec
+        _tcscpy(path, pwsz);
+        PathRemoveFileSpec(path);
+        SetCurrentDirectory(path);
+        launch_file(g_Globals._hwndDesktop, pwsz);
+        CoTaskMemFree(pwsz);
     }
     return S_FALSE;
 }
