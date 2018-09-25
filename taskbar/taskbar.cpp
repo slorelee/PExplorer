@@ -121,22 +121,30 @@ HWND TaskBar::Create(HWND hwndParent)
                           taskbar_pos, clnt.top + 1, clnt.right - taskbar_pos - (NOTIFYAREA_WIDTH_DEF + 1), clnt.bottom - 2, hwndParent);
 }
 
+//#include <Uxtheme.h>
+
 LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
 {
     if (super::Init(pcs))
         return 1;
 
     /* FIXME: There's an internal padding for non-flat toolbar. Get rid of it somehow. */
-    DWORD ws = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_TOP |
-               CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT;
+    DWORD ws = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_TOP | TBSTYLE_TRANSPARENT |
+        CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT;
 
-    _htoolbar = CreateToolbarEx(_hwnd, ws /* |TBSTYLE_AUTOSIZE */, IDW_TASKTOOLBAR, 0, 0, 0, NULL,
-                                0, 0, 0, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT, sizeof(TBBUTTON));
+    //_htoolbar = CreateToolbarEx(_hwnd, ws /* |TBSTYLE_AUTOSIZE */, IDW_TASKTOOLBAR, 0, 0, 0, NULL,
+    //                            0, 0, 0, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT, sizeof(TBBUTTON));
 
-    SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELONG(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
-    //RECT rc;
-    //GetWindowRect(_htoolbar, &rc);
-    //MoveWindow(_htoolbar, rc.left, rc.top, rc.right - rc.left, 48, TRUE);
+    // Create the toolbar.
+    _htoolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, ws, 0, 0,
+        DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT, _hwnd, NULL, g_Globals._hInstance, NULL);
+
+    //SetWindowTheme(_htoolbar, L"TaskBarComposited", NULL); //TaskBar
+    SendMessage(_htoolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+    SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT - 8, DESKTOPBARBAR_HEIGHT - 6 - 2));
+    SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELPARAM(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
+
+    // show only icons
     //SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
     //SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
     //SetWindowFont(_htoolbar, GetStockFont(DEFAULT_GUI_FONT), FALSE);
