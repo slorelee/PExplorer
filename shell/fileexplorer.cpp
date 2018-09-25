@@ -48,6 +48,8 @@ BOOL IsWow64()
 #endif
 */
 
+static HWND hFileDialog_FileNameCtrl = NULL;
+
 HHOOK FileExplorerWindow::HookHandle = NULL;
 FileExplorerWindow::FileExplorerWindow(HWND hwnd)
     : super(hwnd)
@@ -194,7 +196,7 @@ int FileExplorerWindow::OpenDialog(HWND hwnd, String path)
     // NOTE: Error handling omitted here for clarity.
     //pDlg->SetFileTypes(_countof(aFileTypes), aFileTypes);
     pDlg->SetTitle(path.c_str());
-    pDlg->SetOptions(FOS_NOVALIDATE | FOS_ALLNONSTORAGEITEMS | FOS_ALLOWMULTISELECT | FOS_NODEREFERENCELINKS);
+    pDlg->SetOptions(FOS_NOVALIDATE | FOS_FILEMUSTEXIST | FOS_ALLNONSTORAGEITEMS | FOS_ALLOWMULTISELECT | FOS_NODEREFERENCELINKS);
 
     IShellItem *psi = NULL;
     //LPITEMIDLIST pidlControlPanel;
@@ -265,6 +267,7 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
     /* hide filename combox */
     item = GetDlgItem(hwndDialog, 0x47C);
     ShowWindow(item, SW_HIDE);
+    hFileDialog_FileNameCtrl = item;
 
     /* hide filename filter combox */
     item = GetDlgItem(hwndDialog, 0x470);
@@ -331,6 +334,7 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChange(IFileDialog *pDlg)
     if (FAILED(hr)) return S_OK;
     pDlg->SetTitle(pwsz);
     CoTaskMemFree(pwsz);
+    SetWindowText(hFileDialog_FileNameCtrl, TEXT(""));
     return S_OK;
 }
 
