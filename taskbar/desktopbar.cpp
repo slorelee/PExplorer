@@ -122,7 +122,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
     string_t start_icon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("custom")).ToString();
     int start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
-
+    start_btn_width = JCFG2_DEF("JS_STARTMENU", "start_width", start_btn_width).ToInt();
     _taskbar_pos = start_btn_width + DPI_SX(start_btn_padding) + 1;
     // create "Start" button
     static WNDCLASS wc;
@@ -143,7 +143,9 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
             idStartIcon = IDI_STARTMENU_W;
         }
     }
-    new StartButton(hwndStart, idStartIcon, TASKBAR_TEXTCOLOR(), true);
+    COLORREF clrSWButtonPushed = JValueToColor(JCFG2_DEF("JS_STARTMENU", "start_pushed_bkcolor", (int)RGB(51, 53, 55)));
+    HBRUSH hbrSWButtonPushed = CreateSolidBrush(clrSWButtonPushed);
+    new StartButton(hwndStart, idStartIcon, TASKBAR_BRUSH(), hbrSWButtonPushed, TASKBAR_TEXTCOLOR(), true);
 
     /* Save the handle to the window, needed for push-state handling */
     _hwndStartButton = hwndStart;
@@ -230,10 +232,10 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 }
 
 
-StartButton::StartButton(HWND hwnd, UINT nid, COLORREF textcolor, bool flat)
-    :  PictureButton2(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE),
-        SizeIcon(nid + 1, TASKBAR_ICON_SIZE), TASKBAR_BRUSH(),
-        CreateSolidBrush(RGB(51, 53, 55)), textcolor, flat)
+StartButton::StartButton(HWND hwnd, UINT nid, HBRUSH hbrush, HBRUSH hbrush2,
+    COLORREF textcolor, bool flat)
+    : PictureButton2(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE),
+        SizeIcon(nid + 1, TASKBAR_ICON_SIZE), hbrush, hbrush2, textcolor, flat)
 {
 }
 

@@ -103,6 +103,9 @@
   },
   "::开始菜单":
   {
+    "start_pushed_bkcolor" : [0, 100, 180],
+    "start_icon_comment": "empty;custom",
+    "start_icon": "custom",
     "commands": {
       "reboot": {
          "command": "Wpeutil.exe",
