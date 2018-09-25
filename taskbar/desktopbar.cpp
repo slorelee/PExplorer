@@ -425,7 +425,11 @@ static void OnTrayNetwork(HWND hwnd, UINT id)
 
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
-    //if (nmsg != WM_TIMER) LOG(FmtString(TEXT("NMSG - %d"), nmsg));
+#ifdef _DEBUG
+    if (nmsg != WM_SETCURSOR && nmsg != WM_TIMER && nmsg != PM_RESIZE_CHILDREN && nmsg != WM_ENTERIDLE &&
+        nmsg != WM_COPYDATA && nmsg != PM_RESIZE_CHILDREN)
+     LOG(FmtString(TEXT("NMSG - 0x%x"), nmsg));
+#endif
     switch (nmsg) {
     case WM_NCHITTEST: {
 #ifndef TASKBAR_AT_TOP
@@ -615,10 +619,50 @@ void DesktopBar::Resize(int cx, int cy)
     }
 }
 
+/*
+
+#include <Shldisp.h>
+
+CoInitialize(NULL);
+//Create an instance of the shell class
+IShellDispatch *pShellDisp = NULL;
+CoCreateInstance(CLSID_Shell, NULL, CLSCTX_SERVER, IID_IDispatch, (LPVOID *)&pShellDisp);
+pShellDisp->FileRun();
+pShellDisp->ToggleDesktop();
+pShellDisp->Release();
+=============================================
+CShellDispatch::WindowsSecurity:1389h
+
+CShellDispatch::UpgradeWindowsBottom:1A6h ,2
+CShellDispatch::UpgradeWindowsTop:1A6h,3
+
+CShellDispatch::RefreshMenu:0A220h
+CShellDispatch::FindComputer:0A086h
+CShellDispatch::FindFiles:0A085h
+
+CShellDispatch::CascadeWindows:193h
+CShellDispatch::TileVertically:194h
+CShellDispatch::TileHorizontally:195h
+CShellDispatch::Suspend:199h
+CShellDispatch::SetTime:198h
+CShellDispatch::EjectPC:19Ah
+CShellDispatch::WindowSwitcher:19Bh
+CShellDispatch::TrayProperties:19Dh
+CShellDispatch::MinimizeAll: 19Fh
+CShellDispatch::UndoMinimizeALL:1A0h
+CShellDispatch::ShutdownWindows:1FAh
+*/
+#define IDC_FILERUN        0x191
+#define IDC_TOGGLEDESKTOP  0x197
+
 int DesktopBar::Command(int id, int code)
 {
     static int isStartButtonHooked = -1;
+    if (id == IDC_TOGGLEDESKTOP) id = ID_MINIMIZE_ALL;
     switch (id) {
+    case IDC_FILERUN:
+        _startMenuRoot->Command(IDC_LAUNCH, 0);
+        break;
     case IDC_START: {
         if (isStartButtonHooked == -1) {
             String def_value = TEXT("");
