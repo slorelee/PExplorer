@@ -99,7 +99,8 @@
     "userebar":false,
     "theme":"dark",
     "height": 40,
-    "bkcolor":[0,122,204]
+    "bkcolor":[0,122,204],
+    "task_line_color":[240,240,240]
   },
   "::开始菜单":
   {

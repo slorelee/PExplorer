@@ -51,6 +51,8 @@ DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("sh
 #define GCL_HICONSM GCLP_HICONSM
 #endif
 
+static HBRUSH hbrTaskLine = NULL;
+
 TaskBarEntry::TaskBarEntry()
 {
     _id = 0;
@@ -128,6 +130,12 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     if (super::Init(pcs))
         return 1;
 
+    //hbrTaskLine = GetSysColorBrush(COLOR_BTNFACE);
+    COLORREF clrTaskLine = JValueToColor(JCFG2_DEF("JS_TASKBAR", "task_line_color", (int)RGB(176, 176, 176)));
+    if (clrTaskLine != MAXDWORD) {
+        hbrTaskLine = CreateSolidBrush(clrTaskLine);
+    }
+
     /* FIXME: There's an internal padding for non-flat toolbar. Get rid of it somehow. */
     DWORD ws = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_TOP | TBSTYLE_TRANSPARENT |
         CCS_NODIVIDER | TBSTYLE_LIST | TBSTYLE_TOOLTIPS | TBSTYLE_WRAPABLE | TBSTYLE_FLAT;
@@ -160,7 +168,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     metrics.dwMask = TBMF_BARPAD | TBMF_BUTTONSPACING;
     metrics.cxBarPad = 0;
     metrics.cyBarPad = JCFG_TB(2, "padding-top").ToInt();
-    metrics.cxButtonSpacing = 3;
+    metrics.cxButtonSpacing = 1;
     metrics.cyButtonSpacing = 0;
 
     SendMessage(_htoolbar, TB_SETMETRICS, 0, (LPARAM)&metrics);
@@ -302,6 +310,21 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                 return CDRF_NOTIFYITEMDRAW;
             case CDDS_ITEMPREPAINT: {
                 lptbcd->clrText = TASKBAR_TEXTCOLOR();
+                if (hbrTaskLine) {
+                    lptbcd->nmcd.hdc;
+                    RECT rect = lptbcd->nmcd.rc;
+                    rect.top = DESKTOPBARBAR_HEIGHT - 4;
+                    rect.bottom = rect.top + 2;
+                    if (((lptbcd->nmcd.uItemState & CDIS_CHECKED) != CDIS_CHECKED) &&
+                        ((lptbcd->nmcd.uItemState & CDIS_HOT) != CDIS_HOT)) {
+                        rect.left += 4;
+                        rect.right -= 4;
+                    }
+#ifdef _DEBUG
+                    _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
+#endif
+                    FillRect(lptbcd->nmcd.hdc, &rect, hbrTaskLine);
+                }
 #define CDRF_USECDCOLORS 0x00800000
                 return CDRF_USECDCOLORS; //Windows vista later
                 return CDRF_DODEFAULT;
