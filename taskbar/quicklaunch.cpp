@@ -62,6 +62,9 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
 
     SetWindowStyle(hwndToolTip, GetWindowStyle(hwndToolTip) | TTS_ALWAYSTIP);
 
+    int btnWidth = JCFG2_DEF("JS_QUICKLAUNCH", "button_width", DESKTOPBARBAR_HEIGHT).ToInt();
+    SendMessage(hwnd, TB_SETBITMAPSIZE, 0, MAKELPARAM(btnWidth, DESKTOPBARBAR_HEIGHT - 6));
+
     // delay refresh to some time later
     PostMessage(hwnd, PM_REFRESH, 0, 0);
 }
