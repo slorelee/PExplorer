@@ -142,6 +142,9 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     //SetWindowFont(_htoolbar, GetStockFont(DEFAULT_GUI_FONT), FALSE);
     //SendMessage(_htoolbar, TB_SETPADDING, 0, MAKELPARAM(8,8));
 
+    HWND hwndToolTip = (HWND)SendMessage(_htoolbar, TB_GETTOOLTIPS, 0, 0);
+    SetWindowStyle(hwndToolTip, GetWindowStyle(hwndToolTip) | TTS_ALWAYSTIP);
+
     // set metrics for the Taskbar toolbar to enable button spacing
     TBMETRICS metrics;
 
