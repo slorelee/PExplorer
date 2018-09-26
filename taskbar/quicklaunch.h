@@ -74,6 +74,7 @@ protected:
     QuickLaunchMap  _entries;
     int             _btn_dist;
     int             _size;
+    int             _fixed_btn;
 
     void    AddShortcuts();
     void    ReloadShortcuts();

@@ -57,6 +57,7 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
     _next_id = IDC_FIRST_QUICK_ID;
     _btn_dist = 20;
     _size = 0;
+    _fixed_btn = 0;
 
     HWND hwndToolTip = (HWND) SendMessage(hwnd, TB_GETTOOLTIPS, 0, 0);
 
@@ -122,7 +123,7 @@ void QuickLaunchBar::ReloadShortcuts()
         cnt = 0;
     }
 
-    if (_entries.size() == cnt + 2) {
+    if (_entries.size() == cnt + _fixed_btn) {
         return;
     }
 
@@ -173,11 +174,29 @@ void QuickLaunchBar::AddShortcuts()
     HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
     RECT rect = { 0, -2, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT };
-    AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_MINIMIZE_ALL), NULL);
-    AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_TITLE), NULL);
 
-    TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP, { 0, 0 }, 0, 0 };
-    SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
+    static int bHideShowDesktop = -1;
+    static int bHideFileExplorer = -1;
+    static int bHideFixedSep = -1;
+    if (bHideShowDesktop == -1) {
+        bHideShowDesktop = JCFG2_DEF("JS_QUICKLAUNCH", "hide_showdesktop", false).ToBool() ? 1 : 0;
+        bHideFileExplorer = JCFG2_DEF("JS_QUICKLAUNCH", "hide_fileexplorer", false).ToBool() ? 1 : 0;
+        bHideFixedSep = JCFG2_DEF("JS_QUICKLAUNCH", "hide_fixedsep", false).ToBool() ? 1 : 0;
+    }
+
+    if (bHideShowDesktop != 1) {
+        AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_MINIMIZE_ALL), NULL);
+        _fixed_btn++;
+    }
+    if (bHideFileExplorer != 1) {
+        AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_TITLE), NULL);
+        _fixed_btn++;
+    }
+
+    if (_fixed_btn != 0 && bHideFixedSep != 1) {
+        TBBUTTON sep = { 0, -1, TBSTATE_ENABLED, BTNS_SEP, { 0, 0 }, 0, 0 };
+        SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&sep);
+    }
 
     int ignore = 0;
     for (Entry *entry = _dir->_down; entry; entry = entry->_next) {
@@ -254,12 +273,12 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
         static int maxbtns = JCFG_QL(2, "maxiconsinrow").ToInt();
         if (maxbtns < 0) maxbtns = 0;
-        if (maxbtns > 0 && maxbtns < 2) maxbtns = 2; // miniconsinrow = 2 Show Desktop & Explorer
+        if (maxbtns > 0 && maxbtns < _fixed_btn) maxbtns = _fixed_btn; // miniconsinrow = 2 Show Desktop & Explorer
         if (maxbtns == 0 || rows == btns) return _size;
         if (btns - 1 <= maxbtns) return _size; // BTNS_SEP
 
         RECT rect;
-        int max_cx = 2 * _btn_dist + 5;
+        int max_cx = _fixed_btn * _btn_dist + 5;
 
         for (QuickLaunchMap::const_iterator it = _entries.begin(); it != _entries.end(); ++it) {
             SendMessage(_hwnd, TB_GETRECT, it->first, (LPARAM)&rect);
@@ -268,7 +287,7 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
         if (maxbtns > 0) {
             int maxbtns_cx = maxbtns * _btn_dist + 5;  // no BTNS_SEP
-            if ((btns - 2) > maxbtns || max_cx > maxbtns_cx) max_cx = maxbtns_cx;
+            if ((btns - _fixed_btn) > maxbtns || max_cx > maxbtns_cx) max_cx = maxbtns_cx;
         }
         return max_cx;
     }
