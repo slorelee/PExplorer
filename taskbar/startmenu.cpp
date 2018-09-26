@@ -1763,8 +1763,9 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
 void StartMenuRoot::AddEntries()
 {
     super::AddEntries();
-
-    AddButton(ResString(IDS_EXPLORE),   ICID_EXPLORER, false, IDC_EXPLORE);
+    if (!JCFG2_DEF("JS_STARTMENU", "nofileexplorer", true).ToBool()) {
+        AddButton(ResString(IDS_EXPLORE), ICID_EXPLORER, false, IDC_EXPLORE);
+    }
 }
 
 
