@@ -360,7 +360,7 @@ NotifyInfo::NotifyInfo()
     _dwState = 0;
     _uCallbackMessage = 0;
     _version = 0;
-
+    _guid = {0};
     _mode = NIM_SHOW;
     _lastChange = GetTickCount();
 }
@@ -421,6 +421,12 @@ bool NotifyInfo::_modify(NID_T *pnid)
             _dwState = new_state;
             changes = true;
         }
+    }
+#endif
+
+#ifdef NIF_GUID
+    if (pnid->uFlags & NIF_GUID) {
+        _guid = pnid->guidItem;
     }
 #endif
 
@@ -586,12 +592,21 @@ static TCHAR *getmsgstr(UINT msgid)
 }
 #endif
 
+static BOOL isEmptyGUID(const GUID *ptr)
+{
+    if (ptr->Data1 != 0 || ptr->Data2 != 0 || ptr->Data3 != 0) return FALSE;
+    for (int i = 0; i < sizeof(ptr->Data4); i++) {
+        if (ptr->Data4[i] != '\0') return FALSE;
+    }
+    return TRUE;
+}
+
 static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam, POINT pt)
 {
 #ifdef _DEBUG
-    _log_(FmtString(TEXT("TRAYICON MSG = %s"), getmsgstr(lparam)));
+    _log_(FmtString(TEXT("TRAYICON MSG = %s %d"), getmsgstr(lparam), entry._version));
 #endif
-    if (entry._version == NOTIFYICON_VERSION_4)
+    if (entry._version >= NOTIFYICON_VERSION_4 || !isEmptyGUID(&entry._guid))
     {
         POINT messagePt = pt;
         ClientToScreen(hwnd, &messagePt);

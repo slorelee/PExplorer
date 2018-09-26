@@ -132,7 +132,7 @@ struct NotifyInfo : public NotifyIconIndex, public NotifyIconConfig {
     DWORD   _dwState;
     UINT    _uCallbackMessage;
     UINT    _version;
-
+    GUID    _guid;
     DWORD   _lastChange;    // timer tick value of the last change
 };
 
