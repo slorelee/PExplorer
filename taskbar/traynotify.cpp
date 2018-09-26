@@ -519,7 +519,7 @@ static bool get_hide_clock_from_registry()
 
 void NotifyArea::read_config()
 {
-    bool clock_visible = true;
+    bool clock_visible = JCFG2_DEF("JS_NOTIFYCLOCK", "visible", true).ToBool();
     show_clock(clock_visible);
 }
 
