@@ -95,6 +95,7 @@ extern struct ExplorerGlobals {
     FileTypeManager _ftype_mgr;
     IconCache   _icon_cache;
 
+    HFONT       _hDefaultFont;
     HWND        _hwndDesktopBar;
     HWND        _hwndShellView;
     HWND        _hwndDesktop;

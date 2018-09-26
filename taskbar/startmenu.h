@@ -110,7 +110,7 @@ struct StartMenuCtrl : public Button {
     {
         *new StartMenuButton(_hwnd, hIcon, hasSubmenu);
 
-        SetWindowFont(_hwnd, GetStockFont(DEFAULT_GUI_FONT), FALSE);
+        SetWindowFont(_hwnd, g_Globals._hDefaultFont, FALSE);
     }
 };
 

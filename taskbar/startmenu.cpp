@@ -892,7 +892,7 @@ void StartMenu::Paint(PaintCanvas &canvas)
 
     int sep_width = rect.right - rect.left - 4;
 
-    FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
+    FontSelection font(canvas, g_Globals._hDefaultFont);
     BkMode bk_mode(canvas, TRANSPARENT);
 
     for (SMBtnVector::const_iterator it = _buttons.begin() + _scroll_pos; it != _buttons.end(); ++it) {
@@ -1162,7 +1162,7 @@ void StartMenu::AddButton(LPCTSTR title, ICON_ID icon_id, bool hasSubmenu, int i
     }
 
     WindowCanvas canvas(_hwnd);
-    FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
+    FontSelection font(canvas, g_Globals._hDefaultFont);
 
     // widen window, if it is too small
     int text_width = GetStartMenuBtnTextWidth(canvas, title, _hwnd) + icon_size + 10/*placeholder*/ + 16/*arrow*/;
@@ -1453,7 +1453,7 @@ void StartMenu::ResizeToButtons()
     WindowRect rect(_hwnd);
 
     WindowCanvas canvas(_hwnd);
-    FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
+    FontSelection font(canvas, g_Globals._hDefaultFont);
 
     const int icon_size = _icon_size;
 

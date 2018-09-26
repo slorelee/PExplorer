@@ -311,7 +311,7 @@ struct ExplorerAboutDlg : public
 
         HWND hwnd_winver = GetDlgItem(hwnd, IDC_WIN_VERSION);
         SetWindowText(hwnd_winver, get_windows_version_str());
-        SetWindowFont(hwnd_winver, GetStockFont(DEFAULT_GUI_FONT), FALSE);
+        SetWindowFont(hwnd_winver, g_Globals._hDefaultFont, FALSE);
 
         CenterWindow(hwnd);
     }
@@ -515,6 +515,16 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     g_Globals.load_config();
     g_Globals.get_systeminfo();
     g_Globals._cmdline = lpCmdLineOrg;
+
+    // init default font
+    if (JCFG2_DEF("JS_TASKBAR", "usesystemfont", false).ToBool() == FALSE) {
+        g_Globals._hDefaultFont = GetStockFont(DEFAULT_GUI_FONT);
+    } else {
+        NONCLIENTMETRICS ncm;
+        ncm.cbSize = sizeof(ncm);
+        SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+        g_Globals._hDefaultFont = CreateFontIndirect(&(ncm.lfMessageFont));
+    }
 
     string_t file(_T("WinXShell.lua"));
     TCHAR luascript[MAX_PATH + 1] = { 0 };

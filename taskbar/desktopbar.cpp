@@ -113,7 +113,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     // create start button
     string_t start_str(JCFG2("JS_STARTMENU", "text").ToString());
     WindowCanvas canvas(_hwnd);
-    FontSelection font(canvas, GetStockFont(DEFAULT_GUI_FONT));
+    FontSelection font(canvas, g_Globals._hDefaultFont);
     RECT rect = {0, 0};
     DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE | DT_CALCRECT);
 
@@ -131,7 +131,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     wc.hInstance = NULL;
     RegisterClass(&wc);
     HWND hwndStart = SWButton(_hwnd, start_str.c_str(), 0, 0, start_btn_width, DESKTOPBARBAR_HEIGHT, IDC_START, WS_VISIBLE | WS_CHILD | BS_OWNERDRAW);
-    SetWindowFont(hwndStart, GetStockFont(DEFAULT_GUI_FONT), FALSE);
+    SetWindowFont(hwndStart, g_Globals._hDefaultFont, FALSE);
 
     UINT idStartIcon = IDI_STARTMENU_B;
     if (start_icon.compare(TEXT("empty")) == 0) {

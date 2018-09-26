@@ -24,6 +24,7 @@ ExplorerGlobals::ExplorerGlobals()
 
     _log = NULL;
     _SHRestricted = 0;
+    _hDefaultFont = NULL;
     _hwndDesktopBar = 0;
     _hwndShellView = 0;
     _hwndDesktop = 0;
