@@ -46,7 +46,9 @@ end
 function onfirstrun()
   -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   if is_wes then
-    app:call('SetTimer', ICP_TIMER_ID, 200) -- use timer to make main shell running
+    if win_ver == '6.2' or win_ver == '6.3' then -- only Windows 8, 8.1
+      app:call('SetTimer', ICP_TIMER_ID, 200) -- use timer to make main shell running
+    end
   end
 end
 
@@ -79,26 +81,40 @@ function onclick(ctrl)
   return 1 -- continue shell action
 end
 
-function onclick_startmenu_reboot()
-  if is_pe then
-    app:run('Wpeutil.exe', 'Reboot', 0) -- SW_HIDE(0)
+local function power_helper(wu_param, sd_param)
+  local sd = os.getenv("SystemDrive")
+  if File.exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
+    app:run('wpeutil.exe', wu_param, 0) -- SW_HIDE(0)
     return 0
-  elseif is_wes then
-    app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown\\main.jcfg')
+  elseif File.exists(sd ..'\\Windows\\System32\\shutdown.exe') then
+    app:run('shutdown.exe', sd_param .. ' -t 0')
     return 0
   end
   return 1
 end
 
+local function reboot()
+    return power_helper('Reboot', '-r')
+end
+
+local function shutdown()
+    return power_helper('Shutdown', '-s')
+end
+
+function onclick_startmenu_reboot()
+  -- restart computer directly
+  -- reboot()
+  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown.zip\\full.jcfg')
+  return 0
+  -- return 1 -- for call system dialog
+end
+
 function onclick_startmenu_shutdown()
-  if is_pe then
-    app:run('Wpeutil.exe', 'Shutdown', 0) -- SW_HIDE(0)
-    return 0
-  elseif is_wes then
-    app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown\\main.jcfg')
-    return 0
-  end
-  return 1
+  -- restart computer directly
+  -- shutdown()
+  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown.zip\\full.jcfg')
+  return 0
+  -- return 1 -- for call system dialog
 end
 
 function onclick_startmenu_controlpanel()
