@@ -526,6 +526,7 @@ static bool get_hide_clock_from_registry()
 void NotifyArea::read_config()
 {
     bool clock_visible = JCFG2_DEF("JS_NOTIFYCLOCK", "visible", true).ToBool();
+    _show_button = !(JCFG2_DEF("JS_NOTIFYAREA", "hide_toggle_button", false).ToBool());
     show_clock(clock_visible);
 }
 
