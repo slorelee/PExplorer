@@ -842,6 +842,50 @@ void NotifyArea::CancelModes()
         PostMessage(it->_hWnd, WM_CANCELMODE, 0, 0);
 }
 
+#define NIS_IGNORED              0x00080000
+
+#define DEF_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        EXTERN_C const GUID DECLSPEC_SELECTANY name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+
+//SYS_TRAYICON_VOLUME {7820AE73-23E3-4229-82C1-E41CB67D5B9C}
+DEF_GUID(SYS_TRAYICON_VOLUME, 0x7820ae73, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+//SYS_TRAYICON_NETWORK {7820AE74-23E3-4229-82C1-E41CB67D5B9C}
+DEF_GUID(SYS_TRAYICON_NETWORK, 0x7820ae74, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+
+static int IsSameGUID(const GUID *a, const GUID *b) {
+    if (memcmp(a, b, sizeof(GUID)) == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+static DWORD GetTrayIconState(NotifyInfo &entry) {
+    if (isEmptyGUID(&entry._guid)) return 0;
+
+    String prop = TEXT("");
+    while (1) {
+        if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_VOLUME))) {
+            prop = JCFG2_DEF("JS_NOTIFYAREA", "volume_icon", TEXT("")).ToString();
+            if (prop != TEXT("")) break;
+        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_NETWORK))) {
+            prop = JCFG2_DEF("JS_NOTIFYAREA", "network_icon", TEXT("")).ToString();
+            if (prop != TEXT("")) break;
+        }
+        return 0;
+    }
+    if (prop == TEXT("ignored")) {
+        entry._dwState |= NIS_IGNORED | NIS_HIDDEN;
+        entry._mode = NIM_HIDE;
+    } else if (prop == TEXT("hidden")) {
+        entry._dwState |= NIS_HIDDEN;
+        entry._mode = NIM_HIDE;
+    } else {
+        return 0;
+    }
+    return entry._dwState;
+}
+
 LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA *pnid)
 {
     bool changes = false;
@@ -863,6 +907,12 @@ LRESULT NotifyArea::ProcessTrayNotification(int notify_code, NOTIFYICONDATA *pni
             entry._idx = ++_next_idx;
 
         bool changes = entry.modify((void *)pnid);
+
+        if (NIM_ADD == notify_code) {
+            if (GetTrayIconState(entry) & NIS_IGNORED) {
+                return TRUE;
+            }
+        }
 
 #if NOTIFYICON_VERSION>=3   // as of 21.08.2003 missing in MinGW headers
         if (DetermineHideState(entry) && entry._mode == NIM_HIDE) {
@@ -917,7 +967,8 @@ void NotifyArea::UpdateIcons()
         const NotifyInfo &entry = it->second;
 
 #ifdef NIF_STATE    // as of 21.08.2003 missing in MinGW headers
-        if (_show_hidden || !(entry._dwState & NIS_HIDDEN))
+        if (!(entry._dwState & NIS_IGNORED) &&
+            (_show_hidden || !(entry._dwState & NIS_HIDDEN)))
 #endif
             _sorted_icons.insert(entry);
     }
