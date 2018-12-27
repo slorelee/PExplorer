@@ -848,10 +848,17 @@ void NotifyArea::CancelModes()
         EXTERN_C const GUID DECLSPEC_SELECTANY name \
                 = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 
-//SYS_TRAYICON_VOLUME {7820AE73-23E3-4229-82C1-E41CB67D5B9C}
-DEF_GUID(SYS_TRAYICON_VOLUME, 0x7820ae73, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-//SYS_TRAYICON_NETWORK {7820AE74-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_CLOCK           {7820AE72-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_VOLUME          {7820AE73-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_NETWORK         {7820AE74-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_POWER           {7820AE75-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_ACTIONCENTER    {7820AE76-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_PLUG            {7820AE78-23E3-4229-82C1-E41CB67D5B9C}
+DEF_GUID(SYS_TRAYICON_CLOCK,   0x7820ae72, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_VOLUME,  0x7820ae73, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
 DEF_GUID(SYS_TRAYICON_NETWORK, 0x7820ae74, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_POWER,   0x7820ae75, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_PLUG,    0x7820ae78, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
 
 static int IsSameGUID(const GUID *a, const GUID *b) {
     if (memcmp(a, b, sizeof(GUID)) == 0) {
@@ -870,6 +877,12 @@ static DWORD GetTrayIconState(NotifyInfo &entry) {
             if (prop != TEXT("")) break;
         } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_NETWORK))) {
             prop = JCFG2_DEF("JS_NOTIFYAREA", "network_icon", TEXT("")).ToString();
+            if (prop != TEXT("")) break;
+        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_POWER))) {
+            prop = JCFG2_DEF("JS_NOTIFYAREA", "power_icon", TEXT("")).ToString();
+            if (prop != TEXT("")) break;
+        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_PLUG))) {
+            prop = JCFG2_DEF("JS_NOTIFYAREA", "plug_icon", TEXT("")).ToString();
             if (prop != TEXT("")) break;
         }
         return 0;
