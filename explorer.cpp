@@ -451,7 +451,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (_tcsstr(ext_options, TEXT("-winpe"))) {
         g_Globals._isWinPE = TRUE;
         CloseShellProcess();
-        ChangeUserProfileEnv();
         any_desktop_running = FALSE;
     } else if (_tcsstr(ext_options, TEXT("-wes"))) {
         CloseShellProcess();
@@ -615,13 +614,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         return 0;    // no shell to launch, so exit immediatelly
 #endif
 
-
-    if (!any_desktop_running) {
-        // launch the shell DDE server
-        if (g_SHDOCVW_ShellDDEInit)
-            (*g_SHDOCVW_ShellDDEInit)(TRUE);
-    }
-
     if (_tcsstr(ext_options, TEXT("-debug"))) {
         DebugMode = true;
         Sleep(10000);
@@ -670,6 +662,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (startup_desktop) {
         WaitCursor wait;
+        if (g_Globals._lua) g_Globals._lua->preShell();
+
+        if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
+            ChangeUserProfileEnv();
+        }
+
         HWND daemon = create_daemonwindow();
         g_Globals._hwndDaemon = daemon;
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
@@ -682,6 +680,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
 #endif
+    }
+
+    if (!any_desktop_running) {
+        // launch the shell DDE server
+        if (g_SHDOCVW_ShellDDEInit)
+            (*g_SHDOCVW_ShellDDEInit)(TRUE);
     }
 
     if (_tcsstr(ext_options, TEXT("-?"))) {

@@ -15,7 +15,9 @@ public:
     void call(const char * funcname, string_t & p1, string_t & p2);
     void onLoad();
     void onFirstRun();
+    void preShell();
     void onShell();
+    void onDaemon();
     int onClick(string_t& ctrl);
     void onTimer(int id);
 private:

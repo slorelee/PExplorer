@@ -32,16 +32,33 @@ void CloseShellProcess()
     }
 }
 
+BOOL FolderExists(const TCHAR *strPath)
+{
+    WIN32_FIND_DATA wfd = { 0 };
+    HANDLE hFile = FindFirstFile(strPath, &wfd);
+    if (hFile == INVALID_HANDLE_VALUE) return FALSE;
+    FindClose(hFile);
+    if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 void ChangeUserProfileEnv()
 {
     //HKLM\Software\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-18\ProfileImagePath
     TCHAR userprofile[MAX_PATH + 1] = { 0 };
-    if (g_Globals._isWinPE) {
-        GetEnvironmentVariable(TEXT("USERPROFILE"), userprofile, MAX_PATH);
-        if (_tcsicmp(userprofile, TEXT("X:\\windows\\system32\\config\\systemprofile")) == 0) {
-            _tcscpy(userprofile, TEXT("X:\\Users\\Default"));
-            SetEnvironmentVariable(TEXT("USERPROFILE"), userprofile);
-        }
+    TCHAR desktop[MAX_PATH + 1] = { 0 };
+    if (!g_Globals._isWinPE) return;
+
+    GetEnvironmentVariable(TEXT("USERPROFILE"), userprofile, MAX_PATH);
+    _tcscpy(desktop, userprofile);
+    _tcscat(desktop, TEXT("\\Desktop"));
+    if (FolderExists(desktop)) return;
+
+    if (_tcsicmp(userprofile, TEXT("X:\\windows\\system32\\config\\systemprofile")) == 0) {
+        _tcscpy(userprofile, TEXT("X:\\Users\\Default"));
+        SetEnvironmentVariable(TEXT("USERPROFILE"), userprofile);
     }
 }
 

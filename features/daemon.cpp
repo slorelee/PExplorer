@@ -215,7 +215,7 @@ int daemon_entry()
     CoInitialize(NULL);
     HWND daemon = create_daemonwindow();
     g_Globals._hwndDaemon = daemon;
-    if (g_Globals._lua) g_Globals._lua->call("ondaemon");
+    if (g_Globals._lua) g_Globals._lua->onDaemon();
     bool instHook = false;
     //default install the hook if running in WinPE
     TCHAR drv[MAX_PATH + 1] = { 0 };

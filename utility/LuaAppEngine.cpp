@@ -178,6 +178,11 @@ extern "C" {
             UINT b = (UINT)lua_tointeger(L, base + 3);
             v.iVal = (s & b);
             PUSH_INT(v);
+        } else if (func == "exit") {
+            if (lua_isinteger(L, base + 2)) {
+                int code = (int)lua_tointeger(L, base + 2);
+                exit(code);
+            }
         } else {
             char buff[100];
             sprintf(buff, "error:fcuntion %s() is not implemented", func.c_str());
@@ -366,9 +371,19 @@ void LuaAppEngine::onFirstRun()
     call("onfirstrun");
 }
 
+void LuaAppEngine::preShell()
+{
+    call("preshell");
+}
+
 void LuaAppEngine::onShell()
 {
     call("onshell");
+}
+
+void LuaAppEngine::onDaemon()
+{
+    call("ondaemon");
 }
 
 int LuaAppEngine::onClick(string_t& ctrl)
