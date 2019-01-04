@@ -602,6 +602,14 @@ static BOOL isEmptyGUID(const GUID *ptr)
     return TRUE;
 }
 
+#ifdef _DEBUG
+#ifdef _UNICODE
+#define RPC_TSTR RPC_WSTR
+#else
+#define RPC_TSTR RPC_CSTR
+#endif // _UNICODE
+#endif
+
 static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam, POINT pt)
 {
 #ifdef _DEBUG
@@ -611,6 +619,13 @@ static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam,
     {
         POINT messagePt = pt;
         ClientToScreen(hwnd, &messagePt);
+#ifdef _DEBUG
+        RPC_TSTR strGuid = NULL;
+        if (UuidToString(&(entry._guid), &strGuid) == RPC_S_OK) {
+            _log_(FmtString(TEXT("TRAYICON MSG = %s %s"), getmsgstr(lparam), LPTSTR(strGuid)));
+            RpcStringFree(&strGuid);
+        }
+#endif
         //if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
         WPARAM wparam = MAKEWPARAM(messagePt.x, messagePt.y);
         return PostMessage(entry._hWnd, entry._uCallbackMessage, wparam, MAKELPARAM(lparam, entry._uID)) == S_OK;
@@ -867,26 +882,47 @@ static int IsSameGUID(const GUID *a, const GUID *b) {
     return 0;
 }
 
-static DWORD GetTrayIconState(NotifyInfo &entry) {
-    if (isEmptyGUID(&entry._guid)) return 0;
+extern void resstr_expand(string_t &restr);
 
+static String GetPropByGUID(const GUID *id) {
     String prop = TEXT("");
-    while (1) {
-        if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_VOLUME))) {
-            prop = JCFG2_DEF("JS_NOTIFYAREA", "volume_icon", TEXT("")).ToString();
-            if (prop != TEXT("")) break;
-        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_NETWORK))) {
-            prop = JCFG2_DEF("JS_NOTIFYAREA", "network_icon", TEXT("")).ToString();
-            if (prop != TEXT("")) break;
-        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_POWER))) {
-            prop = JCFG2_DEF("JS_NOTIFYAREA", "power_icon", TEXT("")).ToString();
-            if (prop != TEXT("")) break;
-        } else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_PLUG))) {
-            prop = JCFG2_DEF("JS_NOTIFYAREA", "plug_icon", TEXT("")).ToString();
-            if (prop != TEXT("")) break;
-        }
-        return 0;
+    if (IsSameGUID(id, &(SYS_TRAYICON_VOLUME))) {
+        prop = JCFG2_DEF("JS_NOTIFYAREA", "volume_icon", TEXT("")).ToString();
+    } else if (IsSameGUID(id, &(SYS_TRAYICON_NETWORK))) {
+        prop = JCFG2_DEF("JS_NOTIFYAREA", "network_icon", TEXT("")).ToString();
+    } else if (IsSameGUID(id, &(SYS_TRAYICON_POWER))) {
+        prop = JCFG2_DEF("JS_NOTIFYAREA", "power_icon", TEXT("")).ToString();
+    } else if (IsSameGUID(id, &(SYS_TRAYICON_PLUG))) {
+        prop = JCFG2_DEF("JS_NOTIFYAREA", "plug_icon", TEXT("")).ToString();
     }
+    return prop;
+}
+
+static String GetPropByTip(String str) {
+    static string_t plug_tip = TEXT("#{@stobject.dll,211}");
+    String prop = TEXT("");
+    if (plug_tip[0] == TEXT('#')) {
+        resstr_expand(plug_tip);
+    }
+#ifdef _DEBUG
+    _log_(FmtString(TEXT("GetPropByTip plug_tip = %s"), plug_tip.c_str()));
+#endif
+    if (lstrcmp(plug_tip.c_str(), str.c_str()) != 0) return prop;
+    prop = JCFG2_DEF("JS_NOTIFYAREA", "plug_icon", TEXT("")).ToString();
+#ifdef _DEBUG
+    _log_(FmtString(TEXT("GetPropByTip plug_icon = %s"), prop.c_str()));
+#endif
+    return prop;
+}
+
+static DWORD GetTrayIconState(NotifyInfo &entry) {
+    String prop = TEXT("");
+    if (!isEmptyGUID(&entry._guid)) {
+        prop = GetPropByGUID(&entry._guid);
+    } else {
+        prop = GetPropByTip(entry._tipText);
+    }
+
     if (prop == TEXT("ignored")) {
         entry._dwState |= NIS_IGNORED | NIS_HIDDEN;
         entry._mode = NIM_HIDE;
