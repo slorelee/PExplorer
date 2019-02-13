@@ -4,6 +4,7 @@
 #include "../utility/utility.h"
 #include "../utility/window.h"
 #include "../globals.h"
+#include "../jconfig/jcfg.h"
 
 extern ExplorerGlobals g_Globals;
 
@@ -183,3 +184,12 @@ void UpdateSysColor(LPTSTR pszCmdline)
     }
 }
 
+void RegistAppPath() {
+    RegSetValue(HKEY_LOCAL_MACHINE,
+        TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\WinXShell.exe"),
+        REG_SZ, (JVAR("JVAR_MODULEFILENAME").ToString().c_str()), 0);
+
+    RegSetValue(HKEY_CURRENT_USER,
+    TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\WinXShell.exe"),
+        REG_SZ, (JVAR("JVAR_MODULEFILENAME").ToString().c_str()), 0);
+}

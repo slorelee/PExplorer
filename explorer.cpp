@@ -59,6 +59,7 @@ extern ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
 
 void UIProcess(HINSTANCE hInst, String cmdline);
+extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
 
 bool FileTypeManager::is_exe_file(LPCTSTR ext)
 {
@@ -637,10 +638,42 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     // for loading UI Resources
 #ifndef _DEBUG
     SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+#else
+    if (_tcsstr(ext_options, TEXT("-cd"))) {
+        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+    }
 #endif
 
     if (_tcsstr(ext_options, TEXT("-color"))) {
         UpdateSysColor(lpCmdLineOrg);
+    }
+
+    if (_tcsstr(ext_options, TEXT("-regist"))) {
+        RegistAppPath();
+    }
+
+    if (_tcsstr(ext_options, TEXT("-luacode"))) {
+        String code = GetParameter(lpCmdLineOrg, TEXT("-luacode"), TRUE);
+        if (g_Globals._lua) {
+            g_Globals._lua->RunCode(code);
+        }
+        return 0;
+    }
+
+    if (_tcsstr(ext_options, TEXT("-script"))) {
+        String file = GetParameter(lpCmdLineOrg, TEXT("-script"), TRUE);
+        if (PathFileExists(file.c_str())) {
+            if (g_Globals._lua) {
+                g_Globals._lua->LoadFile(file);
+            } else {
+                new LuaAppEngine(file);
+            }
+        }
+        return 0;
+    }
+
+    if (_tcsstr(ext_options, TEXT("-noaction"))) {
+        return 0;
     }
 
     if (_tcsstr(ext_options, TEXT("-settings"))) {

@@ -361,6 +361,17 @@ void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
     if (rel == -1) return;
 }
 
+void LuaAppEngine::RunCode(string_t& code)
+{
+    luaL_dostring(L, w2s(code).c_str());
+}
+
+void LuaAppEngine::LoadFile(string_t& file)
+{
+    luaL_dofile(L, w2s(file).c_str());
+}
+
+
 void LuaAppEngine::onLoad()
 {
     call("onload");

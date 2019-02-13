@@ -5,6 +5,7 @@ extern void ChangeUserProfileEnv();
 
 extern void OpenContainingFolder(LPTSTR pszCmdline);
 extern void UpdateSysColor(LPTSTR pszCmdline);
+extern void RegistAppPath();
 
 extern void handle_console(FILE *log);
 extern int daemon_entry();
