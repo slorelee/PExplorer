@@ -99,6 +99,23 @@ LuaAppEngine::~LuaAppEngine()
     lua_close(L);
 }
 
+void AutoHideTaskBar(BOOL bHide)
+{
+#ifndef   ABM_SETSTATE 
+#define   ABM_SETSTATE             0x0000000A 
+#endif
+    LPARAM lParam = ABS_ALWAYSONTOP;
+    if (bHide) lParam = ABS_AUTOHIDE;
+
+    APPBARDATA apBar = { 0 };
+    apBar.cbSize = sizeof(APPBARDATA);
+    apBar.hWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+    if (apBar.hWnd != NULL) {
+        apBar.lParam = lParam;
+        SHAppBarMessage(ABM_SETSTATE, &apBar);
+    }
+}
+
 #ifndef LOGA
 extern void _logA_(LPCSTR txt);
 
@@ -141,6 +158,13 @@ extern "C" {
         }
         if (func == "getresolutionlist") {
 
+        } else if (func == "taskbar::changenotify") {
+            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
+        } else if (func == "taskbar::autohide") {
+            if (lua_isinteger(L, base + 2)) {
+                int val = (int)lua_tointeger(L, base + 2);
+                AutoHideTaskBar(val == 1);
+            }
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
             if (!frame) return ret;
