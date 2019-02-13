@@ -131,19 +131,25 @@ extern "C" {
         }
         luaL_checktype(L, base + 1, LUA_TSTRING);
         std::string func = lua_tostring(L, base + 1);
-
+        char funcname[255] = { 0 };
+        strcpy(funcname, func.c_str());
+        func = _strlwr(funcname);
         LuaAppEngine *lua = g_Globals._lua;
+        if (!lua) {
+            LOGA("error:Cannot find the lua script file specified");
+            return ret;
+        }
+        if (func == "getresolutionlist") {
 
-        if (func == "GetResolutionList") {
- 
-        } else if ((func == "SetTimer") || (func == "KillTimer")) {
+        } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
-            if (func == "SetTimer") {
+            if (!frame) return ret;
+            if (func == "settimer") {
                 SetTimer(frame->GetHWND(), (UINT_PTR)lua_tointeger(L, base + 2), (UINT)lua_tointeger(L, base + 3), NULL);
             } else {
                 KillTimer(frame->GetHWND(), lua_tointeger(L, base + 2));
             }
-        } else if (func == "GetTickCount") {
+        } else if (func == "gettickcount") {
             v.iVal = GetTickCount();
             PUSH_INT(v);
         } else if (func == "sleep") {
