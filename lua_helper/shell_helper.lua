@@ -3,8 +3,9 @@ require 'reg_helper'
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
 
-function Taskbar:GetSetting(key, value)
-  return reg_read(regkey_setting, key, value)
+function Taskbar:GetSetting(key)
+  if key == 'AutoHide' then return app:call('Taskbar::AutoHideState') end
+  return reg_read(regkey_setting, key)
 end
 
 function Taskbar:SetSetting(key, value, type)

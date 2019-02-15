@@ -116,6 +116,16 @@ void AutoHideTaskBar(BOOL bHide)
     }
 }
 
+int TaskBarAutoHideState()
+{
+    UINT uState = 0;
+    APPBARDATA apBar = { 0 };
+    apBar.cbSize = sizeof(APPBARDATA);
+    uState = (UINT)SHAppBarMessage(ABM_GETSTATE, &apBar);
+    if (uState && ABS_AUTOHIDE) return 1;
+    return 0;
+}
+
 #ifndef LOGA
 extern void _logA_(LPCSTR txt);
 
@@ -151,11 +161,7 @@ extern "C" {
         char funcname[255] = { 0 };
         strcpy(funcname, func.c_str());
         func = _strlwr(funcname);
-        LuaAppEngine *lua = g_Globals._lua;
-        if (!lua) {
-            LOGA("error:Cannot find the lua script file specified");
-            return ret;
-        }
+
         if (func == "getresolutionlist") {
 
         } else if (func == "taskbar::changenotify") {
@@ -165,7 +171,15 @@ extern "C" {
                 int val = (int)lua_tointeger(L, base + 2);
                 AutoHideTaskBar(val == 1);
             }
+        } else if (func == "taskbar::autohidestate") {
+            v.iVal = TaskBarAutoHideState();
+            PUSH_INT(v);
         } else if ((func == "settimer") || (func == "killtimer")) {
+            LuaAppEngine *lua = g_Globals._lua;
+            if (!lua) {
+                LOGA("error:Cannot find the lua script file specified");
+                return ret;
+            }
             LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
             if (!frame) return ret;
             if (func == "settimer") {
@@ -215,7 +229,7 @@ extern "C" {
             }
         } else {
             char buff[100];
-            sprintf(buff, "error:fcuntion %s() is not implemented", func.c_str());
+            sprintf(buff, "error:function %s() is not implemented", func.c_str());
             LOGA(buff);
         }
         return ret;
