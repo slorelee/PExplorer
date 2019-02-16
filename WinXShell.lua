@@ -145,21 +145,24 @@ function ontimer(tid)
 end
 
 -- ======================================================================================
+function close_window(title, class)
+  local win = winapi.find_window(class, title)
+  local hwnd = win:get_handle()
+  app:print('CloseWindow(' .. title .. ', ' .. class .. string.format(", 0x%x", hwnd) .. ')')
+  win:send_message(WM_SYSCOMMAND, SC_CLOSE, 0)
+  return hwnd
+end
+
 function initcontrolpanel(ver)
-  local ctrlpanel_title = ''
   --  4161    Control Panel
-  -- 32012    All Control Panel Items
-  if ver == '6.1' then
-    ctrlpanel_title = app:call('resstr', '#{@shell32.dll,4161}')
-  else
-    ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
-  end
-  app:print(ctrlpanel_title)
+  local ctrlpanel_title = app:call('resstr', '#{@shell32.dll,4161}')
   app:run('control.exe')
   app:call('sleep', 500)
-  local cp_win = winapi.find_window('CabinetWClass', ctrlpanel_title)
-  app:print(string.format("Control Panel Handle:0x%x", cp_win:get_handle()))
-  cp_win:send_message(WM_SYSCOMMAND, SC_CLOSE, 0)
+  if close_window(ctrlpanel_title, 'CabinetWClass') == 0 then
+    -- 32012    All Control Panel Items
+    ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
+    close_window(ctrlpanel_title, 'CabinetWClass')
+  end
 end
 
 function regist_ms_settings_url()
