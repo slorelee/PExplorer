@@ -55,7 +55,9 @@ end
 function ms_settings(url)
     app:print(url)
     local exe = app_path .. '\\WinXShell.exe'
-    if url == "ms-settings:dateandtime" then
+    if url == "ms-settings:taskbar" then
+      app:run(exe, ' -ui -jcfg wxsUI\\UI_Settings\\main.jcfg')
+    elseif url == "ms-settings:dateandtime" then
       app:run('timedate.cpl')
     elseif  url == "ms-settings:display" then
       app:run(exe, ' -ui -jcfg wxsUI\\UI_Resolution\\main.jcfg')
