@@ -516,6 +516,15 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     g_Globals.get_systeminfo();
     g_Globals._cmdline = lpCmdLineOrg;
 
+    // for loading UI Resources, lua_helper
+#ifndef _DEBUG
+    SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+#else
+    if (_tcsstr(ext_options, TEXT("-cd"))) {
+        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+    }
+#endif
+
     // init default font
     if (JCFG2_DEF("JS_TASKBAR", "usesystemfont", false).ToBool() == FALSE) {
         g_Globals._hDefaultFont = GetStockFont(DEFAULT_GUI_FONT);
@@ -634,15 +643,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     // init common controls library
     CommonControlInit usingCmnCtrl;
-
-    // for loading UI Resources
-#ifndef _DEBUG
-    SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
-#else
-    if (_tcsstr(ext_options, TEXT("-cd"))) {
-        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
-    }
-#endif
 
     if (_tcsstr(ext_options, TEXT("-color"))) {
         UpdateSysColor(lpCmdLineOrg);
