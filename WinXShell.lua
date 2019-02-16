@@ -60,11 +60,11 @@ function ms_settings(url)
     app:print(url)
     local exe = app_path .. '\\WinXShell.exe'
     if url == "ms-settings:taskbar" then
-      app:run(exe, ' -ui -jcfg wxsUI\\UI_Settings\\main.jcfg')
+      wxsUI('UI_Settings', 'main.jcfg')
     elseif url == "ms-settings:dateandtime" then
       app:run('timedate.cpl')
     elseif  url == "ms-settings:display" then
-      app:run(exe, ' -ui -jcfg wxsUI\\UI_Resolution\\main.jcfg')
+      wxsUI('UI_Resolution', 'main.jcfg')
     elseif url == "ms-settings:personalization-background" then
       app:run('control.exe')
     else
@@ -110,7 +110,7 @@ end
 function onclick_startmenu_reboot()
   -- restart computer directly
   -- reboot()
-  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown.zip\\full.jcfg')
+  wxsUI('UI_Shutdown', 'full.jcfg')
   return 0
   -- return 1 -- for call system dialog
 end
@@ -118,7 +118,7 @@ end
 function onclick_startmenu_shutdown()
   -- restart computer directly
   -- shutdown()
-  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Shutdown.zip\\full.jcfg')
+  wxsUI('UI_Shutdown', 'full.jcfg')
   return 0
   -- return 1 -- for call system dialog
 end
@@ -135,7 +135,7 @@ function onclick_tray_clockarea(isdouble)
   if isdouble then
     app:run('control.exe', 'timedate.cpl')
   else
-    app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\UI_Calendar\\Calendar.jcfg')
+    wxsUI('UI_Calendar', 'Calendar.jcfg')
   end
   return 0
 end
@@ -149,6 +149,14 @@ function ontimer(tid)
 end
 
 -- ======================================================================================
+function wxsUI(ui, jcfg)
+  if jcfg == nil then jcfg = 'main.jcfg' end
+  if File.exists(app_path .. '\\wxsUI\\' .. ui .. '.zip') then
+    ui = ui .. '.zip'
+  end
+  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\' .. ui .. '\\' .. jcfg)
+end
+
 function close_window(title, class)
   local win = winapi.find_window(class, title)
   local hwnd = win:get_handle()
