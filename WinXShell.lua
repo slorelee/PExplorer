@@ -210,7 +210,7 @@ function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
 
     reg_write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}]], '', 'wxsStub')
     local stub_dll = 'wxsStub.dll'
-    if not ARCH == 'x64' then stub_dll = 'wxsStub32.dll' end
+    if ARCH ~= 'x64' then stub_dll = 'wxsStub32.dll' end
     reg_write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], '', app_path .. '\\' .. stub_dll)
     reg_write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], 'ThreadingModel', 'Apartment')
 
