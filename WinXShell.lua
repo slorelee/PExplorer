@@ -18,7 +18,11 @@ is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Window
 function do_ocf(lnkfile, realfile) -- handle open containing folder menu
   -- local path = realfile:match('(.+)\\')
   -- app:run('cmd', '/k echo ' .. path)
+
+  -- totalcmd
   app:run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
+  -- XYplorer
+  app:run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
 end
 --]]
 
