@@ -90,7 +90,8 @@ extern struct ExplorerGlobals {
 
     FILE       *_log;
 
-    DWORD(STDAPICALLTYPE *_SHRestricted)(RESTRICTIONS);
+    DWORD(STDAPICALLTYPE *_SHRestricted)(RESTRICTIONS rest);
+    VOID(STDAPICALLTYPE *_SHSettingsChanged)(UINT Ignored, LPCWSTR lpCategory);
 
     FileTypeManager _ftype_mgr;
     IconCache   _icon_cache;

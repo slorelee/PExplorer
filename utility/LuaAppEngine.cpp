@@ -165,7 +165,11 @@ extern "C" {
         if (func == "getresolutionlist") {
 
         } else if (func == "taskbar::changenotify") {
+            // g_Globals._SHSettingsChanged(0, TEXT("TraySettings"));
             SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
+        } else if (func == "system::changecolorthemenotify") {
+            // g_Globals._SHSettingsChanged(0, TEXT("ImmersiveColorSet"));
+            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("ImmersiveColorSet")));
         } else if (func == "taskbar::autohide") {
             if (lua_isinteger(L, base + 2)) {
                 int val = (int)lua_tointeger(L, base + 2);

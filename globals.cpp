@@ -24,6 +24,7 @@ ExplorerGlobals::ExplorerGlobals()
 
     _log = NULL;
     _SHRestricted = 0;
+    _SHSettingsChanged = 0;
     _hDefaultFont = NULL;
     _hwndDesktopBar = 0;
     _hwndShellView = 0;
@@ -39,7 +40,7 @@ void ExplorerGlobals::init(HINSTANCE hInstance)
     _hInstance = hInstance;
 
     _SHRestricted = (DWORD(STDAPICALLTYPE *)(RESTRICTIONS)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), "SHRestricted");
-
+    _SHSettingsChanged = (VOID(STDAPICALLTYPE *)(UINT,LPCWSTR)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), (LPCSTR)244);
     _icon_cache.init();
 }
 

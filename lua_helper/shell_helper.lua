@@ -1,5 +1,25 @@
 require 'reg_helper'
 
+System = {}
+local regkey_colortheme = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]]
+
+function System:GetSetting(key)
+    if key == 'AppsColorTheme' then
+        return reg_read(regkey_colortheme, 'AppsUseLightTheme') | 0 -- convert to integer
+    end
+    return 0
+end
+
+function System:ColorTheme(mode)
+    if mode == 'light' then
+        reg_write(regkey_colortheme, 'AppsUseLightTheme', 1, winapi.REG_DWORD)
+    else
+        reg_write(regkey_colortheme, 'AppsUseLightTheme', 0, winapi.REG_DWORD)
+    end
+    app:call('System::ChangeColorThemeNotify')
+end
+
+
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
 
