@@ -3,6 +3,8 @@
 #include <string>
 #include <Windows.h>
 #include "LuaAppEngine.h"
+#include "../systemsettings/MonitorAdapter.h"
+#include "../systemsettings/Volume.h"
 
 #ifdef _DEBUG
 #   ifdef _WIN64
@@ -180,6 +182,48 @@ extern "C" {
             PUSH_INT(v);
         } else if (func == "desktop::updatewallpaper") {
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        } else if (func == "desktop::getwallpaper") {
+            TCHAR wpPath[MAX_PATH] = { 0 };
+            SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, wpPath, 0);
+            v.str = wpPath;
+            PUSH_STR(v);
+        } else if (func == "desktop::setwallpaper") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            SHSetValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("Wallpaper"), REG_SZ, v.str.c_str(), (DWORD)(v.str.length()) * sizeof(TCHAR));
+            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        } else if (func == "screen::get") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            if (v.str == TEXT("x") || v.str == TEXT("width")) {
+                v.iVal = GetSystemMetrics(SM_CXSCREEN);
+            } else if (v.str == TEXT("y") || v.str == TEXT("height")) {
+                v.iVal = GetSystemMetrics(SM_CYSCREEN);
+            } else if (v.str == TEXT("rotation")) {
+                v.iVal = GetScreenRotation();
+            }
+            PUSH_INT(v);
+        } else if (func == "screen::set") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            if (v.str == TEXT("rotation")) {
+                int r = (int)lua_tointeger(L, base + 3);
+                SetScreenRotation(r);
+            } else if (v.str == TEXT("resolution")) {
+                int w = (int)lua_tointeger(L, base + 3);
+                int h = (int)lua_tointeger(L, base + 4);
+                MonitorAdapter m_monitorAdapter;
+                VEC_MONITORMODE_INFO vecMointorListInfo;
+                m_monitorAdapter.ChangeMonitorResolution(NULL, w, h);
+            }
+            PUSH_INT(v);
+        } else if (func == "volume::mute") {
+            SetVolumeMute((int)lua_tointeger(L, base + 3));
+        } else if (func == "volume::ismuted") {
+            v.iVal = GetVolumeMute();
+            PUSH_INT(v);
+        } else if (func == "volume::getlevel") {
+            v.iVal = GetVolumeLevel();
+            PUSH_INT(v);
+        } else if (func == "volume::setlevel") {
+            SetVolumeLevel((int)lua_tointeger(L, base + 3));
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {
@@ -206,6 +250,8 @@ extern "C" {
                 int type = (int)lua_tointeger(L, base + 2);
                 MessageBeep(type);
             }
+        } else if (func == "play") {
+            PlaySoundA(lua_tostring(L, 2), NULL, SND_FILENAME);
         } else if (func == "resstr") {
             v.str = s2w(lua_tostring(L, base + 2));
             resstr_expand(v.str);
