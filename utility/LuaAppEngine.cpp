@@ -178,6 +178,8 @@ extern "C" {
         } else if (func == "taskbar::autohidestate") {
             v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
+        } else if (func == "desktop::updatewallpaper") {
+            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {
