@@ -14,6 +14,9 @@ is_pe = (app:info('iswinpe') == 1)                              -- Windows Prein
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
 
+-- 'ui_systemInfo', 'system', '' or nil
+handle_system_property = 'ui_systemInfo'
+
 --[[ add one more '-' to be '---', will enable this function
 function do_ocf(lnkfile, realfile) -- handle open containing folder menu
   -- local path = realfile:match('(.+)\\')
@@ -195,6 +198,9 @@ function regist_system_property() -- handle This PC's property menu
     if not is_x then return end
     --if File.exists('X:\\Windows\\explorer.exe') then return end
 
+    if handle_system_property == nil then return end
+    if handle_system_property == '' then return end
+
     local key = [[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]]
     if reg_read(key, '') then return end -- already exists
     -- show This PC on the Desktop
@@ -202,7 +208,14 @@ function regist_system_property() -- handle This PC's property menu
     -- handle Property menu to UI_SystemInfo
     reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], '', '@shell32.dll,-33555')
     reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], 'Position', 'Bottom')
-    reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]], '', app_path .. '\\WinXShell.exe -ui -jcfg wxsUI\\UI_SystemInfo\\main.jcfg')
+
+    if handle_system_property == 'system' and File.exists('X:\\Windows\\explorer.exe') then
+      reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]], '',
+        [[explorer.exe ::{26EE0668-A00A-44D7-9371-BEB064C98683}\0\::{BB06C0E4-D293-4F75-8A90-CB05B6477EEE}]])
+    else
+      reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]], '',
+        app_path .. '\\WinXShell.exe -luacode wxsUI(\'UI_SystemInfo\')')
+    end
 
 end
 
