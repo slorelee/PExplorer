@@ -152,15 +152,6 @@ function ontimer(tid)
 end
 
 -- ======================================================================================
-function wxsUI(ui, jcfg, opt)
-  if jcfg == nil then jcfg = 'main.jcfg' end
-  if opt == nil then opt = '' else opt = ' ' .. opt end
-  if File.exists(app_path .. '\\wxsUI\\' .. ui .. '.zip') then
-    ui = ui .. '.zip'
-  end
-  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\' .. ui .. '\\' .. jcfg .. opt)
-end
-
 function close_window(title, class)
   local win = winapi.find_window(class, title)
   local hwnd = win:get_handle()

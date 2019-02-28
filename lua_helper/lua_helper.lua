@@ -46,20 +46,35 @@ if root then
 end
 package.cpath = dllpath .. package.cpath
 
-local f = io.popen('@dir /b '.. path .. '\\*.lua')
-for line in f:lines() do
-  if str.lower(line) ~= str.lower(__this__) then
-    if suilib then
-      suilib.print(line)
-    else
-      print(line)
+local function lua_dir_load()
+  local f = io.popen('@dir /b '.. path .. '\\*.lua')
+  for line in f:lines() do
+    if str.lower(line) ~= str.lower(__this__) then
+      if suilib then
+        suilib.print(line)
+      else
+        print(line)
+      end
+      require(line:sub(1, -5))
     end
-    require(line:sub(1, -5))
   end
+  f:close()
 end
-f:close()
 
---[[
-require('reg_helper')
---require('os_helper')
+local function lua_files_load()
+---[[
+  require('debug_helper')
+  require('io_helper')
+  require('os_helper')
+  require('reg_helper')
+  require('shell_helper')
+  require('str_helper')
+  require('ui_helper')
 --]]
+end
+
+if lua_helper_loader == 'dir' then
+  lua_dir_load()
+else
+  lua_files_load()
+end
