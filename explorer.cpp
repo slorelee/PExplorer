@@ -535,6 +535,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._hDefaultFont = CreateFontIndirect(&(ncm.lfMessageFont));
     }
 
+    if (_tcsstr(ext_options, TEXT("-console"))) {
+        handle_console(g_Globals._log);
+        LOG(TEXT("starting winxshell debug log\n"));
+    }
+
     string_t file(_T("WinXShell.lua"));
     TCHAR luascript[MAX_PATH + 1] = { 0 };
     DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_LUASCRIPT"), luascript, MAX_PATH);
@@ -553,12 +558,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (PathFileExists(file.c_str())) {
             g_Globals._lua = new LuaAppEngine(file);
         }
-    }
-
-
-    if (_tcsstr(ext_options, TEXT("-console"))) {
-        handle_console(g_Globals._log);
-        LOG(TEXT("starting winxshell debug log\n"));
     }
 
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];

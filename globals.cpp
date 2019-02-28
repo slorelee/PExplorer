@@ -15,6 +15,7 @@ ExplorerGlobals::ExplorerGlobals()
 
     _cmdline = _T("");
     _winver = _T("");
+    ZeroMemory(_winvers, sizeof(_winvers));
 #ifndef ROSSHELL
     _hframeClass = 0;
     _hMainWnd = 0;
@@ -92,7 +93,7 @@ void ExplorerGlobals::load_config()
     Load_JCfg(jcfgfile);
 }
 
-DWORD PASCAL ReadKernelVersion(void)
+DWORD PASCAL ReadKernelVersion(WORD *wdVers)
 {
     DWORD dwVersion = 0;
     HMODULE hinstDLL = LoadLibraryExW(L"kernel32.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
@@ -112,6 +113,10 @@ DWORD PASCAL ReadKernelVersion(void)
                 } *lpVI = (struct VS_VERSIONINFO *)LockResource(hResData);
                 if ((lpVI != NULL) && (lstrcmpiW(lpVI->szKey, wszVerInfo) == 0) && (lpVI->wValueLength > 0)) {
                     dwVersion = lpVI->Value.dwFileVersionMS;
+                    wdVers[0] = HIWORD(lpVI->Value.dwFileVersionMS);
+                    wdVers[1] = LOWORD(lpVI->Value.dwFileVersionMS);
+                    wdVers[2] = HIWORD(lpVI->Value.dwProductVersionLS);
+                    wdVers[3] = LOWORD(lpVI->Value.dwProductVersionLS);
                 }
             }
         }
@@ -122,7 +127,7 @@ DWORD PASCAL ReadKernelVersion(void)
 
 void ExplorerGlobals::get_systeminfo()
 {
-    DWORD dwVer = ReadKernelVersion();
+    DWORD dwVer = ReadKernelVersion(g_Globals._winvers);
     g_Globals._winver = FmtString(TEXT("%d.%d"), HIWORD(dwVer), LOWORD(dwVer));
     g_Globals._isNT5 = !IsWindowsVistaOrGreater();
 

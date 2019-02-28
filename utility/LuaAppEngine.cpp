@@ -292,18 +292,25 @@ extern "C" {
         int ret = 0;
         Token v = { TOK_UNSET };
         int base = 0;
-
+        int top = lua_gettop(L);
         if (lua_type(L, 1) == LUA_TTABLE) {
             //skip self for app:call
             base++;
         }
+
         luaL_checktype(L, base + 1, LUA_TSTRING);
         std::string name = lua_tostring(L, base + 1);
         if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
         } else if (name == "winver") {
-            v.str = g_Globals._winver;
+            if (top == 1) {
+                v.str = g_Globals._winver;
+            } else {
+                v.str = FmtString(TEXT("%d.%d.%d.%d"),
+                    g_Globals._winvers[0], g_Globals._winvers[1],
+                    g_Globals._winvers[2], g_Globals._winvers[3]);
+            }
             PUSH_STR(v);
         } else if (name == "langid") {
             v.str = g_Globals._langID;
@@ -365,16 +372,13 @@ static char *built_code_errorhandle = "function __G__TRACKBACK__(msg)\n"
 "    app:print(\"----------------------------------------\")\n"
 "end";
 
-static char *lua_built_code =
+char *app_built_code =
 "\n\
-suilib = app\n\
-wxs = app\n\
-\n\
-function wxs:jcfg(...)\n\
+function app:jcfg(...)\n\
   return app.jcfg(...)\n\
 end\n\
 \n\
-function wxs:run(...)\n\
+function app:run(...)\n\
   app.call('run', ...)\n\
   \n\
 end";
@@ -392,7 +396,7 @@ void LuaAppEngine::init(string_t& file)
     luaL_requiref(L, "app", luaopen_app_module, 1);
 
     luaL_dostring(L, built_code_errorhandle);
-    luaL_dostring(L, lua_built_code);
+    luaL_dostring(L, app_built_code);
     luaL_dofile(L, w2s(file).c_str());
 }
 
