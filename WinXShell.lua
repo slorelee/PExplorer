@@ -14,8 +14,8 @@ is_pe = (app:info('iswinpe') == 1)                              -- Windows Prein
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
 
--- 'ui_systemInfo', 'system', '' or nil
-handle_system_property = 'ui_systemInfo'
+-- 'auto', ui_systemInfo', 'system', '' or nil
+handle_system_property = 'auto'
 
 --[[ add one more '-' to be '---', will enable this function
 function do_ocf(lnkfile, realfile) -- handle open containing folder menu
@@ -67,7 +67,8 @@ function ms_settings(url)
     elseif url == "ms-settings:dateandtime" then
       app:run('timedate.cpl')
     elseif  url == "ms-settings:display" then
-      wxsUI('UI_Resolution', 'main.jcfg')
+      --wxsUI('UI_Resolution', 'main.jcfg')
+      wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
     elseif url == "ms-settings:personalization-background" then
       app:run('control.exe')
     else
@@ -191,6 +192,13 @@ function regist_system_property() -- handle This PC's property menu
 
     if handle_system_property == nil then return end
     if handle_system_property == '' then return end
+    if handle_system_property == 'auto' then
+        -- 'control system' works in x86_x64 with explorer.exe
+        if ARCH == 'x64' and File.exists('X:\\Windows\\explorer.exe') and
+            File.exists('X:\\Windows\\SysWOW64\\wow32.dll') then
+            return
+        end
+    end
 
     local key = [[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]]
     if reg_read(key, '') then return end -- already exists
