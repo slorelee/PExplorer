@@ -173,7 +173,7 @@ function initcontrolpanel(ver)
 end
 
 function regist_ms_settings_url()
-  if win_ver ~= "10.0" then return end
+  if tonumber(win_ver) >= 10 then return end
   local key = [[HKEY_CLASSES_ROOT\ms-settings]]
   local val = reg_read(key .. [[\Shell\Open\Command]], 'DelegateExecute')
   app:print(val)

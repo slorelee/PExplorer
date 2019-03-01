@@ -304,7 +304,7 @@ extern "C" {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
         } else if (name == "winver") {
-            if (top == 1) {
+            if (top == base + 1) {
                 v.str = g_Globals._winver;
             } else {
                 v.str = FmtString(TEXT("%d.%d.%d.%d"),
