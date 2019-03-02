@@ -53,7 +53,8 @@
     "bkcolor":[199,237,204],
     "wallpaperstyle comment":"value:0-strech(default);1-tile;2-center",
     "::WP_MODE":0,
-    "::WP":"##{JVAR_MODULEPATH}\\wallpaper.jpg"
+    "wallpaper comment":"if it is not set or be empty, will use system's wallpaper image file",
+    "::WP":""
   },
   "JS_TASKBAR":
   {

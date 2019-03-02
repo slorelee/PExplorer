@@ -858,6 +858,8 @@ DesktopShellView::StretchWallpaper()
     return _hbmWallp;
 }
 
+static BOOL UpdateWallpaper();
+
 LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
 {
     EnterCriticalSection(&wpcs);
@@ -873,7 +875,11 @@ LRESULT DesktopShellView::LoadWallpaper(BOOL fInitial)
         SetRect(&_rcWp, 0, 0, 0, 0);
         SetRect(&_rcBitmapWp, 0, 0, 0, 0);
 
-        String wallpaper_path = JCFG2("JS_DESKTOP", "wallpaper").ToString();
+        String wallpaper_path = JCFG2_DEF("JS_DESKTOP", "wallpaper", TEXT("")).ToString();
+        if (wallpaper_path == TEXT("")) {
+            UpdateWallpaper();
+            wallpaper_path = JCFG2_DEF("JS_DESKTOP", "wallpaper", TEXT("")).ToString();
+        }
         _fStyleWallp = JCFG2("JS_DESKTOP", "wallpaperstyle").ToInt();
         ExpandEnvironmentStrings(wallpaper_path, _szBMPName, MAX_PATH);
         int x, y;
