@@ -2,6 +2,35 @@
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 
+//for PKEY_Device_FriendlyName
+#include <Functiondiscoverykeys_devpkey.h>
+
+WCHAR *GetVolumeDeviceName(void *ptr)
+{
+    static WCHAR deviceName[255] = {0};
+    HRESULT hr = S_OK;
+    IPropertyStore *pProps = NULL;
+    LPWSTR pwszID = NULL;
+    IMMDevice *pDevice = (IMMDevice *)ptr;
+    if (pDevice == NULL) return deviceName;
+
+    //pDevice->GetId(&pwszID);
+    hr = pDevice->OpenPropertyStore(STGM_READ, &pProps);
+    if (SUCCEEDED(hr)) {
+        PROPVARIANT varName;
+        PropVariantInit(&varName);
+        // Get the endpoint's friendly-name property.
+        hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+        if (SUCCEEDED(hr)) {
+            // save endpoint friendly name and endpoint ID.
+            lstrcpy(deviceName, varName.pwszVal);
+        }
+        PropVariantClear(&varName);
+        //CoTaskMemFree(pwszID);
+        pProps->Release();
+    }
+    return deviceName;
+}
 
 IAudioEndpointVolume *GetEndpointVolume()
 {
@@ -11,7 +40,7 @@ IAudioEndpointVolume *GetEndpointVolume()
     //    const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
     //    const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
     if (!pEnumerator) {
-        hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+        hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if (SUCCEEDED(hr)) {
             hr = CoCreateInstance(
                 __uuidof(MMDeviceEnumerator),
@@ -37,6 +66,7 @@ IAudioEndpointVolume *GetEndpointVolume()
         __uuidof(IAudioEndpointVolume),
         CLSCTX_INPROC_SERVER, NULL,
         reinterpret_cast<void **>(&pEndpointVolume));
+    GetVolumeDeviceName(pDevice);
     pDevice->Release();
     return pEndpointVolume;
 }
@@ -55,7 +85,7 @@ int SetVolumeMute(int mute)
 {
     IAudioEndpointVolume *pEndpointVolume = GetEndpointVolume();
     if (pEndpointVolume) {
-        BOOL bMute = (mute == 0) ? TRUE : FALSE;
+        BOOL bMute = (mute == 0) ? FALSE : TRUE;
         pEndpointVolume->SetMute(bMute, NULL);
         return 0;
     }
@@ -81,7 +111,7 @@ int SetVolumeLevel(int iLevel)
     HRESULT hr = S_OK;
     if (iLevel < 0) iLevel = 0;
     else if (iLevel > 100) iLevel = 100;
-    float fLevel = iLevel / 100.0;
+    float fLevel = iLevel / 100.0f;
     IAudioEndpointVolume *pEndpointVolume = GetEndpointVolume();
     if (!pEndpointVolume) return 1;
 
@@ -90,7 +120,7 @@ int SetVolumeLevel(int iLevel)
     hr = pEndpointVolume->GetChannelCount(&iChannelSum);
 
     if (SUCCEEDED(hr) && (iChannelSum >= 2)) {
-        for (int i = 0; i < iChannelSum; i++) {
+        for (UINT i = 0; i < iChannelSum; i++) {
             pEndpointVolume->SetChannelVolumeLevelScalar(i, fLevel, NULL);
         }
     }

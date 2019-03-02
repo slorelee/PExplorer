@@ -215,7 +215,7 @@ extern "C" {
             }
             PUSH_INT(v);
         } else if (func == "volume::mute") {
-            SetVolumeMute((int)lua_tointeger(L, base + 3));
+            SetVolumeMute((int)lua_tointeger(L, base + 2));
         } else if (func == "volume::ismuted") {
             v.iVal = GetVolumeMute();
             PUSH_INT(v);
@@ -223,7 +223,11 @@ extern "C" {
             v.iVal = GetVolumeLevel();
             PUSH_INT(v);
         } else if (func == "volume::setlevel") {
-            SetVolumeLevel((int)lua_tointeger(L, base + 3));
+            SetVolumeLevel((int)lua_tointeger(L, base + 2));
+        } else if (func == "volume::getname") {
+            GetEndpointVolume();
+            v.str = GetVolumeDeviceName(NULL);
+            PUSH_STR(v);
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {
@@ -251,7 +255,16 @@ extern "C" {
                 MessageBeep(type);
             }
         } else if (func == "play") {
-            PlaySoundA(lua_tostring(L, 2), NULL, SND_FILENAME);
+            int bewait = 1;
+            if (lua_isinteger(L, base + 3)) {
+                int bewait = (int)lua_tointeger(L, base + 2);
+            }
+            if (bewait == 0) {
+                //TODO: Thread
+                PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
+            } else {
+                PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
+            }
         } else if (func == "resstr") {
             v.str = s2w(lua_tostring(L, base + 2));
             resstr_expand(v.str);
