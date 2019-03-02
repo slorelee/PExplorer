@@ -687,10 +687,14 @@ int DesktopBar::Command(int id, int code)
         explorer_about(g_Globals._hwndDesktop);
         break;
 
-    case ID_DESKTOPBAR_SETTINGS:
-        ExplorerPropertySheet(g_Globals._hwndDesktop);
+    case ID_DESKTOPBAR_SETTINGS: {
+        if (g_Globals._winvers[0] >= 10) {
+            launch_file(g_Globals._hwndDesktop, TEXT("ms-settings:taskbar"));
+        } else {
+            ExplorerPropertySheet(g_Globals._hwndDesktop);
+        }
         break;
-
+    }
     case ID_MINIMIZE_ALL:
         g_Globals._desktop.ToggleMinimize();
         break;
