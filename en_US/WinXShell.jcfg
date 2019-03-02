@@ -32,7 +32,7 @@
   {
     "clockarea_click": {
       "command": "##{JVAR_MODULEPATH}\\WinXShell.exe",
-      "parameters": "-ui -jcfg wxsUI\\UI_Calendar\\Calendar.jcfg"
+      "parameters": "-ui -jcfg wxsUI\\UI_Calendar.zip\\Calendar.jcfg"
     },
     "clockarea_dbclick": {
       "command": "timedate.cpl"
