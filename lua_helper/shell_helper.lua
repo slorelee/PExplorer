@@ -5,7 +5,7 @@ local regkey_colortheme = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\Current
 
 function System:GetSetting(key)
     if key == 'AppsColorTheme' then
-        return reg_read(regkey_colortheme, 'AppsUseLightTheme') | 0 -- convert to integer
+        return (reg_read(regkey_colortheme, 'AppsUseLightTheme') or 1) | 0 -- convert to integer
     end
     return 0
 end
