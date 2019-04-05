@@ -205,12 +205,12 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
 
     // Remove quote characters, as they are evaluated at this point.
     for (; *option; ++option)
-        if (*option != '"')
+        if (*option != TEXT('"'))
             opt_str += *option;
 
     option = opt_str;
 
-    if (option[0] == '/') {
+    if (option[0] == TEXT('/')) {
         ++option;
 
         // option /e for windows in explorer mode
@@ -236,17 +236,15 @@ bool ExplorerCmd::EvaluateOption(LPCTSTR option)
             return false;
 
         if ((SelectOpt == TRUE) && (PathFileExists(option))) {
-            TCHAR szDir[MAX_PATH];
-
-            _tsplitpath(option, szPath, szDir, NULL, NULL);
-            _tcscat(szPath, szDir);
+            _tcscpy(szPath, option);
             PathRemoveBackslash(szPath);
             _path = szPath;
-            SelectOpt = FALSE;
-        } else
-            _path = opt_str;
+        } else {
+            _tcscpy(szPath, opt_str);
+            _path = szPath;
+        }
     }
-
+    _option = SelectOpt ? 1 : 0;
     return true;
 }
 

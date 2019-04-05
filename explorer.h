@@ -81,6 +81,7 @@
 struct ExplorerCmd {
     ExplorerCmd()
         :  _flags(0),
+           _option(0),
            _cmdShow(SW_SHOWNORMAL),
            _mdi(false),
            _valid_path(false)
@@ -90,6 +91,7 @@ struct ExplorerCmd {
     ExplorerCmd(LPCTSTR url, bool mdi)
         :  _path(url),
            _flags(0),
+           _option(0),
            _cmdShow(SW_SHOWNORMAL),
            _mdi(mdi),
            _valid_path(true)   //@@
@@ -103,6 +105,7 @@ struct ExplorerCmd {
     String  _path;
     TCHAR   szPath[MAX_PATH];
     int     _flags; // OPEN_WINDOW_MODE
+    int     _option;
     int     _cmdShow;
     bool    _mdi;
     bool    _valid_path;

@@ -77,6 +77,9 @@ void FileExplorerWindow::ReleaseHook()
 
 #define WM_OPENDIALOG (WM_USER+1)
 #define WM_CUSTOMDIALOG (WM_USER+2)
+#define WM_OPENOPTION (WM_USER+10)
+
+UINT FileExplorerWindow::uOption = 0;
 
 HWND FileExplorerWindow::Create()
 {
@@ -125,7 +128,7 @@ LRESULT WINAPI MinButtonHooker(int code, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(NULL, code, wParam, lParam);
 }
 
-HWND FileExplorerWindow::Create(HWND hwnd, String path)
+HWND FileExplorerWindow::Create(HWND hwnd, String path, UINT option = 0)
 {
     HWND hFrame = Create();
     BOOL dwmEnabled = FALSE;
@@ -156,6 +159,10 @@ HWND FileExplorerWindow::Create(HWND hwnd, String path)
             (HOOKPROC)MinButtonHooker, (HINSTANCE)NULL, (DWORD)GetCurrentThreadId());
     }
 
+    if (option != 0) {
+        PostMessage(hFrame, WM_OPENOPTION, (WPARAM)0, (LPARAM)option);
+    }
+
     String *dirpath = new String(path);
     PostMessage(hFrame, WM_OPENDIALOG, (WPARAM)hFrame, (LPARAM)dirpath);
     return hFrame;
@@ -170,6 +177,9 @@ LRESULT FileExplorerWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         OpenDialog((HWND)wparam, *path);
         delete path;
         PostMessage((HWND)wparam, WM_CLOSE, 0, 0);
+        return S_OK;
+    } else if (nmsg == WM_OPENOPTION) {
+        FileExplorerWindow::uOption = (UINT)lparam;
         return S_OK;
     } else if (nmsg == WM_SETTINGCHANGE) {
         HandleEnvChangeBroadcast(lparam);
@@ -194,10 +204,27 @@ int FileExplorerWindow::OpenDialog(HWND hwnd, String path)
     if (FAILED(hr))
         return 0;
 
+    // SelectOption
+    String dir = path;
+    TCHAR *pSelectFile = NULL;
+    BOOL select_item_enabled = JCFG2_DEF("JS_FILEEXPLORER", "select_item_enabled", true).ToBool();
+    if (!select_item_enabled) {
+        pSelectFile = NULL;
+    } else if (FileExplorerWindow::uOption == 1) {
+        if (!PathIsRoot(path) && PathFileExists(path)) {
+            pSelectFile = (TCHAR *)path.c_str();
+            TCHAR buff[MAX_PATH] = {0};
+            _tcscpy(buff, path.c_str());
+            PathRemoveFileSpec(buff);
+            dir = buff;
+        }
+        FileExplorerWindow::uOption = 0;
+    }
+
     // Set the dialog's caption text and the available file types.
     // NOTE: Error handling omitted here for clarity.
     //pDlg->SetFileTypes(_countof(aFileTypes), aFileTypes);
-    pDlg->SetTitle(path.c_str());
+    pDlg->SetTitle(dir.c_str());
     pDlg->SetOptions(FOS_NOVALIDATE | FOS_FILEMUSTEXIST | FOS_ALLNONSTORAGEITEMS | FOS_ALLOWMULTISELECT | FOS_NODEREFERENCELINKS);
 
     IShellItem *psi = NULL;
@@ -205,7 +232,7 @@ int FileExplorerWindow::OpenDialog(HWND hwnd, String path)
     //SHGetSpecialFolderLocation(NULL, CSIDL_CONTROLS, &pidlControlPanel);
     //hr = SHCreateItemFromIDList(pidlControlPanel, IID_PPV_ARGS(&psi));
     //hr = SHCreateItemInKnownFolder(CLSID_ControlPanel, 0, NULL, IID_PPV_ARGS(&psi));
-    hr = SHCreateItemFromParsingName(path.c_str(), NULL, IID_PPV_ARGS(&psi));
+    hr = SHCreateItemFromParsingName(dir.c_str(), NULL, IID_PPV_ARGS(&psi));
     if (SUCCEEDED(hr)) {
         pDlg->SetFolder(psi);
         psi->Release();
@@ -213,7 +240,7 @@ int FileExplorerWindow::OpenDialog(HWND hwnd, String path)
 
     // Create an event handling object, and hook it up to the dialog.
     IFileDialogEvents *pfde = NULL;
-    hr = CFileDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+    hr = CFileDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde), pSelectFile);
     if (FAILED(hr)) goto end;
     DWORD dwCookie = -1;
     pDlg->Advise(pfde, &dwCookie);
@@ -340,6 +367,41 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChange(IFileDialog *pDlg)
     return S_OK;
 }
 
+static int FileDialogSelectItem(IFileDialog *pDlg, TCHAR *path) {
+    String file = path;
+    if (file != TEXT("")) {
+        IShellView *psv = NULL;
+        HRESULT hr = IUnknown_QueryService(pDlg, SID_SFolderView, IID_PPV_ARGS(&psv));
+        if (SUCCEEDED(hr)) {
+            IShellItem *psi = NULL;
+            hr = SHCreateItemFromParsingName(path, NULL, IID_PPV_ARGS(&psi));
+            if (SUCCEEDED(hr)) {
+                IParentAndItem *ppai = NULL;
+                hr = psi->QueryInterface(&ppai);
+                if (SUCCEEDED(hr)) {
+                    PITEMID_CHILD pidlChild;
+                    hr = ppai->GetParentAndItem(NULL, NULL, &pidlChild);
+                    if (SUCCEEDED(hr)) {
+                        psv->SelectItem(pidlChild, SVSI_SELECT | SVSI_ENSUREVISIBLE | SVSI_DESELECTOTHERS);
+                    }
+                    ppai->Release();
+                }
+                psi->Release();
+            }
+            psv->Release();
+        }
+    }
+    return 0;
+}
+
+IFACEMETHODIMP CFileDialogEventHandler::OnSelectionChange(IFileDialog *pDlg) {
+    if (m_pSelectFile) {
+        FileDialogSelectItem(pDlg, m_pSelectFile);
+        m_pSelectFile = NULL;
+    }
+    return S_OK; 
+}
+
 static int ChangedFolderFromShortcut(IFileDialog *pDlg, IShellItem *pItem)
 {
     SFGAOF sfgAttribute = 0;
@@ -399,13 +461,14 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFileOk(IFileDialog *pDlg)
 //
 //   PURPOSE:  CFileDialogEventHandler instance creation helper function.
 //
-HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv)
+HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv, TCHAR *path)
 {
     *ppv = NULL;
     CFileDialogEventHandler* pFileDialogEventHandler =
         new CFileDialogEventHandler();
     HRESULT hr = pFileDialogEventHandler ? S_OK : E_OUTOFMEMORY;
     if (SUCCEEDED(hr)) {
+        pFileDialogEventHandler->m_pSelectFile = path;
         hr = pFileDialogEventHandler->QueryInterface(riid, ppv);
         pFileDialogEventHandler->Release();
     }
@@ -541,7 +604,7 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
     }
 
     // create main window
-    FileExplorerWindow::Create(NULL, cmd._path.c_str());
+    FileExplorerWindow::Create(NULL, cmd._path.c_str(), cmd._option);
 }
 #endif
 

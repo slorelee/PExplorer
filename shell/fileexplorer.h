@@ -52,12 +52,12 @@ public:
     IFACEMETHODIMP OnFolderChange(IFileDialog *pDlg);
     IFACEMETHODIMP OnFileOk(IFileDialog*);
     IFACEMETHODIMP OnHelp(IFileDialog*) { return S_OK; }
-    IFACEMETHODIMP OnSelectionChange(IFileDialog*) { return S_OK; }
+    IFACEMETHODIMP OnSelectionChange(IFileDialog *pDlg);
     IFACEMETHODIMP OnTypeChange(IFileDialog*) { return S_OK; }
     IFACEMETHODIMP OnShareViolation(IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) { return S_OK; }
     IFACEMETHODIMP OnOverwrite(IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*) { return S_OK; }
     CFileDialogEventHandler() : m_cRef(1), m_DialogInited(FALSE) { }
-
+    TCHAR *m_pSelectFile;
 protected:
 
     ~CFileDialogEventHandler() { }
@@ -65,7 +65,7 @@ protected:
     BOOL m_DialogInited;
 };
 
-HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv);
+HRESULT CFileDialogEventHandler_CreateInstance(REFIID riid, void **ppv, TCHAR *path);
 
 #define FILEEXPLORERWINDOWCLASSNAME TEXT("FileExplorerClass")
 struct FileExplorerWindow : public Window {
@@ -75,8 +75,9 @@ struct FileExplorerWindow : public Window {
     FileExplorerWindow(HWND hwnd);
     ~FileExplorerWindow();
     static void ReleaseHook();
+    static UINT uOption;
     static HWND Create();
-    static HWND Create(HWND hwnd, String path);
+    static HWND Create(HWND hwnd, String path, UINT option);
     static int OpenDialog(HWND hwnd, String path);
 protected:
     LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
