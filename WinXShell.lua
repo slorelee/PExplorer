@@ -61,6 +61,7 @@ end
 
 function ms_settings(url)
     app:print(url)
+    if not string.find(url, "ms-settings:") then url = "ms-settings:" .. url end
     local exe = app_path .. '\\WinXShell.exe'
     if url == "ms-settings:taskbar" then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')

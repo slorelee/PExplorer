@@ -660,6 +660,8 @@ CShellDispatch::ShutdownWindows:1FAh
 #define IDC_FILERUN        0x191
 #define IDC_TOGGLEDESKTOP  0x197
 
+extern void send_ms_settings_url(PWSTR pszName);
+
 int DesktopBar::Command(int id, int code)
 {
     static int isStartButtonHooked = -1;
@@ -689,9 +691,22 @@ int DesktopBar::Command(int id, int code)
 
     case ID_DESKTOPBAR_SETTINGS: {
         if (g_Globals._winvers[0] >= 10) {
-            launch_file(g_Globals._hwndDesktop, TEXT("ms-settings:taskbar"));
+            TCHAR sysPathBuff[MAX_PATH] = { 0 };
+            GetWindowsDirectory(sysPathBuff, MAX_PATH);
+            String dllPath = sysPathBuff;
+#ifdef _WIN64
+            dllPath.append(_T("\\System32\\ieframe.dll"));
+#else
+            dllPath.append(_T("\\SysNative\\ieframe.dll"));
+#endif
+            if (PathFileExists(dllPath)) {
+                launch_file(g_Globals._hwndDesktop, TEXT("ms-settings:taskbar"));
+            } else {
+                send_ms_settings_url(L"taskbar");
+            }
         } else {
-            ExplorerPropertySheet(g_Globals._hwndDesktop);
+            send_ms_settings_url(L"taskbar");
+            //ExplorerPropertySheet(g_Globals._hwndDesktop);
         }
         break;
     }
