@@ -33,3 +33,15 @@ function reg_write(key, name, value, type)
   k:close()
   return 1
 end
+
+function reg_delete(key, name)
+  k,err = winapi.open_reg_key(key, true)
+  if not k then return nil end
+  if name == nil then
+    k:delete()
+  else
+    k:del_value(name)
+  end
+  k:close()
+  return 0
+end

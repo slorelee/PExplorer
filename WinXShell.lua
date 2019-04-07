@@ -45,6 +45,7 @@ function ondaemon()
 end
 
 function onshell()
+  regist_folder_shell()
   regist_shortcut_ocf()
   regist_system_property()
   regist_ms_settings_url()
@@ -172,6 +173,22 @@ function initcontrolpanel(ver)
     ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
     close_window(ctrlpanel_title, 'CabinetWClass')
   end
+end
+
+function regist_folder_shell()
+  local key = [[HKEY_CLASSES_ROOT\Folder\shell]]
+  local val = reg_read(key, 'WinXShell_Registered')
+
+  if val ~= nil then return end
+  reg_write(key, 'WinXShell_Registered', 'done')
+
+  key = [[HKEY_CLASSES_ROOT\Folder\shell\open\command]]
+  val = reg_read(key, 'DelegateExecute')
+  if val ~= nil then reg_write(key, 'DelegateExecute_Backup', val) end
+  reg_delete(key, 'DelegateExecute')
+  reg_write(key, '', '"' .. app_path .. '\\WinXShell.exe" "%1"')
+
+  -- explore,opennewprocess,opennewtab
 end
 
 function regist_ms_settings_url()
