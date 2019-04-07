@@ -211,10 +211,12 @@ int FileExplorerWindow::OpenDialog(HWND hwnd, String path)
     if (!select_item_enabled) {
         pSelectFile = NULL;
     } else if (FileExplorerWindow::uOption == 1) {
-        if (!PathIsRoot(path) && PathFileExists(path)) {
-            pSelectFile = (TCHAR *)path.c_str();
+        TCHAR szPath[MAX_PATH + 1] = { 0 };
+        ExpandEnvironmentStrings(path, szPath, MAX_PATH);
+        if (!PathIsRoot(szPath) && PathFileExists(szPath)) {
+            pSelectFile = szPath;
             TCHAR buff[MAX_PATH] = {0};
-            _tcscpy(buff, path.c_str());
+            _tcscpy(buff, szPath);
             PathRemoveFileSpec(buff);
             dir = buff;
         }
