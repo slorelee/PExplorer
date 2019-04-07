@@ -62,7 +62,7 @@ end
 
 function ms_settings(url)
     app:print(url)
-    if not string.find(url, "ms-settings:") then url = "ms-settings:" .. url end
+    if string.find(url, "ms-settings:", 1, true) == nil then url = "ms-settings:" .. url end
     local exe = app_path .. '\\WinXShell.exe'
     if url == "ms-settings:taskbar" then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
@@ -72,7 +72,7 @@ function ms_settings(url)
       --wxsUI('UI_Resolution', 'main.jcfg')
       wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
     elseif url == "ms-settings:personalization-background" then
-      app:run('control.exe')
+      wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
     else
       app:run('control.exe')
     end
