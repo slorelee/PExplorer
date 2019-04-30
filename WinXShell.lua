@@ -71,6 +71,8 @@ function ms_settings(url)
     elseif  url == "ms-settings:display" then
       --wxsUI('UI_Resolution', 'main.jcfg')
       wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
+    elseif url == "ms-settings:personalization" then
+      wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
     elseif url == "ms-settings:personalization-background" then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
     else
