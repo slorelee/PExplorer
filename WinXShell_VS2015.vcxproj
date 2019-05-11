@@ -474,6 +474,7 @@
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
     <ClInclude Include="utility\TrayHelper.h" />
+    <ClInclude Include="utility\UNIBASE.h" />
     <ClInclude Include="utility\utility.h" />
     <ClInclude Include="utility\window.h" />
     <ClInclude Include="resource.h" />

@@ -233,6 +233,90 @@ void GetShortcutPath(const TCHAR *lnk, TCHAR *path, DWORD cchBuffer)
     }
 }
 
+#include "UNIBASE.h"
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Create shortcut
+HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
+    PTSTR param = NULL, PTSTR icon = NULL,
+    INT iIcon = 0, INT iShowCmd = SW_SHOWNORMAL)
+{
+    if (target == NULL) {
+        return ERROR_PATH_NOT_FOUND;
+    }
+
+    // Search target
+    TCHAR tzTarget[MAX_PATH];
+    ExpandEnvironmentStrings(target, tzTarget, MAX_PATH);
+    if (PathFileExists(tzTarget)) {
+        target = tzTarget;
+    } else {
+        if (SearchPath(NULL, target, NULL, MAX_PATH, tzTarget, NULL)) {
+            target = tzTarget;
+        } else {
+            return ERROR_PATH_NOT_FOUND;
+        }
+    }
+
+    // Create shortcut
+    IShellLink *pLink = NULL;
+    CoInitialize(NULL);
+    HRESULT hResult = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (PVOID *)&pLink);
+    if (hResult == S_OK) {
+        IPersistFile *pFile = NULL;
+        hResult = pLink->QueryInterface(IID_IPersistFile, (PVOID *)&pFile);
+        if (hResult == S_OK) {
+            // Shortcut settings
+            if (iShowCmd > SW_SHOWNORMAL) hResult = pLink->SetShowCmd(iShowCmd);
+
+            hResult = pLink->SetPath(target);
+            hResult = pLink->SetArguments(param);
+            hResult = pLink->SetIconLocation(icon, iIcon);
+
+            if (DirSplitPath(target) != target) {
+                hResult = pLink->SetWorkingDirectory(target);
+            }
+
+            // Save link
+            TCHAR tzLink[MAX_PATH];
+            ExpandEnvironmentStrings(lnk, tzLink, MAX_PATH);
+            DirCreate(lnk);
+            hResult = pFile->Save(tzLink, FALSE);
+            pFile->Release();
+        }
+        pLink->Release();
+    }
+    CoUninitialize();
+    return hResult;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Execute command
+DWORD Exec(PTSTR ptzCmd, BOOL bWait = TRUE, INT iShowCmd = SW_NORMAL)
+{
+    DWORD dwExitCode = 0;
+    STARTUPINFO si = { 0 };
+    PROCESS_INFORMATION pi;
+    si.cb = sizeof(STARTUPINFO);
+    si.lpDesktop = TEXT("WinSta0\\Default");
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = iShowCmd;
+    TCHAR tzExpandCmd[MAX_PATH * 10];
+    ExpandEnvironmentStrings(ptzCmd, tzExpandCmd, MAX_PATH * 10);
+    BOOL bResult = CreateProcess(NULL, tzExpandCmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+    if (!bResult) return S_FALSE;
+    if (bWait) {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        GetExitCodeProcess(pi.hProcess, &dwExitCode);
+    }
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+
+    return dwExitCode;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int CommandHook(HWND hwnd, const TCHAR *act, const TCHAR *sect)
 {
     String cmd = TEXT("");

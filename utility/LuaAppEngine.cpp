@@ -6,6 +6,9 @@
 #include "../systemsettings/MonitorAdapter.h"
 #include "../systemsettings/Volume.h"
 
+extern DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd);
+extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
+
 #ifdef _DEBUG
 #   ifdef _WIN64
 #       pragma comment(lib, "lua/lua53_d_x64.lib")
@@ -280,6 +283,45 @@ extern "C" {
             }
             if (lua_isnumber(L, base + 4)) showflags = (int)lua_tointeger(L, base + 4);
             launch_file(g_Globals._hwndDesktop, cmd.c_str(), showflags, param_ptr);
+            v.iVal = 0;
+            PUSH_INT(v);
+        } else if (func == "exec") {
+            string_t cmd = s2w(lua_tostring(L, base + 2));
+            int showflags = SW_SHOWNORMAL;
+            bool wait = false;
+            if (lua_isboolean(L, base + 3)) {
+                wait = lua_toboolean(L, base + 3);
+            }
+            if (lua_isnumber(L, base + 4)) showflags = (int)lua_tointeger(L, base + 4);
+            DWORD dwExitCode = Exec((PTSTR)cmd.c_str(), wait, showflags);
+            v.iVal = (int)dwExitCode;
+            PUSH_INT(v);
+        } else if (func == "link") {
+            string_t str_lnk = s2w(lua_tostring(L, base + 2));
+            string_t str_target = s2w(lua_tostring(L, base + 3));
+            string_t str_param, str_icon;
+            resstr_expand(str_lnk);
+            resstr_expand(str_target);
+            PTSTR lnk = (PTSTR)str_lnk.c_str();
+            PTSTR target = (PTSTR)str_target.c_str();
+            PTSTR param = NULL, icon = NULL;
+            INT iIcon = 0, iShowCmd = SW_SHOWNORMAL;
+            if (lua_isstring(L, base + 4)) {
+                str_param = s2w(lua_tostring(L, base + 4));
+                resstr_expand(str_param);
+                param = (PTSTR)str_param.c_str();
+            }
+            if (lua_isstring(L, base + 5)) {
+                str_icon = s2w(lua_tostring(L, base + 5));
+                icon = (PTSTR)str_icon.c_str();
+            }
+            if (lua_isinteger(L, base + 6)) {
+                iIcon = lua_tointeger(L, base + 6);
+            }
+            if (lua_isinteger(L, base + 7)) {
+                iShowCmd = lua_tointeger(L, base + 7);
+            }
+            CreateShortcut(lnk, target, param, icon, iIcon, iShowCmd);
             v.iVal = 0;
             PUSH_INT(v);
         } else if (func == "band") {

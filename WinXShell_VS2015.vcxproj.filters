@@ -257,6 +257,9 @@
     <ClInclude Include="customization\startbutton.h">
       <Filter>customization</Filter>
     </ClInclude>
+    <ClInclude Include="utility\UNIBASE.h">
+      <Filter>utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="explorer_intres.rc" />

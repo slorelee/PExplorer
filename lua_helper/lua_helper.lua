@@ -70,6 +70,7 @@ local function lua_files_load()
   require('shell_helper')
   require('str_helper')
   require('ui_helper')
+  require('cmd_helper')
 --]]
 end
 
