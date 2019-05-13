@@ -546,7 +546,22 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         SendMessage(_hwndQuickLaunch, WM_SYSCOLORCHANGE, 0, 0);
         SendMessage(_hwndTaskBar, WM_SYSCOLORCHANGE, 0, 0);
         break;
-
+    case WM_SETTINGCHANGE: {
+        if (wparam == SPI_SETWORKAREA) {
+            WindowRect rect(_hwnd);
+            RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), rect.top };
+            RECT rt = { 0 };
+            SystemParametersInfo(SPI_GETWORKAREA, 0, &rt, 0);
+            // reset the WORKAREA
+            _log_(FmtString(TEXT("WORKAREA CHANGED NOTIFYTION: %d, %d, %d, %d"), rt.left, rt.top, rt.right, rt.bottom));
+            if (memcmp(&rt, &work_area, sizeof(RECT)) != 0) {
+                SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
+                PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+                SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+            }
+        }
+        break;
+    }
 default: def:
         return super::WndProc(nmsg, wparam, lparam);
     }
