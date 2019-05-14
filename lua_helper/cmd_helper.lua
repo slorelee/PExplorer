@@ -1,6 +1,31 @@
 --local app = _G.app
 
-function option_parser(opt_str)
+function has_option(opt, cmd)
+    if cmd == nil then cmd = app:info('cmdline') end
+    return (string.find(cmd, opt) and true or false)
+end
+
+function get_option(opt, cmd)
+    local val, val2
+    if cmd == nil then cmd = app:info('cmdline') end
+    val = string.match(cmd, opt .. '%s(.+)$')
+    if val == nil then return nil end
+
+    --  -xyz 'v a l u e' -abc
+    val2 = string.match(val, '[\'](.+)[\']%s')
+    if val2 ~= nil then return val2 end
+    --  -xyz "v a l u e" -abc
+    val2 = string.match(val, '[\"](.+)[\"]%s')
+    if val2 ~= nil then return val2 end
+
+    --  -xyz abc -abc
+    val2 = string.match(val, '([^%s]+)%s')
+    if val2 ~= nil then return val2 end
+
+    return val
+end
+
+function parse_option(opt_str)
     local opt = {}
     opt.wait = false
     opt.showcmd = 1
@@ -29,24 +54,24 @@ function exec(option, cmd)
         cmd = option
         option = nil
     end
-    local opt = option_parser(option)
+    local opt = parse_option(option)
     return app:call('exec', cmd, opt.wait, opt.showcmd)
 end
 
 
 function link(lnk, target, param, icon, index, showcmd)
-    local opt = option_parser(showcmd)
+    local opt = parse_option(showcmd)
     return app:call('link', lnk, target, param, icon, index, opt.showcmd)
 end
 
 
 --[[
 -- test
-print(option_parser('/wait /hide').wait)
-print(option_parser('/hide').wait)
-print(option_parser('/wait /hide').showcmd)
-print(option_parser('/wait').showcmd)
-print(option_parser('/wait /min').showcmd)
-print(option_parser('/wait /max').showcmd)
-print(option_parser(nil).showcmd)
+print(parse_option('/wait /hide').wait)
+print(parse_option('/hide').wait)
+print(parse_option('/wait /hide').showcmd)
+print(parse_option('/wait').showcmd)
+print(parse_option('/wait /min').showcmd)
+print(parse_option('/wait /max').showcmd)
+print(parse_option(nil).showcmd)
 --]]
