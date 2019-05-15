@@ -79,3 +79,9 @@ if lua_helper_loader == 'dir' then
 else
   lua_files_load()
 end
+
+function os.putenv(var, str)
+  app:call('putenv', var, str)
+end
+
+os.setenv = os.putenv
