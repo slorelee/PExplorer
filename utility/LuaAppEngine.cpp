@@ -268,6 +268,21 @@ extern "C" {
             } else {
                 PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
             }
+        } else if (func == "putenv") {
+            string_t var = s2w(lua_tostring(L, base + 2));
+            string_t str = TEXT("");
+            if (lua_isstring(L, base + 3)) {
+                str = s2w(lua_tostring(L, base + 3));
+                var.append(TEXT("="));
+                var.append(str);
+            }
+            _putenv(w2s(var).c_str());
+        } else if (func == "envstr") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            TCHAR buff[MAX_PATH * 5];
+            ExpandEnvironmentStrings(v.str.c_str(), buff, MAX_PATH * 5);
+            v.str = buff;
+            PUSH_STR(v);
         } else if (func == "resstr") {
             v.str = s2w(lua_tostring(L, base + 2));
             resstr_expand(v.str);
