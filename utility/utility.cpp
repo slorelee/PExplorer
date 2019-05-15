@@ -280,7 +280,7 @@ HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
             // Save link
             TCHAR tzLink[MAX_PATH];
             ExpandEnvironmentStrings(lnk, tzLink, MAX_PATH);
-            DirCreate(lnk);
+            DirCreate(tzLink);
             hResult = pFile->Save(tzLink, FALSE);
             pFile->Release();
         }
