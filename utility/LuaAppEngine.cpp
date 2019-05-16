@@ -205,6 +205,7 @@ extern "C" {
             }
             PUSH_INT(v);
         } else if (func == "screen::set") {
+            v.iVal = 0;
             v.str = s2w(lua_tostring(L, base + 2));
             if (v.str == TEXT("rotation")) {
                 int r = (int)lua_tointeger(L, base + 3);
@@ -214,11 +215,12 @@ extern "C" {
                 int h = (int)lua_tointeger(L, base + 4);
                 MonitorAdapter m_monitorAdapter;
                 VEC_MONITORMODE_INFO vecMointorListInfo;
-                m_monitorAdapter.ChangeMonitorResolution(NULL, w, h);
+                v.iVal = m_monitorAdapter.ChangeMonitorResolution(NULL, w, h);
             }
             PUSH_INT(v);
         } else if (func == "volume::mute") {
-            SetVolumeMute((int)lua_tointeger(L, base + 2));
+            v.iVal = SetVolumeMute((int)lua_tointeger(L, base + 2));
+            PUSH_INT(v);
         } else if (func == "volume::ismuted") {
             v.iVal = GetVolumeMute();
             PUSH_INT(v);
@@ -226,7 +228,8 @@ extern "C" {
             v.iVal = GetVolumeLevel();
             PUSH_INT(v);
         } else if (func == "volume::setlevel") {
-            SetVolumeLevel((int)lua_tointeger(L, base + 2));
+            v.iVal = SetVolumeLevel((int)lua_tointeger(L, base + 2));
+            PUSH_INT(v);
         } else if (func == "volume::getname") {
             GetEndpointVolume();
             v.str = GetVolumeDeviceName(NULL);
