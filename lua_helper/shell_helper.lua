@@ -50,3 +50,46 @@ function Taskbar:AutoHide(value)
   app:call('Taskbar::AutoHide', value)
 end
 
+Screen = {}
+
+local function fixscreen()
+  app:call('Desktop::UpdateWallpaper')
+  app:call('sleep', 200)
+  app:call('Taskbar::ChangeNotify')
+end
+
+function  Screen:Get(...)
+  return app:call('Screen::Get', ...)
+end
+
+function Screen:GetX()
+  return app:call('Screen::Get', 'X')
+end
+
+function Screen:GetY()
+  return app:call('Screen::Get', 'Y')
+end
+
+function Screen:GetRotation()
+  return app:call('Screen::Get', 'rotation')
+end
+
+function Screen:Disp(w, h)
+  local ret = app:call('Screen::Set', 'resolution', w, h)
+  if ret == 0 then
+    fixscreen()
+  end
+  return ret
+end
+
+-- arr = {'1152x864', '1366x768', '1024x768'}
+function Screen:DispTest(arr)
+  local i, w, h, ret = 0
+  for i = 1, #arr do
+    w, h = string.match(arr[i], '(%d+)[x*](%d+)')
+    if h ~= nil then
+      app:print(w, h)
+      if Screen:Disp(tonumber(w), tonumber(h)) == 0 then return end
+    end
+  end
+end
