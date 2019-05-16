@@ -63,11 +63,11 @@ function  Screen:Get(...)
 end
 
 function Screen:GetX()
-  return app:call('Screen::Get', 'X')
+  return app:call('Screen::Get', 'x')
 end
 
 function Screen:GetY()
-  return app:call('Screen::Get', 'Y')
+  return app:call('Screen::Get', 'y')
 end
 
 function Screen:GetRotation()
