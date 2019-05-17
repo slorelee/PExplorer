@@ -8,6 +8,7 @@
 
 extern DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd);
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
+extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
 
 #ifdef _DEBUG
 #   ifdef _WIN64
@@ -183,6 +184,24 @@ extern "C" {
         } else if (func == "taskbar::autohidestate") {
             v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
+        } else if (func == "taskbar::pin") {
+            string_t str_lnk = s2w(lua_tostring(L, base + 2));
+            varstr_expand(str_lnk);
+            //ShellExecute(NULL, TEXT("pintotaskbar"), tzLink, NULL, NULL, 0);
+            //ShellExecute(NULL, TEXT("taskbarpin"), tzLink, NULL, NULL, 0);
+            DoFileVerb(str_lnk.c_str(), TEXT("pintotaskbar"));
+        } else if (func == "taskbar::unpin") {
+            /*
+                function Taskbar:UnPin(name)
+                  menu_pintotaskbar()
+                  local pinned_path = [[%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\]]
+                  app:call('Taskbar::UnPin', .. name .. '.lnk')
+                end
+            */
+            string_t name = s2w(lua_tostring(L, base + 2));
+            string_t str_lnk = TEXT("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\") + name + TEXT(".lnk");
+            varstr_expand(str_lnk);
+            DoFileVerb(str_lnk.c_str(), TEXT("pintotaskbar"));
         } else if (func == "desktop::updatewallpaper") {
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "desktop::getwallpaper") {
