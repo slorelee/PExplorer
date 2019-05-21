@@ -309,6 +309,10 @@ extern "C" {
             v.str = s2w(lua_tostring(L, base + 2));
             resstr_expand(v.str);
             PUSH_STR(v);
+        } else if (func == "varstr") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            varstr_expand(v.str);
+            PUSH_STR(v);
         } else if (func == "run") {
             string_t cmd = s2w(lua_tostring(L, base + 2));
             string_t param = TEXT("");
