@@ -428,6 +428,20 @@ static void OnTrayNetwork(HWND hwnd, UINT id)
     launch_file(hwnd, selfexe, SW_SHOWNORMAL, _T("-ui -jcfg UI_WIFI\\main.jcfg"));
 }
 
+static void NotifySetWorkArea(HWND hwnd) {
+    WindowRect rect(hwnd);
+    RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), rect.top };
+    RECT rt = { 0 };
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &rt, 0);
+    // reset the WORKAREA
+    _log_(FmtString(TEXT("WORKAREA CHANGED NOTIFYTION: %d, %d, %d, %d"), rt.left, rt.top, rt.right, rt.bottom));
+    if (memcmp(&rt, &work_area, sizeof(RECT)) != 0) {
+        SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
+        PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+        SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
+    }
+}
+
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
 #ifdef _DEBUG
@@ -548,19 +562,13 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
     case WM_SETTINGCHANGE: {
         if (wparam == SPI_SETWORKAREA) {
-            WindowRect rect(_hwnd);
-            RECT work_area = { 0, 0, GetSystemMetrics(SM_CXSCREEN), rect.top };
-            RECT rt = { 0 };
-            SystemParametersInfo(SPI_GETWORKAREA, 0, &rt, 0);
-            // reset the WORKAREA
-            _log_(FmtString(TEXT("WORKAREA CHANGED NOTIFYTION: %d, %d, %d, %d"), rt.left, rt.top, rt.right, rt.bottom));
-            if (memcmp(&rt, &work_area, sizeof(RECT)) != 0) {
-                SystemParametersInfo(SPI_SETWORKAREA, 0, &work_area, 0);
-                PostMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
-                SendMessage(g_Globals._hwndShellView, WM_SETTINGCHANGE, SPI_SETWORKAREA, 0);
-            }
+            NotifySetWorkArea(_hwnd);
         }
         break;
+    }
+    case WM_DISPLAYCHANGE: {
+        NotifySetWorkArea(_hwnd);
+        //fallthough
     }
 default: def:
         return super::WndProc(nmsg, wparam, lparam);
