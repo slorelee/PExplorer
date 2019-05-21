@@ -169,7 +169,11 @@ extern "C" {
         func = _strlwr(funcname);
 
         if (func == "getresolutionlist") {
-
+        } else if (func == "file::doverb") {
+            string_t file = s2w(lua_tostring(L, base + 2));
+            string_t verb = s2w(lua_tostring(L, base + 3));
+            varstr_expand(file);
+            DoFileVerb(file.c_str(), verb.c_str());
         } else if (func == "taskbar::changenotify") {
             // g_Globals._SHSettingsChanged(0, TEXT("TraySettings"));
             SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));

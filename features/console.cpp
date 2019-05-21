@@ -45,4 +45,17 @@ void _logA_(LPCSTR txt)
 #endif
 }
 
+extern std::string w2s(const std::wstring& wstr);
+void _logU2A_(LPCWSTR txt)
+{
+    wstring wstr = txt;
+    FmtStringA msg("%s\n", w2s(wstr).c_str());
+    if (console_log)
+        fputs(msg.c_str(), console_log);
+
+#ifdef _DEBUG
+    OutputDebugStringA(msg.c_str());
+#endif
+}
+
 

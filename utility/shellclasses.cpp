@@ -527,6 +527,7 @@ IContextMenu *CtxMenuInterfaces::query_interfaces(IContextMenu *pcm1)
 
 UINT WalkPopupMenu(HMENU hmenu, LPCTSTR verb, IContextMenu *pcm)
 {
+    int mid = 0;
     MENUITEMINFO mmi = { 0 };
     mmi.cbSize = sizeof(MENUITEMINFO);
     mmi.fMask = MIIM_ID | MIIM_SUBMENU;
@@ -542,14 +543,16 @@ UINT WalkPopupMenu(HMENU hmenu, LPCTSTR verb, IContextMenu *pcm)
                 if (pcm) pcm->GetCommandString(mmi.wID, GCS_VERB, NULL, (char *)verbbuffer, MAX_PATH);
 #endif
                 GetMenuString(hmenu, mmi.wID, namebuffer, MAX_PATH, MF_BYCOMMAND);
-                _log_(FmtString(TEXT("%s%d |%s|%s| %x"), TEXT("  "), mmi.wID, verbbuffer, namebuffer, mmi.hSubMenu));
+                _logU2A_(FmtString(TEXT("%s%d |%s|%s| %x"), TEXT("  "), mmi.wID, verbbuffer, namebuffer, mmi.hSubMenu).c_str());
                 if (_tcsicmp(verbbuffer, verb) == 0) {
-                    return mmi.wID;
+                    // output all menu info
+                    //return mmi.wID;
+                    if (mid == 0) mid = mmi.wID;
                 }
             }
         }
     }
-    return 0;
+    return mid;
 }
 
 HRESULT ShellFolderContextMenu(IShellFolder *shell_folder, HWND hwndParent, int cidl,
