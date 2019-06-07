@@ -648,11 +648,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #endif
     }
 
+    if (_tcsstr(ext_options, TEXT("-test"))) {
+        exit(0);
+    }
+
     // initialize COM and OLE before creating the desktop window
     OleInit usingCOM;
 
     // init common controls library
     CommonControlInit usingCmnCtrl;
+
+    // Initializes COM
+    CoInitialize(NULL);
 
     if (_tcsstr(ext_options, TEXT("-color"))) {
         UpdateSysColor(lpCmdLineOrg);

@@ -235,6 +235,18 @@ void GetShortcutPath(const TCHAR *lnk, TCHAR *path, DWORD cchBuffer)
 
 #include "UNIBASE.h"
 
+TCHAR *CompletePath(TCHAR *target, TCHAR *out)
+{
+    TCHAR buff[MAX_PATH] = { 0 };
+    ExpandEnvironmentStrings(target, out, MAX_PATH);
+    if (PathFileExists(out)) return out;
+    StrCpy(buff, out);
+    if (SearchPath(NULL, buff, NULL, MAX_PATH, out, NULL)) {
+        return out;
+     }
+     return NULL;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Create shortcut
 HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
@@ -247,16 +259,8 @@ HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
 
     // Search target
     TCHAR tzTarget[MAX_PATH];
-    ExpandEnvironmentStrings(target, tzTarget, MAX_PATH);
-    if (PathFileExists(tzTarget)) {
-        target = tzTarget;
-    } else {
-        if (SearchPath(NULL, target, NULL, MAX_PATH, tzTarget, NULL)) {
-            target = tzTarget;
-        } else {
-            return ERROR_PATH_NOT_FOUND;
-        }
-    }
+    target = CompletePath(target, tzTarget);
+    if (!target) return ERROR_PATH_NOT_FOUND;
 
     // Create shortcut
     IShellLink *pLink = NULL;

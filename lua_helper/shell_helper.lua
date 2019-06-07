@@ -50,41 +50,26 @@ function Taskbar:AutoHide(value)
   app:call('Taskbar::AutoHide', value)
 end
 
-local pintotaskbar = 0
-local function menu_pintotaskbar()
-  if pintotaskbar == 1 then return end
-  pintotaskbar = 1
-  local regkey = [[HKEY_CLASSES_ROOT\exefile\shell\pintotaskbar]]
-  local handler = reg_read(regkey, 'ExplorerCommandHandler')
-  if handler ~= nil then return end
-
-  reg_write(regkey, 'ExplorerCommandHandler', '{90AA3A4E-1CBA-4233-B8BB-535773D48449}')
-  reg_write(regkey, 'Extended', '')
-  reg_write(regkey, 'MUIVerb', '@shell32.dll,-37423')
-end
-
 function Taskbar:Pin(target, name, param, icon, index, showcmd)
-  menu_pintotaskbar()
-  local lnk = target
   local ext = string.sub(target, -4)
   local case_ext = string.lower(ext)
 
-  if case_ext ~= '.exe' and case_ext ~= '.lnk' then return end
-  if case_ext == '.exe' then
-    lnk = "%TEMP%\\TaskBarPinned\\"
-    if name ~= nil then
-      lnk = lnk .. name
-    else
-      lnk = lnk .. string.match(target, '([^\\]+)' .. ext .. '$')
-    end
-    lnk = lnk .. '.lnk'
+  if case_ext == '.lnk' then
+    app:call('Taskbar::Pin', target)
+    return
+  end
+  if case_ext ~= '.exe' then return end
+
+  local lnk = target
+  if name ~= nil or param ~= nil or icon ~= nil then
+    if name == nil then name = string.match(target, '([^\\]+)' .. ext .. '$') end
+    lnk = "%TEMP%\\TaskBarPinned\\" .. name  .. '.lnk'
     app:call('link', lnk, target, param, icon, index, showcmd)
   end
   app:call('Taskbar::Pin', lnk)
 end
 
 function Taskbar:UnPin(name)
-  menu_pintotaskbar()
   app:call('Taskbar::UnPin', name)
 end
 

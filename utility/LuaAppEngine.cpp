@@ -6,9 +6,11 @@
 #include "../systemsettings/MonitorAdapter.h"
 #include "../systemsettings/Volume.h"
 
+extern int FakeExplorer();
 extern DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd);
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
 extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
+TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
 #ifdef _DEBUG
 #   ifdef _WIN64
@@ -169,6 +171,8 @@ extern "C" {
         func = _strlwr(funcname);
 
         if (func == "getresolutionlist") {
+        } else if (func == "FakeExplorer") {
+            FakeExplorer();
         } else if (func == "file::doverb") {
             string_t file = s2w(lua_tostring(L, base + 2));
             string_t verb = s2w(lua_tostring(L, base + 3));
@@ -189,11 +193,14 @@ extern "C" {
             v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
         } else if (func == "taskbar::pin") {
-            string_t str_lnk = s2w(lua_tostring(L, base + 2));
-            varstr_expand(str_lnk);
-            //ShellExecute(NULL, TEXT("pintotaskbar"), tzLink, NULL, NULL, 0);
-            //ShellExecute(NULL, TEXT("taskbarpin"), tzLink, NULL, NULL, 0);
-            DoFileVerb(str_lnk.c_str(), TEXT("pintotaskbar"));
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            // Search target
+            TCHAR tzTarget[MAX_PATH] = { 0 };
+            TCHAR *target = CompletePath((TCHAR *)str_file.c_str(), tzTarget);
+            if (!target) return 0;
+            FakeExplorer();
+            //CoInitialize(NULL);
+            DoFileVerb(target, TEXT("taskbarpin"));
         } else if (func == "taskbar::unpin") {
             /*
                 function Taskbar:UnPin(name)
@@ -205,7 +212,8 @@ extern "C" {
             string_t name = s2w(lua_tostring(L, base + 2));
             string_t str_lnk = TEXT("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\") + name + TEXT(".lnk");
             varstr_expand(str_lnk);
-            DoFileVerb(str_lnk.c_str(), TEXT("pintotaskbar"));
+            FakeExplorer();
+            DoFileVerb(str_lnk.c_str(), TEXT("taskbarunpin"));
         } else if (func == "desktop::updatewallpaper") {
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "desktop::getwallpaper") {
