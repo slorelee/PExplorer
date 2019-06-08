@@ -192,7 +192,7 @@ int MonitorAdapter::ChangeMonitorResolution(HMONITOR hMonitor, const int nWidth,
 
     HRESULT lResult = S_OK;
     lResult = SetNewResolution(dmOld, dmNew);
-    if (!lResult) return -1;
+    if (lResult != S_OK) return -1;
     return 0;
 }
 
