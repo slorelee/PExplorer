@@ -171,6 +171,9 @@ extern "C" {
         func = _strlwr(funcname);
 
         if (func == "getresolutionlist") {
+        } else if (func == "cd") {
+            string_t str_path = s2w(lua_tostring(L, base + 2));
+            SetCurrentDirectory(str_path.c_str());
         } else if (func == "FakeExplorer") {
             FakeExplorer();
         } else if (func == "file::doverb") {
