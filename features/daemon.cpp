@@ -186,15 +186,22 @@ void InstallCADHookEntry()
     }
 }
 
+static void EnableShowDesktop()
+{
+    if (g_Globals._isShell) return;
+}
+
 LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDbClick = 0;
     if (nmsg == WM_CREATE) {
         InstallEventHookEntry(_hwnd);
         //InstallCADHookEntry(); /* Can't work here */
+        EnableShowDesktop();
         update_property_handler();
     } else if (nmsg == WM_TASKBARCREATED) {
         InstallEventHookEntry(_hwnd);
+        EnableShowDesktop();
     } else if (nmsg == WM_CLOCKAREA_EVENT) {
 #ifdef _DEBUG
         PrintMessage(0, nmsg, wparam, lparam);
