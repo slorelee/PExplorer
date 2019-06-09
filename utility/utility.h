@@ -271,6 +271,7 @@ extern BOOL RunDLL(HWND hwnd, LPCTSTR dllname, LPCSTR procname, LPCTSTR cmdline,
 // launch control panel applet
 extern BOOL launch_cpanel(HWND hwnd, LPCTSTR applet);
 
+DWORD Exec(PTSTR ptzCmd, BOOL bWait = TRUE, INT iShowCmd = SW_NORMAL);
 
 /// initialization of windows common controls
 struct CommonControlInit {

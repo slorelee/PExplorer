@@ -297,7 +297,7 @@ HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Execute command
-DWORD Exec(PTSTR ptzCmd, BOOL bWait = TRUE, INT iShowCmd = SW_NORMAL)
+DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd)
 {
     DWORD dwExitCode = 0;
     STARTUPINFO si = { 0 };

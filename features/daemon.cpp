@@ -9,6 +9,8 @@
 
 extern ExplorerGlobals g_Globals;
 
+void update_property_handler();
+
 #define WM_CLOCKAREA_EVENT (WM_USER + 100)
 #define HM_CLOCKAREA_CLICKED 1
 
@@ -68,6 +70,43 @@ void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
     SendMessage(g_daemon, WM_CLOCKAREA_EVENT, HM_CLOCKAREA_CLICKED, 0);
 }
 
+// Ctrl+Alt+Del handler
+// Ctrl+Shift+Esc handler
+static HHOOK g_hCADHook = NULL;
+TCHAR TASKMANAGER[] = TEXT("TaskMgr.exe");
+LRESULT CALLBACK HandleCADProc(INT iCode, WPARAM wParam, LPARAM lParam)
+{
+    if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_DELETE)) {
+        if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
+            Exec(TASKMANAGER, FALSE);
+            return TRUE;
+        }
+    } else if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_ESCAPE)) {
+        if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
+            Exec(TASKMANAGER, FALSE);
+            return TRUE;
+        }
+    }
+
+    return CallNextHookEx(g_hCADHook, iCode, wParam, lParam);
+}
+
+VOID InstallCADHook(BOOL Install)
+{
+    if (Install) {
+        if (!g_hCADHook) {
+            g_hCADHook = SetWindowsHookEx(WH_KEYBOARD_LL, HandleCADProc, g_hInst, 0);
+        }
+    } else {
+        if (g_hCADHook) {
+            UnhookWindowsHookEx(g_hCADHook);
+            g_hCADHook = NULL;
+        }
+    }
+}
+
+
+
 struct WinXShell_DaemonWindow : public Window {
     typedef Window super;
     WinXShell_DaemonWindow(HWND hwnd);
@@ -116,11 +155,46 @@ static void ClockArea_OnClick(HWND hwnd, int isDbClick)
     }
 }
 
+static bool IsX()
+{
+    static int inited = -1;
+    if (inited != -1) return inited == 1;
+    inited = 0;
+    //default install the hook if running in WinPE
+    TCHAR drv[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("SystemDrive"), drv, MAX_PATH);
+    if (drv[0] == TEXT('x') || drv[0] == TEXT('X')) inited = 1;
+
+    return inited == 1;
+}
+
+static void InstallEventHookEntry(HWND hwnd)
+{
+    //hijack clockarea click event
+    if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", IsX()).ToBool() != FALSE) {
+        // sets up the event hook.
+        InstallEventHook(hwnd);
+    }
+}
+
+void InstallCADHookEntry()
+{
+    // Ctrl+Alt+Del handler
+    if (JCFG2_DEF("JS_DAEMON", "handle_CAD_press", IsX()).ToBool() != FALSE) {
+        // sets up the KEYBOARD hook.
+        InstallCADHook(TRUE);
+    }
+}
+
 LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDbClick = 0;
-    if (nmsg == WM_TASKBARCREATED) {
-        InstallEventHook(_hwnd);
+    if (nmsg == WM_CREATE) {
+        InstallEventHookEntry(_hwnd);
+        //InstallCADHookEntry(); /* Can't work here */
+        update_property_handler();
+    } else if (nmsg == WM_TASKBARCREATED) {
+        InstallEventHookEntry(_hwnd);
     } else if (nmsg == WM_CLOCKAREA_EVENT) {
 #ifdef _DEBUG
         PrintMessage(0, nmsg, wparam, lparam);
@@ -216,18 +290,7 @@ int daemon_entry()
     HWND daemon = create_daemonwindow();
     g_Globals._hwndDaemon = daemon;
     if (g_Globals._lua) g_Globals._lua->onDaemon();
-    bool instHook = false;
-    //default install the hook if running in WinPE
-    TCHAR drv[MAX_PATH + 1] = { 0 };
-    DWORD dw = GetEnvironmentVariable(TEXT("SystemDrive"), drv, MAX_PATH);
-    if (drv[0] == TEXT('x') || drv[0] == TEXT('X')) instHook = true;
-
-    //hijack clockarea click event
-    if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", instHook).ToBool() != FALSE) {
-        // sets up the event hook.
-        InstallEventHook(daemon);
-    }
-    update_property_handler();
+    InstallCADHookEntry();
     Window::MessageLoop();
     CoUninitialize();
     return 0;

@@ -6,6 +6,7 @@
 #include "jconfig/jcfg.h"
 #include "utility/LuaAppEngine.h"
 
+HINSTANCE g_hInst;
 ExplorerGlobals g_Globals;
 
 ExplorerGlobals::ExplorerGlobals()
@@ -32,6 +33,7 @@ ExplorerGlobals::ExplorerGlobals()
     _hwndDesktop = 0;
     _hwndDaemon = 0;
 
+    _isShell = FALSE;
     _isWinPE = FALSE;
     _lua = NULL;
 }

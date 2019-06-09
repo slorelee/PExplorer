@@ -7,7 +7,6 @@
 #include "../systemsettings/Volume.h"
 
 extern int FakeExplorer();
-extern DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd);
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
 extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
 TCHAR *CompletePath(TCHAR *target, TCHAR *buff);

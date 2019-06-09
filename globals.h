@@ -78,6 +78,7 @@ extern struct ExplorerGlobals {
     String      _cmdline;
     String      _winver;
     WORD        _winvers[4];
+    BOOL        _isShell;
     BOOL        _isWinPE;
     BOOL        _isNT5;
     String      _langID;
@@ -112,3 +113,4 @@ extern struct ExplorerGlobals {
     LuaAppEngine    *_lua;
 } g_Globals;
 
+extern HINSTANCE g_hInst;

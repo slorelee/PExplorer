@@ -60,6 +60,7 @@ boolean SelectOpt = FALSE;
 
 void UIProcess(HINSTANCE hInst, String cmdline);
 extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
+extern void InstallCADHookEntry();
 
 bool FileTypeManager::is_exe_file(LPCTSTR ext)
 {
@@ -519,6 +520,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
+    g_hInst = hInstance;
     g_Globals.init(hInstance); /* init icon_cache for UI process */
 
     g_Globals.read_persistent();
@@ -712,6 +714,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (startup_desktop) {
         WaitCursor wait;
+        g_Globals._isShell = TRUE;
         if (g_Globals._lua) g_Globals._lua->preShell();
 
         if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
@@ -720,12 +723,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
         HWND daemon = create_daemonwindow();
         g_Globals._hwndDaemon = daemon;
+        InstallCADHookEntry();
+
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();
 
         if (g_Globals._lua) g_Globals._lua->onShell();
-        update_property_handler();
 
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
