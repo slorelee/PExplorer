@@ -158,10 +158,11 @@ extern "C" {
         int ret = 0;
         Token v = { TOK_UNSET };
         int base = 0;
-
+        int top = lua_gettop(L);
         if (lua_type(L, 1) == LUA_TTABLE) {
             //skip self for app:call
             base++;
+            top--;
         }
         luaL_checktype(L, base + 1, LUA_TSTRING);
         std::string func = lua_tostring(L, base + 1);
@@ -351,6 +352,56 @@ extern "C" {
             DWORD dwExitCode = Exec((PTSTR)cmd.c_str(), wait, showflags);
             v.iVal = (int)dwExitCode;
             PUSH_INT(v);
+        } else if (func == "calldll") {
+            // app:call('CallDll','Kernel32.dll','SetComputerName','WINDOWS-PC')
+            // app:call('CallDll','Netapi32.dll','NetJoinDomain',nil,'WORKGROUP',nil,nil,nil,1)
+            // Call DLL function
+            typedef HRESULT(WINAPI *PROC1)(PVOID pv0);
+            typedef HRESULT(WINAPI *PROC2)(PVOID pv0, PVOID pv1);
+            typedef HRESULT(WINAPI *PROC3)(PVOID pv0, PVOID pv1, PVOID pv2);
+            typedef HRESULT(WINAPI *PROC4)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3);
+            typedef HRESULT(WINAPI *PROC5)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3, PVOID pv4);
+            typedef HRESULT(WINAPI *PROC6)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3, PVOID pv4, PVOID pv5);
+            typedef HRESULT(WINAPI *PROC7)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3, PVOID pv4, PVOID pv5, PVOID pv6);
+            typedef HRESULT(WINAPI *PROC8)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3, PVOID pv4, PVOID pv5, PVOID pv6, PVOID pv7);
+            typedef HRESULT(WINAPI *PROC9)(PVOID pv0, PVOID pv1, PVOID pv2, PVOID pv3, PVOID pv4, PVOID pv5, PVOID pv6, PVOID pv7, PVOID pv8);
+            HRESULT hResult = E_NOINTERFACE;
+            int uArg = top - 3;
+            string_t strArg[9];
+            PTSTR ptzArg[9] = { NULL };
+            for (int i = 1; i <= uArg; i++) {
+                int n = base + 3 + i;
+                if (lua_isnumber(L, n)) {
+                    ptzArg[i - 1] = (PTSTR)(INT_PTR)lua_tointeger(L, n);
+                } else if (!lua_isnil(L, n)) {
+                    strArg[i - 1] = s2w(lua_tostring(L, n));
+                    ptzArg[i - 1] = (PTSTR)strArg[i - 1].c_str();
+                }
+            }
+            HMODULE hLib = NULL;
+            if (uArg >= 0) hLib = LoadLibraryA(lua_tostring(L, base + 2));
+            if (hLib) {
+                PROC f = GetProcAddress(hLib, lua_tostring(L, base + 3));
+                if (f) {
+                    switch (uArg) {
+                    case 0: hResult = (HRESULT)f(); break;
+                    case 1: hResult = ((PROC1)f)(ptzArg[0]); break;
+                    case 2: hResult = ((PROC2)f)(ptzArg[0], ptzArg[1]); break;
+                    case 3: hResult = ((PROC3)f)(ptzArg[0], ptzArg[1], ptzArg[2]); break;
+                    case 4: hResult = ((PROC4)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3]); break;
+                    case 5: hResult = ((PROC5)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3], ptzArg[4]); break;
+                    case 6: hResult = ((PROC6)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3], ptzArg[4], ptzArg[5]); break;
+                    case 7: hResult = ((PROC7)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3], ptzArg[4], ptzArg[5], ptzArg[6]); break;
+                    case 8: hResult = ((PROC8)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3], ptzArg[4], ptzArg[5], ptzArg[6], ptzArg[7]); break;
+                    case 9: hResult = ((PROC9)f)(ptzArg[0], ptzArg[1], ptzArg[2], ptzArg[3], ptzArg[4], ptzArg[5], ptzArg[6], ptzArg[7], ptzArg[8]); break;
+                    }
+                }
+                FreeLibrary(hLib);
+            }
+            v.iVal = hResult;
+            DWORD dw = GetLastError();
+            PUSH_INT(v);
+            return ret;
         } else if (func == "link") {
             string_t str_lnk = s2w(lua_tostring(L, base + 2));
             string_t str_target = s2w(lua_tostring(L, base + 3));

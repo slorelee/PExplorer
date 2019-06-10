@@ -51,3 +51,7 @@ function win_copyright()
   prompt:close()
   return cr
 end
+
+function call_dll(...)
+  return app:call('calldll', ...)
+end
