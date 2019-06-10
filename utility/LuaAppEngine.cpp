@@ -268,6 +268,23 @@ extern "C" {
             GetEndpointVolume();
             v.str = GetVolumeDeviceName(NULL);
             PUSH_STR(v);
+        } else if (func == "file::exists") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            varstr_expand(v.str);
+            if (PathFileExists(v.str.c_str())) {
+                v.iVal = 1;
+                if (FILE_ATTRIBUTE_DIRECTORY == PathIsDirectory(v.str.c_str())) {
+                    v.iVal = 0;
+                }
+            }
+            PUSH_INT(v);
+        } else if (func == "folder::exists") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            varstr_expand(v.str);
+            v.iVal = PathFileExists(v.str.c_str());
+            if (v.iVal == 1) v.iVal = PathIsDirectory(v.str.c_str());
+            if (v.iVal == FILE_ATTRIBUTE_DIRECTORY) v.iVal = 1;
+            PUSH_INT(v);
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {

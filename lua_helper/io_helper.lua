@@ -1,9 +1,8 @@
 File = {}
+Folder = {}
 
 function File.exists(path)
-  local f = io.open(path, "rb")
-  if f then f:close() end
-  return f ~= nil
+  return app:call('file::exists', path) == 1
 end
 
 function File.delete(path)
@@ -12,3 +11,7 @@ function File.delete(path)
 end
 
 File.remove = File.delete
+
+function Folder.exists(path)
+  return app:call('folder::exists', path) == 1
+end
