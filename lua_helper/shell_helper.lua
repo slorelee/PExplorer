@@ -19,6 +19,24 @@ function System:ColorTheme(mode)
     app:call('System::ChangeColorThemeNotify')
 end
 
+local function PinCommand(class, target, name, param, icon, index, showcmd)
+  local ext = string.sub(target, -4)
+  local case_ext = string.lower(ext)
+
+  if case_ext == '.lnk' then
+    app:call(class .. '::Pin', target)
+    return
+  end
+  if case_ext ~= '.exe' then return end
+
+  local lnk = target
+  if name ~= nil or param ~= nil or icon ~= nil then
+    if name == nil then name = string.match(target, '([^\\]+)' .. ext .. '$') end
+    lnk = "%TEMP%\\' .. class .. 'Pinned\\" .. name  .. '.lnk'
+    app:call('link', lnk, target, param, icon, index, showcmd)
+  end
+  app:call(class .. '::Pin', lnk)
+end
 
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
@@ -51,26 +69,20 @@ function Taskbar:AutoHide(value)
 end
 
 function Taskbar:Pin(target, name, param, icon, index, showcmd)
-  local ext = string.sub(target, -4)
-  local case_ext = string.lower(ext)
-
-  if case_ext == '.lnk' then
-    app:call('Taskbar::Pin', target)
-    return
-  end
-  if case_ext ~= '.exe' then return end
-
-  local lnk = target
-  if name ~= nil or param ~= nil or icon ~= nil then
-    if name == nil then name = string.match(target, '([^\\]+)' .. ext .. '$') end
-    lnk = "%TEMP%\\TaskBarPinned\\" .. name  .. '.lnk'
-    app:call('link', lnk, target, param, icon, index, showcmd)
-  end
-  app:call('Taskbar::Pin', lnk)
+  PinCommand('Taskbar',target, name, param, icon, index, showcmd)
 end
 
 function Taskbar:UnPin(name)
   app:call('Taskbar::UnPin', name)
+end
+
+Startmenu = {}
+function Startmenu:Pin(target, name, param, icon, index, showcmd)
+  PinCommand('Startmenu',target, name, param, icon, index, showcmd)
+end
+
+function Startmenu:UnPin(target)
+  app:call('startmenu::unpin', target)
 end
 
 Screen = {}

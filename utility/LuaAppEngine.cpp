@@ -133,6 +133,17 @@ int TaskBarAutoHideState()
     return 0;
 }
 
+void ShellContextMenuVerb(const TCHAR *file, TCHAR *verb)
+{
+    // Search target
+    TCHAR tzTarget[MAX_PATH] = { 0 };
+    TCHAR *target = CompletePath((TCHAR *)file, tzTarget);
+    if (!target) return;
+    FakeExplorer();
+    //CoInitialize(NULL);
+    DoFileVerb(target, verb);
+}
+
 #ifndef LOGA
 extern void _logA_(LPCSTR txt);
 
@@ -197,13 +208,7 @@ extern "C" {
             PUSH_INT(v);
         } else if (func == "taskbar::pin") {
             string_t str_file = s2w(lua_tostring(L, base + 2));
-            // Search target
-            TCHAR tzTarget[MAX_PATH] = { 0 };
-            TCHAR *target = CompletePath((TCHAR *)str_file.c_str(), tzTarget);
-            if (!target) return 0;
-            FakeExplorer();
-            //CoInitialize(NULL);
-            DoFileVerb(target, TEXT("taskbarpin"));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("taskbarpin"));
         } else if (func == "taskbar::unpin") {
             /*
                 function Taskbar:UnPin(name)
@@ -217,6 +222,12 @@ extern "C" {
             varstr_expand(str_lnk);
             FakeExplorer();
             DoFileVerb(str_lnk.c_str(), TEXT("taskbarunpin"));
+        } else if (func == "startmenu::pin") {
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("startpin"));
+        } else if (func == "startmenu::unpin") {
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("startunpin"));
         } else if (func == "desktop::updatewallpaper") {
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "desktop::getwallpaper") {
