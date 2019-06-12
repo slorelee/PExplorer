@@ -705,7 +705,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
-        return daemon_entry();
+        return daemon_entry(1);
     }
 
     if (_tcsstr(ext_options, TEXT("-Embedding"))) {
@@ -721,9 +721,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             ChangeUserProfileEnv();
         }
 
-        HWND daemon = create_daemonwindow();
-        g_Globals._hwndDaemon = daemon;
-        InstallCADHookEntry();
+        daemon_entry(0);
 
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();

@@ -170,6 +170,7 @@ static bool IsX()
 
 static void InstallEventHookEntry(HWND hwnd)
 {
+    if (g_Globals._isShell) return;
     //hijack clockarea click event
     if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", IsX()).ToBool() != FALSE) {
         // sets up the event hook.
@@ -195,10 +196,11 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDbClick = 0;
     if (nmsg == WM_CREATE) {
-        InstallEventHookEntry(_hwnd);
-        //InstallCADHookEntry(); /* Can't work here */
-        EnableShowDesktop();
-        update_property_handler();
+        /* Can't work here */
+        //InstallEventHookEntry(_hwnd);
+        //InstallCADHookEntry();
+        //EnableShowDesktop();
+        //update_property_handler();
     } else if (nmsg == WM_TASKBARCREATED) {
         InstallEventHookEntry(_hwnd);
         EnableShowDesktop();
@@ -290,15 +292,27 @@ HWND create_daemonwindow()
      return WinXShell_DaemonWindow::Create();
 }
 
-int daemon_entry()
+int daemon_entry(int standalone)
 {
-    // Initializes COM
-    CoInitialize(NULL);
+    if (standalone != 0) {
+        // Initializes COM
+        CoInitialize(NULL);
+    }
     HWND daemon = create_daemonwindow();
     g_Globals._hwndDaemon = daemon;
-    if (g_Globals._lua) g_Globals._lua->onDaemon();
+
+    if (standalone != 0) {
+        if (g_Globals._lua) g_Globals._lua->onDaemon();
+    }
+
+    InstallEventHookEntry(daemon);
     InstallCADHookEntry();
-    Window::MessageLoop();
-    CoUninitialize();
+    EnableShowDesktop();
+    update_property_handler();
+
+    if (standalone != 0) {
+        Window::MessageLoop();
+        CoUninitialize();
+    }
     return 0;
 }
