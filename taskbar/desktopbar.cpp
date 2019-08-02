@@ -166,12 +166,14 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
 
     //LoadSSO(); /* load in main() by SSOThread */
 
-    _iQuickLaunchPadding = JCFG2_DEF("JS_QUICKLAUNCH", "padding", 4).ToInt();
-    _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
+    if (JCFG2_DEF("JS_QUICKLAUNCH", "visible", true).ToBool()) {
+        _hwndQuickLaunch = QuickLaunchBar::Create(_hwnd);
+        _iQuickLaunchPadding = JCFG2_DEF("JS_QUICKLAUNCH", "padding", 4).ToInt();
+    }
 
     SetTimer(_hwnd, 0, 1000, NULL);
 
-    if (JCFG_TB(2, "userebar").ToBool() == TRUE) {
+    if (_hwndQuickLaunch && JCFG_TB(2, "userebar").ToBool() == TRUE) {
         JCFG_QL_SET(2, "maxiconsinrow") = 0;
         // create rebar window to manage task and quick launch bar
         _hwndrebar = CreateWindowEx(WS_EX_TOOLWINDOW, REBARCLASSNAME, NULL,
@@ -538,7 +540,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_TIMER:
         if (wparam == 0) {
-            SendMessage(_hwndQuickLaunch, PM_RELOAD_BUTTONS, 0, 0);
+            if (_hwndQuickLaunch) SendMessage(_hwndQuickLaunch, PM_RELOAD_BUTTONS, 0, 0);
             if (JCFG2_DEF("JS_TASKBAR", "hideforfullscreenwindow", true).ToBool() != FALSE) {
                 HideForFullScreenWindow(_hwnd);
             }
@@ -557,7 +559,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (_hwndrebar) {
             SendMessage(_hwndrebar, WM_SYSCOLORCHANGE, 0, 0);
         }
-        SendMessage(_hwndQuickLaunch, WM_SYSCOLORCHANGE, 0, 0);
+        if (_hwndQuickLaunch) SendMessage(_hwndQuickLaunch, WM_SYSCOLORCHANGE, 0, 0);
         SendMessage(_hwndTaskBar, WM_SYSCOLORCHANGE, 0, 0);
         break;
     case WM_SETTINGCHANGE: {
@@ -615,7 +617,10 @@ static int CommandHook(HWND hwnd, const TCHAR *act)
 void DesktopBar::Resize(int cx, int cy)
 {
     ///@todo general children resizing algorithm
-    int quicklaunch_width = (int)SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
+    int quicklaunch_width = 0;
+    if (_hwndQuickLaunch) {
+        quicklaunch_width = (int)SendMessage(_hwndQuickLaunch, PM_GET_WIDTH, 0, 0);
+    }
     int notifyarea_width = (int)SendMessage(_hwndNotify, PM_GET_WIDTH, 0, 0);
     //_log_(FmtString("Resize - %d,%d\r\n", cx, cy));
     HDWP hdwp = BeginDeferWindowPos(3);
