@@ -403,6 +403,12 @@
     </ClCompile>
     <ClCompile Include="utility\LuaAppEngine.cpp" />
     <ClCompile Include="utility\mpool.cpp" />
+    <ClCompile Include="utility\ProductPolicyEditor.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
     <ClCompile Include="utility\TrayHelper.cpp">
@@ -471,6 +477,7 @@
     <ClInclude Include="systemsettings\WLAN.h" />
     <ClInclude Include="utility\LuaAppEngine.h" />
     <ClInclude Include="utility\mpool.h" />
+    <ClInclude Include="utility\ProductPolicyEditor.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
     <ClInclude Include="utility\TrayHelper.h" />

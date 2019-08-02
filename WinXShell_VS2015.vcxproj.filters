@@ -133,6 +133,9 @@
     <ClCompile Include="customization\startbutton.cpp">
       <Filter>customization</Filter>
     </ClCompile>
+    <ClCompile Include="utility\ProductPolicyEditor.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -258,6 +261,9 @@
       <Filter>customization</Filter>
     </ClInclude>
     <ClInclude Include="utility\UNIBASE.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ProductPolicyEditor.h">
       <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>

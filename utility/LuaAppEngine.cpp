@@ -150,6 +150,11 @@ extern void _logA_(LPCSTR txt);
 #define LOGA(txt) _logA_(txt)
 #endif
 
+extern void ProductPolicyLoad(const char *key, const char *value);
+extern void ProductPolicyGet(const wchar_t *name);
+extern void ProductPolicySet(const wchar_t *name, DWORD val);
+extern void ProductPolicySave();
+
 extern "C" {
     extern int lua_print(lua_State* L);
 #ifdef _DEBUG
@@ -296,6 +301,17 @@ extern "C" {
             if (v.iVal == 1) v.iVal = PathIsDirectory(v.str.c_str());
             if (v.iVal == FILE_ATTRIBUTE_DIRECTORY) v.iVal = 1;
             PUSH_INT(v);
+        } else if (func == "productpolicy::load") {
+            ProductPolicyLoad(lua_tostring(L, base + 2), lua_tostring(L, base + 3));
+        } else if (func == "productpolicy::get") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            ProductPolicyGet(v.str.c_str());
+        } else if (func == "productpolicy::set") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            v.iVal = lua_tointeger(L, base + 3);
+            ProductPolicySet(v.str.c_str(), v.iVal);
+        } else if (func == "productpolicy::save") {
+            ProductPolicySave();
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {
