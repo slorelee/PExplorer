@@ -1,6 +1,8 @@
 # What's me?
 The shell part's source code of WinXShell. It is a freely available program intended as replacement of MS Windows Explorer for Windows(PE). It is based on the [ROS Explorer](http://www.foxplanet.de/explorer/index.html).
 
+The source code is in **`WinXShell_shellpart`** branch.
+
 ![Taskbar](https://github.com/slorelee/wimbuilder_sample/blob/master/winxshell/WinXShell_Taskbar.jpg)
 ![UI](https://github.com/slorelee/wimbuilder_sample/blob/master/winxshell/WinXShell_UI_Stuffs.jpg)
 
@@ -28,6 +30,8 @@ If you like this project, you can Star this.
 
 # 这是什么?
 pexplorer是WinXShell的Windows外壳部分的代码。这是一个免费的代替Windows Explorer的程序。是基于[ROS Explorer](http://www.foxplanet.de/explorer/index.html)开发的。
+
+代码在**`WinXShell_shellpart`**分支。
 
 # 改进的功能:
 * 可x64环境工作
