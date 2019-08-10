@@ -468,6 +468,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     } else if (_tcsstr(ext_options, TEXT("-wes"))) {
         CloseShellProcess();
         any_desktop_running = FALSE;
+    } else if (_tcsstr(ext_options, TEXT("-shell"))) {
+        CloseShellProcess();
+        any_desktop_running = FALSE;
     }
 
     // command line option "-install" to replace previous shell application with WinXShell
