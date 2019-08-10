@@ -1817,9 +1817,14 @@ UINT StartMenuRoot::GetLogoResId()
 
     int clr_bits = GetDeviceCaps(dc, BITSPIXEL);
 
-    if (clr_bits > 8)
-        return IDB_LOGOV;
-    else if (clr_bits > 4)
+    if (clr_bits > 8) {
+        if (g_Globals._lua) {
+            int logo_id = g_Globals._lua->call("startmenu_logoid", 1);
+            if (logo_id == -1) logo_id = 1;
+            return IDB_LOGOV + logo_id;
+        }
+        return IDB_LOGOV + 1;
+    } else if (clr_bits > 4)
         return IDB_LOGOV256;
     else
         return IDB_LOGOV16;

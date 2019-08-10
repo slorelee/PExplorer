@@ -51,6 +51,19 @@ function onshell()
   regist_ms_settings_url()
 end
 
+-- return the resource id for startmenu logo
+function startmenu_logoid()
+  local map = {
+    ["none"] = 0, ["windows"] = 1, ["winpe"] = 2,
+    ["custom1"] = 11, ["custom2"] = 12, ["custom3"] = 13,
+    ["default"] = 1
+  }
+  -- use next line for custom (remove "--" and change "none" to what you like)
+  -- if true then return map["none"] end
+  if is_pe then return map["winpe"] end
+  return map["windows"]
+end
+
 function onfirstrun()
   -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   if is_wes then
