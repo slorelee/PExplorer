@@ -25,9 +25,14 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 //
 
 IDB_DRIVEBAR            BITMAP                  "res/drivebar.bmp"
-IDB_LOGOV               BITMAP                  "res/logov.bmp"
-IDB_LOGOV256            BITMAP                  "res/logov256.bmp"
 IDB_LOGOV16             BITMAP                  "res/logov16.bmp"
+IDB_LOGOV256            BITMAP                  "res/logov256.bmp"
+IDB_LOGOV               BITMAP                  "res/logov.bmp"
+IDB_LOGOV_WIN           BITMAP                  "res/logov_WIN.bmp"
+IDB_LOGOV_PE            BITMAP                  "res/logov_PE.bmp"
+IDB_LOGOV_CTM1          BITMAP                  "res/logov_CTM1.bmp"
+IDB_LOGOV_CTM2          BITMAP                  "res/logov_CTM2.bmp"
+IDB_LOGOV_CTM3          BITMAP                  "res/logov_CTM3.bmp"
 IDB_ICON_ALIGN_0        BITMAP                  "res/icoalig0.bmp"
 IDB_ICON_ALIGN_1        BITMAP                  "res/icoalig1.bmp"
 IDB_ICON_ALIGN_2        BITMAP                  "res/icoalig2.bmp"

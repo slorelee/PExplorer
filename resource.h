@@ -75,8 +75,14 @@
 #define IDI_ARROW_SELECTED              126
 #define IDI_SHUTDOWN                    127
 #define IDI_TERMINATE                   128
-#define IDB_LOGOV                       129
+#define IDB_LOGOV16                     129
 #define IDB_LOGOV256                    130
+#define IDB_LOGOV                       200
+#define IDB_LOGOV_WIN                   201
+#define IDB_LOGOV_PE                    202
+#define IDB_LOGOV_CTM1                  211
+#define IDB_LOGOV_CTM2                  212
+#define IDB_LOGOV_CTM3                  213
 #define IDA_SEARCH_PROGRAM              133
 #define IDI_APPICON                     134
 #define IDA_DESKTOP                     134
@@ -116,7 +122,6 @@
 #define IDI_SPEAKER                     162
 #define IDB_ICON_ALIGN_10               163
 #define IDI_DOT                         163
-#define IDB_LOGOV16                     164
 #define IDI_DOT_TRANS                   164
 #define IDI_DOT_RED                     165
 #define IDI_ARROW_UP                    166
