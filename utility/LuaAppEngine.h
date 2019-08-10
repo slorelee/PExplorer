@@ -11,8 +11,8 @@ public:
     ~LuaAppEngine();
     void *getFrame() { return _frame; };
     int hasfunc(const char *funcname);
-    void call(const char *funcname);
-    void call(const char * funcname, string_t & p1, string_t & p2);
+    int call(const char *funcname, int nres = 0);
+    int call(const char * funcname, string_t & p1, string_t & p2, int nres = 0);
     void RunCode(string_t & code);
     void LoadFile(string_t & file);
     void onLoad();

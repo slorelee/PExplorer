@@ -632,38 +632,46 @@ int LuaAppEngine::hasfunc(const char *funcname)
     return 1;
 }
 
-void LuaAppEngine::call(const char *funcname)
+int LuaAppEngine::call(const char *funcname, int nres)
 {
     char buff[1024] = { 0 };
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
     fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return;
+    if (lua_errorfunc == MININT) return -1;
 
     lua_getglobal(L, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
-        return;
+        return -1;
     }
-    int rel = lua_pcall(L, 0, 0, lua_errorfunc);
-    if (rel == -1) return;
+    int rel = lua_pcall(L, 0, nres, lua_errorfunc);
+    if (rel == -1) return -1;
+    if (nres <= 0) return 0;
+    rel = (int)lua_tointeger(L, -1);
+    lua_pop(L, 1);
+    return rel;
 }
 
-void LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2)
+int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nres)
 {
     char buff[1024] = { 0 };
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
     fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return;
+    if (lua_errorfunc == MININT) return -1;
 
     lua_getglobal(L, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
-        return;
+        return -1;
     }
     lua_pushstring(L, w2s(p1).c_str());
     lua_pushstring(L, w2s(p2).c_str());
-    int rel = lua_pcall(L, 2, 0, lua_errorfunc);
-    if (rel == -1) return;
+    int rel = lua_pcall(L, 2, nres, lua_errorfunc);
+    if (rel == -1) return -1;
+    if (nres <= 0) return 0;
+    rel = (int)lua_tointeger(L, -1);
+    lua_pop(L, 1);
+    return rel;
 }
 
 void LuaAppEngine::RunCode(string_t& code)
