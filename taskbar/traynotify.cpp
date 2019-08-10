@@ -1659,8 +1659,11 @@ HWND ClockWindow::Create(HWND hwndParent)
     TCHAR buffer[32];
     // Arbitrary high time so that the created clock window is big enough
     SYSTEMTIME st = { 1601, 1, 0, 1, 23, 59, 59, 999 };
-
-    if (!GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &st, NULL, buffer, sizeof(buffer) / sizeof(TCHAR)))
+    if (g_Globals._lua) g_Globals._lua->call("update_clock_text");
+    String clocktext = g_Globals._varClockTextBuffer;
+    if (clocktext != TEXT("")) {
+        _tcscpy(buffer, clocktext.c_str());
+    } else if (!GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &st, NULL, buffer, sizeof(buffer) / sizeof(TCHAR)))
         _tcscpy(buffer, TEXT("00:00\r\n2015/08/15"));
     else {
         _tcscat(buffer, TEXT("\r\n2015/08/15"));
@@ -1746,16 +1749,21 @@ bool ClockWindow::FormatTime()
     TCHAR time_buff[16];
     TCHAR date_buffer[64];
 
-    if (!(GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL,
-                        time_buff, sizeof(time_buff) / sizeof(TCHAR)))) return false;
+    if (g_Globals._varClockTextBuffer[0] != TEXT('\0')) {
+        if (g_Globals._lua) g_Globals._lua->call("update_clock_text");
+        _tcscpy(buffer, g_Globals._varClockTextBuffer);
+    } else {
+        if (!(GetTimeFormat(LOCALE_USER_DEFAULT, TIME_NOSECONDS, NULL, NULL,
+            time_buff, sizeof(time_buff) / sizeof(TCHAR)))) return false;
 
-    _tcscat(buffer, time_buff);
+        _tcscat(buffer, time_buff);
 
-    if (!(GetDateFormat(LOCALE_USER_DEFAULT, DATE_SHORTDATE, NULL, NULL,
-                        date_buffer, sizeof(date_buffer) / sizeof(TCHAR)))) return false;
+        if (!(GetDateFormat(LOCALE_USER_DEFAULT, DATE_SHORTDATE, NULL, NULL,
+            date_buffer, sizeof(date_buffer) / sizeof(TCHAR)))) return false;
 
-    _tcscat(buffer, TEXT("\r\n"));
-    _tcscat(buffer, date_buffer);
+        _tcscat(buffer, TEXT("\r\n"));
+        _tcscat(buffer, date_buffer);
+    }
 
     if (_tcscmp(buffer, _time)) {
         _tcscpy(_time, buffer);

@@ -312,6 +312,12 @@ extern "C" {
             ProductPolicySet(v.str.c_str(), v.iVal);
         } else if (func == "productpolicy::save") {
             ProductPolicySave();
+        } else if (func == "setvar") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            if (v.str == TEXT("ClockText")) {
+                string_t clocktext = s2w(lua_tostring(L, base + 3));
+                _tcscpy(g_Globals._varClockTextBuffer, clocktext.c_str());
+            }
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
             if (!lua) {

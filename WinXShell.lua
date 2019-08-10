@@ -64,6 +64,12 @@ function startmenu_logoid()
   return map["windows"]
 end
 
+function update_clock_text()
+  local now_time = os.time()
+  local clocktext = os.date('%H:%M\r\n%Y-%m-%d', now_time)
+  app:call('SetVar', 'ClockText', clocktext)
+end
+
 function onfirstrun()
   -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   if is_wes then

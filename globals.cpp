@@ -36,6 +36,8 @@ ExplorerGlobals::ExplorerGlobals()
     _isShell = FALSE;
     _isWinPE = FALSE;
     _lua = NULL;
+
+    _varClockTextBuffer[0] = TEXT('\0');
 }
 
 void ExplorerGlobals::init(HINSTANCE hInstance)

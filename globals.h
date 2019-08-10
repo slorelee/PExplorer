@@ -111,6 +111,8 @@ extern struct ExplorerGlobals {
 
     String      _uifolder;
     LuaAppEngine    *_lua;
+
+    TCHAR _varClockTextBuffer[64];
 } g_Globals;
 
 extern HINSTANCE g_hInst;
