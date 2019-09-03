@@ -490,6 +490,7 @@ NotifyArea::NotifyArea(HWND hwnd)
 {
     _next_idx = 0;
     _clock_width = 0;
+    _showdesktopbtn_width = 0;
     _last_icon_count = 0;
     _show_hidden = false;
     _hide_inactive = true;
@@ -526,8 +527,10 @@ static bool get_hide_clock_from_registry()
 void NotifyArea::read_config()
 {
     bool clock_visible = JCFG2_DEF("JS_NOTIFYCLOCK", "visible", true).ToBool();
+    bool showdesktopbtn_visible = (JCFG2_DEF("JS_NOTIFYAREA", "hide_showdesktop_button", false).ToBool() == false);
     _show_button = !(JCFG2_DEF("JS_NOTIFYAREA", "hide_toggle_button", false).ToBool());
     show_clock(clock_visible);
+    show_showdesktopbtn(showdesktopbtn_visible);
 }
 
 void NotifyArea::write_config()
@@ -551,6 +554,28 @@ void NotifyArea::show_clock(bool flag)
             DestroyWindow(_hwndClock);
             _hwndClock = 0;
             _clock_width = 0;
+        }
+
+        SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
+    }
+}
+
+void NotifyArea::show_showdesktopbtn(bool flag)
+{
+    bool vis = _hwndShowDesktopBtn != 0;
+
+    if (vis != flag) {
+        if (flag) {
+            // create showdesktop button window
+            _hwndShowDesktopBtn = ShowDesktopButtonWindow::Create(_hwnd);
+
+            if (_hwndShowDesktopBtn) {
+                _showdesktopbtn_width = SHOWDESKTOPBUTTON_WIDTH;
+            }
+        } else {
+            DestroyWindow(_hwndShowDesktopBtn);
+            _hwndShowDesktopBtn = 0;
+            _showdesktopbtn_width = 0;
         }
 
         SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
@@ -668,12 +693,13 @@ LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_SIZE: {
         int cx = LOWORD(lparam);
-        SetWindowPos(_hwndClock, 0, cx - _clock_width, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        SetWindowPos(_hwndShowDesktopBtn, 0, cx - _showdesktopbtn_width, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        SetWindowPos(_hwndClock, 0, cx - _clock_width - _showdesktopbtn_width, 0, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         break;
     }
 
     case PM_GET_WIDTH: {
-        size_t w = _sorted_icons.size() * NOTIFYICON_DIST + NOTIFYAREA_SPACE + _clock_width;
+        size_t w = _sorted_icons.size() * NOTIFYICON_DIST + NOTIFYAREA_SPACE + _clock_width + _showdesktopbtn_width;
         if (_show_button)
             w += NOTIFYICON_DIST;
         return w;
@@ -1795,4 +1821,70 @@ void ClockWindow::Paint()
     }
 
     DrawText(canvas, _time, -1, &rc, DT_CENTER | DT_NOPREFIX);
+}
+
+ShowDesktopButtonWindow::ShowDesktopButtonWindow(HWND hwnd)
+    : super(hwnd)
+{
+}
+
+HWND ShowDesktopButtonWindow::Create(HWND hwndParent)
+{
+    static BtnWindowClass wcShowDesktopBtn(CLASSNAME_SHOWDESKTOPBUTTONWINDOW, CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS | CS_OWNDC | BS_OWNERDRAW);
+    wcShowDesktopBtn.hbrBackground = TASKBAR_BRUSH();
+    wcShowDesktopBtn.hCursor = LoadCursor(NULL, IDC_HAND);
+    ClientRect clnt(hwndParent);
+
+    int windowWidth = SHOWDESKTOPBUTTON_WIDTH;
+
+    return Window::Create(WINDOW_CREATOR(ShowDesktopButtonWindow), 0,
+        wcShowDesktopBtn, NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
+        clnt.right - windowWidth, clnt.top + 1, windowWidth, clnt.bottom - 2, hwndParent);
+}
+
+#define SHOWDESKTOPBUTTON_CLICK_TIMER 1001
+#define IDHK_DESKTOP 2
+
+static void ShowDesktopButton_OnClick(HWND hwnd, int isDbClick)
+{
+    if (hwnd) KillTimer(hwnd, SHOWDESKTOPBUTTON_CLICK_TIMER);
+    if (!isDbClick) {
+        SendMessage(g_Globals._hwndDesktopBar, WM_HOTKEY, IDHK_DESKTOP, 0); // call WIN+D action
+        InvalidateRect(hwnd, NULL, TRUE);
+    }
+}
+
+void ShowDesktopButtonWindow::Paint()
+{
+    static RECT rc;
+    PaintCanvas canvas(_hwnd);
+    FillRect(canvas, &canvas.rcPaint, TASKBAR_BRUSH());
+    rc = canvas.rcPaint;
+    rc.right = 1;
+    FillRect(canvas, &rc, GetSysColorBrush(COLOR_BTNSHADOW));
+}
+
+LRESULT ShowDesktopButtonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
+{
+    static int isDbClick = 0;
+    switch (nmsg) {
+    case WM_PAINT:
+        Paint();
+        break;
+    case WM_LBUTTONUP:
+        SetTimer(_hwnd, SHOWDESKTOPBUTTON_CLICK_TIMER, 300, NULL);
+        isDbClick++;
+        break;
+    case  WM_TIMER:
+        if (wparam == SHOWDESKTOPBUTTON_CLICK_TIMER) {
+            ShowDesktopButton_OnClick(_hwnd, (isDbClick>1) ? 1 : 0);
+            isDbClick = 0;
+            return S_OK;
+        }
+        /* fallthough */
+    default:
+        return super::WndProc(nmsg, wparam, lparam);
+    }
+
+    return 0;
 }

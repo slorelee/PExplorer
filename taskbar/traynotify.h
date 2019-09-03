@@ -31,6 +31,8 @@
 
 #define CLASSNAME_CLOCKWINDOW   TEXT("TrayClockWClass")
 
+#define CLASSNAME_SHOWDESKTOPBUTTONWINDOW   TEXT("TrayShowDesktopButtonWClass")
+
 #define ICON_AUTOHIDE_SECONDS   300
 
 #define PM_GETMODULEPATH_CB     (WM_APP+0x21)
@@ -167,6 +169,9 @@ protected:
     WindowHandle _hwndClock;
     int     _clock_width;
 
+    WindowHandle _hwndShowDesktopBtn;
+    int     _showdesktopbtn_width;
+
     ToolTip _tooltip;
 
 #ifdef USE_NOTIFYHOOK
@@ -193,6 +198,7 @@ protected:
     void    read_config();
     void    write_config();
     void    show_clock(bool flag);
+    void    show_showdesktopbtn(bool flag);
 
     friend struct TrayNotifyDlg;
 
@@ -278,4 +284,14 @@ protected:
 
     TCHAR   _time[32];
     ToolTip _tooltip;
+};
+
+#define SHOWDESKTOPBUTTON_WIDTH DPI_SX(5)
+struct ShowDesktopButtonWindow : public Window {
+    typedef Window super;
+    ShowDesktopButtonWindow(HWND hwnd);
+    static HWND Create(HWND hwndParent);
+protected:
+    LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
+    void    Paint();
 };
