@@ -667,7 +667,7 @@ HWND NotifyArea::Create(HWND hwndParent)
 
     return Window::Create(WINDOW_CREATOR(NotifyArea), 0,
                           wcTrayNotify, TITLE_TRAYNOTIFY, WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN,
-                          clnt.right - (NOTIFYAREA_WIDTH_DEF + 1), 1, NOTIFYAREA_WIDTH_DEF, clnt.bottom - 2, hwndParent);
+                          clnt.right - NOTIFYAREA_WIDTH_DEF, 0, NOTIFYAREA_WIDTH_DEF, clnt.bottom, hwndParent);
 }
 
 LRESULT NotifyArea::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
@@ -1701,7 +1701,7 @@ HWND ClockWindow::Create(HWND hwndParent)
 
     return Window::Create(WINDOW_CREATOR(ClockWindow), 0,
                           wcClock, NULL, WS_CHILD | WS_VISIBLE,
-                          clnt.right - clockwindowWidth, clnt.top + 1, clockwindowWidth, clnt.bottom - 2, hwndParent);
+                          clnt.right - clockwindowWidth, clnt.top, clockwindowWidth, clnt.bottom, hwndParent);
 }
 
 #define CLOCKAREA_CLICK_TIMER 1001
@@ -1839,7 +1839,7 @@ HWND ShowDesktopButtonWindow::Create(HWND hwndParent)
 
     return Window::Create(WINDOW_CREATOR(ShowDesktopButtonWindow), 0,
         wcShowDesktopBtn, NULL, WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
-        clnt.right - windowWidth, clnt.top + 1, windowWidth, clnt.bottom - 2, hwndParent);
+        clnt.right - windowWidth, clnt.top, windowWidth, clnt.bottom, hwndParent);
 }
 
 #define SHOWDESKTOPBUTTON_CLICK_TIMER 1001

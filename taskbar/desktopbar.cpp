@@ -637,7 +637,7 @@ void DesktopBar::Resize(int cx, int cy)
     }
 
     if (_hwndNotify)
-        DeferWindowPos(hdwp, _hwndNotify, 0, cx - (notifyarea_width + 3), 1, notifyarea_width, cy - 2, SWP_NOZORDER | SWP_NOACTIVATE);
+        DeferWindowPos(hdwp, _hwndNotify, 0, cx - notifyarea_width, 0, notifyarea_width, cy, SWP_NOZORDER | SWP_NOACTIVATE);
 
     EndDeferWindowPos(hdwp);
 
