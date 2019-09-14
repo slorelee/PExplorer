@@ -64,9 +64,19 @@ function startmenu_logoid()
   return map["windows"]
 end
 
-function update_clock_text()
+-- 如果你想自定义时钟区域的显示信息,
+-- 请将这个函数名变更为update_clock_text()。
+-- 自定义显示示例:
+--[[
+    |  22:00 星期六  |
+    |   2019-9-14    |
+]]
+-- FYI:https://www.lua.org/pil/22.1.html
+function update_clock_text_sample()
+  local wd_name = {'日', '一', '二', '三', '四', '五', '六'}
   local now_time = os.time()
-  local clocktext = os.date('%H:%M\r\n%Y-%m-%d', now_time)
+  local wd_disname =  ' 星期' .. wd_name[os.date('%w', now_time) + 1]
+  local clocktext = os.date('%H:%M' .. wd_disname .. '\r\n%Y-%m-%d', now_time)
   app:call('SetVar', 'ClockText', clocktext)
 end
 

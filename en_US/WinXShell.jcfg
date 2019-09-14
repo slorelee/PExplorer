@@ -62,7 +62,8 @@
     "userebar":false,
     "theme":"dark",
     "height": 40,
-    "bkcolor":[0,122,204]
+    "#bkcolor":[0,122,204],
+    "task_line_color":[240,240,240]
   },
   "::STARTMENU":
   {
@@ -80,6 +81,13 @@
   "::QL":
   {
     "3rd_startup_arguments":"",
-    "maxiconsinrow":8
+    "hide_fixedsep":false,
+    "maxiconsinrow":8,
+    "hide_usericons":false,
+    "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
+  },
+    "JS_NOTIFYAREA":
+  {
+    "hide_showdesktop_button":false
   }
 }

@@ -52,7 +52,10 @@
       ["JS_QUICKLAUNCH", "::快速启动栏",      "段名。可对快速启动栏进行设置"],
       ["3rd_startup_arguments", "::第3方文件管理器启动参数", "属性名。"],
       ["maxiconsinrow", "::单行最大图标数", "属性名。"],
+      ["hide_fixedsep", "::隐藏分隔符", "属性名。"],
+      ["hide_usericons", "::隐藏用户图标", "属性名。"],
       ["JS_NOTIFYAREA", "::托盘区域",         "段名。可对托盘区域进行设置"],
+      ["hide_showdesktop_button", "::隐藏显示桌面按钮", "属性名。"],
       ["JS_NOTIFYCLOCK", "::时钟栏",          "段名。可对时钟栏进行设置"],
       ["JS_DESKTOP", "::桌面",                "段名。可对桌面进行设置"],
       ["3rd_open_arguments", "::第3方文件管理器打开参数", "属性名。"],
@@ -94,13 +97,13 @@
     "壁纸注释":"设置为空,或者不设置,将使用系统设置",
     "::桌面壁纸":""
   },
-  "JS_TASKBAR":
+  "::任务栏":
   {
     "::使用小图标":false,
     "userebar":false,
     "theme":"dark",
     "height": 40,
-    "bkcolor":[0,122,204],
+    "#bkcolor":[0,122,204],
     "task_line_color":[240,240,240]
   },
   "::开始菜单":
@@ -122,6 +125,13 @@
   "::快速启动栏":
   {
     "::第3方文件管理器启动参数":"",
-    "::单行最大图标数":8
+    "::隐藏分隔符":false,
+    "::单行最大图标数":8,
+    "::隐藏用户图标":false,
+    "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
+  },
+  "::托盘区域":
+  {
+    "::隐藏显示桌面按钮":false
   }
 }

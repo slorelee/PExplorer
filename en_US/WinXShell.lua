@@ -64,9 +64,17 @@ function startmenu_logoid()
   return map["windows"]
 end
 
-function update_clock_text()
+-- if you want to use the custom clock text,
+-- rename the function name to be update_clock_text()
+-- sample for:
+--[[
+    |  22:00 Sat  |
+    |  2019-9-14  |
+]]
+-- FYI:https://www.lua.org/pil/22.1.html
+function update_clock_text_sample()
   local now_time = os.time()
-  local clocktext = os.date('%H:%M\r\n%Y-%m-%d', now_time)
+  local clocktext = os.date('%H:%M %a\r\n%Y-%m-%d', now_time)
   app:call('SetVar', 'ClockText', clocktext)
 end
 
