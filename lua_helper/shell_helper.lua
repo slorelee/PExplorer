@@ -32,7 +32,7 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   local lnk = target
   if name ~= nil or param ~= nil or icon ~= nil then
     if name == nil then name = string.match(target, '([^\\]+)' .. ext .. '$') end
-    lnk = "%TEMP%\\' .. class .. 'Pinned\\" .. name  .. '.lnk'
+    lnk = '%TEMP%\\' .. class .. 'Pinned\\' .. name  .. '.lnk'
     app:call('link', lnk, target, param, icon, index, showcmd)
   end
   app:call(class .. '::Pin', lnk)
