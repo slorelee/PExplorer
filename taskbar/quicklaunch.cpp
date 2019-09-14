@@ -58,6 +58,8 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
     _btn_dist = 20;
     _size = 0;
     _fixed_btn = 0;
+    _path[0] = TEXT('\0');
+    _need_reload = 1;
 
     HWND hwndToolTip = (HWND) SendMessage(hwnd, TB_GETTOOLTIPS, 0, 0);
 
@@ -97,13 +99,11 @@ void QuickLaunchBar::ReloadShortcuts()
 {
     int cnt = 0;
     static ShellDirectory *shelldir = NULL;
+    if (_need_reload == 0) return;
+
     try {
-        static TCHAR path[MAX_PATH];
-        SpecialFolderFSPath app_data(CSIDL_APPDATA, _hwnd); ///@todo perhaps also look into CSIDL_COMMON_APPDATA ?
-        _stprintf(path, TEXT("%s\\")QUICKLAUNCH_FOLDER, (LPCTSTR)app_data);
-        RecursiveCreateDirectory(path);
         if (!shelldir) {
-            shelldir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
+            shelldir = new ShellDirectory(GetDesktopFolder(), _path, _hwnd);
         }
         shelldir->_scanned = false;
         shelldir->smart_scan(SORT_NAME, SCAN_DONT_EXTRACT_ICONS | SCAN_DONT_ACCESS | SCAN_NO_DIRECTORY);
@@ -145,16 +145,16 @@ void QuickLaunchBar::AddShortcuts()
     WaitCursor wait;
 
     try {
-        TCHAR path[MAX_PATH];
-
+        String quicklaunch_folder = JCFG2_DEF("JS_QUICKLAUNCH", "folder", QUICKLAUNCH_FOLDER).ToString();
         SpecialFolderFSPath app_data(CSIDL_APPDATA, _hwnd); ///@todo perhaps also look into CSIDL_COMMON_APPDATA ?
 
-        _stprintf(path, TEXT("%s\\")QUICKLAUNCH_FOLDER, (LPCTSTR)app_data);
-
-        RecursiveCreateDirectory(path);
+        if (_path[0] == TEXT('\0')) {
+            _stprintf(_path, TEXT("%s\\%s"), (LPCTSTR)app_data, quicklaunch_folder.c_str());
+            RecursiveCreateDirectory(_path);
+        }
 
         if (!_dir) {
-            _dir = new ShellDirectory(GetDesktopFolder(), path, _hwnd);
+            _dir = new ShellDirectory(GetDesktopFolder(), _path, _hwnd);
         }
         _dir->_scanned = false;
         _dir->smart_scan(SORT_NAME, SCAN_DONT_ACCESS | SCAN_NO_DIRECTORY);
@@ -178,19 +178,22 @@ void QuickLaunchBar::AddShortcuts()
     static int bHideShowDesktop = -1;
     static int bHideFileExplorer = -1;
     static int bHideFixedSep = -1;
+    static int bHideUserIcons = -1;
     if (bHideShowDesktop == -1) {
         bHideShowDesktop = JCFG2_DEF("JS_QUICKLAUNCH", "hide_showdesktop", false).ToBool() ? 1 : 0;
         bHideFileExplorer = JCFG2_DEF("JS_QUICKLAUNCH", "hide_fileexplorer", false).ToBool() ? 1 : 0;
         bHideFixedSep = JCFG2_DEF("JS_QUICKLAUNCH", "hide_fixedsep", false).ToBool() ? 1 : 0;
+        bHideUserIcons = JCFG2_DEF("JS_QUICKLAUNCH", "hide_usericons", false).ToBool() ? 1 : 0;
+        if (bHideShowDesktop != 1) _fixed_btn++;
+        if (bHideFileExplorer != 1) _fixed_btn++;
+        if (bHideUserIcons) _need_reload = 0;
     }
 
     if (bHideShowDesktop != 1) {
         AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_MINIMIZE_ALL), NULL);
-        _fixed_btn++;
     }
     if (bHideFileExplorer != 1) {
         AddButton(ID_EXPLORE, g_Globals._icon_cache.get_icon(ICID_EXPLORER).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_TITLE), NULL);
-        _fixed_btn++;
     }
 
     if (_fixed_btn != 0 && bHideFixedSep != 1) {
@@ -199,7 +202,7 @@ void QuickLaunchBar::AddShortcuts()
     }
 
     int ignore = 0;
-    for (Entry *entry = _dir->_down; entry; entry = entry->_next) {
+    for (Entry *entry = _dir->_down; !bHideUserIcons && entry; entry = entry->_next) {
         // hide files like "desktop.ini"
         if (entry->_data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
             continue;
@@ -222,7 +225,6 @@ void QuickLaunchBar::AddShortcuts()
 
     _btn_dist = LOWORD(SendMessage(_hwnd, TB_GETBUTTONSIZE, 0, 0));
     _size = (int)(_entries.size() * _btn_dist + 5 + 3); // 3 for BTNS_SEP
-    _size -= ignore;
     if (JCFG_TB(2, "userebar").ToBool() == TRUE) _size += 20;
 
     //adjust QuickLaunchBar width
@@ -275,7 +277,7 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (maxbtns < 0) maxbtns = 0;
         if (maxbtns > 0 && maxbtns < _fixed_btn) maxbtns = _fixed_btn; // miniconsinrow = 2 Show Desktop & Explorer
         if (maxbtns == 0 || rows == btns) return _size;
-        if (btns - 1 <= maxbtns) return _size; // BTNS_SEP
+        if (btns - 1 <= maxbtns) return _size; // 1 for BTNS_SEP
 
         RECT rect;
         int max_cx = _fixed_btn * _btn_dist + 5;

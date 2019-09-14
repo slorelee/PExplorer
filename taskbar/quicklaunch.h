@@ -36,7 +36,7 @@
 #define IDC_FIRST_QUICK_ID  0x4000
 
 
-#define QUICKLAUNCH_FOLDER  TEXT("Microsoft\\Internet Explorer\\Quick Launch")
+#define QUICKLAUNCH_FOLDER  TEXT("Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar")
 
 
 /// quick launch bar shortcut
@@ -75,6 +75,8 @@ protected:
     int             _btn_dist;
     int             _size;
     int             _fixed_btn;
+    TCHAR           _path[MAX_PATH];
+    int             _need_reload;
 
     void    AddShortcuts();
     void    ReloadShortcuts();
