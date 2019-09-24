@@ -128,3 +128,18 @@ function Screen:DispTest(arr)
     end
   end
 end
+
+FolderOptions = {}
+
+-- Opt = 
+--   'ShowAll'     - Show the hidden files / folders
+--   'ShowExt'     - Show the known extension
+--   'ShowSuperHidden' - Always hide the system files / folders
+
+function FolderOptions:Set(opt, val)
+  app:call('FolderOptions::Set', opt, val)
+end
+
+function FolderOptions:Get(opt)
+  return app:call('FolderOptions::Get', opt)
+end
