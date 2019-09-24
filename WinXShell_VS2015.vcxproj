@@ -401,6 +401,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="utility\FolderOptions.cpp" />
     <ClCompile Include="utility\LuaAppEngine.cpp" />
     <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
@@ -475,6 +476,7 @@
     <ClInclude Include="systemsettings\MonitorAdapter.h" />
     <ClInclude Include="systemsettings\Volume.h" />
     <ClInclude Include="systemsettings\WLAN.h" />
+    <ClInclude Include="utility\FolderOptions.h" />
     <ClInclude Include="utility\LuaAppEngine.h" />
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />

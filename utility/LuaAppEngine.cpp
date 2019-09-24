@@ -5,6 +5,7 @@
 #include "LuaAppEngine.h"
 #include "../systemsettings/MonitorAdapter.h"
 #include "../systemsettings/Volume.h"
+#include "FolderOptions.h"
 
 extern int FakeExplorer();
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
@@ -312,6 +313,17 @@ extern "C" {
             ProductPolicySet(v.str.c_str(), v.iVal);
         } else if (func == "productpolicy::save") {
             ProductPolicySave();
+        } else if (func == "folderoptions::get") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            v.iVal = FolderOptions->Get(v.str.c_str());
+            PUSH_INT(v);
+        } else if (func == "folderoptions::set") {
+            if (lua_isnumber(L, base + 2)) {
+                FolderOptions->Set((DWORD)lua_tointeger(L, base + 2), lua_tointeger(L, base + 3));
+            } else {
+                v.str = s2w(lua_tostring(L, base + 2));
+                FolderOptions->Set(v.str.c_str(), (DWORD)lua_tointeger(L, base + 3));
+            }
         } else if (func == "setvar") {
             v.str = s2w(lua_tostring(L, base + 2));
             if (v.str == TEXT("ClockText")) {

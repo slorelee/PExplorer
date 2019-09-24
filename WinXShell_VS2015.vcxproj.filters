@@ -136,6 +136,9 @@
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="utility\FolderOptions.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -264,6 +267,9 @@
       <Filter>utility</Filter>
     </ClInclude>
     <ClInclude Include="utility\ProductPolicyEditor.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\FolderOptions.h">
       <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
