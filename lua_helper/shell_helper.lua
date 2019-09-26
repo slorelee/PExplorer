@@ -23,19 +23,37 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   local ext = string.sub(target, -4)
   local case_ext = string.lower(ext)
 
+  local pinned_path = [[%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\]] .. class .. '\\'
+  local lnk_name = name
+  if lnk_name == nil then lnk_name = string.match(target, '([^\\]+)' .. ext .. '$') end
+  lnk_name = lnk_name .. '.lnk'
   if case_ext == '.lnk' then
-    app:call(class .. '::Pin', target)
+    if app:info('isshell') ~= 0 then
+      exec('/hide', 'cmd.exe /c copy /y \"' .. target .. '\" \"' .. pinned_path .. lnk_name .. '\"')
+    else
+      app:call(class .. '::Pin', target)
+    end
     return
   end
   if case_ext ~= '.exe' then return end
 
   local lnk = target
   if name ~= nil or param ~= nil or icon ~= nil then
-    if name == nil then name = string.match(target, '([^\\]+)' .. ext .. '$') end
-    lnk = '%TEMP%\\' .. class .. 'Pinned\\' .. name  .. '.lnk'
+    if app:info('isshell') ~= 0 then
+      lnk = pinned_path .. lnk_name
+    else
+      lnk = '%TEMP%\\' .. class .. 'Pinned\\' .. lnk_name
+    end
     app:call('link', lnk, target, param, icon, index, showcmd)
   end
-  app:call(class .. '::Pin', lnk)
+  if app:info('isshell') ~= 0 then
+    if lnk == target then
+      lnk = pinned_path .. lnk_name
+      app:call('link', lnk, target)
+    end
+  else
+    app:call(class .. '::Pin', lnk)
+  end
 end
 
 Taskbar = {}

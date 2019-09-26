@@ -718,6 +718,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (startup_desktop) {
         WaitCursor wait;
         g_Globals._isShell = TRUE;
+
+        {
+            CreateWindowEx(WS_EX_NOACTIVATE, WINXSHELL_SHELLWINDOW, TEXT(""),
+                WS_POPUP, 0, 0, 0, 0, NULL, NULL, g_Globals._hInstance, 0);
+        }
         if (g_Globals._lua) g_Globals._lua->preShell();
 
         if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {

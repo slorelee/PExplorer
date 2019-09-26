@@ -13,3 +13,8 @@ extern HWND create_daemonwindow();
 extern void update_property_handler();
 
 extern int embedding_entry();
+
+#define WINXSHELL_SHELLWINDOW TEXT("WinXShell_ShellWindow")
+
+extern BOOL isWinXShellAsShell();
+

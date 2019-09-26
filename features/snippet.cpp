@@ -5,6 +5,7 @@
 #include "../utility/window.h"
 #include "../globals.h"
 #include "../jconfig/jcfg.h"
+#include "features.h"
 
 extern ExplorerGlobals g_Globals;
 
@@ -192,4 +193,11 @@ void RegistAppPath() {
     RegSetValue(HKEY_CURRENT_USER,
     TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\WinXShell.exe"),
         REG_SZ, (JVAR("JVAR_MODULEFILENAME").ToString().c_str()), 0);
+}
+
+BOOL isWinXShellAsShell()
+{
+    if (g_Globals._isShell) return TRUE;
+    if (FindWindow(WINXSHELL_SHELLWINDOW, NULL)) return TRUE;
+    return FALSE;
 }

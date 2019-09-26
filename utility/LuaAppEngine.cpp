@@ -12,6 +12,8 @@ extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, 
 extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
 TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
+extern BOOL isWinXShellAsShell();
+
 #ifdef _DEBUG
 #   ifdef _WIN64
 #       pragma comment(lib, "lua/lua53_d_x64.lib")
@@ -213,6 +215,7 @@ extern "C" {
             v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
         } else if (func == "taskbar::pin") {
+            if (isWinXShellAsShell()) return ret;
             string_t str_file = s2w(lua_tostring(L, base + 2));
             ShellContextMenuVerb(str_file.c_str(), TEXT("taskbarpin"));
         } else if (func == "taskbar::unpin") {
@@ -226,6 +229,10 @@ extern "C" {
             string_t name = s2w(lua_tostring(L, base + 2));
             string_t str_lnk = TEXT("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\") + name + TEXT(".lnk");
             varstr_expand(str_lnk);
+            if (isWinXShellAsShell()) {
+                DeleteFile(str_lnk.c_str());
+                return ret;
+            }
             FakeExplorer();
             DoFileVerb(str_lnk.c_str(), TEXT("taskbarunpin"));
         } else if (func == "startmenu::pin") {
@@ -543,6 +550,9 @@ extern "C" {
             PUSH_STR(v);
         } else if (name == "iswinpe") {
             v.iVal = g_Globals._isWinPE;
+            PUSH_INT(v);
+        } else if (name == "isshell") {
+            v.iVal = isWinXShellAsShell();
             PUSH_INT(v);
         } else if (name == "path") {
             v.str = JVAR("JVAR_MODULEPATH").ToString();
