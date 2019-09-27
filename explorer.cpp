@@ -602,7 +602,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (pUIManager) {
             Window::MessageLoop();
         }
-        return 0;
+        return g_Globals._exitcode;
     }
 
     // If there is given the command line option "-desktop", create desktop window anyways
@@ -636,7 +636,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 #ifdef ROSSHELL
     else
-        return 0;    // no shell to launch, so exit immediatelly
+        return g_Globals._exitcode;    // no shell to launch, so exit immediatelly
 #endif
 
     if (_tcsstr(ext_options, TEXT("-debug"))) {
@@ -654,7 +654,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     if (_tcsstr(ext_options, TEXT("-test"))) {
-        exit(0);
+        exit(g_Globals._exitcode);
     }
 
     // initialize COM and OLE before creating the desktop window
@@ -679,7 +679,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (g_Globals._lua) {
             g_Globals._lua->RunCode(code);
         }
-        return 0;
+        return g_Globals._exitcode;
     }
 
     if (_tcsstr(ext_options, TEXT("-script"))) {
@@ -691,20 +691,20 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
                 new LuaAppEngine(file);
             }
         }
-        return 0;
+        return g_Globals._exitcode;
     }
 
     if (_tcsstr(ext_options, TEXT("-noaction"))) {
-        return 0;
+        return g_Globals._exitcode;
     }
 
     if (_tcsstr(ext_options, TEXT("-settings"))) {
-        return 0;
+        return g_Globals._exitcode;
     }
 
     if (_tcsstr(ext_options, TEXT("-ocf"))) {
         OpenContainingFolder(lpCmdLineOrg);
-        return 0;
+        return g_Globals._exitcode;
     }
 
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
@@ -793,8 +793,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     /* UIManager Process */
     if (!startup_desktop && pUIManager) {
-         Window::MessageLoop();
-         return 0;
+        Window::MessageLoop();
+        return g_Globals._exitcode;
     }
 
     int ret = explorer_main(hInstance, lpCmdLine, nShowCmd);

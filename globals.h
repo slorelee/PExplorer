@@ -83,6 +83,8 @@ extern struct ExplorerGlobals {
     BOOL        _isNT5;
     String      _langID;
     String      _locale;
+
+    int         _exitcode;
 #ifndef ROSSHELL
     ATOM        _hframeClass;
     HWND        _hMainWnd;

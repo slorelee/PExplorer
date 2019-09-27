@@ -37,6 +37,8 @@ ExplorerGlobals::ExplorerGlobals()
     _isWinPE = FALSE;
     _lua = NULL;
 
+    _exitcode = 0;
+
     _varClockTextBuffer[0] = TEXT('\0');
 }
 

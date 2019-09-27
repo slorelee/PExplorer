@@ -504,6 +504,11 @@ extern "C" {
             UINT b = (UINT)lua_tointeger(L, base + 3);
             v.iVal = (s & b);
             PUSH_INT(v);
+        } else if (func == "exitcode") {
+            if (lua_isinteger(L, base + 2)) {
+                int code = (int)lua_tointeger(L, base + 2);
+                g_Globals._exitcode = code;
+            }
         } else if (func == "exit") {
             if (lua_isinteger(L, base + 2)) {
                 int code = (int)lua_tointeger(L, base + 2);
