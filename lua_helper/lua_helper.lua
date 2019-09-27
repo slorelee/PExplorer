@@ -71,6 +71,8 @@ local function lua_files_load()
   require('str_helper')
   require('ui_helper')
   require('cmd_helper')
+  require('loader_helper')
+  require('i18n')
 --]]
 end
 
