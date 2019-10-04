@@ -720,9 +720,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._isShell = TRUE;
 
         {
+            static WindowClass wcWinXShellShellWindow(WINXSHELL_SHELLWINDOW);
+            wcWinXShellShellWindow.Register();
             CreateWindowEx(WS_EX_NOACTIVATE, WINXSHELL_SHELLWINDOW, TEXT(""),
                 WS_POPUP, 0, 0, 0, 0, NULL, NULL, g_Globals._hInstance, 0);
         }
+
         if (g_Globals._lua) g_Globals._lua->preShell();
 
         if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
