@@ -59,6 +59,15 @@ end
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
 
+function Taskbar:WaitForReady()
+  local sh_win = winapi.find_window('Shell_TrayWnd', nil)
+  while (sh_win == nil or sh_win:get_handle() == 0) do
+    app:print(string.format("shell Handle:0x%x", sh_win:get_handle()))
+    app:call('sleep', 1000)
+    sh_win = winapi.find_window('Shell_TrayWnd', nil)
+  end
+end
+
 function Taskbar:GetSetting(key)
   if key == 'AutoHide' then return app:call('Taskbar::AutoHideState') end
   return reg_read(regkey_setting, key)
