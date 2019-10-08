@@ -267,7 +267,9 @@ end
 
 function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
     if not is_x then return end
-    if File.exists('X:\\Windows\\System32\\ieframe.dll') then return end
+    if File.exists('X:\\Windows\\explorer.exe') then
+      if File.exists('X:\\Windows\\System32\\ieframe.dll') then return end
+    end
 
     local key = [[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub]]
     if reg_read(key, '') then return end -- already exists
@@ -276,7 +278,7 @@ function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub]], 'Extended', '')
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub]], 'Position', 'Bottom')
     local explorer_opt = ''
-    if File.exists('X:\\Windows\\explorer.exe') then explorer_opt = '-explorer' end
+    -- if File.exists('X:\\Windows\\explorer.exe') then explorer_opt = '-explorer' end
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub\command]], '', app_path .. '\\WinXShell.exe '.. explorer_opt ..' -ocf \"%1\"')
 
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu]], '', 'disable-{37ea3a21-7493-4208-a011-7f9ea79ce9f5}')
