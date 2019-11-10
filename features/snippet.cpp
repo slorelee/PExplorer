@@ -13,6 +13,20 @@ EXTERN_C {
     extern void explorer_show_frame(int cmdshow, LPTSTR lpCmdLine = NULL);
 }
 
+void WaitForShellTerminated()
+{
+    HWND shellWindow = GetShellWindow();
+
+    if (shellWindow) {
+        DWORD pid;
+        GetWindowThreadProcessId(shellWindow, &pid);
+        if (pid <= 0) return;
+        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+        WaitForSingleObject(hProcess, INFINITE); //INFINITE
+        CloseHandle(hProcess);
+    }
+}
+
 void CloseShellProcess()
 {
     HWND shellWindow = GetShellWindow();

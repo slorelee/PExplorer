@@ -14,6 +14,10 @@ TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
 extern BOOL isWinXShellAsShell();
 
+extern void WaitForShellTerminated();
+extern void CloseShellProcess();
+
+
 #ifdef _DEBUG
 #   ifdef _WIN64
 #       pragma comment(lib, "lua/lua53_d_x64.lib")
@@ -499,6 +503,10 @@ extern "C" {
             CreateShortcut(lnk, target, param, icon, iIcon, iShowCmd);
             v.iVal = 0;
             PUSH_INT(v);
+        } else if (func == "waitforshellterminated") {
+            WaitForShellTerminated();
+        } else if (func == "closeshell") {
+            CloseShellProcess();
         } else if (func == "band") {
             UINT s = (UINT)lua_tointeger(L, base + 2);
             UINT b = (UINT)lua_tointeger(L, base + 3);
