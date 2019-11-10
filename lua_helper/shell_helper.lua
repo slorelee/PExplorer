@@ -59,13 +59,23 @@ end
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
 
-function Taskbar:WaitForReady()
+function Taskbar:IsReady(sec)
   local sh_win = winapi.find_window('Shell_TrayWnd', nil)
-  while (sh_win == nil or sh_win:get_handle() == 0) do
+  local n = -1
+  while (n <= sec and (sh_win == nil or sh_win:get_handle() == 0)) do
     app:print(string.format("shell Handle:0x%x", sh_win:get_handle()))
     app:call('sleep', 1000)
     sh_win = winapi.find_window('Shell_TrayWnd', nil)
+    if sec ~= -1 then n = n + 1 end
   end
+  if sh_win == nil or sh_win:get_handle() == 0 then
+    return false
+  end
+  return true
+end
+
+function Taskbar:WaitForReady()
+  Taskbar:IsReady(-1)
 end
 
 function Taskbar:GetSetting(key)
@@ -158,7 +168,7 @@ end
 
 FolderOptions = {}
 
--- Opt = 
+-- Opt =
 --   'ShowAll'     - Show the hidden files / folders
 --   'ShowExt'     - Show the known extension
 --   'ShowSuperHidden' - Always hide the system files / folders
