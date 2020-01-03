@@ -14,7 +14,7 @@ is_pe = (app:info('iswinpe') == 1)                              -- Windows Prein
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
 
--- 'auto', ui_systemInfo', 'system', '' or nil
+-- 'auto', 'ui_systemInfo', 'system', '' or nil
 handle_system_property = 'auto'
 
 --[[ add one more '-' to be '---', will enable this function
@@ -243,6 +243,8 @@ function regist_system_property() -- handle This PC's property menu
         -- 'control system' works in x86_x64 with explorer.exe
         if ARCH == 'x64' and File.exists('X:\\Windows\\explorer.exe') and
             File.exists('X:\\Windows\\SysWOW64\\wow32.dll') then
+            return
+        elseif ARCH == 'x86' and File.exists('X:\\Windows\\explorer.exe') then
             return
         end
     end
