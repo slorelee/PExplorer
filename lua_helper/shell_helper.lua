@@ -180,3 +180,16 @@ end
 function FolderOptions:Get(opt)
   return app:call('FolderOptions::Get', opt)
 end
+
+-- Helper(alias)
+function PinToTaskbar(target, name, param, icon, index, showcmd)
+  Taskbar:Pin(target, name, param, icon, index, showcmd)
+end
+
+function PinToStartMenu(target, name, param, icon, index, showcmd)
+  Startmenu:Pin(target, name, param, icon, index, showcmd)
+end
+
+function LINK(lnk, target, param, icon, index, showcmd)
+  link(lnk, target, param, icon, index, showcmd)
+end
