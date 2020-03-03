@@ -41,4 +41,5 @@ public:
 
 protected:
     UINT WM_TASKBARCREATED;
+    HICON hLastIcon;
 };

@@ -50,6 +50,7 @@ void CTrayIcon::Set(DWORD dwMessage, UINT id, HICON hIcon, LPCTSTR tooltip) {
 
 CTrayIconController::CTrayIconController() {
     WM_TASKBARCREATED = RegisterWindowMessage(WINMSG_TASKBARCREATED);
+    hLastIcon = NULL;
 }
 
 LRESULT CTrayIconController::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam) {
