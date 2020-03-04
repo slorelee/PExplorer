@@ -26,12 +26,12 @@ function ShellDaemon(wait, cmd)
       Taskbar:WaitForReady()
       app:print('WaitForReady')
       app:call('sleep', 5000)
-      app:call('WaitForShellTerminated')
-      app:print('ShellTerminated')
     end
     wait = false
-    exec('/wait', cmd)
-    app:call('sleep', 500)
+    if Taskbar:IsReady(5) == false then
+      exec('/wait', cmd)
+    end
+    app:call('sleep', 5000)
   end
 end
 
