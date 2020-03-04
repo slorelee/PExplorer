@@ -46,12 +46,13 @@
   "JS_DESKTOP":
   {
     "3rd_open_arguments":"\"%s\"",
-    "cascademenu": {
+    "cascademenu":
+    {
       "#WinXNew":"Directory\\Background\\shell\\WinXNew"
     },
+    "#iconsize":32,
     "bkcolor comment":"green for eyes",
     "bkcolor":[199,237,204],
-    "#iconsize":32,
     "wallpaperstyle comment":"value:0-strech(default);1-tile;2-center",
     "::WP_MODE":0,
     "wallpaper comment":"if it is not set or be empty, will use system's wallpaper image file",
@@ -68,6 +69,9 @@
   },
   "::STARTMENU":
   {
+    "start_pushed_bkcolor" : [0, 100, 180],
+    "start_icon_comment": "empty;custom",
+    "start_icon": "custom",
     "commands": {
       "reboot": {
          "command": "Wpeutil.exe",

@@ -4,8 +4,8 @@
     "此段可省略":true,
     "说明":
     [
-    "PExlorer的jcfg配置文件的说明。",
-    "需要自定义PExlorer中的开始菜单项目，任务栏大小，背景色，文字颜色等时,",
+    "WinXShell的jcfg配置文件的说明。",
+    "需要自定义WinXShell中的开始菜单项目，任务栏大小，背景色，文字颜色等时,",
     "可利用此文件进行定义，未定义时，将利用默认设定。",
     "配置文件中的字符串资源可进行扩展:",
     "    【%】开始的字符串将进行环境变量扩展，需要使用%时，使用%%。",
@@ -18,11 +18,11 @@
     "此段可省略":true,
     "说明":
     [
-    "外部PExlorer.jcfg配置文件加载设定。",
+    "外部WinXShell.jcfg配置文件加载设定。",
     "LOADPATH 内核配置文件中指定外部配置文件路径格式",
     "LOADIF 外部配置文件中可定义存在指定环境变量时加载"
     ],
-    "LOADPATH":"?:\\PExlorer\\PExlorer.jcfg",
+    "LOADPATH":"?:\\WinXShell\\WinXShell.jcfg",
     "LOADIF":"WIN10PEx64-A"
   },
   "JS_JMACRO":
@@ -88,8 +88,9 @@
   "::桌面":
   {
     "::第3方文件管理器打开参数":"\"%s\"",
-    "::多级菜单":{
-        "#WinXNew":"Directory\\Background\\shell\\WinXNew"
+    "::多级菜单":
+    {
+      "#WinXNew":"Directory\\Background\\shell\\WinXNew"
     },
     "#::桌面图标大小":32,
     "背景色注释":"绿豆沙色",
