@@ -673,8 +673,17 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         RegistAppPath();
     }
 
-    if (_tcsstr(ext_options, TEXT("-luacode"))) {
-        String code = GetParameter(lpCmdLineOrg, TEXT("-luacode"), TRUE);
+    TCHAR *code_opt = NULL;
+    if (_tcsstr(ext_options, TEXT("-lua"))) {
+        code_opt = TEXT("-lua");
+    } else if (_tcsstr(ext_options, TEXT("-code"))) {
+        code_opt = TEXT("-code");
+    } else if (_tcsstr(ext_options, TEXT("-luacode"))) {
+        code_opt = TEXT("-luacode");
+    }
+
+    if (code_opt) {
+        String code = GetParameter(lpCmdLineOrg, code_opt, TRUE);
         if (g_Globals._lua) {
             g_Globals._lua->RunCode(code);
         }
