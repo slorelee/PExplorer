@@ -57,6 +57,8 @@
 #define IDC_TERMINATE           0x1018
 #define IDC_RESTART             0x1019
 
+#define IDC_CONNECTIONS_FOLDER  0x110F
+
 #define IDC_FIRST_MENU          0x3000
 
 // hotkeys

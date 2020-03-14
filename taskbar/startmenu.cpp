@@ -1725,6 +1725,9 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
     if (!JCFG2_DEF("JS_STARTMENU", "nobrowse", false).ToBool())
         AddButton(ResString(IDS_BROWSE),        ICID_FOLDER, true, IDC_BROWSE);
 
+    if (!JCFG2_DEF("JS_STARTMENU", "noconnections", false).ToBool())
+        AddButton(ResString(IDS_CONNECTIONS), ICID_NETCONNS, true, IDC_CONNECTIONS_FOLDER);
+
     //if (!g_Globals._SHRestricted || !SHRestricted(REST_NOFIND))
     if (!JCFG2_DEF("JS_STARTMENU", "nofind", true).ToBool())
         AddButton(ResString(IDS_SEARCH),    ICID_SEARCH, true, IDC_SEARCH);
@@ -2016,6 +2019,9 @@ int StartMenuHandler::Command(int id, int code)
 #endif
         break;
     }
+    case IDC_CONNECTIONS_FOLDER:
+        CreateSubmenu(id, CSIDL_CONNECTIONS, ResString(IDS_CONNECTIONS));
+        break;
 
 
     // browse menu
