@@ -87,6 +87,19 @@ function onfirstrun()
   end
 end
 
+function wxs_ui(url)
+    app:print(url)
+    if string.find(url, "wxs-ui:", 1, true) == nil then url = "wxs-ui:" .. url end
+    local exe = app_path .. '\\WinXShell.exe'
+    if url == "wxs-ui:settings" then
+      wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
+    elseif url == "wxs-ui:wifi" then
+      wxsUI('UI_WIFI')
+    elseif url == "wxs-ui:volume" then
+      wxsUI('UI_Volume')
+    end
+end
+
 function ms_settings(url)
     app:print(url)
     if string.find(url, "ms-settings:", 1, true) == nil then url = "ms-settings:" .. url end
