@@ -69,6 +69,40 @@ bool NotifyHook::ModulePathCopyData(LPARAM lparam, HWND *phwnd, String &path)
 }
 #endif //USE_NOTIFYHOOK
 
+
+
+#define DEF_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        EXTERN_C const GUID DECLSPEC_SELECTANY name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+
+//SYS_TRAYICON_CLOCK           {7820AE72-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_VOLUME          {7820AE73-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_NETWORK         {7820AE74-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_POWER           {7820AE75-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_ACTIONCENTER    {7820AE76-23E3-4229-82C1-E41CB67D5B9C}
+//SYS_TRAYICON_PLUG            {7820AE78-23E3-4229-82C1-E41CB67D5B9C}
+DEF_GUID(SYS_TRAYICON_CLOCK, 0x7820ae72, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_VOLUME, 0x7820ae73, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_NETWORK, 0x7820ae74, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_POWER, 0x7820ae75, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+DEF_GUID(SYS_TRAYICON_PLUG, 0x7820ae78, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
+
+static BOOL isEmptyGUID(const GUID *ptr)
+{
+    if (ptr->Data1 != 0 || ptr->Data2 != 0 || ptr->Data3 != 0) return FALSE;
+    for (int i = 0; i < sizeof(ptr->Data4); i++) {
+        if (ptr->Data4[i] != '\0') return FALSE;
+    }
+    return TRUE;
+}
+
+static int IsSameGUID(const GUID *a, const GUID *b) {
+    if (memcmp(a, b, sizeof(GUID)) == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 const int PF_NOTIFYICONDATAA_V1_SIZE = FIELD_OFFSET(X86_NOTIFYICONDATAA, szTip[64]);
 const int PF_NOTIFYICONDATAW_V1_SIZE = FIELD_OFFSET(X86_NOTIFYICONDATAW, szTip[64]);
 
@@ -618,15 +652,6 @@ static TCHAR *getmsgstr(UINT msgid)
 }
 #endif
 
-static BOOL isEmptyGUID(const GUID *ptr)
-{
-    if (ptr->Data1 != 0 || ptr->Data2 != 0 || ptr->Data3 != 0) return FALSE;
-    for (int i = 0; i < sizeof(ptr->Data4); i++) {
-        if (ptr->Data4[i] != '\0') return FALSE;
-    }
-    return TRUE;
-}
-
 #ifdef _DEBUG
 #ifdef _UNICODE
 #define RPC_TSTR RPC_WSTR
@@ -884,29 +909,6 @@ void NotifyArea::CancelModes()
 }
 
 #define NIS_IGNORED              0x00080000
-
-#define DEF_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
-        EXTERN_C const GUID DECLSPEC_SELECTANY name \
-                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-
-//SYS_TRAYICON_CLOCK           {7820AE72-23E3-4229-82C1-E41CB67D5B9C}
-//SYS_TRAYICON_VOLUME          {7820AE73-23E3-4229-82C1-E41CB67D5B9C}
-//SYS_TRAYICON_NETWORK         {7820AE74-23E3-4229-82C1-E41CB67D5B9C}
-//SYS_TRAYICON_POWER           {7820AE75-23E3-4229-82C1-E41CB67D5B9C}
-//SYS_TRAYICON_ACTIONCENTER    {7820AE76-23E3-4229-82C1-E41CB67D5B9C}
-//SYS_TRAYICON_PLUG            {7820AE78-23E3-4229-82C1-E41CB67D5B9C}
-DEF_GUID(SYS_TRAYICON_CLOCK,   0x7820ae72, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-DEF_GUID(SYS_TRAYICON_VOLUME,  0x7820ae73, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-DEF_GUID(SYS_TRAYICON_NETWORK, 0x7820ae74, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-DEF_GUID(SYS_TRAYICON_POWER,   0x7820ae75, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-DEF_GUID(SYS_TRAYICON_PLUG,    0x7820ae78, 0x23e3, 0x4229, 0x82, 0xc1, 0xe4, 0x1c, 0xb6, 0x7d, 0x5b, 0x9c);
-
-static int IsSameGUID(const GUID *a, const GUID *b) {
-    if (memcmp(a, b, sizeof(GUID)) == 0) {
-        return 1;
-    }
-    return 0;
-}
 
 extern void resstr_expand(string_t &restr);
 
