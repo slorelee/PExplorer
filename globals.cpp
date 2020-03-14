@@ -155,3 +155,20 @@ void ExplorerGlobals::write_persistent()
     // write configuration file
     //RecursiveCreateDirectory(_cfg_dir);
 }
+
+void gLuaCall(const char *funcname, LPTSTR p1, LPTSTR p2) {
+    if (g_Globals._lua) {
+        string_t s1 = p1;
+        string_t s2 = p2;
+        g_Globals._lua->call(funcname, s1, s2);
+    }
+}
+
+int gLuaClick(LPTSTR item) {
+    if (g_Globals._lua) {
+        string_t btn = item;
+        return g_Globals._lua->onClick(btn);
+    }
+    return -1;
+}
+

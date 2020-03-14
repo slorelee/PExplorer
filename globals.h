@@ -118,3 +118,7 @@ extern struct ExplorerGlobals {
 } g_Globals;
 
 extern HINSTANCE g_hInst;
+
+extern void gLuaCall(const char *funcname, LPTSTR p1 = TEXT(""), LPTSTR p2 = TEXT(""));
+extern int gLuaClick(LPTSTR item);
+
