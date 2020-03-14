@@ -2196,8 +2196,8 @@ void SettingsMenu::AddEntries()
 
     AddButton(ResString(IDS_ADMIN),             ICID_ADMIN, true, IDC_ADMIN);
 
-    if (!g_Globals._SHRestricted || !SHRestricted(REST_NOCONTROLPANEL))
-        AddButton(ResString(IDS_SETTINGS_MENU), ICID_CONFIG, true, IDC_SETTINGS_MENU);
+    /* if (!g_Globals._SHRestricted || !SHRestricted(REST_NOCONTROLPANEL))
+        AddButton(ResString(IDS_SETTINGS_MENU), ICID_CONFIG, true, IDC_SETTINGS_MENU); */
 
     AddButton(ResString(IDS_DESKTOPBAR_SETTINGS), ICID_DESKSETTING, false, ID_DESKTOPBAR_SETTINGS);
 
