@@ -49,6 +49,9 @@ function onshell()
   regist_shortcut_ocf()
   regist_system_property()
   regist_ms_settings_url()
+
+  wxsUI('UI_WIFI', 'main.jcfg', '-notrayicon -hidewindow')
+  wxsUI('UI_Volume', 'main.jcfg', '-notrayicon -hidewindow')
 end
 
 -- return the resource id for startmenu logo
@@ -110,13 +113,17 @@ function ms_settings(url)
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
     elseif url == "ms-settings:dateandtime" then
       app:run('timedate.cpl')
-    elseif  url == "ms-settings:display" then
+    elseif url == "ms-settings:display" then
       --wxsUI('UI_Resolution', 'main.jcfg')
       wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
     elseif url == "ms-settings:personalization" then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
     elseif url == "ms-settings:personalization-background" then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
+    elseif url == "ms-settings:sound" then
+      wxsUI('UI_Volume')
+    elseif url == "ms-settings:network" then
+      app:run('ncpa.cpl')
     else
       app:run('control.exe')
     end

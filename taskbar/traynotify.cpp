@@ -676,6 +676,22 @@ static BOOL TrayNotifyMessage(HWND hwnd, const NotifyInfo &entry, LPARAM lparam,
             RpcStringFree(&strGuid);
         }
 #endif
+
+        if (lparam == WM_LBUTTONUP) {
+            if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_VOLUME))) {
+                if (JCFG2_DEF("JS_NOTIFYAREA", "handle_system_volume", true).ToBool() != FALSE) {
+                    gLuaCall("wxs_ui", TEXT("volume"));
+                    return TRUE;
+                }
+            }
+            else if (IsSameGUID(&entry._guid, &(SYS_TRAYICON_NETWORK))) {
+                if (JCFG2_DEF("JS_NOTIFYAREA", "handle_system_network", true).ToBool() != FALSE) {
+                    gLuaCall("wxs_ui", TEXT("wifi"));
+                    return TRUE;
+                }
+            }
+        }
+
         //if (lparam == NIN_SELECT) lparam = NIN_KEYSELECT;
         WPARAM wparam = MAKEWPARAM(messagePt.x, messagePt.y);
         return PostMessage(entry._hWnd, entry._uCallbackMessage, wparam, MAKELPARAM(lparam, entry._uID)) == S_OK;
