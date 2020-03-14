@@ -78,6 +78,8 @@ protected:
     TCHAR           _path[MAX_PATH];
     int             _need_reload;
 
+    ULONG _hSHNotify;
+
     void    AddShortcuts();
     void    ReloadShortcuts();
     void    AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry *entry, int flags = TBSTATE_ENABLED);

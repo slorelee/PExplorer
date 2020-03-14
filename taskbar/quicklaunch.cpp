@@ -32,6 +32,7 @@
 
 #include "quicklaunch.h"
 
+#define WM_SHNOTIFY  (WM_USER+0x1)
 
 QuickLaunchEntry::QuickLaunchEntry()
 {
@@ -60,7 +61,7 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
     _fixed_btn = 0;
     _path[0] = TEXT('\0');
     _need_reload = 1;
-
+    _hSHNotify = 0;
     HWND hwndToolTip = (HWND) SendMessage(hwnd, TB_GETTOOLTIPS, 0, 0);
 
     SetWindowStyle(hwndToolTip, GetWindowStyle(hwndToolTip) | TTS_ALWAYSTIP);
@@ -74,6 +75,8 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
 
 QuickLaunchBar::~QuickLaunchBar()
 {
+    if (_hSHNotify != 0)
+        SHChangeNotifyDeregister(_hSHNotify);
     delete _dir;
 }
 
@@ -97,9 +100,9 @@ HWND QuickLaunchBar::Create(HWND hwndParent)
 
 void QuickLaunchBar::ReloadShortcuts()
 {
+    /*
     int cnt = 0;
     static ShellDirectory *shelldir = NULL;
-    if (_need_reload == 0) return;
 
     try {
         if (!shelldir) {
@@ -126,6 +129,7 @@ void QuickLaunchBar::ReloadShortcuts()
     if (_entries.size() == cnt + _fixed_btn) {
         return;
     }
+    */
 
     _next_id = IDC_FIRST_QUICK_ID;
     _entries.clear();
@@ -235,6 +239,23 @@ void QuickLaunchBar::AddShortcuts()
     rbBand.cx = _size;
     SendMessage(GetParent(_hwnd), RB_SETBANDINFO, (WPARAM)0, (LPARAM)&rbBand);
     SendMessage(GetParent(_hwnd), PM_RESIZE_CHILDREN, 0, 0);
+
+    if (_need_reload == 0) return;
+
+    if (_hSHNotify != 0) return;
+
+    // register change notify
+    IShellItem *psi = NULL;
+    LPITEMIDLIST pidl_path;
+    SHCreateItemFromParsingName(_path, NULL, IID_PPV_ARGS(&psi));
+    HRESULT hr = SHGetIDListFromObject(psi, &pidl_path);
+    if (hr != S_OK) return;
+
+    SHChangeNotifyEntry ps;
+    ps.pidl = pidl_path;
+    ps.fRecursive = FALSE;
+    int fSources = SHCNRF_InterruptLevel | SHCNRF_ShellLevel;
+    _hSHNotify = SHChangeNotifyRegister(_hwnd, fSources, SHCNE_CREATE | SHCNE_DELETE | SHCNE_RENAMEITEM | SHCNE_UPDATEDIR, WM_SHNOTIFY, 1, &ps);
 }
 
 void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry *entry, int flags)
@@ -258,16 +279,63 @@ void QuickLaunchBar::AddButton(int id, HBITMAP hbmp, LPCTSTR name, Entry *entry,
     SendMessage(_hwnd, TB_INSERTBUTTON, INT_MAX, (LPARAM)&btn);
 }
 
+#ifdef _DEBUG
+#define MAP_ENTRY(x) {L#x, x}
+
+PCWSTR EventName(long lEvent)
+{
+    PCWSTR psz = L"";
+
+    static const struct { PCWSTR pszName; long lEvent; } c_rgEventNames[] =
+    {
+        MAP_ENTRY(SHCNE_RENAMEITEM),
+        MAP_ENTRY(SHCNE_CREATE),
+        MAP_ENTRY(SHCNE_DELETE),
+        MAP_ENTRY(SHCNE_MKDIR),
+        MAP_ENTRY(SHCNE_RMDIR),
+        MAP_ENTRY(SHCNE_MEDIAINSERTED),
+        MAP_ENTRY(SHCNE_MEDIAREMOVED),
+        MAP_ENTRY(SHCNE_DRIVEREMOVED),
+        MAP_ENTRY(SHCNE_DRIVEADD),
+        MAP_ENTRY(SHCNE_NETSHARE),
+        MAP_ENTRY(SHCNE_NETUNSHARE),
+        MAP_ENTRY(SHCNE_ATTRIBUTES),
+        MAP_ENTRY(SHCNE_UPDATEDIR),
+        MAP_ENTRY(SHCNE_UPDATEITEM),
+        MAP_ENTRY(SHCNE_SERVERDISCONNECT),
+        MAP_ENTRY(SHCNE_DRIVEADDGUI),
+        MAP_ENTRY(SHCNE_RENAMEFOLDER),
+        MAP_ENTRY(SHCNE_FREESPACE),
+        MAP_ENTRY(SHCNE_UPDATEITEM),
+    };
+    for (int i = 0; i < ARRAYSIZE(c_rgEventNames); i++)
+    {
+        if (c_rgEventNames[i].lEvent == lEvent)
+        {
+            psz = c_rgEventNames[i].pszName;
+            break;
+        }
+    }
+    return psz;
+}
+
+void OnChangeMessage(WPARAM wparam, LPARAM lparam) {
+    long lEvent;
+    PIDLIST_ABSOLUTE *rgpidl;
+    HANDLE hNotifyLock = SHChangeNotification_Lock((HANDLE)wparam, (DWORD)lparam, &rgpidl, &lEvent);
+    if (hNotifyLock) {
+        LOG(EventName(lEvent));
+        SHChangeNotification_Unlock(hNotifyLock);
+    }
+}
+#endif
+
 LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     switch (nmsg) {
     case PM_REFRESH:
         AddShortcuts();
         break;
-    case PM_RELOAD_BUTTONS: {
-        ReloadShortcuts();
-        break;
-    }
     case PM_GET_WIDTH: {
         // take line wrapping into account
         int btns = (int)SendMessage(_hwnd, TB_BUTTONCOUNT, 0, 0);
@@ -317,7 +385,12 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
             goto def;
         break;
     }
-
+    case WM_SHNOTIFY:
+#ifdef _DEBUG
+        OnChangeMessage(wparam, lparam);
+#endif
+        ReloadShortcuts();
+        break;
 default: def:
         return super::WndProc(nmsg, wparam, lparam);
     }
