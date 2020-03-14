@@ -129,7 +129,7 @@
   {
     "::第3方文件管理器启动参数":"",
     "::隐藏分隔符":false,
-    "::单行最大图标数":8,
+    "::单行最大图标数":20,
     "::隐藏用户图标":false,
     "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
   },
