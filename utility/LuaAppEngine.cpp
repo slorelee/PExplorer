@@ -567,6 +567,13 @@ extern "C" {
         } else if (name == "isshell") {
             v.iVal = isWinXShellAsShell();
             PUSH_INT(v);
+        } else if (name == "isdebug") {
+#ifdef _DEBUG
+            v.iVal = TRUE;
+#else
+            v.iVal = FALSE;
+#endif // DEBUG
+            PUSH_STR(v);
         } else if (name == "path") {
             v.str = JVAR("JVAR_MODULEPATH").ToString();
             PUSH_STR(v);
