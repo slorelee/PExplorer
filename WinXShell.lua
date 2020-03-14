@@ -207,6 +207,8 @@ function initcontrolpanel(ver)
 end
 
 function regist_folder_shell()
+  if File.exists('X:\\Windows\\explorer.exe') then return end
+
   local key = [[HKEY_CLASSES_ROOT\Folder\shell]]
   local val = reg_read(key, 'WinXShell_Registered')
 
