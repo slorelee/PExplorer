@@ -59,7 +59,6 @@ extern ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
 
 void UIProcess(HINSTANCE hInst, String cmdline);
-extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
 extern void InstallCADHookEntry();
 
 bool FileTypeManager::is_exe_file(LPCTSTR ext)
