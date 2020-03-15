@@ -215,3 +215,33 @@ BOOL isWinXShellAsShell()
     if (FindWindow(WINXSHELL_SHELLWINDOW, NULL)) return TRUE;
     return FALSE;
 }
+
+static BOOL isTarget(LPCTSTR cmd, LPCTSTR target) {
+    String str_cmd = cmd;
+    String str_target = target;
+    str_cmd.toLower();
+    str_target.toLower();
+    if (str_cmd == str_target) {
+        return TRUE;
+    } else if (str_cmd == TEXT("wxs-open:") + str_target) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void wxsOpen(LPTSTR cmd) {
+    if (isTarget(cmd, TEXT("System"))) {
+        launch_file(g_Globals._hwndDesktop, TEXT("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\5\\::{BB06C0E4-D293-4F75-8A90-CB05B6477EEE}"));
+    } else if (isTarget(cmd, TEXT("NetworkConnections"))) {
+        // ncpa.cpl
+        launch_file(g_Globals._hwndDesktop, TEXT("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}"));
+    } else if (isTarget(cmd, TEXT("Printers"))) {
+        launch_file(g_Globals._hwndDesktop, TEXT("::{2227A280-3AEA-1069-A2DE-08002B30309D}"));
+    } else if (isTarget(cmd, TEXT("UsersLibraries"))) {
+        launch_file(g_Globals._hwndDesktop, TEXT("::{031E4825-7B94-4DC3-B131-E946B44C8DD5}"));
+    } else if (isTarget(cmd, TEXT("DevicesAndPrinters"))) {
+        launch_file(g_Globals._hwndDesktop, TEXT("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\2\\::{A8A91A66-3A7D-4424-8D24-04E180695C7A}"));
+    } else {
+        gLuaCall("wxs_open", cmd, TEXT(""));
+    }
+}

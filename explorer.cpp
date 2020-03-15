@@ -728,6 +728,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         return g_Globals._exitcode;
     }
 
+    // wxs-open:xxxx
+    if (cmd_str.find(TEXT("wxs-open:")) != String::npos) {
+        ExplorerCmd cmd;
+        if (lpCmdLine) cmd.ParseCmdLine(lpCmdLine);
+        if (cmd._path.find(TEXT("wxs-open:")) == 0) {
+            if (g_Globals._lua) {
+                wxsOpen((LPTSTR)cmd._path.c_str());
+            }
+        }
+        return g_Globals._exitcode;
+    }
+
     if (_tcsstr(ext_options, TEXT("-daemon"))) {
         return daemon_entry(1);
     }
