@@ -753,13 +753,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             ChangeUserProfileEnv();
         }
 
-        daemon_entry(0);
-
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();
         g_Globals._hwndDesktop = DesktopWindow::Create();
 
         if (g_Globals._lua) g_Globals._lua->onShell();
+
+        daemon_entry(0);
 
 #ifdef _USE_HDESK
         g_Globals._desktops.get_current_Desktop()->_hwndDesktop = g_Globals._hwndDesktop;
