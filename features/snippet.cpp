@@ -242,7 +242,11 @@ static BOOL isTarget(LPCTSTR cmd, LPCTSTR target) {
 
 void wxsOpen(LPTSTR cmd) {
     if (isTarget(cmd, TEXT("System"))) {
-        launch_file(g_Globals._hwndDesktop, TEXT("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\5\\::{BB06C0E4-D293-4F75-8A90-CB05B6477EEE}"));
+        if (hasMSExplorer()) {
+            launch_file(g_Globals._hwndDesktop, TEXT("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\5\\::{BB06C0E4-D293-4F75-8A90-CB05B6477EEE}"));
+        } else {
+            gLuaCall("wxs_ui", TEXT("systeminfo"), TEXT(""));
+        }
     } else if (isTarget(cmd, TEXT("NetworkConnections"))) {
         // ncpa.cpl
         launch_file(g_Globals._hwndDesktop, TEXT("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}"));

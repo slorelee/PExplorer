@@ -14,6 +14,7 @@ TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
 extern BOOL hasMSExplorer();
 extern BOOL isWinXShellAsShell();
+extern void wxsOpen(LPTSTR cmd);
 
 extern void WaitForShellTerminated();
 extern void CloseShellProcess();
@@ -402,6 +403,11 @@ extern "C" {
             v.str = s2w(lua_tostring(L, base + 2));
             varstr_expand(v.str);
             PUSH_STR(v);
+        } else if (func == "wxs_open") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            wxsOpen((LPTSTR)v.str.c_str());
+            v.iVal = 0;
+            PUSH_INT(v);
         } else if (func == "run") {
             string_t cmd = s2w(lua_tostring(L, base + 2));
             string_t param = TEXT("");

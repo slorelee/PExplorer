@@ -15,7 +15,9 @@ function wxs_ui(url)
     app:print(url)
     if string.find(url, "wxs-ui:", 1, true) == nil then url = "wxs-ui:" .. url end
     local exe = app_path .. '\\WinXShell.exe'
-    if url == "wxs-ui:settings" then
+    if url == "wxs-ui:systeminfo" then
+        wxsUI('UI_SystemInfo')
+    elseif url == "wxs-ui:settings" then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
     elseif url == "wxs-ui:wifi" then
       wxsUI('UI_WIFI')
@@ -24,12 +26,6 @@ function wxs_ui(url)
     end
 end
 
--- wxs-open:System
--- wxs-open:NetworkConnections
--- wxs-open:Printers
--- wxs-open:UsersLibraries
--- wxs-open:DevicesAndPrinters
-
 function wxs_open(url)
     app:print(url)
     if string.find(url, "wxs-open:", 1, true) == nil then url = "wxs-open:" .. url end
@@ -37,6 +33,16 @@ function wxs_open(url)
       local sd = os.getenv("SystemDrive")
       if not File.exists(sd .. '\\Windows\\explorer.exe')then return end
       app:run('control.exe')
+    elseif url == "wxs-open:system" then
+      app:call('wxs_open', 'system')
+    elseif url == "wxs-open:networkconnections" then
+      app:call('wxs_open', 'networkconnections')
+    elseif url == "wxs-open:printers" then
+      app:call('wxs_open', 'printers')
+    elseif url == "wxs-open:userslibraries" then
+      app:call('wxs_open', 'userslibraries')
+    elseif url == "wxs-open:devicesandprinters" then
+      app:call('wxs_open', 'devicesandprinters')
     elseif url == "wxs-open:wifi" then
       wxsUI('UI_WIFI')
     elseif url == "wxs-open:volume" then
@@ -120,17 +126,14 @@ function regist_system_property() -- handle This PC's property menu
     -- show This PC on the Desktop
     reg_write([[HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel]], '{20D04FE0-3AEA-1069-A2D8-08002B30309D}', 0, winapi.REG_DWORD)
     -- handle Property menu to UI_SystemInfo
-    reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], '', '@shell32.dll,-33555')
-    reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]], 'Position', 'Bottom')
+    reg_write(key, '', '@shell32.dll,-33555')
+    reg_write(key, 'Position', 'Bottom')
 
-    if handle_system_property == 'system' and File.exists('X:\\Windows\\explorer.exe') then
-      reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]], '',
-        [[explorer.exe ::{26EE0668-A00A-44D7-9371-BEB064C98683}\0\::{BB06C0E4-D293-4F75-8A90-CB05B6477EEE}]])
+    if handle_system_property == 'ui_systemInfo' then
+      reg_write(key ..'\\command', '', app_path .. '\\WinXShell.exe wxs-ui:systeminfo')
     else
-      reg_write([[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties\command]], '',
-        app_path .. '\\WinXShell.exe -luacode wxsUI(\'UI_SystemInfo\')')
+      reg_write(key ..'\\command', '', app_path .. '\\WinXShell.exe wxs-open:system')
     end
-
 end
 
 function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
