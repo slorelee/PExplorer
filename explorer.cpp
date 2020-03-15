@@ -674,12 +674,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     TCHAR *code_opt = NULL;
-    if (_tcsstr(ext_options, TEXT("-lua"))) {
-        code_opt = TEXT("-lua");
+    if (_tcsstr(ext_options, TEXT("-luacode"))) {
+        code_opt = TEXT("-luacode");
     } else if (_tcsstr(ext_options, TEXT("-code"))) {
         code_opt = TEXT("-code");
-    } else if (_tcsstr(ext_options, TEXT("-luacode"))) {
-        code_opt = TEXT("-luacode");
     }
 
     if (code_opt) {
