@@ -12,6 +12,7 @@ extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, 
 extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
 TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
+extern BOOL hasMSExplorer();
 extern BOOL isWinXShellAsShell();
 
 extern void WaitForShellTerminated();
@@ -574,6 +575,9 @@ extern "C" {
             v.iVal = FALSE;
 #endif // DEBUG
             PUSH_STR(v);
+        } else if (name == "hasexplorer") {
+            v.iVal = hasMSExplorer();
+            PUSH_INT(v);
         } else if (name == "path") {
             v.str = JVAR("JVAR_MODULEPATH").ToString();
             PUSH_STR(v);

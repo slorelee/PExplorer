@@ -16,5 +16,6 @@ extern int embedding_entry();
 
 #define WINXSHELL_SHELLWINDOW TEXT("WinXShell_ShellWindow")
 
+extern BOOL hasMSExplorer();
 extern BOOL isWinXShellAsShell();
 extern void wxsOpen(LPTSTR cmd);

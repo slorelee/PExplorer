@@ -209,6 +209,17 @@ void RegistAppPath() {
         REG_SZ, (JVAR("JVAR_MODULEFILENAME").ToString().c_str()), 0);
 }
 
+BOOL hasMSExplorer() {
+    TCHAR buff[32] = { 0 };
+    static TCHAR file[] = TEXT("?:\\Windows\\explorer.exe");
+    if (file[0] == TEXT('?')) {
+        GetEnvironmentVariable(TEXT("SystemDrive"), buff, 10);
+        file[0] = buff[0];
+    }
+    if (PathFileExists(file)) return TRUE;
+    return FALSE;
+}
+
 BOOL isWinXShellAsShell()
 {
     if (g_Globals._isShell) return TRUE;
