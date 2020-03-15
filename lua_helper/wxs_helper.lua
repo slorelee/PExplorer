@@ -92,16 +92,26 @@ function regist_folder_shell()
   -- explore,opennewprocess,opennewtab
 end
 
-function regist_ms_settings_url()
-  if tonumber(win_ver) < 10 then return end
-  local key = [[HKEY_CLASSES_ROOT\ms-settings]]
+local function regist_protocol(protocol, type)
+  local key = 'HKEY_CLASSES_ROOT\\' .. protocol
   local val = reg_read(key .. [[\Shell\Open\Command]], 'DelegateExecute')
   app:print(val)
   if val == nil or val ~= '{C59C9814-F038-4B71-A341-6024882458AF}' then
-    reg_write(key, '', 'URL:ms-settings')
+    reg_write(key, '', 'URL:' .. protocol)
     reg_write(key, 'URL Protocol', '')
     reg_write(key .. [[\Shell\Open\Command]], 'DelegateExecute', '{C59C9814-F038-4B71-A341-6024882458AF}')
+
+    if type == 'App' then
+      reg_write(key .. [[\Application]], 'AppUserModelId', '')
+      reg_write(key .. [[\Shell\Open]], 'PackageId', '')
+    end
   end
+end
+
+function regist_protocols()
+  if tonumber(win_ver) < 10 then return end
+  regist_protocol('ms-settings')
+  regist_protocol('ms-availablenetworks', 'App')
   app:run(app_path .. '\\WinXShell.exe', ' -Embedding')
 end
 

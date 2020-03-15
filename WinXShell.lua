@@ -38,14 +38,14 @@ end
 function ondaemon()
   regist_shortcut_ocf()
   regist_system_property()
-  regist_ms_settings_url()
+  regist_protocols()
 end
 
 function onshell()
   regist_folder_shell()
   regist_shortcut_ocf()
   regist_system_property()
-  regist_ms_settings_url()
+  regist_protocols()
 
   wxsUI('UI_WIFI', 'main.jcfg', '-notrayicon -hidewindow')
   wxsUI('UI_Volume', 'main.jcfg', '-notrayicon -hidewindow')
