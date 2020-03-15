@@ -343,7 +343,7 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChanging(IFileDialog *pDlg, IShe
         LOGA(ptr);
         if (strcmp(ptr, "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}") == 0 ||
             strcmp(ptr, "::{26EE0668-A00A-44D7-9371-BEB064C98683}") == 0) {
-            launch_file(g_Globals._hwndDesktop, TEXT("control.exe"));
+            gLuaCall("wxs_open", TEXT("controlpanel"), TEXT(""));
         }
         CoTaskMemFree(pwsz);
     }
