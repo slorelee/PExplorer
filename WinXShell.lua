@@ -1,9 +1,6 @@
 require('lua_helper.lua_helper')
 require 'winapi'
 
-WM_SYSCOMMAND = 0x0112
-SC_CLOSE      = 0xf060
-
 ICP_TIMER_ID = 10001 -- init control panel timer
 
 cmd_line = app:info('cmdline')
@@ -92,7 +89,6 @@ function onfirstrun()
   end
 end
 
-
 function onclick(ctrl)
   if ctrl == 'startmenu_reboot' then
     return onclick_startmenu_reboot()
@@ -108,37 +104,17 @@ function onclick(ctrl)
   return 1 -- continue shell action
 end
 
-local function power_helper(wu_param, sd_param)
-  local sd = os.getenv("SystemDrive")
-  if File.exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
-    app:run('wpeutil.exe', wu_param, 0) -- SW_HIDE(0)
-    return 0
-  elseif File.exists(sd ..'\\Windows\\System32\\shutdown.exe') then
-    app:run('shutdown.exe', sd_param .. ' -t 0')
-    return 0
-  end
-  return 1
-end
-
-local function reboot()
-    return power_helper('Reboot', '-r')
-end
-
-local function shutdown()
-    return power_helper('Shutdown', '-s')
-end
-
 function onclick_startmenu_reboot()
   -- restart computer directly
-  -- reboot()
+  -- System:Reboot()
   wxsUI('UI_Shutdown', 'full.jcfg')
   return 0
   -- return 1 -- for call system dialog
 end
 
 function onclick_startmenu_shutdown()
-  -- restart computer directly
-  -- shutdown()
+  -- shutdown computer directly
+  -- System::Shutdown()
   wxsUI('UI_Shutdown', 'full.jcfg')
   return 0
   -- return 1 -- for call system dialog
@@ -170,22 +146,14 @@ function ontimer(tid)
 end
 
 -- ======================================================================================
-function close_window(title, class)
-  local win = winapi.find_window(class, title)
-  local hwnd = win:get_handle()
-  app:print('CloseWindow(' .. title .. ', ' .. class .. string.format(", 0x%x", hwnd) .. ')')
-  win:send_message(WM_SYSCOMMAND, SC_CLOSE, 0)
-  return hwnd
-end
-
 function initcontrolpanel(ver)
   --  4161    Control Panel
   local ctrlpanel_title = app:call('resstr', '#{@shell32.dll,4161}')
   app:run('control.exe')
   app:call('sleep', 500)
-  if close_window(ctrlpanel_title, 'CabinetWClass') == 0 then
+  if CloseWindow('CabinetWClass', ctrlpanel_title) == 0 then
     -- 32012    All Control Panel Items
     ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
-    close_window(ctrlpanel_title, 'CabinetWClass')
+    CloseWindow('CabinetWClass', ctrlpanel_title)
   end
 end

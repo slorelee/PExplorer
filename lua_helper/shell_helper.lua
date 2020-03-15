@@ -19,6 +19,26 @@ function System:ColorTheme(mode)
     app:call('System::ChangeColorThemeNotify')
 end
 
+local function power_helper(wu_param, sd_param)
+  local sd = os.getenv("SystemDrive")
+  if File.exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
+    app:run('wpeutil.exe', wu_param, 0) -- SW_HIDE(0)
+    return 0
+  elseif File.exists(sd ..'\\Windows\\System32\\shutdown.exe') then
+    app:run('shutdown.exe', sd_param .. ' -t 0')
+    return 0
+  end
+  return 1
+end
+
+function System:Reboot()
+  return power_helper('Reboot', '-r')
+end
+
+function System:Shutdown()
+  return power_helper('Shutdown', '-s')
+end
+
 local function PinCommand(class, target, name, param, icon, index, showcmd)
   local ext = string.sub(target, -4)
   local case_ext = string.lower(ext)
