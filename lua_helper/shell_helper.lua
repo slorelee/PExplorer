@@ -4,13 +4,39 @@ System = {}
 local regkey_colortheme = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]]
 
 function System:GetSetting(key)
-    if key == 'AppsColorTheme' then
-        return (reg_read(regkey_colortheme, 'AppsUseLightTheme') or 1) | 0 -- convert to integer
-    end
-    return 0
+  if key == 'AppsColorTheme' then
+    return (reg_read(regkey_colortheme, 'AppsUseLightTheme') or 1) | 0 -- convert to integer
+  elseif key == 'SysColorTheme' then
+    return (reg_read(regkey_colortheme, 'SystemUsesLightTheme') or 1) | 0
+  elseif key == 'ShellColorPrevalence' then
+    return (reg_read(regkey_colortheme, 'ColorPrevalence') or 1) | 0
+  elseif key == 'WindowColorPrevalence' then
+    local regkey = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\DWM]]
+    return (reg_read(regkey, 'ColorPrevalence') or 1) | 0
+  end
+  return 0
 end
 
-function System:ColorTheme(mode)
+function System:SetSetting(key, val)
+  if key == 'ShellColorPrevalence' then
+    reg_write(regkey_colortheme, 'ColorPrevalence', val, winapi.REG_DWORD)
+  elseif key == 'WindowColorPrevalence' then
+    local regkey = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\DWM]]
+    reg_write(regkey, 'ColorPrevalence', val, winapi.REG_DWORD)
+  end
+  return 0
+end
+
+function System:SysColorTheme(mode)
+    if mode == 'light' then
+        reg_write(regkey_colortheme, 'SystemUsesLightTheme', 1, winapi.REG_DWORD)
+    else
+        reg_write(regkey_colortheme, 'SystemUsesLightTheme', 0, winapi.REG_DWORD)
+    end
+    app:call('System::ChangeColorThemeNotify')
+end
+
+function System:AppsColorTheme(mode)
     if mode == 'light' then
         reg_write(regkey_colortheme, 'AppsUseLightTheme', 1, winapi.REG_DWORD)
     else
