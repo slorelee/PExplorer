@@ -1,6 +1,8 @@
 require 'reg_helper'
 
 System = {}
+local regkey_user = 'HKEY_CURRENT_USER'
+if os.getenv('USERNAME') == 'SYSTEM' then regkey_user = 'HKEY_LOCAL_MACHINE' end
 local regkey_colortheme = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]]
 
 function System:GetSetting(key)
@@ -11,18 +13,25 @@ function System:GetSetting(key)
   elseif key == 'ShellColorPrevalence' then
     return (reg_read(regkey_colortheme, 'ColorPrevalence') or 1) | 0
   elseif key == 'WindowColorPrevalence' then
-    local regkey = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\DWM]]
+    local regkey = regkey_user .. [[\SOFTWARE\Microsoft\Windows\DWM]]
     return (reg_read(regkey, 'ColorPrevalence') or 1) | 0
+  elseif key == 'Colors.Transparency' then
+    return (reg_read(regkey_colortheme, 'EnableTransparency') or 1) | 0
   end
   return 0
 end
 
 function System:SetSetting(key, val)
+  if val ~= 0 then val = 1 end
   if key == 'ShellColorPrevalence' then
     reg_write(regkey_colortheme, 'ColorPrevalence', val, winapi.REG_DWORD)
+    app:call('System::ChangeColorThemeNotify')
   elseif key == 'WindowColorPrevalence' then
-    local regkey = [[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\DWM]]
+    local regkey = regkey_user .. [[\SOFTWARE\Microsoft\Windows\DWM]]
     reg_write(regkey, 'ColorPrevalence', val, winapi.REG_DWORD)
+  elseif key == 'Colors.Transparency' then
+    reg_write(regkey_colortheme, 'EnableTransparency', val, winapi.REG_DWORD)
+    app:call('System::ChangeColorThemeNotify')
   end
   return 0
 end
