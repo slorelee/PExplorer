@@ -195,6 +195,20 @@ IDI_TRAY_NET_SIGNAL_QUARTER1    ICON            "res/tray_network_signal_25.ico"
 IDI_TRAY_NET_SIGNAL_QUARTER2    ICON            "res/tray_network_signal_50.ico"
 IDI_TRAY_NET_SIGNAL_QUARTER3    ICON            "res/tray_network_signal_75.ico"
 IDI_TRAY_NET_SIGNAL_QUARTER4    ICON            "res/tray_network_signal_100.ico"
+
+IDI_TRAY_DARK_NET_WIRED_DIS          ICON            "res/dark/tray_network_wired_dis.ico"
+IDI_TRAY_DARK_NET_WIRED_LAN          ICON            "res/dark/tray_network_wired_lan.ico"
+IDI_TRAY_DARK_NET_WIRED_INTERNET     ICON            "res/dark/tray_network_wired_internet.ico"
+IDI_TRAY_DARK_NET_WIRELESS_DIS       ICON            "res/dark/tray_network_wireless_dis.ico"
+IDI_TRAY_DARK_NET_WIRELESS_NOCONN    ICON            "res/dark/tray_network_wireless_noconn.ico"
+IDI_TRAY_DARK_NET_WIRELESS_LAN       ICON            "res/dark/tray_network_wireless_lan.ico"
+//IDI_TRAY_DARK_NET_WIRELESS_INTERNET  ICON            "res/dark/tray_network_wireless_internet.ico"
+IDI_TRAY_DARK_NET_SIGNAL_NONE        ICON            "res/dark/tray_network_signal_0.ico"
+IDI_TRAY_DARK_NET_SIGNAL_QUARTER1    ICON            "res/dark/tray_network_signal_25.ico"
+IDI_TRAY_DARK_NET_SIGNAL_QUARTER2    ICON            "res/dark/tray_network_signal_50.ico"
+IDI_TRAY_DARK_NET_SIGNAL_QUARTER3    ICON            "res/dark/tray_network_signal_75.ico"
+IDI_TRAY_DARK_NET_SIGNAL_QUARTER4    ICON            "res/dark/tray_network_signal_100.ico"
+
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
