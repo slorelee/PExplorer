@@ -46,6 +46,7 @@
       ["JS_JVAR", "::程序变量",   "段名。可以定义方便内部多出使用的变量"],
       ["JS_FILEEXPLORER", "::文件管理器",     "段名。可对桌面进行设置"],
       ["3rd_filename", "::第3方文件管理器",   "属性名。"],
+      ["JS_THEMES", "::主题",     "段名。可定义多个主题"],
       ["JS_TASKBAR", "::任务栏",  "段名。可对任务栏的高度，颜色等进行设置"],
       ["smallicon", "::使用小图标",  "属性名。"],
       ["JS_STARTMENU", "::开始菜单",          "段名。可对开始菜单进行设置"],
@@ -100,14 +101,36 @@
     "壁纸注释":"设置为空,或者不设置,将使用系统设置",
     "::桌面壁纸":""
   },
+  "::主题": {
+    "blue": {
+      "taskbar": {
+        "bkcolor": [0, 120, 215],
+        "task_line_color": [238, 238, 238],
+        "textcolor": "0xffffff"
+      }
+    },
+    "dark": {
+      "taskbar": {
+        "bkcolor": [0, 0, 0],
+        "task_line_color": [238, 238, 238],
+        "textcolor": "0xffffff"
+      }
+    },
+    "light": {
+      "taskbar": {
+        "style": "light",
+        "bkcolor": [238, 238, 238],
+        "task_line_color": [0, 120, 215],
+        "textcolor": "0x000000"
+      }
+    }
+  },
   "::任务栏":
   {
     "::使用小图标":false,
     "userebar":false,
     "theme":"dark",
-    "height": 40,
-    "#bkcolor":[0,122,204],
-    "task_line_color":[240,240,240]
+    "height": 40
   },
   "::开始菜单":
   {

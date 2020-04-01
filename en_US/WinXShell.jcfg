@@ -58,14 +58,36 @@
     "wallpaper comment":"if it is not set or be empty, will use system's wallpaper image file",
     "::WP":""
   },
+  "JS_THEMES": {
+    "blue": {
+      "taskbar": {
+        "bkcolor": [0, 120, 215],
+        "task_line_color": [238, 238, 238],
+        "textcolor": "0xffffff"
+      }
+    },
+    "dark": {
+      "taskbar": {
+        "bkcolor": [0, 0, 0],
+        "task_line_color": [238, 238, 238],
+        "textcolor": "0xffffff"
+      }
+    },
+    "light": {
+      "taskbar": {
+        "style": "light",
+        "bkcolor": [238, 238, 238],
+        "task_line_color": [0, 120, 215],
+        "textcolor": "0x000000"
+      }
+    }
+  },
   "JS_TASKBAR":
   {
     "smallicon":false,
     "userebar":false,
     "theme":"dark",
-    "height": 40,
-    "#bkcolor":[0,122,204],
-    "task_line_color":[240,240,240]
+    "height": 40
   },
   "::STARTMENU":
   {
