@@ -139,7 +139,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     } else if (start_icon.compare(TEXT("custom")) == 0) {
         idStartIcon = IDI_SM_CUSTOM_1;
     } else {
-        if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+        if (TASKBAR_THEMESTYLE().compare(TEXT("dark")) == 0) {
             idStartIcon = IDI_STARTMENU_W;
         }
     }

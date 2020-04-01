@@ -15,6 +15,8 @@ extern int g_JCfg_DPI_SX;
 extern int g_JCfg_DPI_SY;
 
 extern HBRUSH g_JCfg_taskbar_bkbrush;
+extern COLORREF g_JCfg_taskbar_textcolor;
+extern string_t g_JCfg_taskbar_themestyle;
 
 extern Object Load_JsonCfg(string_t filename);
 extern Object Load_JCfg(string_t filename);
@@ -60,11 +62,20 @@ extern int JCfg_GetDesktopBarHeight();
 #define JCFG_TB_SET(n, ...) (SET_JCFG##n("JS_TASKBAR", __VA_ARGS__))
 #define JCFG_QL_SET(n, ...) (SET_JCFG##n("JS_QUICKLAUNCH", __VA_ARGS__))
 
+#define JCFG_THEME_DEF(key1, key2, key3, defval) (JCfg_GetValue(&g_JCfg, TEXT("JS_THEMES"), JCFG2(key1, "theme"), TEXT(key2), TEXT(key3), defval))
+#define JCFG_THEME_COLOR(key1, key2, key3) (JCFG_THEME_DEF(key1, key2, key3, Value(0)))
+
 #define DESKTOP_BKCOLOR() (JValueToColor(JCFG2("JS_DESKTOP", "bkcolor")))
-#define TASKBAR_BKCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "bkcolor")))
-#define TASKBAR_TEXTCOLOR() (JValueToColor(JCFG2("JS_TASKBAR", "textcolor")))
+#define TASKBAR_BKCOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "bkcolor")))
+#define TASKBAR_GETTEXTCOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "textcolor")))
+#define TASKBAR_TASKLINECOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "task_line_color")))
+
+#define TASKBAR_GETTHEMESTYLE() (JCFG_THEME_DEF("JS_TASKBAR", "taskbar", "style", TEXT("dark")))
+
 #define TASKBAR_BRUSH() (g_JCfg_taskbar_bkbrush)
-#define CLOCK_TEXT_COLOR() TASKBAR_TEXTCOLOR()
+#define TASKBAR_TEXTCOLOR() (g_JCfg_taskbar_textcolor)
+#define TASKBAR_THEMESTYLE() (g_JCfg_taskbar_themestyle)
+#define CLOCK_TEXT_COLOR() (g_JCfg_taskbar_textcolor)
 
 #define DESKTOPBARBAR_HEIGHT    DPI_SY(JCfg_GetDesktopBarHeight()) //(GetSystemMetrics(SM_CYSIZE) + 5 * GetSystemMetrics(SM_CYEDGE))
 #define REBARBAND_HEIGHT        ((DESKTOPBARBAR_HEIGHT) - 2) //(GetSystemMetrics(SM_CYSIZE) + 3 * GetSystemMetrics(SM_CYEDGE))

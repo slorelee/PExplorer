@@ -1124,7 +1124,7 @@ void NotifyArea::Paint()
         static SizeIcon rightArrowIcon(IDI_NOTIFY_R_B, NOTIFYICON_SIZE);
         if (initIcon == 0) {
             initIcon = 1;
-            if (JCFG2("JS_TASKBAR", "theme").ToString().compare(TEXT("dark")) == 0) {
+            if (TASKBAR_THEMESTYLE().compare(TEXT("dark")) == 0) {
                 leftArrowIcon = SizeIcon(IDI_NOTIFY_L_W, NOTIFYICON_SIZE);
                 rightArrowIcon = SizeIcon(IDI_NOTIFY_R_W, NOTIFYICON_SIZE);
             }

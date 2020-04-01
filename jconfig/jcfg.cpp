@@ -23,11 +23,19 @@ int g_JCfg_taskbar_startmenu_iconsize = 24;
 int g_JCfg_DPI_SX = 96;
 int g_JCfg_DPI_SY = 96;
 HBRUSH g_JCfg_taskbar_bkbrush = NULL;
+COLORREF g_JCfg_taskbar_textcolor = 0;
+string_t g_JCfg_taskbar_themestyle = TEXT("dark");
 
 //default jcfg data
 const wstring def_jcfg = L"{\"JS_SYSTEMINFO\":{\"langid\":\"0\"},"
                          L"\"JS_VERBMENUNAME\":{\"2052\":{\"refresh\":\"Refresh(&E)\",\"rename\":\"Rename(&M)\"}},"
                          L"\"JS_FILEEXPLORER\":{\"3rd_filename\":\"\"},"
+                         L"\"JS_THEMES\":{"
+                         L"\"default\":{\"taskbar\":{\"bkcolor\":[0,0,0],\"task_line_color\":[238,238,238],\"textcolor\":\"0xffffff\"}},"
+                         L"\"blue\":{\"taskbar\":{\"bkcolor\":[0,120,215],\"task_line_color\":[176,176,176],\"textcolor\":\"0xffffff\"}},"
+                         L"\"dark\":{\"taskbar\":{\"bkcolor\":[0,0,0],\"task_line_color\":[238,238,238],\"textcolor\":\"0xffffff\"}},"
+                         L"\"light\":{\"taskbar\":{\"style\":\"light\",\"bkcolor\":[238,238,238],\"task_line_color\":[0,120,215],\"textcolor\":\"0x000000\"}}"
+                         L"},"
                          L"\"JS_DESKTOP\":{"
                          L"\"bkcolor\":[0,0,0],\"wallpaperstyle\":0,"
                          L"\"wallpaper\":\"\","
@@ -174,6 +182,8 @@ static void
 JCfg_init() {
     /* init taskbar background brush */
     g_JCfg_taskbar_bkbrush = CreateSolidBrush(TASKBAR_BKCOLOR());
+    g_JCfg_taskbar_textcolor = TASKBAR_GETTEXTCOLOR();
+    g_JCfg_taskbar_themestyle = TASKBAR_GETTHEMESTYLE();
     JCfg_GetDesktopBarUseSmallIcon();
 
     HDC hdcScreen = GetDC(NULL);

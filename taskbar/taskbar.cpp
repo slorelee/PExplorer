@@ -131,7 +131,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
         return 1;
 
     //hbrTaskLine = GetSysColorBrush(COLOR_BTNFACE);
-    COLORREF clrTaskLine = JValueToColor(JCFG2_DEF("JS_TASKBAR", "task_line_color", (int)RGB(176, 176, 176)));
+    COLORREF clrTaskLine = TASKBAR_TASKLINECOLOR();
     if (clrTaskLine != MAXDWORD) {
         hbrTaskLine = CreateSolidBrush(clrTaskLine);
     }
