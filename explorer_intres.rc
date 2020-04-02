@@ -135,8 +135,8 @@ END
 // remains consistent on all systems.
 IDI_EXPLORER            ICON                    "res/explorer.ico"
 IDI_COMPUTER            ICON                    "res/computer.ico"
-IDI_STARTMENU_W         ICON                    "res/startmenu_w.ico"
-IDI_STARTMENU_B         ICON                    "res/startmenu_b.ico"
+IDI_STARTMENU_W         ICON                    "res/startmenu_white.ico"
+IDI_STARTMENU_B         ICON                    "res/startmenu_black.ico"
 IDI_SM_CUSTOM_1         ICON                    "res/sm_custom_1.ico"
 IDI_SM_CUSTOM_2         ICON                    "res/sm_custom_2.ico"
 IDI_LOGOFF              ICON                    "res/logoff.ico"
