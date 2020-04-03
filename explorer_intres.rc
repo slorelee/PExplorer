@@ -183,6 +183,13 @@ IDI_TRAY_SND_MUTE       ICON                    "res/snd_mute.ico"
 IDI_TRAY_SND_SMALL      ICON                    "res/snd_s.ico"
 IDI_TRAY_SND_MIDDLE     ICON                    "res/snd_m.ico"
 IDI_TRAY_SND_LARGE      ICON                    "res/snd_l.ico"
+
+IDI_TRAY_DARK_SND_NONE       ICON                    "res/dark/snd_none.ico"
+IDI_TRAY_DARK_SND_MUTE       ICON                    "res/dark/snd_mute.ico"
+IDI_TRAY_DARK_SND_SMALL      ICON                    "res/dark/snd_s.ico"
+IDI_TRAY_DARK_SND_MIDDLE     ICON                    "res/dark/snd_m.ico"
+IDI_TRAY_DARK_SND_LARGE      ICON                    "res/dark/snd_l.ico"
+
 IDI_TRAY_NET_WIRED_DIS          ICON            "res/tray_network_wired_dis.ico"
 IDI_TRAY_NET_WIRED_LAN          ICON            "res/tray_network_wired_lan.ico"
 IDI_TRAY_NET_WIRED_INTERNET     ICON            "res/tray_network_wired_internet.ico"

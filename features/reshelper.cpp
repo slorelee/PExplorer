@@ -228,14 +228,12 @@ void IconCache::init()
     _icons[ICID_ADMIN] = Icon(ICID_ADMIN, IDI_ADMIN, icon_size);
     _icons[ICID_RECENT] = Icon(ICID_RECENT, IDI_RECENT, icon_size);
 
-    _icons[ICID_TRAY_SND_NONE] = Icon(IT_STATIC, ICID_TRAY_SND_NONE, SmallIcon(IDI_TRAY_SND_NONE));
-    _icons[ICID_TRAY_SND_MUTE] = Icon(IT_STATIC, ICID_TRAY_SND_MUTE, SmallIcon(IDI_TRAY_SND_MUTE));
-    _icons[ICID_TRAY_SND_SMALL] = Icon(IT_STATIC, ICID_TRAY_SND_SMALL, SmallIcon(IDI_TRAY_SND_SMALL));
-    _icons[ICID_TRAY_SND_MIDDLE] = Icon(IT_STATIC, ICID_TRAY_SND_MIDDLE, SmallIcon(IDI_TRAY_SND_MIDDLE));
-    _icons[ICID_TRAY_SND_LARGE] = Icon(IT_STATIC, ICID_TRAY_SND_LARGE, SmallIcon(IDI_TRAY_SND_LARGE));
+    init_trayicons(_icons, ICID_TRAY_SND_NONE, IDI_TRAY_SND_NONE);
+    int i = ICID_TRAY_SND_NONE + 1;
+    for (; i <= ICID_TRAY_DARK_SND_LARGE; i++) init_trayicons(_icons, i);
 
     init_trayicons(_icons, ICID_TRAY_NET_WIRED_DIS, IDI_TRAY_NET_WIRED_DIS);
-    int i = ICID_TRAY_NET_WIRED_DIS + 1;
+    i = ICID_TRAY_NET_WIRED_DIS + 1;
     for (; i <= ICID_TRAY_DARK_NET_SIGNAL_QUARTER4; i++) init_trayicons(_icons, i);
 }
 

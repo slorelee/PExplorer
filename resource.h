@@ -148,6 +148,11 @@
 #define IDI_TRAY_SND_SMALL              222
 #define IDI_TRAY_SND_MIDDLE             223
 #define IDI_TRAY_SND_LARGE              224
+#define IDI_TRAY_DARK_SND_NONE               225
+#define IDI_TRAY_DARK_SND_MUTE               226
+#define IDI_TRAY_DARK_SND_SMALL              227
+#define IDI_TRAY_DARK_SND_MIDDLE             228
+#define IDI_TRAY_DARK_SND_LARGE              229
 #define IDI_TRAY_NET_WIRED_DIS          230
 #define IDI_TRAY_NET_WIRED_LAN          231
 #define IDI_TRAY_NET_WIRED_INTERNET     232
