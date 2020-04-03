@@ -372,11 +372,12 @@ extern "C" {
         } else if (func == "play") {
             int bewait = 1;
             if (lua_isinteger(L, base + 3)) {
-                int bewait = (int)lua_tointeger(L, base + 2);
+                bewait = (int)lua_tointeger(L, base + 3);
             }
             if (bewait == 0) {
-                //TODO: Thread
-                PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
+                char *file = (char *)malloc(MAX_PATH);
+                strcpy_s(file, MAX_PATH, lua_tostring(L, base + 2));
+                CreateThread(NULL, 0, PlaySndProc, (void *)file, 0, NULL);
             } else {
                 PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
             }
