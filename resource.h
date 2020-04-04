@@ -140,9 +140,11 @@
 #define IDI_NOTIFY_L_B                  202
 #define IDI_NOTIFY_R_B                  203
 #define IDI_STARTMENU_W                 210
-#define IDI_STARTMENU_B                 211
-#define IDI_SM_CUSTOM_1                 212
-#define IDI_SM_CUSTOM_2                 213
+#define IDI_STARTMENU_W2                211
+#define IDI_STARTMENU_B                 212
+#define IDI_STARTMENU_B2                213
+#define IDI_SM_CUSTOM_1                 214
+#define IDI_SM_CUSTOM_2                 215
 #define IDI_TRAY_SND_NONE               220
 #define IDI_TRAY_SND_MUTE               221
 #define IDI_TRAY_SND_SMALL              222
