@@ -356,7 +356,10 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
     DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
     DWORD dwExStyle = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
-    String uiname = JCFG2_DEF("JS_TRAYAREA", "ui_notifyinfo", _T("UI_NotifyInfo")).ToString();
+    if (pTrayInfo->strTitle[0] == _T('\0') && pTrayInfo->strInfo[0] == _T('\0')) return;
+
+    String uiname = JCFG2_DEF("JS_NOTIFYAREA", "ui_notifyinfo", _T("UI_NotifyInfo")).ToString();
+    if (uiname == _T("")) return;
 
     CNotifyInfoWindow *pFrame = new CNotifyInfoWindow(
         _T("WinXShell-NOTITYINFO-Wnd"), uiname);
@@ -364,14 +367,12 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
     if (pFrame == NULL) return;
     CPaintManagerUI *pMgr = pFrame->GetPaintManager();
     if (pMgr) {
-        if (pMgr->GetResourcePath() == _T("")) {
 #ifndef _DEBUG
-            String path = JVAR("JVAR_MODULEPATH").ToString() + _T("\\") + uiname;
+        String path = JVAR("JVAR_MODULEPATH").ToString() + g_Globals._uifolder + _T("\\") + uiname;
 #else
-            String path = uiname + _T("\\");
+        String path = g_Globals._uifolder +_T("\\") + uiname + _T("\\");
 #endif
-            pMgr->SetResourcePath(path.c_str());
-        }
+        pMgr->SetResourcePath(path.c_str());
         String entry = pMgr->GetResourcePath() + _T("main.xml");
         if (!PathFileExists(entry.c_str())) pMgr = NULL;
     }
