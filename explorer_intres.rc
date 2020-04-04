@@ -103,7 +103,7 @@ BEGIN
     "LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL\r\n"
     "STRINGTABLE DISCARDABLE \r\n"
     "BEGIN\r\n"
-    "IDS_VERSION_STR ""RC 4.2.0""\r\n"
+    "IDS_VERSION_STR ""RC 4.3.0""\r\n"
     "#ifdef UNICODE\r\n"
     "IDS_EXPLORER_VERSION_STR ""WinXShell %0s""\r\n"
     "#else\r\n"
@@ -235,8 +235,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 1 VERSIONINFO
- FILEVERSION 20,19,10,8
- PRODUCTVERSION 4.2.0.0
+ FILEVERSION 20,20,4,4
+ PRODUCTVERSION 4.3.0.0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -253,12 +253,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "FreeMan"
             VALUE "FileDescription", "Windows WinXShell"
-            VALUE "FileVersion", "20,19,10,8"
+            VALUE "FileVersion", "20,20,4,4"
             VALUE "InternalName", "WinXShell"
             VALUE "LegalCopyright", "(c) FreeMan. All rights reserved."
             VALUE "OriginalFilename", "WinXShell.exe"
             VALUE "ProductName", "WINXSHELL.EXE"
-            VALUE "ProductVersion", "4.2.0.0"
+            VALUE "ProductVersion", "4.3.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -285,7 +285,7 @@ IDB_TOOLBAR BITMAP DISCARDABLE "res/toolbar.bmp"
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 STRINGTABLE DISCARDABLE 
 BEGIN
-IDS_VERSION_STR "RC 4.2.0"
+IDS_VERSION_STR "RC 4.3.0"
 #ifdef UNICODE
 IDS_EXPLORER_VERSION_STR "WinXShell %0s"
 #else
