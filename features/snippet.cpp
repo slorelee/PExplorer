@@ -233,7 +233,12 @@ String getShellTheme() {
         JVAR("ShellTheme") = JCFG2("JS_TASKBAR", "theme").ToString();
         return JVAR("ShellTheme").ToString();
     }
-    JVAR("ShellTheme") = TEXT("dark");
+    JVAR("ShellTheme") = TEXT("default");
+
+    TCHAR theme[MAX_PATH + 1] = { 0 };
+    DWORD dw =  GetEnvironmentVariable(TEXT("WINXSHELL_SHELLTHEME"), theme, MAX_PATH);
+    if (dw != 0)  JVAR("ShellTheme") = theme;
+
     DWORD type = REG_DWORD, value = 0, size = sizeof(DWORD);
     SHGetValue(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
         TEXT("SystemUsesLightTheme"), &type, &value, &size);
