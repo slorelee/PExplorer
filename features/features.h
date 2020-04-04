@@ -18,4 +18,5 @@ extern int embedding_entry();
 
 extern BOOL hasMSExplorer();
 extern BOOL isWinXShellAsShell();
+extern String getShellTheme();
 extern void wxsOpen(LPTSTR cmd);

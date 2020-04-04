@@ -209,7 +209,8 @@ void RegistAppPath() {
         REG_SZ, (JVAR("JVAR_MODULEFILENAME").ToString().c_str()), 0);
 }
 
-BOOL hasMSExplorer() {
+BOOL hasMSExplorer()
+{
     TCHAR buff[32] = { 0 };
     static TCHAR file[] = TEXT("?:\\Windows\\explorer.exe");
     if (file[0] == TEXT('?')) {
@@ -225,6 +226,19 @@ BOOL isWinXShellAsShell()
     if (g_Globals._isShell) return TRUE;
     if (FindWindow(WINXSHELL_SHELLWINDOW, NULL)) return TRUE;
     return FALSE;
+}
+
+String getShellTheme() {
+    if (!hasMSExplorer() || isWinXShellAsShell()) {
+        JVAR("ShellTheme") = JCFG2("JS_TASKBAR", "theme").ToString();
+        return JVAR("ShellTheme").ToString();
+    }
+    JVAR("ShellTheme") = TEXT("dark");
+    DWORD type = REG_DWORD, value = 0, size = sizeof(DWORD);
+    SHGetValue(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+        TEXT("SystemUsesLightTheme"), &type, &value, &size);
+    if (value == 1) JVAR("ShellTheme") = TEXT("light");
+    return JVAR("ShellTheme").ToString();
 }
 
 static BOOL isTarget(LPCTSTR cmd, LPCTSTR target) {
