@@ -373,7 +373,7 @@ static void InitInstance(HINSTANCE hInstance)
     g_Globals._cfStrFName = RegisterClipboardFormat(CFSTR_FILENAME);
 }
 
-extern void send_ms_settings_url(PWSTR pszName);
+extern void send_wxs_protocol_url(PWSTR pszName);
 
 int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
 {
@@ -405,7 +405,7 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
             ExplorerCmd cmd;
             if (lpCmdLine) cmd.ParseCmdLine(lpCmdLine);
             if (cmd._path.find(TEXT("ms-settings:")) == 0) {
-                send_ms_settings_url((PWSTR)(cmd._path.c_str()));
+                send_wxs_protocol_url((PWSTR)(cmd._path.c_str()));
             } else {
                 rc = explorer_open_frame(cmdShow, lpCmdLine, EXPLORER_OPEN_NORMAL);
             }

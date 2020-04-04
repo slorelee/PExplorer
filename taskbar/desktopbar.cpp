@@ -688,7 +688,7 @@ CShellDispatch::ShutdownWindows:1FAh
 #define IDC_FILERUN        0x191
 #define IDC_TOGGLEDESKTOP  0x197
 
-extern void send_ms_settings_url(PWSTR pszName);
+extern void send_wxs_protocol_url(PWSTR pszName);
 
 int DesktopBar::Command(int id, int code)
 {
@@ -730,10 +730,10 @@ int DesktopBar::Command(int id, int code)
             if (PathFileExists(dllPath)) {
                 launch_file(g_Globals._hwndDesktop, TEXT("ms-settings:taskbar"));
             } else {
-                send_ms_settings_url(L"taskbar");
+                send_wxs_protocol_url(L"taskbar");
             }
         } else {
-            send_ms_settings_url(L"taskbar");
+            send_wxs_protocol_url(L"taskbar");
             //ExplorerPropertySheet(g_Globals._hwndDesktop);
         }
         break;
