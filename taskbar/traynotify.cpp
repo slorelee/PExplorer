@@ -356,7 +356,7 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
     DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
     DWORD dwExStyle = WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
 
-    if (pTrayInfo->strTitle[0] == _T('\0') && pTrayInfo->strInfo[0] == _T('\0')) return;
+    if (pTrayInfo->strTitle.c_str()[0] == _T('\0') && pTrayInfo->strInfo.c_str()[0] == _T('\0')) return;
 
     String uiname = JCFG2_DEF("JS_NOTIFYAREA", "ui_notifyinfo", _T("UI_NotifyInfo")).ToString();
     if (uiname == _T("")) return;
