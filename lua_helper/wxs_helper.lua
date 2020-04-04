@@ -13,63 +13,68 @@ end
 
 function wxs_ui(url)
     app:print(url)
-    if string.find(url, "wxs-ui:", 1, true) == nil then url = "wxs-ui:" .. url end
+    if string.find(url, 'wxs-ui:', 1, true) then
+      url = url:gsub('wxs-ui:', '')
+    end
+
     local exe = app_path .. '\\WinXShell.exe'
-    if url == "wxs-ui:systeminfo" then
-        wxsUI('UI_SystemInfo')
-    elseif url == "wxs-ui:settings" then
+    if url == "systeminfo" then
+      wxsUI('UI_SystemInfo')
+    elseif url == "settings" then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
-    elseif url == "wxs-ui:wifi" then
+    elseif url == "wifi" then
       wxsUI('UI_WIFI')
-    elseif url == "wxs-ui:volume" then
+    elseif url == "volume" then
       wxsUI('UI_Volume')
     end
 end
 
 function wxs_open(url)
     app:print(url)
-    if string.find(url, "wxs-open:", 1, true) == nil then url = "wxs-open:" .. url end
-    if url == "wxs-open:controlpanel" then
-      local sd = os.getenv("SystemDrive")
-      if not File.exists(sd .. '\\Windows\\explorer.exe')then return end
+    if string.find(url, 'wxs-open:', 1, true) == nil then
+      url = url:gsub('wxs-open:', '')
+    end
+
+    if url == 'controlpanel' then
+      local sd = os.getenv('SystemDrive')
+      if not File.exists(sd .. '\\Windows\\explorer.exe') then return end
       app:run('control.exe')
-    elseif url == "wxs-open:system" then
+    elseif url == 'system' then
       app:call('wxs_open', 'system')
-    elseif url == "wxs-open:networkconnections" then
+    elseif url == 'networkconnections' then
       app:call('wxs_open', 'networkconnections')
-    elseif url == "wxs-open:printers" then
+    elseif url == 'printers' then
       app:call('wxs_open', 'printers')
-    elseif url == "wxs-open:userslibraries" then
+    elseif url == 'userslibraries' then
       app:call('wxs_open', 'userslibraries')
-    elseif url == "wxs-open:devicesandprinters" then
+    elseif url == 'devices' then
       app:call('wxs_open', 'devicesandprinters')
-    elseif url == "wxs-open:wifi" then
+    elseif url == 'wifi' then
       wxsUI('UI_WIFI')
-    elseif url == "wxs-open:volume" then
+    elseif url == 'volume' then
       wxsUI('UI_Volume')
     end
 end
 
 function ms_settings(url)
     app:print(url)
-    if string.find(url, "ms-settings:", 1, true) then
-      url = url:gsub('ms-settings:', '')
-    end
+    if string.find(url, 'ms-settings:', 1, true) == nil then return end
+    url = url:gsub('ms-settings:', '')
 
-    if url == "taskbar" then
+    if url == 'taskbar' then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
-    elseif url == "dateandtime" then
+    elseif url == 'dateandtime' then
       app:run('timedate.cpl')
-    elseif url == "display" then
+    elseif url == 'display' then
       --wxsUI('UI_Resolution', 'main.jcfg')
       wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
-    elseif url == "personalization" then
+    elseif url == 'personalization' then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
-    elseif url == "personalization-background" then
+    elseif url == 'personalization-background' then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
-    elseif url == "sound" then
+    elseif url == 'sound' then
       wxsUI('UI_Volume')
-    elseif url == "network" then
+    elseif url == 'network' then
       wxs_open('networkconnections')
     else
        wxs_open('controlpanel')
@@ -77,7 +82,8 @@ function ms_settings(url)
 end
 
 function wxs_protocol(url)
-  if url == "ms-availablenetworks:" then
+  app:print(url)
+  if url == 'ms-availablenetworks:' then
     wxsUI('UI_WIFI')
   else
     ms_settings(url)
@@ -85,7 +91,8 @@ function wxs_protocol(url)
 end
 
 function regist_folder_shell()
-  if File.exists('X:\\Windows\\explorer.exe') then return end
+  local sd = os.getenv("SystemDrive")
+  if File.exists(sd .. '\\Windows\\explorer.exe') then return end
 
   local key = [[HKEY_CLASSES_ROOT\Folder\shell]]
   local val = reg_read(key, 'WinXShell_Registered')
@@ -122,7 +129,7 @@ function regist_protocols()
   if tonumber(win_ver) < 10 then return end
   regist_protocol('ms-settings')
   regist_protocol('ms-availablenetworks', 'App')
-  app:run(app_path .. '\\WinXShell.exe', ' -Embedding')
+  app:run(app_path .. '\\WinXShell.exe', '-Embedding')
 end
 
 function regist_system_property() -- handle This PC's property menu
