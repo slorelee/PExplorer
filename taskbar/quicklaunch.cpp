@@ -71,6 +71,8 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
 
     // delay refresh to some time later
     PostMessage(hwnd, PM_REFRESH, 0, 0);
+    // SetTimer(hwnd, PM_RELOAD_BUTTONS, 10000, NULL);
+
 }
 
 QuickLaunchBar::~QuickLaunchBar()
@@ -361,6 +363,12 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         }
         return max_cx;
     }
+    case WM_TIMER:
+        if (wparam == PM_RELOAD_BUTTONS) {
+            ReloadShortcuts();
+            KillTimer(_hwnd, PM_RELOAD_BUTTONS);
+        }
+        break;
     case WM_CONTEXTMENU: {
         TBBUTTON btn;
         QuickLaunchMap::iterator it;
@@ -389,7 +397,8 @@ LRESULT QuickLaunchBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 #ifdef _DEBUG
         OnChangeMessage(wparam, lparam);
 #endif
-        ReloadShortcuts();
+        KillTimer(_hwnd, PM_RELOAD_BUTTONS);
+        SetTimer(_hwnd, PM_RELOAD_BUTTONS, 500, NULL);
         break;
 default: def:
         return super::WndProc(nmsg, wparam, lparam);

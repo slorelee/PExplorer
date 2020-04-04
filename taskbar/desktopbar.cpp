@@ -540,7 +540,6 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 
     case WM_TIMER:
         if (wparam == 0) {
-            if (_hwndQuickLaunch) SendMessage(_hwndQuickLaunch, PM_RELOAD_BUTTONS, 0, 0);
             if (JCFG2_DEF("JS_TASKBAR", "hideforfullscreenwindow", true).ToBool() != FALSE) {
                 HideForFullScreenWindow(_hwnd);
             }
