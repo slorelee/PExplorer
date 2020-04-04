@@ -52,26 +52,36 @@ end
 
 function ms_settings(url)
     app:print(url)
-    if string.find(url, "ms-settings:", 1, true) == nil then url = "ms-settings:" .. url end
-    local exe = app_path .. '\\WinXShell.exe'
-    if url == "ms-settings:taskbar" then
+    if string.find(url, "ms-settings:", 1, true) then
+      url = url:gsub('ms-settings:', '')
+    end
+
+    if url == "taskbar" then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
-    elseif url == "ms-settings:dateandtime" then
+    elseif url == "dateandtime" then
       app:run('timedate.cpl')
-    elseif url == "ms-settings:display" then
+    elseif url == "display" then
       --wxsUI('UI_Resolution', 'main.jcfg')
       wxsUI('UI_Settings', 'main.jcfg', '-display -fixscreen')
-    elseif url == "ms-settings:personalization" then
+    elseif url == "personalization" then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
-    elseif url == "ms-settings:personalization-background" then
+    elseif url == "personalization-background" then
       wxsUI('UI_Settings', 'main.jcfg', '-colors -fixscreen')
-    elseif url == "ms-settings:sound" then
+    elseif url == "sound" then
       wxsUI('UI_Volume')
-    elseif url == "ms-settings:network" then
+    elseif url == "network" then
       wxs_open('networkconnections')
     else
        wxs_open('controlpanel')
     end
+end
+
+function wxs_protocol(url)
+  if url == "ms-availablenetworks:" then
+    wxsUI('UI_WIFI')
+  else
+    ms_settings(url)
+  end
 end
 
 function regist_folder_shell()
