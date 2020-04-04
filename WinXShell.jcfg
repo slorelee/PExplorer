@@ -129,7 +129,7 @@
   {
     "::使用小图标":false,
     "userebar":false,
-    "theme":"dark",
+    "theme":  "dark",
     "height": 40
   },
   "::开始菜单":

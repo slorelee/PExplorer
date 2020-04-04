@@ -86,7 +86,7 @@
   {
     "smallicon":false,
     "userebar":false,
-    "theme":"dark",
+    "theme":  "dark",
     "height": 40
   },
   "::STARTMENU":
