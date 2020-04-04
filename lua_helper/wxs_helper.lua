@@ -14,7 +14,7 @@ end
 function wxs_ui(url)
     app:print(url)
     if string.find(url, 'wxs-ui:', 1, true) then
-      url = url:gsub('wxs-ui:', '')
+      url = url:gsub('wxs[-]ui:', '')
     end
 
     local exe = app_path .. '\\WinXShell.exe'
@@ -32,7 +32,7 @@ end
 function wxs_open(url)
     app:print(url)
     if string.find(url, 'wxs-open:', 1, true) == nil then
-      url = url:gsub('wxs-open:', '')
+      url = url:gsub('wxs[-]open:', '')
     end
 
     if url == 'controlpanel' then
@@ -59,7 +59,7 @@ end
 function ms_settings(url)
     app:print(url)
     if string.find(url, 'ms-settings:', 1, true) == nil then return end
-    url = url:gsub('ms-settings:', '')
+    url = url:gsub('ms[-]settings:', '')
 
     if url == 'taskbar' then
       wxsUI('UI_Settings', 'main.jcfg', '-fixscreen')
