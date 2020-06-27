@@ -56,6 +56,7 @@
       ["hide_fixedsep", "::隐藏分隔符", "属性名。"],
       ["hide_usericons", "::隐藏用户图标", "属性名。"],
       ["JS_NOTIFYAREA", "::托盘区域",         "段名。可对托盘区域进行设置"],
+      ["hide_toggle_button", "::隐藏显示隐藏图标按钮", "属性名。"],
       ["hide_showdesktop_button", "::隐藏显示桌面按钮", "属性名。"],
       ["JS_NOTIFYCLOCK", "::时钟栏",          "段名。可对时钟栏进行设置"],
       ["JS_DESKTOP", "::桌面",                "段名。可对桌面进行设置"],
@@ -137,6 +138,17 @@
     "start_pushed_bkcolor" : [0, 100, 180],
     "start_icon_comment": "theme;empty;custom",
     "start_icon": "theme",
+    "notopitems":false,
+    "noprograms":false,
+    "nosettings":true,
+    "nobrowse":false,
+    "noconnections":false,
+    "nofind":true,
+    "norun":false,
+    "nologoff":true,
+    "norestart":false,
+    "noshutdown":false,
+    "noterm":true,
     "commands": {
       "reboot": {
          "command": "Wpeutil.exe",
@@ -158,6 +170,11 @@
   },
   "::托盘区域":
   {
+    "::隐藏显示隐藏图标按钮":false,
     "::隐藏显示桌面按钮":false
+  },
+  "::时钟栏":
+  {
+    "visible":true
   }
 }

@@ -94,6 +94,17 @@
     "start_pushed_bkcolor" : [0, 100, 180],
     "start_icon_comment": "theme;empty;custom",
     "start_icon": "theme",
+    "notopitems":false,
+    "noprograms":false,
+    "nosettings":true,
+    "nobrowse":false,
+    "noconnections":false,
+    "nofind":true,
+    "norun":false,
+    "nologoff":true,
+    "norestart":false,
+    "noshutdown":false,
+    "noterm":true,
     "commands": {
       "reboot": {
          "command": "Wpeutil.exe",
@@ -115,6 +126,11 @@
   },
     "JS_NOTIFYAREA":
   {
+    "hide_toggle_button":false,
     "hide_showdesktop_button":false
+  },
+    "JS_NOTIFYCLOCK":
+  {
+    "visible":true
   }
 }
