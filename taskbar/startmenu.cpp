@@ -1703,14 +1703,17 @@ int StartMenuRoot::Command(int id, int code)
 
 LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
 {
-    // add buttons for entries in _entries
-    if (super::Init(pcs))
-        return 1;
+    if (!JCFG2_DEF("JS_STARTMENU", "notopitems", false).ToBool()) {
+        // add buttons for entries in _entries
+        if (super::Init(pcs))
+            return 1;
 
-    AddSeparator();
+        AddSeparator();
+    }
 
     // insert hard coded start entries
-    AddButton(ResString(IDS_PROGRAMS),      ICID_APPS, true, IDC_PROGRAMS);
+    if (!JCFG2_DEF("JS_STARTMENU", "noprograms", false).ToBool())
+        AddButton(ResString(IDS_PROGRAMS),      ICID_APPS, true, IDC_PROGRAMS);
 
     //AddButton(ResString(IDS_DOCUMENTS),     ICID_DOCUMENTS, true, IDC_DOCUMENTS);
 
@@ -1725,8 +1728,15 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
     if (!JCFG2_DEF("JS_STARTMENU", "nobrowse", false).ToBool())
         AddButton(ResString(IDS_BROWSE),        ICID_FOLDER, true, IDC_BROWSE);
 
-    if (!JCFG2_DEF("JS_STARTMENU", "noconnections", false).ToBool())
-        AddButton(ResString(IDS_CONNECTIONS), ICID_NETCONNS, true, IDC_CONNECTIONS_FOLDER);
+    if (!JCFG2_DEF("JS_STARTMENU", "noconnections", false).ToBool()) {
+        TCHAR sysPathBuff[MAX_PATH] = { 0 };
+        GetWindowsDirectory(sysPathBuff, MAX_PATH);
+        String sPath = sysPathBuff;
+        sPath.append(_T("\\System32\\netshell.dll")); // NetSetupApi.dll
+        if (PathFileExists(sPath)) {
+            AddButton(ResString(IDS_CONNECTIONS), ICID_NETCONNS, true, IDC_CONNECTIONS_FOLDER);
+        }
+    }
 
     //if (!g_Globals._SHRestricted || !SHRestricted(REST_NOFIND))
     if (!JCFG2_DEF("JS_STARTMENU", "nofind", true).ToBool())
