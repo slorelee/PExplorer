@@ -118,9 +118,11 @@
   },
   "::QL":
   {
-    "3rd_startup_arguments":"",
-    "hide_fixedsep":false,
     "maxiconsinrow":20,
+    "3rd_startup_arguments":"",
+    "hide_showdesktop":false,
+    "hide_fileexplorer":false,
+    "hide_fixedsep":false,
     "hide_usericons":false,
     "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
   },

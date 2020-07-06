@@ -51,8 +51,10 @@
       ["smallicon", "::使用小图标",  "属性名。"],
       ["JS_STARTMENU", "::开始菜单",          "段名。可对开始菜单进行设置"],
       ["JS_QUICKLAUNCH", "::快速启动栏",      "段名。可对快速启动栏进行设置"],
-      ["3rd_startup_arguments", "::第3方文件管理器启动参数", "属性名。"],
       ["maxiconsinrow", "::单行最大图标数", "属性名。"],
+      ["3rd_startup_arguments", "::第3方文件管理器启动参数", "属性名。"],
+      ["hide_showdesktop", "::隐藏显示桌面图标", "属性名。"],
+      ["hide_fileexplorer", "::隐藏资源管理器图标", "属性名。"],
       ["hide_fixedsep", "::隐藏分隔符", "属性名。"],
       ["hide_usericons", "::隐藏用户图标", "属性名。"],
       ["JS_NOTIFYAREA", "::托盘区域",         "段名。可对托盘区域进行设置"],
@@ -162,9 +164,11 @@
   },
   "::快速启动栏":
   {
-    "::第3方文件管理器启动参数":"",
-    "::隐藏分隔符":false,
     "::单行最大图标数":20,
+    "::第3方文件管理器启动参数":"",
+    "::隐藏显示桌面图标":false,
+    "::隐藏资源管理器图标":false,
+    "::隐藏分隔符":false,
     "::隐藏用户图标":false,
     "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
   },
