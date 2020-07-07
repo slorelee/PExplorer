@@ -63,6 +63,9 @@ typedef struct _Token {
     string_t attr; //element
 } Token;
 
+extern Token GetResolutionList(int n = -1);
+extern Token SetResolutionByStr(string_t wh);
+
 struct LuaAppWindow : public Window {
     typedef Window super;
     LuaAppWindow(HWND hwnd);
@@ -196,6 +199,10 @@ extern "C" {
         func = _strlwr(funcname);
 
         if (func == "getresolutionlist") {
+            int n = (int)lua_tointeger(L, base + 2);
+            v = GetResolutionList(n);
+            PUSH_STR(v);
+            PUSH_INT(v);
         } else if (func == "cd") {
             string_t str_path = s2w(lua_tostring(L, base + 2));
             SetCurrentDirectory(str_path.c_str());
@@ -266,6 +273,13 @@ extern "C" {
                 v.iVal = GetSystemMetrics(SM_CYSCREEN);
             } else if (v.str == TEXT("rotation")) {
                 v.iVal = GetScreenRotation();
+            } else if (v.str == TEXT("resolutionlist")) {
+                v = GetResolutionList();
+                PUSH_STR(v);
+            } else if (v.str == TEXT("xy")) {
+                v.iVal = GetSystemMetrics(SM_CXSCREEN);
+                PUSH_INT(v);
+                v.iVal = GetSystemMetrics(SM_CYSCREEN);
             }
             PUSH_INT(v);
         } else if (func == "screen::set") {
@@ -280,6 +294,11 @@ extern "C" {
                 MonitorAdapter m_monitorAdapter;
                 VEC_MONITORMODE_INFO vecMointorListInfo;
                 v.iVal = m_monitorAdapter.ChangeMonitorResolution(NULL, w, h);
+            } else if (v.str == TEXT("maxresolution")) {
+                v = GetResolutionList(1);
+                if (v.iVal > 0) {
+                    v = SetResolutionByStr(v.str);
+                }
             }
             PUSH_INT(v);
         } else if (func == "volume::mute") {
