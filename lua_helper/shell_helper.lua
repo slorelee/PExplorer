@@ -202,7 +202,12 @@ function Screen:GetRotation()
 end
 
 function Screen:Disp(w, h)
-  local ret = app:call('Screen::Set', 'resolution', w, h)
+  local ret = -1
+  if w == nil then
+    ret = app:call('Screen::Set', 'maxresolution')
+  else
+    ret = app:call('Screen::Set', 'resolution', w, h)
+  end
   if ret == 0 then
     fixscreen()
   end
