@@ -664,6 +664,11 @@ end\n\
 function app:run(...)\n\
   app.call('run', ...)\n\
   \n\
+end\n\
+\n\
+function app:sleep(...)\n\
+  app.call('sleep', ...)\n\
+  \n\
 end";
 
 static int lua_errorfunc = MININT;
