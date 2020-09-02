@@ -1,3 +1,5 @@
+#undef UNICODE
+
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
 #include <string.h>

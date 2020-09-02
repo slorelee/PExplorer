@@ -13,6 +13,10 @@ A useful set of Windows API functions.
 @license MIT/X11
 @module winapi
 */
+
+#undef UNICODE
+#pragma comment(lib, "mpr.lib")
+
 #line 16 "winapi.l.c"
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
