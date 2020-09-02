@@ -2899,3 +2899,23 @@ set_winapi_constants(L);
 }
 
 
+static int luaopen_winapi_module(lua_State *L) {
+    luaL_newlib(L, winapi_funs);
+    Window_register(L);
+    Event_register(L);
+    Mutex_register(L);
+    Process_register(L);
+    Thread_register(L);
+    File_register(L);
+    Regkey_register(L);
+    init_mutex(L);
+    set_winapi_constants(L);
+    return 1;
+}
+
+
+int luaopen_winapi_lib(lua_State *L) {
+    luaL_requiref(L, "winapi", luaopen_winapi_module, 1);
+    load_lua_code(L);
+    return 0;
+}

@@ -673,6 +673,11 @@ end";
 
 static int lua_errorfunc = MININT;
 
+
+EXTERN_C {
+    extern int luaopen_winapi_lib(lua_State *L);
+}
+
 void LuaAppEngine::init(string_t& file)
 {
     L = luaL_newstate();
@@ -681,8 +686,8 @@ void LuaAppEngine::init(string_t& file)
     ((LuaAppWindow *)_frame)->_lua = this;
 
     luaL_openlibs(L);
+    luaopen_winapi_lib(L);
     luaL_requiref(L, "app", luaopen_app_module, 1);
-
     luaL_dostring(L, built_code_errorhandle);
     luaL_dostring(L, app_built_code);
     luaL_dofile(L, w2s(file).c_str());
