@@ -2479,6 +2479,19 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
 
   }
 
+  /// delete a value.
+  // @param name the value name (can be empty for the default value)
+  // @function delete_value
+  static int l_Regkey_delete_value(lua_State *L) {
+      Regkey *this = Regkey_arg(L, 1);
+      const char *name = luaL_optlstring(L, 2, "", NULL);
+
+      if (RegDeleteValueW(this->key, wstring(name)) != ERROR_SUCCESS) {
+          return push_error(L);
+      }
+      return 0;
+  }
+
   static int l_Regkey_delete_key(lua_State *L) {
     Regkey *this = Regkey_arg(L,1);
     const char *name = luaL_checklstring(L,2,NULL);
@@ -2551,6 +2564,7 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
 static const struct luaL_Reg Regkey_methods [] = {
      {"set_value",l_Regkey_set_value},
    {"get_value",l_Regkey_get_value},
+   {"delete_value",l_Regkey_delete_value},
    {"delete_key",l_Regkey_delete_key},
    {"get_keys",l_Regkey_get_keys},
    {"close",l_Regkey_close},
