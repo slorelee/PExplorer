@@ -2492,9 +2492,12 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
       return 0;
   }
 
+  /// delete a subkey, or the key self.
+  // @param subkey the subkey (can be empty for the key self)
+  // @function delete_key/delete
   static int l_Regkey_delete_key(lua_State *L) {
     Regkey *this = Regkey_arg(L,1);
-    const char *name = luaL_checklstring(L,2,NULL);
+    const char *name = luaL_optlstring(L, 2, "", NULL);
     #line 1869 "winapi.l.c"
     if (RegDeleteKeyW(this->key,wstring(name)) == ERROR_SUCCESS) {
       lua_pushboolean(L,1);
@@ -2566,6 +2569,7 @@ static const struct luaL_Reg Regkey_methods [] = {
    {"get_value",l_Regkey_get_value},
    {"delete_value",l_Regkey_delete_value},
    {"delete_key",l_Regkey_delete_key},
+   {"delete",l_Regkey_delete_key},
    {"get_keys",l_Regkey_get_keys},
    {"close",l_Regkey_close},
    {"flush",l_Regkey_flush},
