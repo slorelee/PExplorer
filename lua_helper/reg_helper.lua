@@ -40,7 +40,7 @@ function reg_delete(key, name)
   if name == nil then
     k:delete()
   else
-    k:del_value(name)
+    k:delete_value(name)
   end
   k:close()
   return 0
