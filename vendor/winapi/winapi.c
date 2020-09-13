@@ -2423,7 +2423,11 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
     const BYTE *data;
     WCHAR wname[MAX_KEYS];
     wstring_buff(name,wname,sizeof(wname));
-    if (lua_isstring(L,val)) {
+    if (type == REG_DWORD && lua_isnumber(L, val)) {
+        ival = (DWORD)lua_tonumber(L, val);
+        data = (const BYTE *)&ival;
+        sz = sizeof(DWORD);
+    } else if (lua_isstring(L,val)) {
         if (type == REG_DWORD) {
             return push_error_msg(L, "parameter must be a number for REG_DWORD");
         }
