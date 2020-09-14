@@ -11,31 +11,18 @@ function cpu_info()
 end
 
 function mem_info()
-  local bin = string.format([[%sc_helper_%s.exe meminfo]], HELPERPATH, ARCH)
-  local prompt = io.popen(bin)
   local mem = {}
-  mem[1] = prompt:read("*line")
-  mem[2] = prompt:read("*line")
-  mem[3] = prompt:read("*line")
-  prompt:close()
+  mem[1], mem[2], mem[3] = app:call('os::info', 'mem')
   return mem
 end
 
 function localename()
-  local bin = string.format([[%sc_helper_%s.exe localename]], HELPERPATH, ARCH)
-  local prompt = io.popen(bin)
-  local ln = prompt:read("*line")
-  prompt:close()
-  return ln
+  return app:call('os::info', 'localename')
 end
 
 function res_str(file, id)
-  local bin = string.format([[%sc_helper_%s.exe load_resstr %s %s]], HELPERPATH, ARCH, file, id)
-  local prompt = io.popen(bin)
-  p(bin)
-  local res = prompt:read('*line')
-  prompt:close()
-  return res
+  local strid = string.format('#{@%s,%s}', file, id)
+  return app:call('resstr', strid)
 end
 
 function mui_str(file, id)
@@ -45,11 +32,7 @@ function mui_str(file, id)
 end
 
 function win_copyright()
-  local bin = string.format([[%sc_helper_%s.exe copyright]], HELPERPATH, ARCH)
-  local prompt = io.popen(bin)
-  local cr = prompt:read('*line')
-  prompt:close()
-  return cr
+  return app:call('os::info', 'copyright')
 end
 
 function call_dll(...)
