@@ -657,6 +657,12 @@ static char *built_code_errorhandle = "function __G__TRACKBACK__(msg)\n"
 
 char *app_built_code =
 "\n\
+function os.putenv(var, str)\n\
+    app:call('putenv', var, str)\n\
+end\n\
+\n\
+os.setenv = os.putenv\n\
+\n\
 function app:jcfg(...)\n\
   return app.jcfg(...)\n\
 end\n\
