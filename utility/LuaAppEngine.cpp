@@ -158,6 +158,32 @@ void ShellContextMenuVerb(const TCHAR *file, TCHAR *verb)
     DoFileVerb(target, verb);
 }
 
+int osinfo_mem(lua_State* L) {
+    int ret = 0;
+    Token v = { TOK_STRING };
+    ULONGLONG memInstalled = 0;
+    MEMORYSTATUS memStatus;
+    memset(&memStatus, 0x00, sizeof(MEMORYSTATUS));
+    memStatus.dwLength = sizeof(MEMORYSTATUS);
+    GlobalMemoryStatus(&memStatus);
+    SIZE_T zt = memStatus.dwTotalPhys;
+    GetPhysicallyInstalledSystemMemory(&memInstalled);
+    int err = GetLastError();
+    char buff[MAXBYTE] = { 0 };
+    char *fmt = "%ld";
+#ifdef _WIN64
+    fmt = "%lld";
+#endif
+    sprintf(buff, fmt, memInstalled);
+    lua_pushstring(L, buff); ret++;
+    sprintf(buff, fmt, memStatus.dwTotalPhys);
+    lua_pushstring(L, buff); ret++;
+    sprintf(buff, fmt, memStatus.dwAvailPhys);
+    lua_pushstring(L, buff); ret++;
+    if (err) printf("GetPhysicallyInstalledSystemMemory error(ec=%d).\n", err);
+    return ret;
+}
+
 #ifndef LOGA
 extern void _logA_(LPCSTR txt);
 
@@ -210,6 +236,19 @@ extern "C" {
             SetCurrentDirectory(str_path.c_str());
         } else if (func == "FakeExplorer") {
             FakeExplorer();
+        } else if (func == "os::info") {
+            string_t info = s2w(lua_tostring(L, base + 2));
+            if (info == TEXT("mem")) {
+                ret += osinfo_mem(L);
+            } else if (info == TEXT("copyright")) {
+                v.str = TEXT("#{@Branding\\Basebrd\\basebrd.dll,14}");
+                //varstr_expand(v.str);
+                resstr_expand(v.str);
+                PUSH_STR(v);
+            } else if (info == TEXT("localename")) {
+                v.str = g_Globals._locale;
+                PUSH_STR(v);
+            }
         } else if (func == "file::doverb") {
             string_t file = s2w(lua_tostring(L, base + 2));
             string_t verb = s2w(lua_tostring(L, base + 3));
