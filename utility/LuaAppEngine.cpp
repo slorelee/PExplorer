@@ -707,7 +707,9 @@ void LuaAppEngine::init(string_t& file)
     if (rescode) luaL_dostring(L, rescode);
     FreeCustomResource(rescode);
 
-    luaL_dofile(L, w2s(file).c_str());
+    if (PathFileExists(file.c_str())) {
+        luaL_dofile(L, w2s(file).c_str());
+    }
 }
 
 static int fetch_errorfunc(lua_State *L)

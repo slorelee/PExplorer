@@ -570,9 +570,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifndef _DEBUG
         file = mpath + TEXT("\\") + file;
 #endif
-        if (PathFileExists(file.c_str())) {
-            g_Globals._lua = new LuaAppEngine(file);
-        }
+        g_Globals._lua = new LuaAppEngine(file);
     }
 
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
