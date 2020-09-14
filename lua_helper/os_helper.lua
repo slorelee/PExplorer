@@ -1,4 +1,4 @@
-require 'reg_helper'
+-- require 'reg_helper'
 
 function os_ver_info()
   return reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]]

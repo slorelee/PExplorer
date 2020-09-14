@@ -1,4 +1,4 @@
-require('io_helper')
+-- require('io_helper')
 
 function wxsUI(ui, jcfg, opt, app_path)
   if jcfg == nil then jcfg = 'main.jcfg' end

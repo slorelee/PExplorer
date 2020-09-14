@@ -1,4 +1,4 @@
-require 'reg_helper'
+-- require 'reg_helper'
 
 System = {}
 local regkey_user = 'HKEY_CURRENT_USER'
