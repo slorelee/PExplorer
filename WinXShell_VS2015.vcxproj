@@ -408,6 +408,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="utility\ResourceHelper.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="utility\shellbrowserimpl.cpp" />
     <ClCompile Include="utility\shellclasses.cpp" />
     <ClCompile Include="utility\TrayHelper.cpp">
@@ -490,6 +496,7 @@
     <ClInclude Include="utility\LuaAppEngine.h" />
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />
+    <ClInclude Include="utility\ResourceHelper.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
     <ClInclude Include="utility\shellclasses.h" />
     <ClInclude Include="utility\TrayHelper.h" />

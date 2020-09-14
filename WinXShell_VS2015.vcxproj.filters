@@ -145,6 +145,9 @@
     <ClCompile Include="vendor\winapi\wutils.c">
       <Filter>vendor\winapi</Filter>
     </ClCompile>
+    <ClCompile Include="utility\ResourceHelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -280,6 +283,9 @@
     </ClInclude>
     <ClInclude Include="vendor\winapi\wutils.h">
       <Filter>vendor\winapi</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ResourceHelper.h">
+      <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
