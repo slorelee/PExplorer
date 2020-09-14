@@ -2,7 +2,7 @@
 #include <precomp.h>
 #include <string>
 #include <Windows.h>
-#include "LuaAppEngine.h"
+#include "../resource.h"
 #include "../systemsettings/MonitorAdapter.h"
 #include "../systemsettings/Volume.h"
 #include "FolderOptions.h"
@@ -19,6 +19,8 @@ extern void wxsOpen(LPTSTR cmd);
 extern void WaitForShellTerminated();
 extern void CloseShellProcess();
 
+extern LPVOID LoadCustomResource(UINT rID, LPTSTR rType);
+extern BOOL FreeCustomResource(LPVOID res);
 
 #ifdef _DEBUG
 #   ifdef _WIN64
@@ -696,6 +698,15 @@ void LuaAppEngine::init(string_t& file)
     luaL_requiref(L, "app", luaopen_app_module, 1);
     luaL_dostring(L, built_code_errorhandle);
     luaL_dostring(L, app_built_code);
+
+    char *rescode = (char *)LoadCustomResource(IDR_LUA_HELPER, TEXT("FILE"));
+    if (rescode) luaL_dostring(L, rescode);
+    FreeCustomResource(rescode);
+
+    rescode = (char *)LoadCustomResource(IDR_APP_HELPERS, TEXT("FILE"));
+    if (rescode) luaL_dostring(L, rescode);
+    FreeCustomResource(rescode);
+
     luaL_dofile(L, w2s(file).c_str());
 }
 
