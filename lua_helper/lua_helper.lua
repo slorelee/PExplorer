@@ -34,12 +34,6 @@ if str.lower(__this__) ~= 'lua_helper.lua' then
   HELPERPATH = 'lua_helper\\'
 end
 
--- set dll load path
-if os.getenv('PROCESSOR_ARCHITECTURE') == 'AMD64' then
-  ARCH = 'x64'
-else
-  ARCH = 'x86'
-end
 local dllpath = str.format('.\\%s%s\\?.dll;', HELPERPATH, ARCH)
 if root then
   dllpath = str.format(root .. '\\%s%s\\?.dll;', HELPERPATH, ARCH)
@@ -81,9 +75,3 @@ if lua_helper_loader == 'dir' then
 else
   lua_files_load()
 end
-
-function os.putenv(var, str)
-  app:call('putenv', var, str)
-end
-
-os.setenv = os.putenv
