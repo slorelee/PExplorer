@@ -231,6 +231,14 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// FILE
+//
+
+IDR_LUA_HELPER            FILE                    "lua_helper/LUA_HELPER.lua"
+IDR_APP_HELPERS           FILE                    "lua_helper/APP_HELPERS.lua"
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Version
 //
 

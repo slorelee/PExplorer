@@ -66,6 +66,8 @@
 #define IDB_IMAGES                      107
 #define IDD_EXECUTE                     108
 #define IDR_MAINFRAME                   109
+#define IDR_LUA_HELPER                  110
+#define IDR_APP_HELPERS                 111
 #define IDM_MDIFRAME                    110
 #define ID_EXECUTE                      111
 #define IDM_SDIFRAME                    113
@@ -279,7 +281,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
+#define _APS_NEXT_RESOURCE_VALUE        112
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
