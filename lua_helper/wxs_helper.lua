@@ -76,7 +76,10 @@ function ms_settings(url)
       wxsUI('UI_Volume')
     elseif url == 'network' then
       wxs_open('networkconnections')
+    elseif url == 'about' then
+      wxsUI('UI_SystemInfo')
     else
+       -- winapi.show_message('', url)
        wxs_open('controlpanel')
     end
 end
