@@ -195,6 +195,10 @@ extern void ProductPolicyGet(const wchar_t *name);
 extern void ProductPolicySet(const wchar_t *name, DWORD val);
 extern void ProductPolicySave();
 
+extern int GetCurrentDPIScaling(int x);
+extern int GetRecommendedDPIScaling();
+extern void SetDpiScaling(int scale);
+
 extern "C" {
     extern int lua_print(lua_State* L);
 #ifdef _DEBUG
@@ -307,20 +311,29 @@ extern "C" {
             SHSetValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("Wallpaper"), REG_SZ, v.str.c_str(), (DWORD)(v.str.length()) * sizeof(TCHAR));
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "screen::get") {
+            MonitorAdapter m_monitorAdapter;
+            int w, h, f, b;
+            m_monitorAdapter.GetCurrentResolution(w, h, f, b);
             v.str = s2w(lua_tostring(L, base + 2));
             if (v.str == TEXT("x") || v.str == TEXT("width")) {
-                v.iVal = GetSystemMetrics(SM_CXSCREEN);
+                v.iVal = w;
             } else if (v.str == TEXT("y") || v.str == TEXT("height")) {
-                v.iVal = GetSystemMetrics(SM_CYSCREEN);
+                v.iVal = h;
             } else if (v.str == TEXT("rotation")) {
                 v.iVal = GetScreenRotation();
             } else if (v.str == TEXT("resolutionlist")) {
                 v = GetResolutionList();
                 PUSH_STR(v);
             } else if (v.str == TEXT("xy")) {
-                v.iVal = GetSystemMetrics(SM_CXSCREEN);
+                v.iVal = w;
                 PUSH_INT(v);
-                v.iVal = GetSystemMetrics(SM_CYSCREEN);
+                v.iVal = h;
+            } else if (v.str == TEXT("dpi")) {
+                v.iVal = GetCurrentDPIScaling(w);
+                PUSH_INT(v);
+                v.iVal = GetRecommendedDPIScaling();
+            } else if (v.str == TEXT("rdpi") || v.str == TEXT("recommendeddpi")) {
+                v.iVal = GetRecommendedDPIScaling();
             }
             PUSH_INT(v);
         } else if (func == "screen::set") {
@@ -339,6 +352,11 @@ extern "C" {
                 v = GetResolutionList(1);
                 if (v.iVal > 0) {
                     v = SetResolutionByStr(v.str);
+                }
+            } else if (v.str == TEXT("dpi")) {
+                v.iVal = (int)lua_tointeger(L, base + 3);
+                if (v.iVal >= 100 && v.iVal <= 500) {
+                    SetDpiScaling(v.iVal);
                 }
             }
             PUSH_INT(v);

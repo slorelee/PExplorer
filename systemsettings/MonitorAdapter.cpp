@@ -257,3 +257,73 @@ void SetScreenRotation(DWORD orientation)
     tempdevmode.dmDisplayOrientation = orientation;
     ChangeDisplaySettings(&tempdevmode, 0);
 }
+
+#ifndef SPI_GETLOGICALDPIOVERRIDE
+#define SPI_GETLOGICALDPIOVERRIDE       0x009E
+#endif
+
+#ifndef SPI_SETLOGICALDPIOVERRIDE
+#define SPI_SETLOGICALDPIOVERRIDE       0x009F
+#endif
+
+static const UINT32 DpiVals[] = { 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500 };
+
+int GetCurrentDPIScaling(int x)
+{
+    HDC hdcScreen = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
+    if (hdcScreen == NULL) return 1;
+    int rX = x;
+    int iX = GetDeviceCaps(hdcScreen, HORZRES);
+
+    float iTemp = rX * 100 / iX;
+    int iDPI = (int)iTemp;
+
+    if (NULL != hdcScreen) {
+        DeleteDC(hdcScreen);
+    }
+     return iDPI;
+}
+
+/*
+  https://stackoverflow.com/questions/35233182/how-can-i-change-windows-10-display-scaling-programmatically-using-c-sharp
+  https://github.com/lihas/windows-DPI-scaling-sample/
+*/
+
+/* Get default DPI scaling percentage.
+The OS recommended value.
+*/
+int GetRecommendedDPIScaling()
+{
+    int dpi = 0;
+    BOOL retval = SystemParametersInfo(SPI_GETLOGICALDPIOVERRIDE, 0, (LPVOID)&dpi, 1);
+
+    if (retval != 0) {
+        int currDPI = DpiVals[dpi * -1];
+        return currDPI;
+    }
+
+    return -1;
+}
+
+void SetDpiScaling(int scale)
+{
+    int recommendedDpiScale = GetRecommendedDPIScaling();
+
+    if (recommendedDpiScale > 0) {
+        int index = 0, recIndex = 0, setIndex = -1;
+        for (const auto& v : DpiVals) {
+            if (recommendedDpiScale == v) {
+                recIndex = index;
+            }
+            if (scale == v) {
+                setIndex = index;
+            }
+            index++;
+        }
+
+        if (setIndex == -1) return;
+        int relativeIndex = setIndex - recIndex;
+        SystemParametersInfo(SPI_SETLOGICALDPIOVERRIDE, relativeIndex, (LPVOID)0, 1);
+    }
+}
+
