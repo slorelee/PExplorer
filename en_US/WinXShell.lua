@@ -1,4 +1,3 @@
-require('lua_helper.lua_helper')
 require 'winapi'
 
 ICP_TIMER_ID = 10001 -- init control panel timer
