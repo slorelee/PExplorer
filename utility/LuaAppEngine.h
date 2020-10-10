@@ -12,6 +12,7 @@ public:
     void *getFrame() { return _frame; };
     int hasfunc(const char *funcname);
     int call(const char *funcname, int nres = 0);
+    int call(const char *funcname, int p1, int p2, int nres = 0);
     int call(const char * funcname, string_t & p1, string_t & p2, int nres = 0);
     void RunCode(string_t & code);
     void LoadFile(string_t & file);

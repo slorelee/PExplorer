@@ -816,6 +816,28 @@ int LuaAppEngine::call(const char *funcname, int nres)
     return rel;
 }
 
+int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
+{
+    char buff[1024] = { 0 };
+    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+    fetch_errorfunc(L);
+    if (lua_errorfunc == MININT) return -1;
+
+    lua_getglobal(L, funcname);
+    if (lua_type(L, -1) != LUA_TFUNCTION) {
+        LOGA(buff);
+        return -1;
+    }
+    lua_pushinteger(L, p1);
+    lua_pushinteger(L, p2);
+    int rel = lua_pcall(L, 2, nres, lua_errorfunc);
+    if (rel == -1) return -1;
+    if (nres <= 0) return 0;
+    rel = (int)lua_tointeger(L, -1);
+    lua_pop(L, 1);
+    return rel;
+}
+
 int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nres)
 {
     char buff[1024] = { 0 };
