@@ -258,6 +258,19 @@ void SetScreenRotation(DWORD orientation)
     ChangeDisplaySettings(&tempdevmode, 0);
 }
 
+#if 0
+#include <d2d1.h>
+#pragma comment(lib, "d2d1.lib")
+int GetCurrentDPIScaling()
+{
+    ID2D1Factory* m_pDirect2dFactory;
+    D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pDirect2dFactory);
+    FLOAT dpiX, dpiY;
+    m_pDirect2dFactory->GetDesktopDpi(&dpiX, &dpiY);
+    return (int)dpiX;
+}
+#endif
+
 #ifndef SPI_GETLOGICALDPIOVERRIDE
 #define SPI_GETLOGICALDPIOVERRIDE       0x009E
 #endif
