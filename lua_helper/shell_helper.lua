@@ -179,7 +179,7 @@ end
 
 Screen = {}
 
-local function fixscreen()
+function Screen:Adjust()
   app:call('Desktop::UpdateWallpaper')
   app:call('sleep', 200)
   app:call('Taskbar::ChangeNotify')
@@ -208,9 +208,7 @@ function Screen:Disp(w, h)
   else
     ret = app:call('Screen::Set', 'resolution', w, h)
   end
-  if ret == 0 then
-    fixscreen()
-  end
+  Screen:Adjust()
   return ret
 end
 
