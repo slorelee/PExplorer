@@ -220,6 +220,24 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
             isDbClick = 0;
             return S_OK;
         }
+    } else if (nmsg == WM_DISPLAYCHANGE) {
+        // Desktop::UpdateWallpaper
+        SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        // Taskbar::ChangeNotify
+        SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
+#if 0 
+        // fixscreen
+        HWND hObjWnd = NULL;
+        SHChangeNotify(0x8000000, 0, 0, 0);
+        SendMessageW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, 0);
+        hObjWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+        if (hObjWnd) {
+            APPBARDATA apBar = { 0 };
+            apBar.cbSize = sizeof(APPBARDATA);
+            SHAppBarMessage(ABM_GETSTATE, &apBar);
+        }
+#endif
+        // fallthough
     }
     return super::WndProc(nmsg, wparam, lparam);
 }
