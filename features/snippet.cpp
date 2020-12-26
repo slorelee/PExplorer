@@ -269,6 +269,8 @@ void wxsOpen(LPTSTR cmd) {
     } else if (isTarget(cmd, TEXT("NetworkConnections"))) {
         // ncpa.cpl
         launch_file(g_Globals._hwndDesktop, TEXT("::{7007ACC7-3202-11D1-AAD2-00805FC1270E}"));
+    } else if (isTarget(cmd, TEXT("NetworkCenter"))) {
+        launch_file(g_Globals._hwndDesktop, TEXT("::{26EE0668-A00A-44D7-9371-BEB064C98683}\\3\\::{8E908FC9-BECC-40F6-915B-F4CA0E70D03D}"));
     } else if (isTarget(cmd, TEXT("Printers"))) {
         launch_file(g_Globals._hwndDesktop, TEXT("::{2227A280-3AEA-1069-A2DE-08002B30309D}"));
     } else if (isTarget(cmd, TEXT("UsersLibraries"))) {
