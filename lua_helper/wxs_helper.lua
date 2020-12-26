@@ -31,16 +31,22 @@ end
 
 function wxs_open(url)
     app:print(url)
-    if string.find(url, 'wxs-open:', 1, true) == nil then
+    local sd = os.getenv('SystemDrive')
+    if string.find(url, 'wxs-open:', 1, true) ~= nil then
       url = url:gsub('wxs[-]open:', '')
     end
 
     if url == 'controlpanel' then
-      local sd = os.getenv('SystemDrive')
       if not File.exists(sd .. '\\Windows\\explorer.exe') then return end
       app:run('control.exe')
     elseif url == 'system' then
       app:call('wxs_open', 'system')
+    elseif url == 'netsettings' then
+      if File.exists(sd .. '\\Windows\\System32\\netcenter.dll') then
+        app:call('wxs_open', 'networkcenter')
+      elseif File.exists(sd .. '\\Windows\\System32\\netshell.dll') then
+        app:call('wxs_open', 'networkconnections')
+      end
     elseif url == 'networkconnections' then
       app:call('wxs_open', 'networkconnections')
     elseif url == 'printers' then
