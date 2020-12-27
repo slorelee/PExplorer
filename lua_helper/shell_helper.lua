@@ -201,6 +201,10 @@ function Screen:GetRotation()
   return app:call('Screen::Get', 'rotation')
 end
 
+function Screen:GetDPI()
+  return app:call('Screen::Get', 'dpi')
+end
+
 function Screen:Disp(w, h)
   local ret = -1
   if w == nil then
@@ -222,6 +226,10 @@ function Screen:DispTest(arr)
       if Screen:Disp(tonumber(w), tonumber(h)) == 0 then return end
     end
   end
+end
+
+function Screen:DPI(scale)
+  app:call('Screen::Set', 'dpi', scale)
 end
 
 FolderOptions = {}
