@@ -334,6 +334,10 @@ void SetDpiScaling(int scale)
             index++;
         }
 
+        if (scale == -1) {
+            setIndex = 0;
+            recIndex = 0;
+        }
         if (setIndex == -1) return;
         int relativeIndex = setIndex - recIndex;
         SystemParametersInfo(SPI_SETLOGICALDPIOVERRIDE, relativeIndex, (LPVOID)0, 1);
