@@ -357,6 +357,9 @@ extern "C" {
                 v.iVal = (int)lua_tointeger(L, base + 3);
                 if (v.iVal >= 100 && v.iVal <= 500) {
                     SetDpiScaling(v.iVal);
+                } else if (v.iVal == -1) {
+                    // Set Recommended DPI Scaling
+                    SetDpiScaling(-1);
                 }
             }
             PUSH_INT(v);
