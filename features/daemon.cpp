@@ -225,6 +225,10 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         // Taskbar::ChangeNotify
         SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
+        // Trigger Event Function
+        if (g_Globals._lua) {
+            g_Globals._lua->call("ondisplaychanged");
+        }
 #if 0 
         // fixscreen
         HWND hObjWnd = NULL;
