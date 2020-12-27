@@ -50,6 +50,21 @@ function onshell()
   -- wxsUI('UI_Volume', 'main.jcfg', '-notrayicon -hidewindow')
 end
 
+-- 如果你想使用这个自定义事件函数,
+-- 请将这个函数名变更为ondisplaychanged()。
+function ondisplaychanged_sample()
+  local cur_res_x = Screen:GetX()
+  if last_res_x == cur_res_x then return end
+  last_res_x = cur_res_x
+  if last_res_x >= 3840 then
+    Screen:DPI(150)
+  elseif last_res_x >= 1440 then
+    Screen:DPI(125)
+  elseif last_res_x >= 800 then
+    Screen:DPI(100)
+  end
+end
+
 -- return the resource id for startmenu logo
 function startmenu_logoid()
   local map = {
