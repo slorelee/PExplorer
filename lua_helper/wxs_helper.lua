@@ -160,7 +160,7 @@ function regist_system_property() -- handle This PC's property menu
     local key = [[HKEY_CLASSES_ROOT\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\shell\properties]]
     if reg_read(key, '') then return end -- already exists
     -- show This PC on the Desktop
-    reg_write([[HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel]], '{20D04FE0-3AEA-1069-A2D8-08002B30309D}', 0, winapi.REG_DWORD)
+    -- reg_write([[HKEY_USERS\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel]], '{20D04FE0-3AEA-1069-A2D8-08002B30309D}', 0, winapi.REG_DWORD)
     -- handle Property menu to UI_SystemInfo
     reg_write(key, '', '@shell32.dll,-33555')
     reg_write(key, 'Position', 'Bottom')
