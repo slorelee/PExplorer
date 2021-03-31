@@ -406,6 +406,12 @@ cscript ResBuilder.vbs
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="shell\fileexplorer.cpp" />
+    <ClCompile Include="systemsettings\DesktopCommand.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="systemsettings\MonitorAdapter.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
@@ -509,6 +515,7 @@ cscript ResBuilder.vbs
     <ClInclude Include="features\reshelper.h" />
     <ClInclude Include="jconfig\jcfg.h" />
     <ClInclude Include="shell\fileexplorer.h" />
+    <ClInclude Include="systemsettings\DesktopCommand.h" />
     <ClInclude Include="systemsettings\MonitorAdapter.h" />
     <ClInclude Include="systemsettings\Volume.h" />
     <ClInclude Include="systemsettings\WLAN.h" />

@@ -148,6 +148,9 @@
     <ClCompile Include="utility\ResourceHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="systemsettings\DesktopCommand.cpp">
+      <Filter>systemsettings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="utility\ResourceHelper.h">
       <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="systemsettings\DesktopCommand.h">
+      <Filter>systemsettings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
