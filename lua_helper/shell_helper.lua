@@ -111,6 +111,35 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   end
 end
 
+Desktop = {}
+function Desktop:Refresh()
+  app:call('Desktop::Refresh')
+end
+
+function Desktop:GetWallpaper()
+  return app:call('Desktop::Getwallpaper')
+end
+
+function Desktop:SetWallpaper(wallpaper)
+  app:call('Desktop::Setwallpaper', wallpaper)
+end
+
+function Desktop:SetIconSize(size)
+  app:call('Desktop::SetIconSize', size)
+end
+
+function Desktop:AutoArrange(checked)
+  app:call('Desktop::AutoArrange', checked)
+end
+
+function Desktop:SnapToGrid(checked)
+  app:call('Desktop::SnapToGrid', checked)
+end
+
+function Desktop:ShowIcons(checked)
+  app:call('Desktop::ShowIcons', checked)
+end
+
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
 
