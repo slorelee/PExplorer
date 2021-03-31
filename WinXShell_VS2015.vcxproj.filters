@@ -151,6 +151,9 @@
     <ClCompile Include="systemsettings\DesktopCommand.cpp">
       <Filter>systemsettings</Filter>
     </ClCompile>
+    <ClCompile Include="taskbar\thumbnail.cpp">
+      <Filter>taskbar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

@@ -363,3 +363,9 @@ JCfg_GetDesktopBarUseSmallIcon()
     }
     return usesmallicon;
 }
+
+int
+JCfg_GetDesktopBarHeightWithDPI()
+{
+    return DESKTOPBARBAR_HEIGHT;
+}

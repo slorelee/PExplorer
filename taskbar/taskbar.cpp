@@ -39,6 +39,11 @@ DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_DeregisterShellHookWindow(TEXT("user32"
 
 DynamicFct<BOOL (WINAPI*)(HWND hWnd, DWORD dwType)> g_RegisterShellHook(TEXT("shell32"), (LPCSTR)0xb5);
 
+#define ID_TIMER_DESTORYTHUMBNAIL 101
+extern void InitThumbnailWindow(HWND taskbar, HWND toolbar);
+extern int DrawThumbnailWindow(HINSTANCE hInstance, HWND hWndSrc, LPCTSTR lpClassName, LPCTSTR lpWindowName, int id);
+extern void DestoryThumbnailWindow();
+
 // constants for RegisterShellHook()
 #define RSH_UNREGISTER          0
 #define RSH_REGISTER            1
@@ -208,6 +213,7 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     }
     Refresh();
 
+    InitThumbnailWindow(_hwnd, _htoolbar);
     return 0;
 }
 
@@ -220,7 +226,12 @@ LRESULT TaskBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         break;
 
     case WM_TIMER:
-        Refresh();
+        if (wparam == 0) {
+            Refresh();
+        } else if (wparam == ID_TIMER_DESTORYTHUMBNAIL) {
+            KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
+            DestoryThumbnailWindow();
+        }
         return 0;
 
     case WM_CONTEXTMENU: {
@@ -282,6 +293,9 @@ int TaskBar::Command(int id, int code)
 int TaskBar::Notify(int id, NMHDR *pnmh)
 {
     if (pnmh->hwndFrom == _htoolbar) {
+#ifdef _DEBUG
+        _log_(FmtString(TEXT("TaskBar::Notify(%d)"), pnmh->code));
+#endif
         switch (pnmh->code) {
         case NM_RCLICK: {
             TBBUTTONINFO btninfo;
@@ -327,6 +341,11 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
 #ifdef _DEBUG
                     _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
 #endif
+                    if (lptbcd->nmcd.uItemState == 0) {
+                        KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
+                        SetTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL, 500, NULL);
+                        //DestoryThumbnailWindow();
+                    }
                     FillRect(lptbcd->nmcd.hdc, &rect, hbrTaskLine);
                 }
 #define CDRF_USECDCOLORS 0x00800000
@@ -337,7 +356,35 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                 return CDRF_DODEFAULT;
             }
         }
+        case TBN_HOTITEMCHANGE: {
+            TBBUTTONINFO btninfo;
+            TaskBarMap::iterator it;
+            Point pt(GetMessagePos());
+            ScreenToClient(_htoolbar, &pt);
+
+            btninfo.cbSize = sizeof(TBBUTTONINFO);
+            btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
+
+            int idx = (int)SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
+
+            if (idx >= 0 &&
+                SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1 &&
+                (it = _map.find_id(btninfo.idCommand)) != _map.end()) {
+                //TaskBarEntry& entry = it->second;
+
+                _log_(FmtString(TEXT("TaskBar::Notify(TBN_HOTITEMCHANGE) %d"), idx));
+                //ActivateApp(it, false, false);  // don't restore minimized windows on right button click
+                HWND hTaskWindow = it->first;
+                DrawThumbnailWindow(g_Globals._hInstance, hTaskWindow, NULL, NULL, idx);
+            }
+            return super::Notify(id, pnmh);
+        }
+        case TBN_GETINFOTIPA:
+        case TBN_GETINFOTIPW:
+            KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
+            break;
         default:
+            _log_(FmtString(TEXT("TaskBar::Notify(%d)"), pnmh->code));
             return super::Notify(id, pnmh);
         }
     }
@@ -543,6 +590,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 
             pThis->_map[hwnd] = entry;
             found = pThis->_map.find(hwnd);
+            _log_(FmtString(TEXT("TaskBar::AddButton %s"), str_title.c_str()));
         }
 
         TBBUTTON btn = { -2/*I_IMAGENONE*/, 0, TBSTATE_ENABLED/*|TBSTATE_ELLIPSES*/, BTNS_BUTTON, {0, 0}, 0, 0};
