@@ -729,10 +729,10 @@ int DesktopBar::Command(int id, int code)
             if (PathFileExists(dllPath)) {
                 launch_file(g_Globals._hwndDesktop, TEXT("ms-settings:taskbar"));
             } else {
-                send_wxs_protocol_url(L"taskbar");
+                send_wxs_protocol_url(L"ms-settings:taskbar");
             }
         } else {
-            send_wxs_protocol_url(L"taskbar");
+            send_wxs_protocol_url(L"ms-settings:taskbar");
             //ExplorerPropertySheet(g_Globals._hwndDesktop);
         }
         break;
