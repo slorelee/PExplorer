@@ -135,6 +135,7 @@ local function regist_protocol(protocol, type)
 end
 
 function regist_protocols()
+  if os.getenv('WIN_VSDEBUG') ~= nil then return end
   if tonumber(win_ver) < 10 then return end
   regist_protocol('ms-settings')
   regist_protocol('ms-availablenetworks', 'App')
