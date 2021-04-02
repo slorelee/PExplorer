@@ -213,7 +213,10 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     }
     Refresh();
 
-    InitThumbnailWindow(_hwnd, _htoolbar);
+    _thumbnail = JCfg_TaskThumbnailEnabled();
+    if (_thumbnail) {
+        InitThumbnailWindow(_hwnd, _htoolbar);
+    }
     return 0;
 }
 
@@ -341,7 +344,7 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
 #ifdef _DEBUG
                     _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
 #endif
-                    if (lptbcd->nmcd.uItemState == 0) {
+                    if (lptbcd->nmcd.uItemState == 0 && _thumbnail) {
                         KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
                         SetTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL, 500, NULL);
                         //DestoryThumbnailWindow();
@@ -357,31 +360,35 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
             }
         }
         case TBN_HOTITEMCHANGE: {
-            TBBUTTONINFO btninfo;
-            TaskBarMap::iterator it;
-            Point pt(GetMessagePos());
-            ScreenToClient(_htoolbar, &pt);
+            if (_thumbnail) {
+                TBBUTTONINFO btninfo;
+                TaskBarMap::iterator it;
+                Point pt(GetMessagePos());
+                ScreenToClient(_htoolbar, &pt);
 
-            btninfo.cbSize = sizeof(TBBUTTONINFO);
-            btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
+                btninfo.cbSize = sizeof(TBBUTTONINFO);
+                btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
 
-            int idx = (int)SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
+                int idx = (int)SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
 
-            if (idx >= 0 &&
-                SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1 &&
-                (it = _map.find_id(btninfo.idCommand)) != _map.end()) {
-                //TaskBarEntry& entry = it->second;
+                if (idx >= 0 &&
+                    SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1 &&
+                    (it = _map.find_id(btninfo.idCommand)) != _map.end()) {
+                    //TaskBarEntry& entry = it->second;
 
-                _log_(FmtString(TEXT("TaskBar::Notify(TBN_HOTITEMCHANGE) %d"), idx));
-                //ActivateApp(it, false, false);  // don't restore minimized windows on right button click
-                HWND hTaskWindow = it->first;
-                DrawThumbnailWindow(g_Globals._hInstance, hTaskWindow, NULL, NULL, idx);
+                    _log_(FmtString(TEXT("TaskBar::Notify(TBN_HOTITEMCHANGE) %d"), idx));
+                    //ActivateApp(it, false, false);  // don't restore minimized windows on right button click
+                    HWND hTaskWindow = it->first;
+                    DrawThumbnailWindow(g_Globals._hInstance, hTaskWindow, NULL, NULL, idx);
+                }
             }
             return super::Notify(id, pnmh);
         }
         case TBN_GETINFOTIPA:
         case TBN_GETINFOTIPW:
-            KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
+            if (_thumbnail) {
+                KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
+            }
             break;
         default:
             _log_(FmtString(TEXT("TaskBar::Notify(%d)"), pnmh->code));

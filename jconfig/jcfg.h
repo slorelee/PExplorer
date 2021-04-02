@@ -28,6 +28,7 @@ extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t 
 extern Value JCfg_GetValue(Object *jcfg, string_t key1, string_t key2, string_t key3, string_t key4, Value defval);
 
 extern int JCfg_GetDesktopBarHeight();
+extern bool JCfg_TaskThumbnailEnabled();
 
 #define FILE_JCFG1(fileobj, key1) JCfg_GetValue(&fileobj, TEXT(key1), Value())
 #define FILE_JCFG1_DEF(fileobj, key1, defval) JCfg_GetValue(&fileobj, TEXT(key1), Value(defval))

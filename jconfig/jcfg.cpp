@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <windows.h>
+#include <Shlwapi.h>
 #include "../vendor/json.h"
 #include "jcfg.h"
 
@@ -368,4 +369,25 @@ int
 JCfg_GetDesktopBarHeightWithDPI()
 {
     return DESKTOPBARBAR_HEIGHT;
+}
+
+bool
+JCfg_TaskThumbnailEnabled()
+{
+    bool thumbnail = JCFG2_DEF("JS_TASKBAR", "thumbnail", true).ToBool();
+
+    if (thumbnail) {
+        TCHAR sysPathBuff[MAX_PATH] = { 0 };
+        GetWindowsDirectory(sysPathBuff, MAX_PATH);
+        string_t dwmPath = sysPathBuff;
+#ifdef _WIN64
+        dwmPath.append(_T("\\System32\\dwm.exe"));
+#else
+        dwmPath.append(_T("\\SysNative\\dwm.exe"));
+#endif
+        if (!PathFileExists(dwmPath.c_str())) {
+            thumbnail = false;
+        }
+    }
+    return thumbnail;
 }
