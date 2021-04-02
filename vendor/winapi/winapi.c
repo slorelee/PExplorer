@@ -535,7 +535,7 @@ static int l_find_window(lua_State *L) {
   const char *cname = lua_tostring(L,1);
   const char *wname = lua_tostring(L,2);
 
-  HWND hwnd = FindWindow(cname,wname);
+  HWND hwnd = FindWindowA(cname,wname);
   if (hwnd == NULL) {
     return push_error(L);
   } else {
