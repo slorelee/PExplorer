@@ -147,7 +147,7 @@ function Taskbar:IsReady(sec)
   local sh_win = winapi.find_window('Shell_TrayWnd', nil)
   local n = -1
   while (n <= sec and (sh_win == nil or sh_win:get_handle() == 0)) do
-    app:print(string.format("shell Handle:0x%x", sh_win:get_handle()))
+    app:print("shell Handle:0x0")
     app:call('sleep', 1000)
     sh_win = winapi.find_window('Shell_TrayWnd', nil)
     if sec ~= -1 then n = n + 1 end
