@@ -85,6 +85,7 @@
   "JS_TASKBAR":
   {
     "smallicon":false,
+    "thumbnail":true,
     "userebar":false,
     "theme":  "dark",
     "height": 40
