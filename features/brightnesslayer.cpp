@@ -16,7 +16,7 @@ HWND CreateMaskLayerWindow(HINSTANCE hInstance)
     TCHAR lpszClassName[] = MASKLAYERWINDOW_TITLE;
 
     WNDCLASS wc;
-    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.style = CS_DBLCLKS;
     wc.lpfnWndProc = WndProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
@@ -31,7 +31,7 @@ HWND CreateMaskLayerWindow(HINSTANCE hInstance)
     RegisterClass(&wc);
 
     hWnd = CreateWindow(lpszClassName, MASKLAYERWINDOW_TITLE,
-        WS_POPUPWINDOW, 0, 0, 8192, 8192,
+        WS_POPUP, 0, 0, 8192, 8192,
         NULL, NULL, hInstance, NULL);
 
     LONG nRet = ::GetWindowLong(hWnd, GWL_EXSTYLE);
@@ -51,9 +51,13 @@ HWND CreateMaskLayerWindow(HINSTANCE hInstance)
 
 void CreateBrightnessLayer(HINSTANCE hInstance)
 {
-    HWND hWnd = CreateMaskLayerWindow(hInstance);
+    HWND hWnd = NULL;
+    hWnd = FindWindow(MASKLAYERWINDOW_TITLE, NULL);
+    if (!hWnd) {
+        hWnd = CreateMaskLayerWindow(hInstance);
+        if (hWnd) SetTimer(hWnd, SWITCHTOTOP_TIMER_ID, 2000, NULL);
+    }
     hBrightnessWindow = hWnd;
-    SetTimer(hWnd, SWITCHTOTOP_TIMER_ID, 2000, NULL);
 }
 
 int GetScreenBrightness()

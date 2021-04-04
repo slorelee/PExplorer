@@ -334,7 +334,8 @@ int daemon_entry(int standalone)
     EnableShowDesktop();
     update_property_handler();
 
-    if (JCFG2_DEF("JS_DAEMON", "screen_brightness", true).ToBool()) {
+    int brightness = JCFG2_DEF("JS_DAEMON", "screen_brightness", 100).ToInt();
+    if (brightness > 1) {
         CreateBrightnessLayer(g_Globals._hInstance);
     }
 
