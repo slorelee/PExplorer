@@ -11,6 +11,8 @@ extern ExplorerGlobals g_Globals;
 
 void update_property_handler();
 
+extern void CreateBrightnessLayer(HINSTANCE hInstance);
+
 #define WM_CLOCKAREA_EVENT (WM_USER + 100)
 #define HM_CLOCKAREA_CLICKED 1
 
@@ -331,6 +333,10 @@ int daemon_entry(int standalone)
     InstallCADHookEntry();
     EnableShowDesktop();
     update_property_handler();
+
+    if (JCFG2_DEF("JS_DAEMON", "screen_brightness", true).ToBool()) {
+        CreateBrightnessLayer(g_Globals._hInstance);
+    }
 
     if (standalone != 0) {
         Window::MessageLoop();

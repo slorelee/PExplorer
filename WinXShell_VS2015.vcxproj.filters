@@ -154,6 +154,9 @@
     <ClCompile Include="taskbar\thumbnail.cpp">
       <Filter>taskbar</Filter>
     </ClCompile>
+    <ClCompile Include="features\brightnesslayer.cpp">
+      <Filter>features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
