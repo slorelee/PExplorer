@@ -81,7 +81,7 @@ LRESULT CALLBACK ThumbnailProcedure(HWND hwnd, UINT message, WPARAM wParam, LPAR
     return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-HWND CreateThumbnailWindow(HINSTANCE instance, RECT rc)
+HWND CreateThumbnailWindow(HINSTANCE instance, RECT rc, RECT btnrc)
 {
     WNDCLASSEX wincl;
     ZeroMemory(&wincl, sizeof(WNDCLASSEX));
@@ -115,15 +115,15 @@ HWND CreateThumbnailWindow(HINSTANCE instance, RECT rc)
         tmp_w = (int)(scr_w / 8);
         tmp_h = (int)(tmp_w * v1);
     }
-    POINT p;
-    GetCursorPos(&p);
+    //POINT p;
+    //GetCursorPos(&p);
 
 #ifdef _DEBUG
     TCHAR buff[255];
     _swprintf(buff, TEXT("ThumbnailWnd: Size(%zd) Rect:%d %d %d %d"), thumbnail_map.size(), w, h, tmp_w, tmp_h);
     _log_(buff);
 #endif
-    w = p.x - (int)(tmp_w / 2);
+    w = btnrc.left + ((btnrc.right - btnrc.left) / 2) - (int)(tmp_w / 2);
     h = scr_h - (tmp_h + 20) - JCfg_GetDesktopBarHeightWithDPI();
     HWND dwmThumbnailWnd = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW, dwmWndClassName,
         NULL, WS_POPUP, w, h, tmp_w + 20, tmp_h + 20, NULL, NULL, NULL, NULL);
@@ -154,7 +154,9 @@ int DrawThumbnailWindow(HINSTANCE hInstance, HWND hWndSrc,
     HRESULT hr = S_OK;
     HTHUMBNAIL thumbnail = NULL;
     HWND hWndThumb = NULL;
+    WINDOWPLACEMENT wndpl;
     RECT rect;
+    int left;
     if (currentThumbnailId == id) {
         return 0;
     }
@@ -165,14 +167,19 @@ int DrawThumbnailWindow(HINSTANCE hInstance, HWND hWndSrc,
     }
     if (!ThumbnailInited) return 0;
     EnterCriticalSection(&cs);
-    GetWindowRect(hWndSrc, &rect);
-    hWndThumb = CreateThumbnailWindow(hInstance, rect);
+    GetWindowPlacement(hWndSrc, &wndpl);
+    GetWindowRect(_toolbar, &rect);
+    left = rect.left;
+    SendMessage(_toolbar, TB_GETITEMRECT, id, (LPARAM)&rect);
+    rect.left += left;
+    rect.right += left;
+    hWndThumb = CreateThumbnailWindow(hInstance, wndpl.rcNormalPosition, rect);
     if (!hWndThumb) return 1;
     hr = DwmRegisterThumbnail(hWndThumb, hWndSrc, &thumbnail);
     if (SUCCEEDED(hr)) {
         thumbnail_map.insert(make_pair(hWndThumb, thumbnail));
         BindThumbnailWindow(hWndThumb, thumbnail);
-        ShowWindow(hWndThumb, SW_SHOW);
+        ShowWindow(hWndThumb, SW_SHOWNOACTIVATE);
         currentThumbnailId = id;
     } else {
         thumbnail_map.insert(make_pair(hWndThumb, (HTHUMBNAIL)NULL));
