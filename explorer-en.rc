@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 英语(美国) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -325,7 +325,22 @@ END
 // AFX_DIALOG_LAYOUT
 //
 
+IDD_ABOUT_EXPLORER AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 IDD_DESKBAR_TASKBAR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_NOTIFYAREA AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SEARCH_PROGRAM AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -372,7 +387,6 @@ BEGIN
     IDS_HIDE_ICONS          "Hide icons"
     IDS_TERMINATE           "Terminate WinXShell"
     IDS_RESTART             "Restart..."
-    IDS_NAMECOLUMN          "Name"
 END
 
 STRINGTABLE
@@ -398,11 +412,12 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_NAMECOLUMN          "Name"
     IDS_PATHCOLUMN          "Path"
     IDS_MENUCOLUMN          "Menu path"
 END
 
-#endif    // 英语(美国) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
