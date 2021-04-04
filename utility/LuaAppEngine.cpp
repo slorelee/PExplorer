@@ -23,6 +23,9 @@ extern void CloseShellProcess();
 extern LPVOID LoadCustomResource(UINT rID, LPTSTR rType);
 extern BOOL FreeCustomResource(LPVOID res);
 
+extern int GetScreenBrightness();
+extern int SetScreenBrightness(int brightness);
+
 #ifdef _DEBUG
 #   ifdef _WIN64
 #       pragma comment(lib, "lua/lua53_d_x64.lib")
@@ -364,6 +367,8 @@ extern "C" {
                 v.iVal = GetRecommendedDPIScaling();
             } else if (v.str == TEXT("rdpi") || v.str == TEXT("recommendeddpi")) {
                 v.iVal = GetRecommendedDPIScaling();
+            } else if (v.str == TEXT("brightness")) {
+                v.iVal = GetScreenBrightness();
             }
             PUSH_INT(v);
         } else if (func == "screen::set") {
@@ -391,6 +396,9 @@ extern "C" {
                     // Set Recommended DPI Scaling
                     SetDpiScaling(-1);
                 }
+            } else if (v.str == TEXT("brightness")) {
+                v.iVal = (int)lua_tointeger(L, base + 3);
+                v.iVal = SetScreenBrightness(v.iVal);
             }
             PUSH_INT(v);
         } else if (func == "volume::mute") {
