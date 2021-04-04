@@ -35,7 +35,7 @@ HWND CreateMaskLayerWindow(HINSTANCE hInstance)
         NULL, NULL, hInstance, NULL);
 
     LONG nRet = ::GetWindowLong(hWnd, GWL_EXSTYLE);
-    nRet = nRet | WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED;
+    nRet = nRet | WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED;
     ::SetWindowLong(hWnd, GWL_EXSTYLE, nRet);
     //00 1A 33 4C 66 80 9A B3 CC E6 FF
     ::SetLayeredWindowAttributes(hWnd, 0, 0, LWA_ALPHA);
