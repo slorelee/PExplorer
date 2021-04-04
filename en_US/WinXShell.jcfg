@@ -36,7 +36,8 @@
     },
     "clockarea_dbclick": {
       "command": "timedate.cpl"
-    }
+    },
+    "screen_brightness":true
   },
   "JS_FILEEXPLORER":
   {
