@@ -218,6 +218,10 @@ function  Screen:Get(...)
   return app:call('Screen::Get', ...)
 end
 
+function  Screen:Set(...)
+  return app:call('Screen::Set', ...)
+end
+
 function Screen:GetX()
   return app:call('Screen::Get', 'x')
 end
