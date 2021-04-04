@@ -3,7 +3,9 @@
 #include "TrayHelper.h"
 
 CTrayIcon::CTrayIcon(HWND hparent, UINT id)
-    : _hparent(hparent), _id(id) {}
+    : _hparent(hparent), _id(id) {
+    _dwUpdateMsg = NIM_ADD;
+}
 
 CTrayIcon::~CTrayIcon() {
     Remove();
@@ -11,10 +13,12 @@ CTrayIcon::~CTrayIcon() {
 
 void CTrayIcon::Add(HICON hIcon, LPCTSTR tooltip) {
     Set(NIM_ADD, _id, hIcon, tooltip);
+    _dwUpdateMsg = NIM_MODIFY;
 }
 
 void CTrayIcon::Modify(HICON hIcon, LPCTSTR tooltip) {
-    Set(NIM_MODIFY, _id, hIcon, tooltip);
+    Set(_dwUpdateMsg, _id, hIcon, tooltip);
+    if (_dwUpdateMsg != NIM_MODIFY) _dwUpdateMsg = NIM_MODIFY;
 }
 
 void CTrayIcon::Remove() {

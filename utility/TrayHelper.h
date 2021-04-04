@@ -24,6 +24,7 @@ public:
 protected:
     HWND _hparent;
     UINT _id;
+    DWORD _dwUpdateMsg;
 
     void Set(DWORD dwMessage, UINT id, HICON hIcon, LPCTSTR tooltip = NULL);
 };
