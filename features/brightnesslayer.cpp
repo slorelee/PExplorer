@@ -40,8 +40,8 @@ HWND CreateMaskLayerWindow(HINSTANCE hInstance)
     //00 1A 33 4C 66 80 9A B3 CC E6 FF
     ::SetLayeredWindowAttributes(hWnd, 0, 0, LWA_ALPHA);
     ::SetWindowLong(hWnd, GWL_USERDATA, (LONG)10);
-    ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    BringWindowToTop(hWnd);
+    ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+    // BringWindowToTop(hWnd);
 
     ::ShowWindow(hWnd, SW_SHOWNORMAL);
     ::UpdateWindow(hWnd);
@@ -63,13 +63,16 @@ void CreateBrightnessLayer(HINSTANCE hInstance)
 int GetScreenBrightness()
 {
     HWND hWnd = FindWindow(MASKLAYERWINDOW_TITLE, NULL);
-    if (!hWnd) return 100;
-    return ::GetWindowLong(hWnd, GWL_USERDATA) * 10;
+    if (hWnd) {
+        return ::GetWindowLong(hWnd, GWL_USERDATA) * 10;
+    }
+    return 100;
 }
 
 int SetScreenBrightness(int brightness)
 {
     HWND hWnd = FindWindow(MASKLAYERWINDOW_TITLE, NULL);
+    if (!hWnd) hWnd = FindWindow(TEXT("FadeLensScrClass"), NULL);
     if (hWnd) {
         SendMessage(hWnd, WM_COMMAND, 1000 + (int)(brightness / 10), 0);
     }
@@ -106,8 +109,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 test_n++;
                 if (test_n > 10) test_n = 2;
 #endif // _DEBUG
-                ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-                ::BringWindowToTop(hWnd);
+                ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+                //::BringWindowToTop(hWnd);
                 lastTopWindow = nowTop;
             }
         }
