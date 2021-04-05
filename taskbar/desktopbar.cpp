@@ -332,8 +332,8 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
 
 //is not PECMD TEXT window
 #define DEF_IGNORE_WINDOWS TEXT(";[PECMD;#32770]")
-//is not InstallShield...
-#define DEF_IGNORE_WINDOW_CLASSES TEXT(";InstallShield_Win")
+//is not BrightnessMaskLayerWindow, InstallShield, PangolinScreenBrightness ...
+#define DEF_IGNORE_WINDOW_CLASSES TEXT(";wxsBrightnessMaskLayerWindow;InstallShield_Win;FadeLensScrClass")
 
 static BOOL IsIgnoredWindow(HWND hwnd)
 {
