@@ -1,4 +1,4 @@
-require 'winapi'
+-- require 'winapi'
 
 WM_SYSCOMMAND = 0x0112
 SC_CLOSE      = 0xf060

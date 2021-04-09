@@ -1,4 +1,4 @@
-require 'winapi'
+-- require 'winapi'
 
 function reg_read(key, values)
   local res = {}
