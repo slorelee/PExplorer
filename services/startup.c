@@ -405,11 +405,18 @@ static int SessionKeyCreated(TCHAR *key)
     HKEY hSessionKey, hKey;
     HRESULT hr;
 
-    /*
+    TCHAR buff[255];
     DWORD dwSessionId;
     ProcessIdToSessionId(GetCurrentProcessId(), &dwSessionId);
-    HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\<dwSessionId>
-    */
+
+    _swprintf(buff, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SessionInfo\\%d"), dwSessionId);
+    if (RegOpenKey(HKEY_CURRENT_USER, buff, &hKey) == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        hKey = NULL;
+    } else {
+        RegSetValue(HKEY_CURRENT_USER, buff, REG_SZ, TEXT(""), 0);
+    }
+
     HMODULE hModule = GetModuleHandle(TEXT("SHELL32"));
     SHCreateSessionKey = (HRESULT(WINAPI *)(REGSAM, PHKEY))GetProcAddress(hModule, (LPCSTR)723);
 
