@@ -12,14 +12,21 @@ function get_option(opt, cmd)
     if val == nil then return nil end
 
     --  -xyz 'v a l u e' -abc
-    val2 = string.match(val, '[\'](.+)[\']%s')
+    val2 = string.match(val, '^[\'](.+)[\']%s')
     if val2 ~= nil then return val2 end
     --  -xyz "v a l u e" -abc
-    val2 = string.match(val, '[\"](.+)[\"]%s')
+    val2 = string.match(val, '^[\"](.+)[\"]%s')
+    if val2 ~= nil then return val2 end
+
+    --  -xyz 'v a l u e'
+    val2 = string.match(val, '^[\'](.+)[\']$')
+    if val2 ~= nil then return val2 end
+    --  -xyz "v a l u e"
+    val2 = string.match(val, '^[\"](.+)[\"]$')
     if val2 ~= nil then return val2 end
 
     --  -xyz abc -abc
-    val2 = string.match(val, '([^%s]+)%s')
+    val2 = string.match(val, '([^%s]+)')
     if val2 ~= nil then return val2 end
 
     return val
