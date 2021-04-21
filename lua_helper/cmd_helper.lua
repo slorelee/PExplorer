@@ -5,6 +5,7 @@ function has_option(opt, cmd)
     return (string.find(cmd, opt) and true or false)
 end
 
+
 function get_option(opt, cmd)
     local val, val2
     if cmd == nil then cmd = app:info('cmdline') end
