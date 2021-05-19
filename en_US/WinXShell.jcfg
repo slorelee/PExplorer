@@ -131,7 +131,9 @@
     "JS_NOTIFYAREA":
   {
     "hide_toggle_button":false,
-    "hide_showdesktop_button":false
+    "hide_showdesktop_button":false,
+    "#handle_system_network:true,
+    "#handle_system_volume:true
   },
     "JS_NOTIFYCLOCK":
   {
