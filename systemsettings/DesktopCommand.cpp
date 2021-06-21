@@ -2,8 +2,13 @@
 #include "DesktopCommand.h"
 
 #include <atlcomcli.h>
-#include <ShlObj.h>
 #include <Windows.h>
+#include "../globals.h"
+
+extern BOOL isWinXShellAsShell();
+
+// resource.h
+#define ID_REFRESH                      1704
 
 class CCoInitialize {
 public:
@@ -16,8 +21,15 @@ public:
 DesktopCommand::DesktopCommand()
 {
     CCoInitialize initCom;
+    _pShellView = NULL;
+    _pFolderView = NULL;
 }
 
+DesktopCommand::DesktopCommand(IShellView * pShellView, IFolderView2 * pFolderView)
+{
+    _pShellView = pShellView;
+    _pFolderView = pFolderView;
+}
 
 DesktopCommand::~DesktopCommand()
 {
@@ -38,6 +50,8 @@ void FindDesktopFolderView(REFIID riid, void **ppv)
         &vtLoc, &vtEmpty,
         SWC_DESKTOP, &lhwnd, SWFO_NEEDDISPATCH, &spdisp);
 
+    if (!spdisp) return;
+
     CComPtr<IShellBrowser> spBrowser;
     CComQIPtr<IServiceProvider>(spdisp)->
         QueryService(SID_STopLevelBrowser, IID_PPV_ARGS(&spBrowser));
@@ -50,6 +64,12 @@ void FindDesktopFolderView(REFIID riid, void **ppv)
 
 void DesktopCommand::Refresh()
 {
+    if (isWinXShellAsShell()) {
+        HWND desktop = FindWindow(TEXT("Progman"), TEXT("Program Manager"));
+        SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_REFRESH, 0x0);
+        return;
+    }
+
     CComPtr<IShellView> spView;
 
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
@@ -61,6 +81,19 @@ void DesktopCommand::Refresh()
 
 void DesktopCommand::SetIconSize(int size)
 {
+    if (_pShellView) {
+        if (_pFolderView) {
+            _pFolderView->SetViewModeAndIconSize(FVM_ICON, size);
+        }
+        return;
+    }
+
+    if (isWinXShellAsShell()) {
+        HWND desktop = FindWindow(TEXT("Progman"), TEXT("Program Manager"));
+        SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_SETICONSIZE, size);
+        return;
+    }
+
     CComPtr<IFolderView2> spView;
 
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
@@ -70,10 +103,24 @@ void DesktopCommand::SetIconSize(int size)
     spView->SetViewModeAndIconSize(FVM_ICON, size);
 }
 
-static void SetDesktopFlags(DWORD dwMask, int checked)
+void DesktopCommand::SetFolderFlags(DWORD dwMask, int checked)
 {
-    CComPtr<IFolderView2> spView;
+    if (_pFolderView) {
+        if (checked) {
+            _pFolderView->SetCurrentFolderFlags(dwMask, dwMask);
+        } else {
+            _pFolderView->SetCurrentFolderFlags(dwMask, 0);
+        }
+        return;
+    }
 
+    if (isWinXShellAsShell()) {
+        HWND desktop = FindWindow(TEXT("Progman"), TEXT("Program Manager"));
+        SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_UNSETFOLDERFLAGS + checked, dwMask);
+        return;
+    }
+
+    CComPtr<IFolderView2> spView;
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
     if (NULL == spView) {
         return;
@@ -88,15 +135,15 @@ static void SetDesktopFlags(DWORD dwMask, int checked)
 
 void DesktopCommand::AutoArrange(int checked)
 {
-    SetDesktopFlags(FWF_AUTOARRANGE, checked);
+    SetFolderFlags(FWF_AUTOARRANGE, checked);
 }
 
 void DesktopCommand::SnapToGrid(int checked)
 {
-    SetDesktopFlags(FWF_SNAPTOGRID, checked);
+    SetFolderFlags(FWF_SNAPTOGRID, checked);
 }
 
 void DesktopCommand::ShowIcons(int checked)
 {
-    SetDesktopFlags(FWF_NOICONS, 1^checked);
+    SetFolderFlags(FWF_NOICONS, 1^checked);
 }

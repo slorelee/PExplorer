@@ -36,6 +36,8 @@
 
 #include <VersionHelpers.h>
 
+#include "../systemsettings/DesktopCommand.h"
+
 enum WallPaperStyle {
     STYLE_WP_STRETCH = 0,
     STYLE_WP_TILE,
@@ -295,6 +297,7 @@ HWND DesktopWindow::Create()
 }
 
 #define WM_SHNOTIFY  (WM_USER+0x1)
+#define WM_USERCOMMAND (WM_USER+WM_COMMAND)
 
 #ifndef _WIN32_WINNT_WIN10
 #define _WIN32_WINNT_WIN10                  0x0A00
@@ -350,15 +353,10 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
                     LOG(TEXT("inited context menu object"));
                 }
             }
-
+            hr = _pShellView->QueryInterface(IID_IFolderView2, (void**)&_pFolderView);
             int iconSize = JCFG2_DEF("JS_DESKTOP", "iconsize", 0).ToInt();
-            if (iconSize > 0) {
-                IFolderView2 *pFolderView = NULL;
-                hr = _pShellView->QueryInterface(IID_IFolderView2, (void**)&pFolderView);
-                if (SUCCEEDED(hr)) {
-                    pFolderView->SetViewModeAndIconSize(FVM_ICON, iconSize);
-                    pFolderView->Release();
-                }
+            if (_pFolderView && iconSize > 0) {
+                _pFolderView->SetViewModeAndIconSize(FVM_ICON, iconSize);
             }
             // subclass shellview window
             _pDesktopShellView = new DesktopShellView(hWndView, _pShellView);
@@ -451,6 +449,26 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
          g_Globals._desktop.ToggleMinimize();
         break;
     //@todo implement all common hotkeys
+    }
+}
+
+void DesktopWindow::ProcessUserCommand(WPARAM wparam, LPARAM lparam)
+{
+    switch (wparam) {
+    case WM_DESKTOP_REFRESH:
+        _pShellView->Refresh();
+        break;
+    case WM_DESKTOP_SETICONSIZE: {
+        DesktopCommand dtcmd(_pShellView, _pFolderView);
+        dtcmd.SetIconSize((int)lparam);
+        break;
+    }
+    case WM_DESKTOP_UNSETFOLDERFLAGS:
+    case WM_DESKTOP_SETFOLDERFLAGS: {
+        DesktopCommand dtcmd(_pShellView, _pFolderView);
+        dtcmd.SetFolderFlags((DWORD)lparam, int(wparam) - WM_DESKTOP_UNSETFOLDERFLAGS);
+        break;
+    }
     }
 }
 
@@ -659,6 +677,10 @@ LRESULT DesktopWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case WM_SHNOTIFY: {
         NotificationReceipt(wparam, lparam);
         goto def;
+    }
+    case WM_USERCOMMAND: {
+        ProcessUserCommand(wparam, lparam);
+        break;
     }
 default: def:
         return super::WndProc(nmsg, wparam, lparam);
