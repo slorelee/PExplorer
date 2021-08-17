@@ -80,7 +80,7 @@
   "JS_DAEMON":
   {
     "clockarea_click": {
-      "command": "##{JVAR_MODULEPATH}\\WinXShell.exe",
+      "command": "##{JVAR_MODULEPATH}\\#{JVAR_MODULENAME}",
       "parameters": "-ui -jcfg wxsUI\\UI_Calendar.zip\\Calendar.jcfg"
     },
     "clockarea_dbclick": {
