@@ -84,6 +84,7 @@ protected:
     int         _last_btn_width;
     MINIMIZEDMETRICS _mmMetrics_org;
     bool        _thumbnail;
+    bool        _task_close_button;
     const UINT WM_SHELLHOOK;
 
     LRESULT Init(LPCREATESTRUCT pcs);

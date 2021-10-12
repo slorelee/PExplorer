@@ -157,10 +157,16 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT - 8, DESKTOPBARBAR_HEIGHT - 6 - 2));
     SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELPARAM(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
 
+    _task_close_button = false;
     if (JCFG2_DEF("JS_TASKBAR", "no_task_title", false).ToBool() != FALSE) {
         // show only icons
         SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
         SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT, DESKTOPBARBAR_HEIGHT - 6 - 2));
+    } else {
+        if (JCFG2_DEF("JS_TASKBAR", "task_close_button", false).ToBool() != FALSE) {
+            _task_close_button = true;
+            SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
+        }
     }
 
     //SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
@@ -286,7 +292,11 @@ int TaskBar::Command(int id, int code)
     TaskBarMap::iterator found = _map.find_id(id);
 
     if (found != _map.end()) {
-        ActivateApp(found);
+        if (code == WM_CLOSE) {
+            PostMessage(found->first, WM_SYSCOMMAND, SC_CLOSE, 0);
+        } else {
+            ActivateApp(found);
+        }
         return 0;
     }
 
@@ -321,6 +331,22 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                 static DynamicFct<DWORD(STDAPICALLTYPE *)(RESTRICTIONS)> pSHRestricted(TEXT("SHELL32"), "SHRestricted");
                 if (pSHRestricted && !(*pSHRestricted)(REST_NOTRAYCONTEXTMENU))
                     ShowAppSystemMenu(it);
+            }
+            break;
+        }
+        case TBN_DROPDOWN: {
+            // Get the coordinates of the button.
+            RECT rc;
+            Point pt(GetMessagePos());
+            ScreenToClient(pnmh->hwndFrom, &pt);
+            TBBUTTONINFO btninfo;
+            btninfo.cbSize = sizeof(TBBUTTONINFO);
+            btninfo.dwMask = TBIF_BYINDEX | TBIF_COMMAND;
+            int idx = (int)SendMessage(_htoolbar, TB_HITTEST, 0, (LPARAM)&pt);
+            if (idx >= 0 &&
+                SendMessage(_htoolbar, TB_GETBUTTONINFO, idx, (LPARAM)&btninfo) != -1) {
+                DestoryThumbnailWindow();
+                Command(btninfo.idCommand, WM_CLOSE);
             }
             break;
         }
@@ -601,6 +627,9 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
         }
 
         TBBUTTON btn = { -2/*I_IMAGENONE*/, 0, TBSTATE_ENABLED/*|TBSTATE_ELLIPSES*/, BTNS_BUTTON, {0, 0}, 0, 0};
+        if (pThis->_task_close_button) {
+            btn.fsStyle = BTNS_DROPDOWN;
+        }
         TaskBarEntry &entry = found->second;
 
         ++entry._used;
