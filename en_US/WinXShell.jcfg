@@ -87,6 +87,7 @@
   {
     "smallicon":false,
     "thumbnail":true,
+    "task_close_button":false,
     "userebar":false,
     "theme":  "dark",
     "height": 40
