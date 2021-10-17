@@ -541,7 +541,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #endif
 
     // init default font
-    if (JCFG2_DEF("JS_TASKBAR", "usesystemfont", false).ToBool() == FALSE) {
+    if (JCFG2_DEF("JS_TASKBAR", "usesystemfont", true).ToBool() == FALSE) {
         g_Globals._hDefaultFont = GetStockFont(DEFAULT_GUI_FONT);
     } else {
         NONCLIENTMETRICS ncm;
