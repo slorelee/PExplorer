@@ -32,6 +32,8 @@
 
 #include "quicklaunch.h"
 
+#include <Uxtheme.h>
+
 #define WM_SHNOTIFY  (WM_USER+0x1)
 
 QuickLaunchEntry::QuickLaunchEntry()
@@ -62,12 +64,24 @@ QuickLaunchBar::QuickLaunchBar(HWND hwnd)
     _path[0] = TEXT('\0');
     _need_reload = 1;
     _hSHNotify = 0;
+
+    _btn_width = JCFG2_DEF("JS_QUICKLAUNCH", "button_width", DESKTOPBARBAR_HEIGHT).ToInt();
+    _icon_area = { 0, -2, _btn_width, DESKTOPBARBAR_HEIGHT };
+
+    String msstyle_button = JCFG2_DEF("JS_QUICKLAUNCH", "msstyle_button", TEXT("Taskbar")).ToString();
+    if (msstyle_button != TEXT("")) {
+        SetWindowTheme(hwnd, msstyle_button, L"Toolbar"); //TaskBar
+        if (msstyle_button == TEXT("BB")) {
+            _icon_area.top = -4;
+        }
+    }
+
     HWND hwndToolTip = (HWND) SendMessage(hwnd, TB_GETTOOLTIPS, 0, 0);
 
     SetWindowStyle(hwndToolTip, GetWindowStyle(hwndToolTip) | TTS_ALWAYSTIP);
 
-    int btnWidth = JCFG2_DEF("JS_QUICKLAUNCH", "button_width", DESKTOPBARBAR_HEIGHT).ToInt();
-    SendMessage(hwnd, TB_SETBITMAPSIZE, 0, MAKELPARAM(btnWidth, DESKTOPBARBAR_HEIGHT - 6));
+    SendMessage(hwnd, TB_SETBUTTONWIDTH, 0, MAKELPARAM(_btn_width, _btn_width));
+    SendMessage(hwnd, TB_SETBITMAPSIZE, 0, MAKELPARAM(_btn_width, DESKTOPBARBAR_HEIGHT));
 
     // delay refresh to some time later
     PostMessage(hwnd, PM_REFRESH, 0, 0);
@@ -179,7 +193,6 @@ void QuickLaunchBar::AddShortcuts()
     COLORREF bk_color = TASKBAR_TEXTCOLOR();
     HBRUSH bk_brush = TASKBAR_BRUSH(); //GetSysColorBrush(COLOR_BTNFACE);
 
-    RECT rect = { 0, -2, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT };
 
     static int bHideShowDesktop = -1;
     static int bHideFileExplorer = -1;
@@ -194,6 +207,8 @@ void QuickLaunchBar::AddShortcuts()
         if (bHideFileExplorer != 1) _fixed_btn++;
         if (bHideUserIcons) _need_reload = 0;
     }
+
+    RECT rect = _icon_area;
 
     if (bHideShowDesktop != 1) {
         AddButton(ID_MINIMIZE_ALL, g_Globals._icon_cache.get_icon(ICID_MINIMIZE).create_bitmap(bk_color, bk_brush, canvas, TASKBAR_ICON_SIZE, rect), ResString(IDS_MINIMIZE_ALL), NULL);

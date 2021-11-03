@@ -31,6 +31,9 @@
 #include "taskbar.h"
 #include "traynotify.h" // for NOTIFYAREA_WIDTH_DEF
 
+#include <Uxtheme.h>
+#pragma comment(lib, "uxtheme.lib")
+
 
 DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_SetTaskmanWindow(TEXT("user32"), "SetTaskmanWindow");
 DynamicFct<BOOL (WINAPI *)(HWND hwnd)> g_RegisterShellHookWindow(TEXT("user32"), "RegisterShellHookWindow");
@@ -77,6 +80,47 @@ TaskBarMap::~TaskBarMap()
     }
 }
 
+RECT TaskBar::_icon_area = { 1, 0, TASKBAR_ICON_SIZE + 4, DESKTOPBARBAR_HEIGHT - 4 };
+
+void TaskBar::InitTaskbarStyle()
+{
+    _no_task_title = false;
+    _task_close_button = false;
+    bool show_task_line = false;
+    COLORREF clrTaskLine = TASKBAR_TASKLINECOLOR();
+
+    if (JCFG2_DEF("JS_TASKBAR", "no_task_title", false).ToBool() != FALSE) {
+        _no_task_title = true;
+        _icon_area.right = TASKBAR_ICON_SIZE + 8 + 4;
+        _icon_area.bottom = DESKTOPBARBAR_HEIGHT - 4;
+    } else {
+        if (JCFG2_DEF("JS_TASKBAR", "task_close_button", false).ToBool() != FALSE) {
+            _task_close_button = true;
+        }
+    }
+
+    if (clrTaskLine != MAXDWORD) {
+        show_task_line = true;
+        _icon_area.top = -1;
+        _icon_area.bottom -= 3;
+    }
+
+    String msstyle_taskbutton = JCFG2_DEF("JS_TASKBAR", "msstyle_taskbutton", TEXT("auto")).ToString();
+    if (msstyle_taskbutton == TEXT("auto")) {
+        if (_task_close_button) {
+            msstyle_taskbutton = TEXT("BB");
+        } else if (TASKBAR_THEMESTYLE().compare(TEXT("light")) == 0) {
+            msstyle_taskbutton = TEXT("BB");
+        } else {
+            msstyle_taskbutton = TEXT("DarkMode");
+            JCFG_QL_SET(2, "hide_fixedsep") = true;
+        }
+    }
+    if (msstyle_taskbutton != TEXT("")) {
+        JCFG_TB_SET(2, "msstyle_taskbutton") = msstyle_taskbutton;
+        JCFG_QL_SET(2, "msstyle_button") = msstyle_taskbutton;
+    }
+}
 
 TaskBar::TaskBar(HWND hwnd)
     :  super(hwnd),
@@ -97,6 +141,8 @@ TaskBar::TaskBar(HWND hwnd)
 
         SystemParametersInfo(SPI_SETMINIMIZEDMETRICS, sizeof(_mmMetrics_new), &_mmMetrics_new, 0);
     }
+
+    InitTaskbarStyle();
 }
 
 TaskBar::~TaskBar()
@@ -152,21 +198,23 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     _htoolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, ws, 0, 0,
         DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT, _hwnd, NULL, g_Globals._hInstance, NULL);
 
-    //SetWindowTheme(_htoolbar, L"TaskBarComposited", NULL); //TaskBar
+
     SendMessage(_htoolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
-    SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT - 8, DESKTOPBARBAR_HEIGHT - 6 - 2));
     SendMessage(_htoolbar, TB_SETBUTTONWIDTH, 0, MAKELPARAM(TASKBUTTONWIDTH_MAX, TASKBUTTONWIDTH_MAX));
 
-    _task_close_button = false;
-    if (JCFG2_DEF("JS_TASKBAR", "no_task_title", false).ToBool() != FALSE) {
+    if (_no_task_title) {
         // show only icons
         SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_MIXEDBUTTONS);
-        SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(DESKTOPBARBAR_HEIGHT, DESKTOPBARBAR_HEIGHT - 6 - 2));
     } else {
-        if (JCFG2_DEF("JS_TASKBAR", "task_close_button", false).ToBool() != FALSE) {
-            _task_close_button = true;
+        if (_task_close_button) {
             SendMessage(_htoolbar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
         }
+    }
+    SendMessage(_htoolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(_icon_area.right, _icon_area.bottom));
+
+    String msstyle_taskbutton = JCFG2_DEF("JS_TASKBAR", "msstyle_taskbutton", TEXT("")).ToString();
+    if (msstyle_taskbutton != TEXT("")) {
+        SetWindowTheme(_htoolbar, msstyle_taskbutton, L"Toolbar"); //TaskBar
     }
 
     //SendMessage(_htoolbar, TB_SETDRAWTEXTFLAGS, DT_CENTER|DT_VCENTER, DT_CENTER|DT_VCENTER);
@@ -357,6 +405,10 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                 return CDRF_NOTIFYITEMDRAW;
             case CDDS_ITEMPREPAINT: {
                 lptbcd->clrText = TASKBAR_TEXTCOLOR();
+#define CDRF_USECDCOLORS 0x00800000
+                return CDRF_NOTIFYPOSTPAINT | CDRF_USECDCOLORS; //Windows vista later
+            }
+            case CDDS_ITEMPOSTPAINT: {
                 if (hbrTaskLine) {
                     lptbcd->nmcd.hdc;
                     RECT rect = lptbcd->nmcd.rc;
@@ -366,7 +418,13 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                         ((lptbcd->nmcd.uItemState & CDIS_HOT) != CDIS_HOT)) {
                         rect.left += 4;
                         rect.right -= 4;
+                    } else {
+                        if (_task_close_button) {
+                            rect.left -= 2;
+                            rect.right += 2;
+                        }
                     }
+
 #ifdef _DEBUG
                     _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
 #endif
@@ -377,8 +435,6 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                     }
                     FillRect(lptbcd->nmcd.hdc, &rect, hbrTaskLine);
                 }
-#define CDRF_USECDCOLORS 0x00800000
-                return CDRF_USECDCOLORS; //Windows vista later
                 return CDRF_DODEFAULT;
             }
             default:
@@ -604,7 +660,7 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
             }
 
             if (hIcon) {
-                RECT rect = {0, -2, DESKTOPBARBAR_HEIGHT - 4, DESKTOPBARBAR_HEIGHT };
+                RECT rect = _icon_area;
                 hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar), TASKBAR_ICON_SIZE, rect);
                 if (delete_icon)
                     DestroyIcon(hIcon); // some icons can be freed, some not - so ignore any error return of DestroyIcon()
@@ -779,6 +835,7 @@ void TaskBar::ResizeButtons()
 
     if (btns > 0) {
         int bar_width = ClientRect(_hwnd).right;
+        if (_task_close_button) bar_width -= btns * 20;
         int btn_width = (bar_width / btns) - 3;
 
         if (btn_width < TASKBUTTONWIDTH_MIN)
