@@ -85,5 +85,5 @@ extern bool JCfg_TaskThumbnailEnabled();
 #define DPI_SY(y) (MulDiv((y),g_JCfg_DPI_SY, 96))
 
 #define STARTMENUROOT_ICON_SIZE     DPI_SX(g_JCfg_taskbar_startmenu_iconsize)
-#define TASKBAR_ICON_SIZE           DPI_SX(g_JCfg_taskbar_iconsize)
+#define TASKBAR_ICON_SIZE           g_JCfg_taskbar_iconsize
 

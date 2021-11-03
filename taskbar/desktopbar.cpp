@@ -118,7 +118,7 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     DrawText(canvas, start_str.c_str(), -1, &rect, DT_SINGLELINE | DT_CALCRECT);
 
     _deskbar_pos_y = DESKTOPBAR_TOP;
-    int start_btn_width = DESKTOPBARBAR_HEIGHT + 8; //TASKBAR_ICON_SIZE + DPI_SX(rect.right) + (TASKBAR_ICON_SIZE / 4);
+    int start_btn_width = DESKTOPBARBAR_HEIGHT + 8; //DPI_SX((TASKBAR_ICON_SIZE + rect.right + (TASKBAR_ICON_SIZE / 4)));
 
     string_t start_icon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("custom")).ToString();
     int start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
