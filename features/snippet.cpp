@@ -281,3 +281,52 @@ void wxsOpen(LPTSTR cmd) {
         gLuaCall("wxs_open", cmd, TEXT(""));
     }
 }
+
+TOKEN_PRIVILEGES *AdjustToken()
+{
+    HANDLE hToken = NULL;
+    TOKEN_PRIVILEGES *p = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken)) {
+        size_t s = sizeof(TOKEN_PRIVILEGES) + 2 * sizeof(LUID_AND_ATTRIBUTES);
+        p = (PTOKEN_PRIVILEGES)malloc(s);
+
+        if (!LookupPrivilegeValue(NULL, SE_SYSTEM_ENVIRONMENT_NAME, &(p->Privileges[0].Luid)) ||
+            !LookupPrivilegeValue(NULL, SE_BACKUP_NAME, &(p->Privileges[1].Luid)) ||
+            !LookupPrivilegeValue(NULL, SE_RESTORE_NAME, &(p->Privileges[2].Luid))) {
+            printf("failed to LookupPrivilegeValue error code : %d \r\n", GetLastError());
+            free(p);
+            return NULL;
+        }
+        p->PrivilegeCount = 3;
+
+        for (int i = 0; i < 3; ++i) {
+            p->Privileges[i].Attributes = SE_PRIVILEGE_ENABLED;
+        }
+
+        if (!AdjustTokenPrivileges(hToken, FALSE, p, s, NULL, NULL) || GetLastError() != ERROR_SUCCESS) {
+            printf("AdjustTokenPrivileges failed! error code : %d \r\n", GetLastError());
+            free(p);
+            return NULL;
+        }
+    } else {
+        printf("Open process token failed! error code : %d \r\n", GetLastError());
+        return NULL;
+    }
+    return p;
+}
+
+BOOL IsUEFIMode() {
+    TCHAR buff[1024] = { 0 };
+
+    DWORD dw = 0;
+    TOKEN_PRIVILEGES *token = AdjustToken();
+    if (!token) return FALSE;
+
+    dw = GetFirmwareEnvironmentVariable(TEXT(""),
+        TEXT("{00000000-0000-0000-0000-000000000000}"), buff, sizeof(buff));
+    dw = GetLastError();
+    free(token);
+    if (dw == ERROR_NOACCESS) return TRUE;
+    //dw = ERROR_INVALID_FUNCTION for legacy BIOS
+    return FALSE;
+}

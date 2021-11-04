@@ -13,6 +13,7 @@ extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, 
 extern HRESULT DoFileVerb(PCTSTR tzFile, PCTSTR verb);
 TCHAR *CompletePath(TCHAR *target, TCHAR *buff);
 
+extern BOOL IsUEFIMode();
 extern BOOL hasMSExplorer();
 extern BOOL isWinXShellAsShell();
 extern void wxsOpen(LPTSTR cmd);
@@ -670,6 +671,10 @@ extern "C" {
 
         luaL_checktype(L, base + 1, LUA_TSTRING);
         std::string name = lua_tostring(L, base + 1);
+        char infoname[255] = { 0 };
+        strcpy(infoname, name.c_str());
+        name = _strlwr(infoname);
+
         if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
@@ -688,6 +693,13 @@ extern "C" {
         } else if (name == "locale") {
             v.str = g_Globals._locale;
             PUSH_STR(v);
+        } else if (name == "firmwaretype") {
+            v.str = TEXT("BIOS");
+            if (IsUEFIMode()) v.str = TEXT("UEFI");
+            PUSH_STR(v);
+        } else if (name == "isuefimode") {
+            v.iVal = IsUEFIMode();
+            PUSH_INT(v);
         } else if (name == "iswinpe") {
             v.iVal = g_Globals._isWinPE;
             PUSH_INT(v);
