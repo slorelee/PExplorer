@@ -497,6 +497,9 @@
     <Image Include="res\sm_custom_2.ico">
       <Filter>res</Filter>
     </Image>
+    <Image Include="res\cmd24.ico">
+      <Filter>res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utility">

@@ -235,6 +235,20 @@ void IconCache::init()
     init_trayicons(_icons, ICID_TRAY_NET_WIRED_DIS, IDI_TRAY_NET_WIRED_DIS);
     i = ICID_TRAY_NET_WIRED_DIS + 1;
     for (; i <= ICID_TRAY_DARK_NET_SIGNAL_QUARTER4; i++) init_trayicons(_icons, i);
+
+    /*
+    TCHAR sysPathBuff[MAX_PATH] = { 0 };
+    GetWindowsDirectory(sysPathBuff, MAX_PATH);
+    String sPath = sysPathBuff;
+    sPath.append(_T("\\System32\\cmd.exe"));
+    _icons[ICID_CMDEXE] = extract(sPath, 0, ICF_MIDDLE);
+    */
+    if (icon_size == 24) {
+    _icons[ICID_CMDEXE] = Icon(IT_STATIC, ICID_CMDEXE, SizeIcon(IDI_CMD24, icon_size));
+    } else {
+        _icons[ICID_CMDEXE] = Icon();
+    }
+
 }
 
 

@@ -650,9 +650,17 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
             if (!last_id)
                 found->second._id = pThis->_next_id++;
         } else {
-            HBITMAP hbmp;
-            HICON hIcon = get_window_icon_big(hwnd);
+            HBITMAP hbmp = NULL;
+            HICON hIcon = NULL;
             BOOL delete_icon = FALSE;
+
+            if (str_title == TEXT("ConsoleWindowClass")) {
+                hIcon = g_Globals._icon_cache.get_icon(ICID_CMDEXE).get_hicon();
+            }
+
+            if (!hIcon) {
+                hIcon = get_window_icon_big(hwnd);
+            }
 
             if (!hIcon) {
                 hIcon = LoadIcon(0, IDI_APPLICATION);
@@ -661,6 +669,14 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
 
             if (hIcon) {
                 RECT rect = _icon_area;
+
+#ifdef _DEBUG
+                ICONINFO iconInfo;
+                GetIconInfo(hIcon, &iconInfo);
+
+                BITMAP biIcon;
+                GetObject(iconInfo.hbmColor, sizeof(BITMAP), &biIcon);
+#endif
                 hbmp = create_bitmap_from_icon(hIcon, TASKBAR_BRUSH(), WindowCanvas(pThis->_htoolbar), TASKBAR_ICON_SIZE, rect);
                 if (delete_icon)
                     DestroyIcon(hIcon); // some icons can be freed, some not - so ignore any error return of DestroyIcon()

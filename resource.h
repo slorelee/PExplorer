@@ -61,6 +61,7 @@
 #define IDI_EMPTY2                      104
 #define ID_ACTIVATE                     105
 #define IDD_SEARCH_PROGRAM              105
+#define IDI_CMD24                       105
 #define IDB_DRIVEBAR                    106
 #define IDD_DESKBAR_DESKTOP             106
 #define IDB_IMAGES                      107

@@ -570,6 +570,7 @@ cscript ResBuilder.vbs
     <Image Include="res\arrow_dwn.ico" />
     <Image Include="res\arrow_up.ico" />
     <Image Include="res\arrowsel.ico" />
+    <Image Include="res\cmd24.ico" />
     <Image Include="res\computer.ico" />
     <Image Include="res\config.ico" />
     <Image Include="res\control-panel.ico" />
