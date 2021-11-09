@@ -717,7 +717,7 @@ int DesktopBar::Command(int id, int code)
         break;
 
     case ID_DESKTOPBAR_SETTINGS: {
-        if (g_Globals._winvers[0] >= 10) {
+        if (!g_Globals._isWinPE && g_Globals._winvers[0] >= 10) {
             TCHAR sysPathBuff[MAX_PATH] = { 0 };
             GetWindowsDirectory(sysPathBuff, MAX_PATH);
             String dllPath = sysPathBuff;
