@@ -1,7 +1,7 @@
 {
   "JS_README":
   {
-    "can_be_omitted_section":true,
+    "can_be_omitted_section": true,
     "description":
     [
     "this is WinXShell's configure file.",
@@ -10,7 +10,7 @@
   },
   "JS_JMACRO":
   {
-    "can_be_omitted_section":true,
+    "can_be_omitted_section": true,
     "description":
     [
     "specify alias name for built-in paramater names which using in jcfg file.",
@@ -37,27 +37,27 @@
     "clockarea_dbclick": {
       "command": "timedate.cpl"
     },
-    "screen_brightness":100
+    "screen_brightness": 100
   },
   "JS_FILEEXPLORER":
   {
-    "#3rd_filename":"##{JVAR_MODULEPATH}\\explorer++.exe",
-    "#padding-bottom":20
+    "#3rd_filename": "##{JVAR_MODULEPATH}\\explorer++.exe",
+    "#padding-bottom": 20
   },
   "JS_DESKTOP":
   {
-    "3rd_open_arguments":"\"%s\"",
+    "3rd_open_arguments": "\"%s\"",
     "cascademenu":
     {
       "#WinXNew":"Directory\\Background\\shell\\WinXNew"
     },
-    "#iconsize":32,
-    "bkcolor comment":"green for eyes",
-    "bkcolor":[199,237,204],
-    "wallpaperstyle comment":"value:0-strech(default);1-tile;2-center",
-    "::WP_MODE":0,
-    "wallpaper comment":"if it is not set or be empty, will use system's wallpaper image file",
-    "::WP":""
+    "#iconsize": 32,
+    "bkcolor comment": "green for eyes",
+    "bkcolor": [199, 237, 204],
+    "wallpaperstyle comment": "value:0-strech(default);1-tile;2-center",
+    "::WP_MODE": 0,
+    "wallpaper comment": "if it is not set or be empty, will use system's wallpaper image file",
+    "::WP": ""
   },
   "JS_THEMES": {
     "blue": {
@@ -69,7 +69,7 @@
     },
     "dark": {
       "taskbar": {
-        "bkcolor": [0, 0, 0],
+        "bkcolor": [38, 38, 38],
         "task_line_color": [238, 238, 238],
         "textcolor": "0xffffff"
       }
@@ -85,11 +85,12 @@
   },
   "JS_TASKBAR":
   {
-    "smallicon":false,
-    "thumbnail":true,
-    "task_close_button":false,
-    "userebar":false,
-    "theme":  "dark",
+    "smallicon": false,
+    "thumbnail": true,
+    "task_close_button": true,
+    "no_task_title": false,
+    "userebar": false,
+    "theme": "dark",
     "height": 40
   },
   "::STARTMENU":
@@ -97,17 +98,17 @@
     "start_pushed_bkcolor" : [0, 100, 180],
     "start_icon_comment": "theme;empty;custom",
     "start_icon": "theme",
-    "notopitems":false,
-    "noprograms":false,
-    "nosettings":true,
-    "nobrowse":false,
-    "noconnections":false,
-    "nofind":true,
-    "norun":false,
-    "nologoff":true,
-    "norestart":false,
-    "noshutdown":false,
-    "noterm":true,
+    "notopitems": false,
+    "noprograms": false,
+    "nosettings": true,
+    "nobrowse": false,
+    "noconnections": false,
+    "nofind": true,
+    "norun": false,
+    "nologoff": true,
+    "norestart": false,
+    "noshutdown": false,
+    "noterm": true,
     "commands": {
       "reboot": {
          "command": "Wpeutil.exe",
@@ -121,23 +122,23 @@
   },
   "::QL":
   {
-    "maxiconsinrow":20,
-    "3rd_startup_arguments":"",
-    "hide_showdesktop":false,
-    "hide_fileexplorer":false,
-    "hide_fixedsep":false,
-    "hide_usericons":false,
-    "folder":"Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
+    "maxiconsinrow": 20,
+    "3rd_startup_arguments": "",
+    "hide_showdesktop": false,
+    "hide_fileexplorer": false,
+    "hide_fixedsep": false,
+    "hide_usericons": false,
+    "folder": "Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
   },
     "JS_NOTIFYAREA":
   {
-    "hide_toggle_button":false,
-    "hide_showdesktop_button":false,
-    "#handle_system_network:true,
-    "#handle_system_volume:true
+    "hide_toggle_button": false,
+    "hide_showdesktop_button": false,
+    "#handle_system_network": true,
+    "#handle_system_volume": true
   },
     "JS_NOTIFYCLOCK":
   {
-    "visible":true
+    "visible": true
   }
 }
