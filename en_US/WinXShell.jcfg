@@ -1,35 +1,29 @@
 {
-  "JS_README":
-  {
+  "JS_README": {
     "can_be_omitted_section": true,
-    "description":
-    [
-    "this is WinXShell's configure file.",
-    "you can specify some settings for desktop,taskbar,etc."
+    "description": [
+      "this is WinXShell's configure file.",
+      "you can specify some settings for desktop,taskbar,etc."
     ]
   },
-  "JS_JMACRO":
-  {
+  "JS_JMACRO": {
     "can_be_omitted_section": true,
-    "description":
-    [
-    "specify alias name for built-in paramater names which using in jcfg file.",
-    "MACRO format:<built-in paramater name>,<alias name>,<description>",
-    "<built-in paramater name>:cann't be modified.",
-    "<alias name>: specify alias name which start with [::] for built-in paramater name",
-    "<description>: the description of built-in paramater name, cann't be modified."
+    "description": [
+      "specify alias name for built-in paramater names which using in jcfg file.",
+      "MACRO format:<built-in paramater name>,<alias name>,<description>",
+      "<built-in paramater name>:cann't be modified.",
+      "<alias name>: specify alias name which start with [::] for built-in paramater name",
+      "<description>: the description of built-in paramater name, cann't be modified."
     ],
-    "JKEYNAME":
-    [
+    "JKEYNAME": [
       ["JS_JMACRO", "",           "section name. define the alias name for *i18n*"],
       ["JS_STARTMENU", "::STARTMENU",          "section name. specify some settings for startmenu."],
       ["JS_QUICKLAUNCH", "::QL",      "section name. specify some settings for quicklanchbar."],
       ["wallpaperstyle", "::WP_MODE",  "property name. wallpaper's style value:0-strech(default);1-tile;2-center"],
       ["wallpaper", "::WP",            "property name."]
-      ]
+    ]
   },
-  "JS_DAEMON":
-  {
+  "JS_DAEMON": {
     "clockarea_click": {
       "command": "##{JVAR_MODULEPATH}\\#{JVAR_MODULENAME}",
       "parameters": "-ui -jcfg wxsUI\\UI_Calendar.zip\\Calendar.jcfg"
@@ -39,17 +33,14 @@
     },
     "screen_brightness": 100
   },
-  "JS_FILEEXPLORER":
-  {
+  "JS_FILEEXPLORER": {
     "#3rd_filename": "##{JVAR_MODULEPATH}\\explorer++.exe",
     "#padding-bottom": 20
   },
-  "JS_DESKTOP":
-  {
+  "JS_DESKTOP": {
     "3rd_open_arguments": "\"%s\"",
-    "cascademenu":
-    {
-      "#WinXNew":"Directory\\Background\\shell\\WinXNew"
+    "cascademenu": {
+      "#WinXNew": "Directory\\Background\\shell\\WinXNew"
     },
     "#iconsize": 32,
     "bkcolor comment": "green for eyes",
@@ -83,8 +74,7 @@
       }
     }
   },
-  "JS_TASKBAR":
-  {
+  "JS_TASKBAR": {
     "smallicon": false,
     "thumbnail": true,
     "task_close_button": true,
@@ -93,9 +83,8 @@
     "theme": "dark",
     "height": 40
   },
-  "::STARTMENU":
-  {
-    "start_pushed_bkcolor" : [0, 100, 180],
+  "::STARTMENU": {
+    "start_pushed_bkcolor": [0, 100, 180],
     "start_icon_comment": "theme;empty;custom",
     "start_icon": "theme",
     "notopitems": false,
@@ -111,17 +100,16 @@
     "noterm": true,
     "commands": {
       "reboot": {
-         "command": "Wpeutil.exe",
-         "parameters": "Reboot"
+        "command": "Wpeutil.exe",
+        "parameters": "Reboot"
       },
       "shutdown": {
-         "command": "Wpeutil.exe",
-         "parameters": "Shutdown"
+        "command": "Wpeutil.exe",
+        "parameters": "Shutdown"
       }
     }
   },
-  "::QL":
-  {
+  "::QL": {
     "maxiconsinrow": 20,
     "3rd_startup_arguments": "",
     "hide_showdesktop": false,
@@ -130,15 +118,13 @@
     "hide_usericons": false,
     "folder": "Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar"
   },
-    "JS_NOTIFYAREA":
-  {
+  "JS_NOTIFYAREA": {
     "hide_toggle_button": false,
     "hide_showdesktop_button": false,
     "#handle_system_network": true,
     "#handle_system_volume": true
   },
-    "JS_NOTIFYCLOCK":
-  {
+  "JS_NOTIFYCLOCK": {
     "visible": true
   }
 }
