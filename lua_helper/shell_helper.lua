@@ -280,6 +280,11 @@ function FolderOptions:Get(opt)
   return app:call('FolderOptions::Get', opt)
 end
 
+function FolderOptions:Toggle(opt)
+  local val = FolderOptions:Get(opt)
+  FolderOptions:Set(opt, val - 1)
+end
+
 -- Helper(alias)
 function PinToTaskbar(target, name, param, icon, index, showcmd)
   Taskbar:Pin(target, name, param, icon, index, showcmd)
