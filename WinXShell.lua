@@ -146,7 +146,7 @@ function onclick_tray_clockarea(isdouble)
   if isdouble then
     app:run('control.exe', 'timedate.cpl')
   else
-    wxsUI('UI_Calendar', 'Calendar.jcfg')
+    wxsUI('UI_Calendar', 'main.jcfg')
   end
   return 0
 end

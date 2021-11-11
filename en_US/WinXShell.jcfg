@@ -26,7 +26,7 @@
   "JS_DAEMON": {
     "clockarea_click": {
       "command": "##{JVAR_MODULEPATH}\\#{JVAR_MODULENAME}",
-      "parameters": "-ui -jcfg wxsUI\\UI_Calendar.zip\\Calendar.jcfg"
+      "parameters": "-code wxsUI('UI_Calendar','main.jcfg')"
     },
     "clockarea_dbclick": {
       "command": "timedate.cpl"
