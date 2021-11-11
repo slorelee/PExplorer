@@ -1,5 +1,6 @@
 
 #include<stdio.h>
+#include<tchar.h>
 #include<windows.h>
 
 #define MASKLAYERWINDOW_TITLE TEXT("wxsBrightnessMaskLayerWindow")
@@ -109,7 +110,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     int bn_arr[11] = { 0xFF, 0xE6, 0xCC, 0xB3, 0x9A, 0x80, 0x66, 0x4C, 0x33, 0x1A, 0 };
 
 #ifdef _DEBUG
-    static int test_n = 2;
+    static int test_n = -1;
+    if (test_n == -1) {
+        TCHAR buff[MAX_PATH + 1] = { 0 };
+        DWORD dw = GetEnvironmentVariable(TEXT("SCREEN_BRIGHTNESS"), buff, MAX_PATH);
+        if (buff[0] != '\0') {
+            test_n = _tstoi(buff);
+            test_n = test_n / 10;
+        } else {
+            test_n = 8;
+        }
+    }
 #endif
 
     switch (msg) {
@@ -129,9 +140,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 char buff[100];
                 sprintf_s(buff, 100, "TopWindow: %d --- %d \n", nowTop, hWnd);
                 OutputDebugStringA(buff);
-                SendMessage(hWnd, WM_COMMAND, 1000 + test_n, 0);
-                test_n++;
-                if (test_n > 10) test_n = 2;
+                if (test_n > 0) {
+                    SendMessage(hWnd, WM_COMMAND, 1000 + test_n, 0);
+                    test_n++;
+                    if (test_n > 10) test_n = 2;
+                }
 #endif // _DEBUG
                 ::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
                 //::BringWindowToTop(hWnd);
