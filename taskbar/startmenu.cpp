@@ -70,6 +70,8 @@ StartMenu::StartMenu(HWND hwnd, int icon_size)
     _selected_id = -1;
     _last_mouse_pos = 0;
 #endif
+
+    _name_flags = 0;
 }
 
 StartMenu::StartMenu(HWND hwnd, const StartMenuCreateInfo &create_info, int icon_size)
@@ -99,6 +101,8 @@ StartMenu::StartMenu(HWND hwnd, const StartMenuCreateInfo &create_info, int icon
     _selected_id = -1;
     _last_mouse_pos = 0;
 #endif
+
+    _name_flags = 0;
 }
 
 StartMenu::~StartMenu()
@@ -1138,7 +1142,16 @@ ShellEntryMap::iterator StartMenu::AddEntry(const ShellFolder folder, Entry *ent
     else
         icon_id = (ICON_ID)/*@@*/ entry->_icon_id;
 
-    return AddEntry(entry->_display_name, icon_id, entry);
+    String title = entry->_display_name;
+    if (_name_flags & NO_EXEEXT_FLAG) {
+        if (title.length() > 4) {
+            String ext = title.substr(title.length() - 4);
+            if (ext == TEXT(".exe")) {
+                title = title.substr(0, title.length() - 4);
+            }
+        }
+    }
+    return AddEntry(title, icon_id, entry);
 }
 
 
@@ -1705,8 +1718,12 @@ LRESULT StartMenuRoot::Init(LPCREATESTRUCT pcs)
 {
     if (!JCFG2_DEF("JS_STARTMENU", "notopitems", false).ToBool()) {
         // add buttons for entries in _entries
+
+        _name_flags = NO_EXEEXT_FLAG; // hide .exe extension
         if (super::Init(pcs))
             return 1;
+
+        _name_flags = 0;
 
         AddSeparator();
     }

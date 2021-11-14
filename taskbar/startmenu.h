@@ -35,6 +35,7 @@
 #define STARTMENU_SEP_HEIGHT(icon_size)     (STARTMENU_LINE_HEIGHT(icon_size)/2)
 #define STARTMENU_TOP_BTN_SPACE             8
 
+#define NO_EXEEXT_FLAG 0x0001
 
 // private message constants
 #define PM_STARTMENU_CLOSED     (WM_APP+0x11)
@@ -221,6 +222,7 @@ protected:
 
     // data members
     int     _next_id;
+    int     _name_flags;
     ShellEntryMap _entries;
     StartMenuShellDirs _dirs;
 
