@@ -335,6 +335,11 @@ int daemon_entry(int standalone)
     update_property_handler();
 
     int brightness = JCFG2_DEF("JS_DAEMON", "screen_brightness", 100).ToInt();
+    TCHAR buff[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("SCREEN_BRIGHTNESS"), buff, MAX_PATH);
+    if (buff[0] != '\0') {
+        brightness = _tstoi(buff);
+    }
     if (brightness > 1) {
         CreateBrightnessLayer(g_Globals._hInstance);
     }
