@@ -287,7 +287,7 @@ protected:
     void    ActivateEntry(int id, const ShellEntrySet &entries);
     virtual void CloseStartMenu(int id = 0);
 
-    bool    GetButtonRect(int id, PRECT prect) const;
+    int     GetButtonRect(int id, PRECT prect) const;
 
     void    DrawFloatingButton(HDC hdc);
     void    GetFloatingButtonRect(LPRECT prect);

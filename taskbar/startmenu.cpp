@@ -792,13 +792,16 @@ bool StartMenu::JumpToNextShortcut(TCHAR c)
 #endif // _LIGHT_STARTMENU
 
 
-bool StartMenu::GetButtonRect(int id, PRECT prect) const
+int StartMenu::GetButtonRect(int id, PRECT prect) const
 {
 #ifdef _LIGHT_STARTMENU
     ClientRect clnt(_hwnd);
     const int icon_size = _icon_size;
     RECT rect = {_border_left, _border_top, clnt.right, STARTMENU_LINE_HEIGHT(icon_size)};
 
+    if (_buttons.size() == 0) {
+        return -1;
+    }
     for (SMBtnVector::const_iterator it = _buttons.begin() + _scroll_pos; it != _buttons.end(); ++it) {
         const SMBtnInfo &info = *it;
 
@@ -806,13 +809,13 @@ bool StartMenu::GetButtonRect(int id, PRECT prect) const
 
         if (info._id == id) {
             *prect = rect;
-            return true;
+            return 1;
         }
 
         rect.top = rect.bottom;
     }
 
-    return false;
+    return 0;
 #else
     HWND btn = GetDlgItem(_hwnd, id);
 
@@ -960,7 +963,7 @@ void StartMenu::UpdateIcons(/*int idx*/)
 
                     RECT rect;
 
-                    GetButtonRect(btn._id, &rect);
+                    if (GetButtonRect(btn._id, &rect) == -1) break;
 
                     if (rect.bottom > _bottom_max)
                         break;
@@ -1292,7 +1295,10 @@ void StartMenu::CreateSubmenu(int id, const StartMenuFolders &new_folders, LPCTS
     RECT rect;
     int x, y;
 
-    if (GetButtonRect(id, &rect)) {
+    int rc = -1;
+    rc = GetButtonRect(id, &rect);
+    if (rc == -1) return;
+    if (rc == 1) {
         ClientToScreen(_hwnd, &rect);
 
         x = rect.right; // Submenus should overlap their parent a bit.
