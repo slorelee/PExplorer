@@ -534,15 +534,21 @@ UINT WalkPopupMenu(HMENU hmenu, LPCTSTR verb, IContextMenu *pcm)
     int count = GetMenuItemCount(hmenu);
     TCHAR verbbuffer[MAX_PATH + 1] = { 0 };
     TCHAR namebuffer[MAX_PATH + 1] = { 0 };
+    HRESULT hr = S_OK;
     for (int i = 0; i < count; i++) {
         if (GetMenuItemInfo(hmenu, i, TRUE, &mmi)) {
             if (mmi.wID != MAXUINT) {
+                verbbuffer[0] = '\0';
+                if (pcm && mmi.wID != (UINT)mmi.hSubMenu) {
 #ifdef UNICODE
-                if (pcm) pcm->GetCommandString(mmi.wID, GCS_VERBW, NULL, (char *)verbbuffer, MAX_PATH);
+                    hr = pcm->GetCommandString(mmi.wID, GCS_VERBW | GCS_UNICODE, NULL, (char *)verbbuffer, MAX_PATH);
 #else
-                if (pcm) pcm->GetCommandString(mmi.wID, GCS_VERB, NULL, (char *)verbbuffer, MAX_PATH);
+                    hr = pcm->GetCommandString(mmi.wID, GCS_VERB, NULL, (char *)verbbuffer, MAX_PATH);
 #endif
-                GetMenuString(hmenu, mmi.wID, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                }
+                if (hr == S_OK) {
+                    GetMenuString(hmenu, mmi.wID, namebuffer, MAX_PATH, MF_BYCOMMAND);
+                }
                 _logU2A_(FmtString(TEXT("%s%d |%s|%s| %x"), TEXT("  "), mmi.wID, verbbuffer, namebuffer, mmi.hSubMenu).c_str());
                 if (_tcsicmp(verbbuffer, verb) == 0) {
                     // output all menu info
