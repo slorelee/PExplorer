@@ -7,6 +7,7 @@
 #include "../systemsettings/MonitorAdapter.h"
 #include "../systemsettings/Volume.h"
 #include "FolderOptions.h"
+#include "Dialog.h"
 
 extern int FakeExplorer();
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, INT iIcon, INT iShowCmd);
@@ -457,6 +458,33 @@ extern "C" {
                 v.str = s2w(lua_tostring(L, base + 2));
                 FolderOptions->Set(v.str.c_str(), (DWORD)lua_tointeger(L, base + 3));
             }
+        } else if (func == "dialog::openfile") {
+            TCHAR buff[MAX_PATH] = {0};
+            const TCHAR *title = NULL;
+            const TCHAR *filters = NULL;
+            if (lua_type(L, base + 2) == LUA_TSTRING) {
+                v.str = s2w(lua_tostring(L, base + 2));
+                lstrcpy(buff, v.str.c_str());
+                title = buff;
+            }
+            if (lua_type(L, base + 3) == LUA_TSTRING) {
+                v.str = s2w(lua_tostring(L, base + 3));
+                filters = v.str.c_str();
+            }
+            v.iVal = Dialog->OpenFile(title, filters);
+            v.str = (TCHAR *)Dialog->SelectedFileName;
+            PUSH_STR(v);
+            PUSH_INT(v);
+        } else if (func == "dialog::browsefolder") {
+            const TCHAR *title = NULL;
+            if (lua_type(L, base + 2) == LUA_TSTRING) {
+                v.str = s2w(lua_tostring(L, base + 2));
+                title = v.str.c_str();
+            }
+            v.iVal = Dialog->BrowseFolder(title);
+            v.str = (TCHAR *)Dialog->SelectedFolderName;
+            PUSH_STR(v);
+            PUSH_INT(v);
         } else if (func == "setvar") {
             v.str = s2w(lua_tostring(L, base + 2));
             if (v.str == TEXT("ClockText")) {
