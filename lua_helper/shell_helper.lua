@@ -285,6 +285,15 @@ function FolderOptions:Toggle(opt)
   FolderOptions:Set(opt, val - 1)
 end
 
+Dialog = {}
+function Dialog:OpenFile(...)
+  return app:call('Dialog::OpenFile', ...)
+end
+
+function Dialog:BrowseFolder(...)
+  return app:call('Dialog::BrowseFolder', ...)
+end
+
 -- Helper(alias)
 function PinToTaskbar(target, name, param, icon, index, showcmd)
   Taskbar:Pin(target, name, param, icon, index, showcmd)
