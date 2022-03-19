@@ -37,6 +37,7 @@ function parse_option(opt_str)
     local opt = {}
     opt.wait = false
     opt.showcmd = 1
+    opt.verb = nil
     if opt_str == nil then return opt end
     opt_str = opt_str .. ' '
     if string.find(opt_str, '/nowait ') then opt.wait = false end
@@ -53,6 +54,9 @@ function parse_option(opt_str)
         opt.max = 1
         opt.showcmd = 3
     end
+    if string.find(opt_str, '/admin ') then
+        opt.verb = 'runas'
+    end
     return opt
 end
 
@@ -63,7 +67,7 @@ function exec(option, cmd)
         option = nil
     end
     local opt = parse_option(option)
-    return app:call('exec', cmd, opt.wait, opt.showcmd)
+    return app:call('exec', cmd, opt.wait, opt.showcmd, opt.verb)
 end
 
 
