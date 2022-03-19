@@ -296,29 +296,79 @@ HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Execute command
-DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd)
+
+static BOOL ShellExecuteWithSEInfo(SHELLEXECUTEINFO &ei, TCHAR *cmd)
 {
+    TCHAR paramSep = _T(' ');
+    TCHAR *cp = cmd;
+    if (cmd[0] == _T('\"') || cmd[0] == _T('\'')) {
+        cp = cmd + 1;
+        paramSep = cmd[0];
+    }
+
+    {
+        while (*cp != _T('\0') && *cp != paramSep) {
+            if (paramSep != _T(' ')) *(cp - 1) = *cp;
+            cp++;
+        }
+        if (paramSep != _T(' ')) {
+            *(cp - 1) = _T('\0');
+            cp++;
+        } else {
+            *cp = _T('\0');
+        }
+        ei.lpParameters = cp + 1;
+    }
+    return ShellExecuteEx(&ei);
+}
+
+// Execute command
+DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd, PTSTR ptzVerb)
+{
+    HANDLE hProcess = NULL;
+    HANDLE hThread = NULL;
     DWORD dwExitCode = 0;
-    STARTUPINFO si = { 0 };
-    PROCESS_INFORMATION pi;
-    si.cb = sizeof(STARTUPINFO);
-    si.lpDesktop = TEXT("WinSta0\\Default");
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = iShowCmd;
+
     TCHAR tzExpandCmd[MAX_PATH * 10];
     ExpandEnvironmentStrings(ptzCmd, tzExpandCmd, MAX_PATH * 10);
-    BOOL bResult = CreateProcess(NULL, tzExpandCmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
-    if (!bResult) return S_FALSE;
-    if (bWait) {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-        GetExitCodeProcess(pi.hProcess, &dwExitCode);
-    }
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
 
+    BOOL bResult = FALSE;
+    if (ptzVerb && ptzVerb[0] != _T('\0')) {
+        SHELLEXECUTEINFO ei = { sizeof(ei) };
+        ei.fMask = SEE_MASK_INVOKEIDLIST;
+        ei.hwnd = NULL;
+        ei.nShow = iShowCmd;
+        ei.lpVerb = ptzVerb;
+        ei.lpFile = tzExpandCmd;
+
+        bResult = ShellExecuteWithSEInfo(ei, tzExpandCmd);
+        if (!bResult) return S_FALSE;
+
+        hProcess = ei.hProcess;
+    } else {
+        STARTUPINFO si = { 0 };
+        PROCESS_INFORMATION pi;
+        si.cb = sizeof(STARTUPINFO);
+        si.lpDesktop = TEXT("WinSta0\\Default");
+        si.dwFlags = STARTF_USESHOWWINDOW;
+        si.wShowWindow = iShowCmd;
+        bResult = CreateProcess(NULL, tzExpandCmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+        if (!bResult) return S_FALSE;
+
+        hProcess = pi.hProcess;
+        hThread = pi.hThread;
+    }
+
+    if (bWait && hProcess) {
+        WaitForSingleObject(hProcess, INFINITE);
+        GetExitCodeProcess(hProcess, &dwExitCode);
+    }
+
+    if (hThread) CloseHandle(hThread);
+    if (hProcess) CloseHandle(hProcess);
     return dwExitCode;
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int CommandHook(HWND hwnd, const TCHAR *act, const TCHAR *sect)

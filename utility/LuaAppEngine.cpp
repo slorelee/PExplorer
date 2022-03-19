@@ -572,13 +572,19 @@ extern "C" {
             PUSH_INT(v);
         } else if (func == "exec") {
             string_t cmd = s2w(lua_tostring(L, base + 2));
+            string_t verb = _T("");
             int showflags = SW_SHOWNORMAL;
             bool wait = false;
             if (lua_isboolean(L, base + 3)) {
                 wait = lua_toboolean(L, base + 3);
             }
-            if (lua_isnumber(L, base + 4)) showflags = (int)lua_tointeger(L, base + 4);
-            DWORD dwExitCode = Exec((PTSTR)cmd.c_str(), wait, showflags);
+            if (lua_isnumber(L, base + 4)) {
+                showflags = (int)lua_tointeger(L, base + 4);
+            }
+            if ((lua_type(L, (base + 5)) == LUA_TSTRING)) {
+                verb = s2w(lua_tostring(L, base + 5));
+            }
+            DWORD dwExitCode = Exec((PTSTR)cmd.c_str(), wait, showflags, (PTSTR)verb.c_str());
             v.iVal = (int)dwExitCode;
             PUSH_INT(v);
         } else if (func == "calldll") {
