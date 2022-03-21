@@ -481,7 +481,10 @@ extern "C" {
                 v.str = s2w(lua_tostring(L, base + 2));
                 title = v.str.c_str();
             }
-            v.iVal = Dialog->BrowseFolder(title);
+            if (lua_isinteger(L, base + 3)) {
+                v.iVal = (int)lua_tointeger(L, base + 3);
+            }
+            v.iVal = Dialog->BrowseFolder(title, v.iVal);
             v.str = (TCHAR *)Dialog->SelectedFolderName;
             PUSH_STR(v);
             PUSH_INT(v);

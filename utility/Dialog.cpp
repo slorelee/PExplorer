@@ -90,15 +90,19 @@ DWORD CDialog::OpenFile(const TCHAR *title, const TCHAR *filters, const TCHAR *d
     return 0;
 }
 
-DWORD CDialog::BrowseFolder(const TCHAR * title)
+DWORD CDialog::BrowseFolder(const TCHAR * title, int csidl)
 {
     BROWSEINFO bi = { 0 };
-
+    LPITEMIDLIST pidlRoot = NULL;
+    if (csidl > -1 && SHGetSpecialFolderLocation(NULL, csidl, &pidlRoot) == S_OK) {
+        bi.pidlRoot = pidlRoot;
+    }
     bi.lpszTitle = title;
     bi.ulFlags = BIF_NEWDIALOGSTYLE;
     SelectedFolderName[0] = '\0';
 
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+    if (pidlRoot != NULL) CoTaskMemFree(pidlRoot);
     if (pidl != NULL)
     {
         TCHAR tszPath[MAX_PATH] = _T("\0");
