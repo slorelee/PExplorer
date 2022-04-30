@@ -550,7 +550,15 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._hDefaultFont = CreateFontIndirect(&(ncm.lfMessageFont));
     }
 
+    if (_tcsstr(ext_options, TEXT("-log"))) {
+        g_Globals.set_log();
+        handle_log(g_Globals._log_file);
+    }
+
     if (_tcsstr(ext_options, TEXT("-console"))) {
+        g_Globals.set_log();
+        handle_log(g_Globals._log_file);
+
         handle_console(g_Globals._log);
         LOG(TEXT("starting winxshell debug log\n"));
     }

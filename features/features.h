@@ -8,6 +8,7 @@ extern void UpdateSysColor(LPTSTR pszCmdline);
 extern void RegistAppPath();
 
 extern void handle_console(FILE *log);
+extern void handle_log(HANDLE log);
 extern int daemon_entry(int standalone);
 extern HWND create_daemonwindow();
 extern void update_property_handler();

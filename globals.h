@@ -67,6 +67,10 @@ extern struct ExplorerGlobals {
     void    read_persistent();
     void    write_persistent();
 
+    void set_log();
+    void log(TCHAR * msg);
+    void close_log();
+
     void    load_config();
     void    get_modulepath();
     void    get_systeminfo();
@@ -93,6 +97,7 @@ extern struct ExplorerGlobals {
 #endif
 
     FILE       *_log;
+    HANDLE       _log_file;
 
     DWORD(STDAPICALLTYPE *_SHRestricted)(RESTRICTIONS rest);
     VOID(STDAPICALLTYPE *_SHSettingsChanged)(UINT Ignored, LPCWSTR lpCategory);

@@ -5,7 +5,31 @@
 #include <tchar.h>
 #include "../utility/utility.h"
 
+static HANDLE file_log = NULL;
+
 static FILE *console_log = NULL;
+
+
+void handle_log(HANDLE log)
+{
+    file_log = log;
+}
+
+static void write_log(LPCWSTR msg)
+{
+    DWORD dwWrite = 0;
+    if (file_log) {
+        WriteFile(file_log, msg, _tcslen(msg) * sizeof(TCHAR), &dwWrite, NULL);
+    }
+}
+
+static void write_logA(LPCSTR msg)
+{
+    DWORD dwWrite = 0;
+    if (file_log) {
+        WriteFile(file_log, msg, strlen(msg), &dwWrite, NULL);
+    }
+}
 
 void handle_console(FILE *log)
 {
@@ -28,6 +52,9 @@ void _log_(LPCTSTR txt)
     if (console_log)
         _fputts(msg, console_log);
 
+    if (file_log)
+        write_log(msg);
+
 #ifdef _DEBUG
     OutputDebugString(msg);
 #endif
@@ -39,6 +66,9 @@ void _logA_(LPCSTR txt)
 
     if (console_log)
         fputs(msg.c_str(), console_log);
+
+    if (file_log)
+        write_logA(msg.c_str());
 
 #ifdef _DEBUG
     OutputDebugStringA(msg.c_str());
@@ -52,6 +82,9 @@ void _logU2A_(LPCWSTR txt)
     FmtStringA msg("%s\n", w2s(wstr).c_str());
     if (console_log)
         fputs(msg.c_str(), console_log);
+
+    if (file_log)
+        write_logA(msg.c_str());
 
 #ifdef _DEBUG
     OutputDebugStringA(msg.c_str());

@@ -25,6 +25,7 @@ ExplorerGlobals::ExplorerGlobals()
 #endif
 
     _log = NULL;
+    _log_file = NULL;
     _SHRestricted = 0;
     _SHSettingsChanged = 0;
     _hDefaultFont = NULL;
@@ -154,6 +155,51 @@ void ExplorerGlobals::write_persistent()
 {
     // write configuration file
     //RecursiveCreateDirectory(_cfg_dir);
+}
+
+void ExplorerGlobals::set_log()
+{
+    TCHAR tmpPath[MAX_PATH + 1] = { 0 };
+    DWORD dwAccess = GENERIC_WRITE;
+
+    TCHAR luascript[MAX_PATH + 1] = { 0 };
+    DWORD dw = 0;
+
+    String logPath = TEXT("");
+    if (g_Globals._log_file) return;
+
+    if (GetEnvironmentVariable(TEXT("WINXSHELL_LOGNAME"), tmpPath, MAX_PATH) != 0) {
+        logPath = FmtString(TEXT("%s.%d.log"), tmpPath, GetCurrentProcessId());
+    } else {
+        tmpPath[0] = '\0';
+        GetTempPath(MAX_PATH, tmpPath);
+        logPath = FmtString(TEXT("%sWinXShell.%d.log"), tmpPath, GetCurrentProcessId());
+    }
+
+    DWORD dwCreate = (dwAccess == GENERIC_WRITE) ? CREATE_ALWAYS :
+        ((dwAccess == (GENERIC_READ | GENERIC_WRITE)) ? OPEN_ALWAYS : OPEN_EXISTING);
+    HANDLE hFile = CreateFile(logPath, dwAccess, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, dwCreate, 0, NULL);
+    if (hFile == INVALID_HANDLE_VALUE) return;
+    if (dwAccess == (GENERIC_READ | GENERIC_WRITE)) {
+        SetFilePointer(hFile, 0, NULL, FILE_END);
+    }
+    g_Globals._log_file = hFile;
+}
+
+void ExplorerGlobals::log(TCHAR *msg)
+{
+    DWORD dwWrite = 0;
+    if (g_Globals._log_file) {
+        WriteFile(g_Globals._log_file, msg, _tcslen(msg) * sizeof(TCHAR), &dwWrite, NULL);
+    }
+}
+
+void ExplorerGlobals::close_log()
+{
+    if (g_Globals._log_file) {
+        CloseHandle(g_Globals._log_file);
+        g_Globals._log_file = NULL;
+    }
 }
 
 void gLuaCall(const char *funcname, LPTSTR p1, LPTSTR p2) {
