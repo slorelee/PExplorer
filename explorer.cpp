@@ -560,7 +560,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         handle_log(g_Globals._log_file);
 
         handle_console(g_Globals._log);
-        LOG(TEXT("starting winxshell debug log\n"));
+        LOGA("starting winxshell console log\n");
     }
 
     string_t file(_T("WinXShell.lua"));
@@ -650,7 +650,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     }
 
     if (_tcsstr(ext_options, TEXT("-break"))) {
-        LOG(TEXT("debugger breakpoint"));
+        LOGA("debugger breakpoint");
 #ifdef _MSC_VER
         DebugBreak();
 #else
