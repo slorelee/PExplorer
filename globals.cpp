@@ -168,7 +168,9 @@ void ExplorerGlobals::set_log()
     String logPath = TEXT("");
     if (g_Globals._log_file) return;
 
-    if (GetEnvironmentVariable(TEXT("WINXSHELL_LOGNAME"), tmpPath, MAX_PATH) != 0) {
+    if (GetEnvironmentVariable(TEXT("WINXSHELL_LOGFILE"), tmpPath, MAX_PATH) != 0) {
+        logPath = tmpPath;
+    }  else if (GetEnvironmentVariable(TEXT("WINXSHELL_LOGNAME"), tmpPath, MAX_PATH) != 0) {
         logPath = FmtString(TEXT("%s.%d.log"), tmpPath, GetCurrentProcessId());
     } else {
         tmpPath[0] = '\0';

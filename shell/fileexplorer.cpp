@@ -321,8 +321,6 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
 
 
 #ifndef LOGA
-extern void _logA_(LPCSTR txt);
-
 #define LOGA(txt) _logA_(txt)
 #endif
 

@@ -60,9 +60,20 @@ void _log_(LPCTSTR txt)
 #endif
 }
 
-void _logA_(LPCSTR txt)
+#define ENDMARK_NEWLINE 0
+#define ENDMARK_NONE 1
+#define ENDMARK_TAB 2
+#define ENDMARK_SPACE 3
+
+void _logA_(LPCSTR txt, char endmark = '\n')
 {
     FmtStringA msg("%s\n", txt);
+
+    if (endmark == '\0') {
+        msg = txt;
+    } else {
+        msg = FmtStringA("%s%c", txt, endmark);
+    }
 
     if (console_log)
         fputs(msg.c_str(), console_log);
