@@ -2492,6 +2492,8 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
       return 0;
   }
 
+extern LSTATUS  SHDeleteKeyW(HKEY hkey,  const wchar_t *pszSubKey);
+
   /// delete a subkey, or the key self.
   // @param subkey the subkey (can be empty for the key self)
   // @function delete_key/delete
@@ -2499,7 +2501,7 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
     Regkey *this = Regkey_arg(L,1);
     const char *name = luaL_optlstring(L, 2, "", NULL);
 
-    if (RegDeleteKeyW(this->key,wstring(name)) == ERROR_SUCCESS) {
+    if (SHDeleteKeyW(this->key,wstring(name)) == ERROR_SUCCESS) {
       lua_pushboolean(L,1);
     } else {
       return push_error(L);
