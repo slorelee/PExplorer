@@ -17,7 +17,7 @@ public:
     void RunCode(string_t & code);
     void LoadFile(string_t & file);
     void onLoad();
-    void onFirstRun();
+    void onFirstShellRun();
     void preShell();
     void onShell();
     void onDaemon();
@@ -26,6 +26,7 @@ public:
 private:
     void init(string_t& file);
     void *_frame;
+    char *_name;
     lua_State *L;
 };
 

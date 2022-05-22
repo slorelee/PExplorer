@@ -206,10 +206,12 @@ extern int GetRecommendedDPIScaling();
 extern void SetDpiScaling(int scale);
 
 extern "C" {
-    extern int lua_print(lua_State* L);
+    const void *lua_app_addr = NULL;
+
 #ifdef _DEBUG
     extern int lua_stack(lua_State* L);
 #endif
+
     int lua_app_version(lua_State* L)
     {
         lua_pushstring(L, LUA_RELEASE);
@@ -219,35 +221,15 @@ extern "C" {
 #define PUSH_STR(v) {lua_pushstring(L, w2s(v.str).c_str());ret++;}
 #define PUSH_INT(v) {lua_pushinteger(L, v.iVal);ret++;}
 
-    int lua_app_call(lua_State* L)
+    int lua_os_info(lua_State* L, int top, int base)
     {
         int ret = 0;
         Token v = { TOK_UNSET };
-        int base = 0;
-        int top = lua_gettop(L);
-        if (lua_type(L, 1) == LUA_TTABLE) {
-            //skip self for app:call
-            base++;
-            top--;
-        }
-        luaL_checktype(L, base + 1, LUA_TSTRING);
-        std::string func = lua_tostring(L, base + 1);
-        char funcname[255] = { 0 };
-        strcpy(funcname, func.c_str());
-        func = _strlwr(funcname);
+        string_t info = s2w(lua_tostring(L, base + 2));
+        TCHAR infoname[MAX_PATH] = { 0 };
+        _tcscpy(infoname, info.c_str());
+        info = _tcslwr(infoname);
 
-        if (func == "getresolutionlist") {
-            int n = (int)lua_tointeger(L, base + 2);
-            v = GetResolutionList(n);
-            PUSH_STR(v);
-            PUSH_INT(v);
-        } else if (func == "cd") {
-            string_t str_path = s2w(lua_tostring(L, base + 2));
-            SetCurrentDirectory(str_path.c_str());
-        } else if (func == "FakeExplorer") {
-            FakeExplorer();
-        } else if (func == "os::info") {
-            string_t info = s2w(lua_tostring(L, base + 2));
             if (info == TEXT("mem")) {
                 ret += osinfo_mem(L);
             } else if (info == TEXT("copyright")) {
@@ -258,94 +240,42 @@ extern "C" {
             } else if (info == TEXT("localename")) {
                 v.str = g_Globals._locale;
                 PUSH_STR(v);
+        } else if (info == TEXT("winver")) {
+            if (top == base + 1) {
+                v.str = g_Globals._winver;
+            } else {
+                v.str = FmtString(TEXT("%d.%d.%d.%d"),
+                    g_Globals._winvers[0], g_Globals._winvers[1],
+                    g_Globals._winvers[2], g_Globals._winvers[3]);
             }
-        } else if (func == "file::doverb") {
-            string_t file = s2w(lua_tostring(L, base + 2));
-            string_t verb = s2w(lua_tostring(L, base + 3));
-            varstr_expand(file);
-            DoFileVerb(file.c_str(), verb.c_str());
-        } else if (func == "taskbar::changenotify") {
-            // g_Globals._SHSettingsChanged(0, TEXT("TraySettings"));
-            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
-        } else if (func == "system::changecolorthemenotify") {
-            // g_Globals._SHSettingsChanged(0, TEXT("ImmersiveColorSet"));
-            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("ImmersiveColorSet")));
-        } else if (func == "taskbar::autohide") {
-            if (lua_isinteger(L, base + 2)) {
-                int val = (int)lua_tointeger(L, base + 2);
-                AutoHideTaskBar(val == 1);
-            }
-        } else if (func == "taskbar::autohidestate") {
-            v.iVal = TaskBarAutoHideState();
-            PUSH_INT(v);
-        } else if (func == "taskbar::pin") {
-            if (isWinXShellAsShell()) return ret;
-            string_t str_file = s2w(lua_tostring(L, base + 2));
-            ShellContextMenuVerb(str_file.c_str(), TEXT("taskbarpin"));
-        } else if (func == "taskbar::unpin") {
-            /*
-                function Taskbar:UnPin(name)
-                  menu_pintotaskbar()
-                  local pinned_path = [[%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\]]
-                  app:call('Taskbar::UnPin', .. name .. '.lnk')
-                end
-            */
-            string_t name = s2w(lua_tostring(L, base + 2));
-            string_t str_lnk = TEXT("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\") + name + TEXT(".lnk");
-            varstr_expand(str_lnk);
-            if (isWinXShellAsShell()) {
-                DeleteFile(str_lnk.c_str());
-                return ret;
-            }
-            FakeExplorer();
-            DoFileVerb(str_lnk.c_str(), TEXT("taskbarunpin"));
-        } else if (func == "startmenu::pin") {
-            string_t str_file = s2w(lua_tostring(L, base + 2));
-            ShellContextMenuVerb(str_file.c_str(), TEXT("startpin"));
-        } else if (func == "startmenu::unpin") {
-            string_t str_file = s2w(lua_tostring(L, base + 2));
-            ShellContextMenuVerb(str_file.c_str(), TEXT("startunpin"));
-        } else if (func == "desktop::updatewallpaper") {
-            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
-        } else if (func == "desktop::getwallpaper") {
-            TCHAR wpPath[MAX_PATH] = { 0 };
-            SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, wpPath, 0);
-            v.str = wpPath;
             PUSH_STR(v);
-        } else if (func == "desktop::setwallpaper") {
-            v.str = s2w(lua_tostring(L, base + 2));
-            SHSetValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("Wallpaper"), REG_SZ, v.str.c_str(), (DWORD)(v.str.length()) * sizeof(TCHAR));
-            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
-        } else if (func == "desktop::refresh") {
-            DesktopCommand dtcmd;
-            dtcmd.Refresh();
-        } else if (func == "desktop::seticonsize") {
-            DesktopCommand dtcmd;
-            if (lua_isinteger(L, base + 2)) {
-                dtcmd.SetIconSize((int)lua_tointeger(L, base + 2));
+        } else if (info == TEXT("langid")) {
+            v.str = g_Globals._langID;
+            PUSH_STR(v);
+        } else if (info == TEXT("locale")) {
+            v.str = g_Globals._locale;
+            PUSH_STR(v);
+        } else if (info == TEXT("firmwaretype")) {
+            v.str = TEXT("BIOS");
+            if (IsUEFIMode()) v.str = TEXT("UEFI");
+            PUSH_STR(v);
+        } else if (info == TEXT("isuefimode")) {
+            v.iVal = IsUEFIMode();
+            PUSH_INT(v);
+        } else if (info == TEXT("tickcount")) {
+            v.iVal = GetTickCount();
+            PUSH_INT(v);
+            }
                 return ret;
             }
-            v.str = s2w(lua_tostring(L, base + 2));
-            if (v.str.find(_T("S")) == 0) {
-                dtcmd.SetIconSize(32);
-            } else if (v.str.find(_T("M")) == 0) {
-                dtcmd.SetIconSize(48);
-            } else if (v.str.find(_T("L")) == 0) {
-                dtcmd.SetIconSize(96);
-            }
-        } else if (func == "desktop::autoarrange") {
-            DesktopCommand dtcmd;
-            v.iVal = (int)lua_tointeger(L, base + 2);
-            dtcmd.AutoArrange(v.iVal);
-        } else if (func == "desktop::snaptogrid") {
-            DesktopCommand dtcmd;
-            v.iVal = (int)lua_tointeger(L, base + 2);
-            dtcmd.SnapToGrid(v.iVal);
-        } else if (func == "desktop::showicons") {
-            DesktopCommand dtcmd;
-            v.iVal = (int)lua_tointeger(L, base + 2);
-            dtcmd.ShowIcons(v.iVal);
-        } else if (func == "screen::get") {
+
+    int lua_screen_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "screen::get") {
             MonitorAdapter m_monitorAdapter;
             int w, h, f, b;
             m_monitorAdapter.GetCurrentResolution(w, h, f, b);
@@ -357,8 +287,16 @@ extern "C" {
             } else if (v.str == TEXT("rotation")) {
                 v.iVal = GetScreenRotation();
             } else if (v.str == TEXT("resolutionlist")) {
-                v = GetResolutionList();
+                int n = -1;
+                if (lua_isinteger(L, base + 3)) {
+                    n = (int)lua_tointeger(L, base + 3);
+                }
+                v = GetResolutionList(n);
                 PUSH_STR(v);
+
+                if (n > 0) {
+                    PUSH_INT(v);
+                }
             } else if (v.str == TEXT("xy")) {
                 v.iVal = w;
                 PUSH_INT(v);
@@ -403,7 +341,17 @@ extern "C" {
                 v.iVal = SetScreenBrightness(v.iVal);
             }
             PUSH_INT(v);
-        } else if (func == "volume::mute") {
+        }
+        return ret;
+    }
+
+    int lua_volume_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "volume::mute") {
             v.iVal = SetVolumeMute((int)lua_tointeger(L, base + 2));
             PUSH_INT(v);
         } else if (func == "volume::ismuted") {
@@ -419,35 +367,127 @@ extern "C" {
             GetEndpointVolume();
             v.str = GetVolumeDeviceName(NULL);
             PUSH_STR(v);
-        } else if (func == "file::exists") {
+        }
+        return ret;
+    }
+
+    int lua_desktop_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "desktop::updatewallpaper") {
+            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        } else if (func == "desktop::getwallpaper") {
+            TCHAR wpPath[MAX_PATH] = { 0 };
+            SystemParametersInfo(SPI_GETDESKWALLPAPER, MAX_PATH, wpPath, 0);
+            v.str = wpPath;
+            PUSH_STR(v);
+        } else if (func == "desktop::setwallpaper") {
             v.str = s2w(lua_tostring(L, base + 2));
-            varstr_expand(v.str);
-            if (PathFileExists(v.str.c_str())) {
-                v.iVal = 1;
-                if (FILE_ATTRIBUTE_DIRECTORY == PathIsDirectory(v.str.c_str())) {
-                    v.iVal = 0;
+            SHSetValue(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), TEXT("Wallpaper"), REG_SZ, v.str.c_str(), (DWORD)(v.str.length()) * sizeof(TCHAR));
+            SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        } else if (func == "desktop::refresh") {
+            DesktopCommand dtcmd;
+            dtcmd.Refresh();
+        } else if (func == "desktop::seticonsize") {
+            DesktopCommand dtcmd;
+            if (lua_isinteger(L, base + 2)) {
+                dtcmd.SetIconSize((int)lua_tointeger(L, base + 2));
+                return ret;
                 }
+            v.str = s2w(lua_tostring(L, base + 2));
+            if (v.str.find(_T("S")) == 0) {
+                dtcmd.SetIconSize(32);
+            } else if (v.str.find(_T("M")) == 0) {
+                dtcmd.SetIconSize(48);
+            } else if (v.str.find(_T("L")) == 0) {
+                dtcmd.SetIconSize(96);
             }
+        } else if (func == "desktop::autoarrange") {
+            DesktopCommand dtcmd;
+            v.iVal = (int)lua_tointeger(L, base + 2);
+            dtcmd.AutoArrange(v.iVal);
+        } else if (func == "desktop::snaptogrid") {
+            DesktopCommand dtcmd;
+            v.iVal = (int)lua_tointeger(L, base + 2);
+            dtcmd.SnapToGrid(v.iVal);
+        } else if (func == "desktop::showicons") {
+            DesktopCommand dtcmd;
+            v.iVal = (int)lua_tointeger(L, base + 2);
+            dtcmd.ShowIcons(v.iVal);
+        }
+        return ret;
+    }
+
+    int lua_tasbar_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "taskbar::changenotify") {
+            // g_Globals._SHSettingsChanged(0, TEXT("TraySettings"));
+            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
+        } else if (func == "taskbar::autohide") {
+            if (lua_isinteger(L, base + 2)) {
+                int val = (int)lua_tointeger(L, base + 2);
+                AutoHideTaskBar(val == 1);
+            }
+        } else if (func == "taskbar::autohidestate") {
+            v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
-        } else if (func == "folder::exists") {
-            v.str = s2w(lua_tostring(L, base + 2));
-            varstr_expand(v.str);
-            v.iVal = PathFileExists(v.str.c_str());
-            if (v.iVal == 1) v.iVal = PathIsDirectory(v.str.c_str());
-            if (v.iVal == FILE_ATTRIBUTE_DIRECTORY) v.iVal = 1;
-            PUSH_INT(v);
-        } else if (func == "productpolicy::load") {
-            ProductPolicyLoad(lua_tostring(L, base + 2), lua_tostring(L, base + 3));
-        } else if (func == "productpolicy::get") {
-            v.str = s2w(lua_tostring(L, base + 2));
-            ProductPolicyGet(v.str.c_str());
-        } else if (func == "productpolicy::set") {
-            v.str = s2w(lua_tostring(L, base + 2));
-            v.iVal = lua_tointeger(L, base + 3);
-            ProductPolicySet(v.str.c_str(), v.iVal);
-        } else if (func == "productpolicy::save") {
-            ProductPolicySave();
-        } else if (func == "folderoptions::get") {
+        } else if (func == "taskbar::pin") {
+            if (isWinXShellAsShell()) return ret;
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("taskbarpin"));
+        } else if (func == "taskbar::unpin") {
+            /*
+            function Taskbar:UnPin(name)
+            menu_pintotaskbar()
+            local pinned_path = [[%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\]]
+            app:call('Taskbar::UnPin', .. name .. '.lnk')
+            end
+            */
+            string_t name = s2w(lua_tostring(L, base + 2));
+            string_t str_lnk = TEXT("%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar\\") + name + TEXT(".lnk");
+            varstr_expand(str_lnk);
+            if (isWinXShellAsShell()) {
+                DeleteFile(str_lnk.c_str());
+                return ret;
+            }
+            FakeExplorer();
+            DoFileVerb(str_lnk.c_str(), TEXT("taskbarunpin"));
+            return ret;
+        }
+        return ret;
+    }
+
+    int lua_startmenu_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+
+        if (func == "startmenu::pin") {
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("startpin"));
+        } else if (func == "startmenu::unpin") {
+            string_t str_file = s2w(lua_tostring(L, base + 2));
+            ShellContextMenuVerb(str_file.c_str(), TEXT("startunpin"));
+        }
+        return ret;
+    }
+
+    int lua_folderoptions_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "folderoptions::get") {
             v.str = s2w(lua_tostring(L, base + 2));
             v.iVal = FolderOptions->Get(v.str.c_str());
             PUSH_INT(v);
@@ -458,20 +498,38 @@ extern "C" {
                 v.str = s2w(lua_tostring(L, base + 2));
                 FolderOptions->Set(v.str.c_str(), (DWORD)lua_tointeger(L, base + 3));
             }
-        } else if (func == "dialog::openfile") {
-            TCHAR buff[MAX_PATH] = {0};
+        }
+        return ret;
+    }
+
+    int lua_dialog_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "dialog::openfile") {
+            TCHAR titleBuff[MAX_PATH] = { 0 };
+            TCHAR dirBuff[MAX_PATH] = { 0 };
             const TCHAR *title = NULL;
             const TCHAR *filters = NULL;
+            const TCHAR *dir = NULL;
             if (lua_type(L, base + 2) == LUA_TSTRING) {
                 v.str = s2w(lua_tostring(L, base + 2));
-                lstrcpy(buff, v.str.c_str());
-                title = buff;
+                lstrcpy(titleBuff, v.str.c_str());
+                title = titleBuff;
+            }
+            if (lua_type(L, base + 4) == LUA_TSTRING) {
+                v.str = s2w(lua_tostring(L, base + 4));
+                varstr_expand(v.str);
+                lstrcpy(dirBuff, v.str.c_str());
+                dir = dirBuff;
             }
             if (lua_type(L, base + 3) == LUA_TSTRING) {
                 v.str = s2w(lua_tostring(L, base + 3));
                 filters = v.str.c_str();
             }
-            v.iVal = Dialog->OpenFile(title, filters);
+            v.iVal = Dialog->OpenFile(title, filters, dir);
             v.str = (TCHAR *)Dialog->SelectedFileName;
             PUSH_STR(v);
             PUSH_INT(v);
@@ -488,51 +546,58 @@ extern "C" {
             v.str = (TCHAR *)Dialog->SelectedFolderName;
             PUSH_STR(v);
             PUSH_INT(v);
-        } else if (func == "setvar") {
+        }
+        return ret;
+    }
+
+    int lua_productpolicy_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        if (func == "productpolicy::load") {
+            ProductPolicyLoad(lua_tostring(L, base + 2), lua_tostring(L, base + 3));
+        } else if (func == "productpolicy::get") {
             v.str = s2w(lua_tostring(L, base + 2));
-            if (v.str == TEXT("ClockText")) {
-                string_t clocktext = s2w(lua_tostring(L, base + 3));
-                _tcscpy(g_Globals._varClockTextBuffer, clocktext.c_str());
-            }
-        } else if ((func == "settimer") || (func == "killtimer")) {
-            LuaAppEngine *lua = g_Globals._lua;
-            if (!lua) {
-                LOGA("error:Cannot find the lua script file specified");
-                return ret;
-            }
-            LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
-            if (!frame) return ret;
-            if (func == "settimer") {
-                SetTimer(frame->GetHWND(), (UINT_PTR)lua_tointeger(L, base + 2), (UINT)lua_tointeger(L, base + 3), NULL);
-            } else {
-                KillTimer(frame->GetHWND(), lua_tointeger(L, base + 2));
-            }
-        } else if (func == "gettickcount") {
-            v.iVal = GetTickCount();
-            PUSH_INT(v);
-        } else if (func == "sleep") {
-            if (lua_isinteger(L, base + 2)) {
-                int ms = (int)lua_tointeger(L, base + 2);
-                Sleep(ms);
-            }
-        } else if (func == "beep") {
-            if (lua_isinteger(L, base + 2)) {
-                int type = (int)lua_tointeger(L, base + 2);
-                MessageBeep(type);
-            }
-        } else if (func == "play") {
-            int bewait = 1;
-            if (lua_isinteger(L, base + 3)) {
-                bewait = (int)lua_tointeger(L, base + 3);
-            }
-            if (bewait == 0) {
-                char *file = (char *)malloc(MAX_PATH);
-                strcpy_s(file, MAX_PATH, lua_tostring(L, base + 2));
-                CreateThread(NULL, 0, PlaySndProc, (void *)file, 0, NULL);
-            } else {
-                PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
-            }
-        } else if (func == "putenv") {
+            ProductPolicyGet(v.str.c_str());
+        } else if (func == "productpolicy::set") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            v.iVal = lua_tointeger(L, base + 3);
+            ProductPolicySet(v.str.c_str(), v.iVal);
+        } else if (func == "productpolicy::save") {
+            ProductPolicySave();
+        }
+        return ret;
+    }
+
+    int lua_class_call(lua_State* L, const char *funcname, int top, int base)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+
+        std::string func = funcname;
+        return ret;
+    }
+
+    int lua_app_call(lua_State* L)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+        int base = 0;
+        int top = lua_gettop(L);
+        if (lua_type(L, 1) == LUA_TTABLE) {
+            //skip self for app:call
+            base++;
+            top--;
+        }
+        luaL_checktype(L, base + 1, LUA_TSTRING);
+        std::string func = lua_tostring(L, base + 1);
+        char funcname[255] = { 0 };
+        strcpy(funcname, func.c_str());
+        func = _strlwr(funcname);
+
+        if (func == "putenv") {
             string_t var = s2w(lua_tostring(L, base + 2));
             string_t str = TEXT("");
             if (lua_isstring(L, base + 3)) {
@@ -555,6 +620,100 @@ extern "C" {
             v.str = s2w(lua_tostring(L, base + 2));
             varstr_expand(v.str);
             PUSH_STR(v);
+        } else if (func == "band") {
+            UINT s = (UINT)lua_tointeger(L, base + 2);
+            UINT b = (UINT)lua_tointeger(L, base + 3);
+            v.iVal = (s & b);
+            PUSH_INT(v);
+        } else if (func == "cd") {
+            string_t str_path = s2w(lua_tostring(L, base + 2));
+            SetCurrentDirectory(str_path.c_str());
+        } else if (func == "FakeExplorer") {
+            FakeExplorer();
+        } else if (func == "os::info") {
+            return lua_os_info(L, top, base);
+        } else if (func == "system::changecolorthemenotify") {
+            // g_Globals._SHSettingsChanged(0, TEXT("ImmersiveColorSet"));
+            SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("ImmersiveColorSet")));
+        } else if (func == "file::exists") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            varstr_expand(v.str);
+            if (PathFileExists(v.str.c_str())) {
+                v.iVal = 1;
+                if (FILE_ATTRIBUTE_DIRECTORY == PathIsDirectory(v.str.c_str())) {
+                    v.iVal = 0;
+                }
+            }
+            PUSH_INT(v);
+        } else if (func == "file::doverb") {
+            string_t file = s2w(lua_tostring(L, base + 2));
+            string_t verb = s2w(lua_tostring(L, base + 3));
+            varstr_expand(file);
+            DoFileVerb(file.c_str(), verb.c_str());
+        } else if (func == "folder::exists") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            varstr_expand(v.str);
+            v.iVal = PathFileExists(v.str.c_str());
+            if (v.iVal == 1) v.iVal = PathIsDirectory(v.str.c_str());
+            if (v.iVal == FILE_ATTRIBUTE_DIRECTORY) v.iVal = 1;
+            PUSH_INT(v);
+        } else if (func.compare(0, 8, "screen::") == 0) {
+            return lua_screen_call(L, funcname, top, base);
+        } else if (func.compare(0, 8, "volume::") == 0) {
+            return lua_volume_call(L, funcname, top, base);
+        } else if (func.compare(0, 11, "desktop::") == 0) {
+            return lua_desktop_call(L, funcname, top, base);
+        } else if (func.compare(0, 9, "taskbar::") == 0) {
+            return lua_tasbar_call(L, funcname, top, base);
+        } else if (func.compare(0, 11, "startmenu::") == 0) {
+            return lua_startmenu_call(L, funcname, top, base);
+        } else if (func.compare(0, 15, "folderoptions::") == 0) {
+            return lua_folderoptions_call(L, funcname, top, base);
+        } else if (func.compare(0, 15, "productpolicy::") == 0) {
+            return lua_productpolicy_call(L, funcname, top, base);
+        } else if (func.compare(0, 8, "dialog::") == 0) {
+            return lua_dialog_call(L, funcname, top, base);
+        } else if (func == "setvar") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            if (v.str == TEXT("ClockText")) {
+                string_t clocktext = s2w(lua_tostring(L, base + 3));
+                _tcscpy(g_Globals._varClockTextBuffer, clocktext.c_str());
+            }
+        } else if ((func == "settimer") || (func == "killtimer")) {
+            LuaAppEngine *lua = g_Globals._lua;
+            if (!lua) {
+                LOGA("error:Cannot find the lua script file specified");
+                return ret;
+            }
+            LuaAppWindow *frame = (LuaAppWindow *)lua->getFrame();
+            if (!frame) return ret;
+            if (func == "settimer") {
+                SetTimer(frame->GetHWND(), (UINT_PTR)lua_tointeger(L, base + 2), (UINT)lua_tointeger(L, base + 3), NULL);
+            } else {
+                KillTimer(frame->GetHWND(), lua_tointeger(L, base + 2));
+            }
+        } else if (func == "sleep") {
+            if (lua_isinteger(L, base + 2)) {
+                int ms = (int)lua_tointeger(L, base + 2);
+                Sleep(ms);
+            }
+        } else if (func == "beep") {
+            if (lua_isinteger(L, base + 2)) {
+                int type = (int)lua_tointeger(L, base + 2);
+                MessageBeep(type);
+            }
+        } else if (func == "play") {
+            int bewait = 1;
+            if (lua_isinteger(L, base + 3)) {
+                bewait = (int)lua_tointeger(L, base + 3);
+            }
+            if (bewait == 0) {
+                char *file = (char *)malloc(MAX_PATH);
+                strcpy_s(file, MAX_PATH, lua_tostring(L, base + 2));
+                CreateThread(NULL, 0, PlaySndProc, (void *)file, 0, NULL);
+            } else {
+                PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
+            }
         } else if (func == "wxs_open") {
             v.str = s2w(lua_tostring(L, base + 2));
             wxsOpen((LPTSTR)v.str.c_str());
@@ -590,9 +749,9 @@ extern "C" {
             DWORD dwExitCode = Exec((PTSTR)cmd.c_str(), wait, showflags, (PTSTR)verb.c_str());
             v.iVal = (int)dwExitCode;
             PUSH_INT(v);
-        } else if (func == "calldll") {
-            // app:call('CallDll','Kernel32.dll','SetComputerName','WINDOWS-PC')
-            // app:call('CallDll','Netapi32.dll','NetJoinDomain',nil,'WORKGROUP',nil,nil,nil,1)
+        } else if (func == "rundll") {
+            // App:RunDll('Kernel32.dll','SetComputerName','WINDOWS-PC')
+            // App:RunDll('Netapi32.dll','NetJoinDomain',nil,'WORKGROUP',nil,nil,nil,1)
             // Call DLL function
             typedef HRESULT(WINAPI *PROC1)(PVOID pv0);
             typedef HRESULT(WINAPI *PROC2)(PVOID pv0, PVOID pv1);
@@ -672,11 +831,6 @@ extern "C" {
             WaitForShellTerminated();
         } else if (func == "closeshell") {
             CloseShellProcess();
-        } else if (func == "band") {
-            UINT s = (UINT)lua_tointeger(L, base + 2);
-            UINT b = (UINT)lua_tointeger(L, base + 3);
-            v.iVal = (s & b);
-            PUSH_INT(v);
         } else if (func == "exitcode") {
             if (lua_isinteger(L, base + 2)) {
                 int code = (int)lua_tointeger(L, base + 2);
@@ -708,35 +862,16 @@ extern "C" {
 
         luaL_checktype(L, base + 1, LUA_TSTRING);
         std::string name = lua_tostring(L, base + 1);
-        char infoname[255] = { 0 };
+        char infoname[MAX_PATH] = { 0 };
         strcpy(infoname, name.c_str());
         name = _strlwr(infoname);
 
         if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
-        } else if (name == "winver") {
-            if (top == base + 1) {
-                v.str = g_Globals._winver;
-            } else {
-                v.str = FmtString(TEXT("%d.%d.%d.%d"),
-                    g_Globals._winvers[0], g_Globals._winvers[1],
-                    g_Globals._winvers[2], g_Globals._winvers[3]);
-            }
+        } else if (name == "path") {
+            v.str = JVAR("JVAR_MODULEPATH").ToString();
             PUSH_STR(v);
-        } else if (name == "langid") {
-            v.str = g_Globals._langID;
-            PUSH_STR(v);
-        } else if (name == "locale") {
-            v.str = g_Globals._locale;
-            PUSH_STR(v);
-        } else if (name == "firmwaretype") {
-            v.str = TEXT("BIOS");
-            if (IsUEFIMode()) v.str = TEXT("UEFI");
-            PUSH_STR(v);
-        } else if (name == "isuefimode") {
-            v.iVal = IsUEFIMode();
-            PUSH_INT(v);
         } else if (name == "iswinpe") {
             v.iVal = g_Globals._isWinPE;
             PUSH_INT(v);
@@ -753,9 +888,6 @@ extern "C" {
         } else if (name == "hasexplorer") {
             v.iVal = hasMSExplorer();
             PUSH_INT(v);
-        } else if (name == "path") {
-            v.str = JVAR("JVAR_MODULEPATH").ToString();
-            PUSH_STR(v);
         }
         return ret;
     }
@@ -776,15 +908,59 @@ extern "C" {
         return 1;
     }
 
+    int lua_print(lua_State* L)
+    {
+        int i = 1;
+        size_t len = 0;
+        const char *s = NULL;
+        int top = lua_gettop(L);
+
+        /* skip app table self */
+        if (lua_app_addr && top >= 1) {
+            if (lua_app_addr == lua_topointer(L, 1)) {
+                i = 2;
+            }
+        }
+        for (; i <= top; i++) {
+            s = luaL_tolstring(L, i, &len);
+            if (i == top) {
+                LOGA(s);
+            } else {
+                LOGA2(s, '\t');
+            }
+        }
+        return 0;
+    }
+
+    int lua_alert(lua_State* L)
+    {
+        int i = 1;
+        size_t len = 0;
+        const char *s = NULL;
+        int top = lua_gettop(L);
+
+        /* skip app table self */
+        if (lua_app_addr && top >= 1) {
+            if (lua_app_addr == lua_topointer(L, 1)) {
+                i = 2;
+            }
+        }
+        for (; i <= top; i++) {
+            s = luaL_tolstring(L, i, &len);
+            MessageBoxA(NULL, s, "", 0);
+        }
+        return 0;
+    }
 
     static const luaL_Reg lua_reg_app_funcs[] = {
-        { "version", lua_app_version },
-        { "call", lua_app_call },
-        { "info", lua_app_info },
-        { "jcfg", lua_app_jcfg },
-        { "print", lua_print },
+        { "Version", lua_app_version },
+        { "Call", lua_app_call },
+        { "Info", lua_app_info },
+        { "JCfg", lua_app_jcfg },
+        { "Print", lua_print },
+        { "Alert", lua_alert },
 #ifdef _DEBUG
-        { "stack", lua_stack },
+        { "Stack", lua_stack },
 #endif // DEBUG
         { NULL, NULL },
     };
@@ -798,33 +974,65 @@ extern "C" {
 }
 
 static char *built_code_errorhandle = "function __G__TRACKBACK__(msg)\n"
-"    app:print(\"----------------------------------------\")\n"
-"    app:print(\"LUA ERROR: \" .. tostring(msg) .. \"\\n\")\n"
-"    app:print(debug.traceback())\n"
-"    app:print(\"----------------------------------------\")\n"
+"    App:Print(\"----------------------------------------\")\n"
+"    App:Print(\"LUA ERROR: \" .. tostring(msg) .. \"\\n\")\n"
+"    App:Print(debug.traceback())\n"
+"    App:Print(\"----------------------------------------\")\n"
 "end";
 
-char *app_built_code =
-"\n\
+char *app_built_code = "\n\
+\n\
+Alert = App.Alert\n\
+\n\
 function os.putenv(var, str)\n\
-    app:call('putenv', var, str)\n\
+    App:Call('putenv', var, str)\n\
 end\n\
 \n\
 os.setenv = os.putenv\n\
 \n\
-function app:jcfg(...)\n\
-  return app.jcfg(...)\n\
+function string.envstr(str)\n\
+    return App.Call('envstr', str)\n\
 end\n\
 \n\
-function app:run(...)\n\
-  app.call('run', ...)\n\
+function string.resstr(str)\n\
+    return App.Call('resstr', str)\n\
+end\n\
   \n\
+\n\
+App.Debug = false\n\
+if os.getenv('WINXSHELL_DEBUG') then\n\
+  App.Debug = true\n\
 end\n\
 \n\
-function app:sleep(...)\n\
-  app.call('sleep', ...)\n\
+function App:DebugPrint(...)\n\
+  if App.Debug then\n\
+    return App.Print(...)\n\
+  end\n\
+end\n\
   \n\
-end";
+function App:JCfg(...)\n\
+  return App.JCfg(...)\n\
+end\n\
+\n\
+function App:SetTimer(...)\n\
+  App.Call('SetTimer', ...)\n\
+end\n\
+function App:KillTimer(...)\n\
+  App.Call('KillTimer', ...)\n\
+end\n\
+function App:Run(...)\n\
+  App.Call('run', ...)\n\
+end\n\
+function App:RunDll(...)\n\
+  App.Call('RunDll', ...)\n\
+end\n\
+\n\
+function App:Sleep(...)\n\
+  App.Call('sleep', ...)\n\
+end\n\
+\n\
+Shell = {}\n\
+\n";
 
 static int lua_errorfunc = MININT;
 
@@ -842,21 +1050,37 @@ void LuaAppEngine::init(string_t& file)
 
     luaL_openlibs(L);
     luaopen_winapi_lib(L);
-    luaL_requiref(L, "app", luaopen_app_module, 1);
+    _name = "App";
+    luaL_requiref(L, _name, luaopen_app_module, 1);
     luaL_dostring(L, built_code_errorhandle);
     luaL_dostring(L, app_built_code);
 
+    lua_getglobal(L, "App");
+    if (lua_type(L, -1) == LUA_TTABLE) {
+        lua_app_addr = lua_topointer(L, -1);
+    }
+
     char *rescode = (char *)LoadCustomResource(IDR_LUA_HELPER, TEXT("FILE"));
-    if (rescode) luaL_dostring(L, rescode);
+    if (rescode) {
+        if (luaL_dostring(L, rescode) != 0) {
+            LOGA(lua_tostring(L, -1));
+        }
+    }
     FreeCustomResource(rescode);
 
     rescode = (char *)LoadCustomResource(IDR_APP_HELPERS, TEXT("FILE"));
-    if (rescode) luaL_dostring(L, rescode);
+    if (rescode) {
+        if (luaL_dostring(L, rescode) != 0) {
+            LOGA(lua_tostring(L, -1));
+        }
+    }
     FreeCustomResource(rescode);
 
     if (PathFileExists(file.c_str())) {
-        luaL_dofile(L, w2s(file).c_str());
+        if (luaL_dofile(L, w2s(file).c_str()) != 0) {
+            LOGA(lua_tostring(L, -1));
     }
+}
 }
 
 static int fetch_errorfunc(lua_State *L)
@@ -893,7 +1117,12 @@ int LuaAppEngine::call(const char *funcname, int nres)
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, funcname);
+    lua_getglobal(L, _name);
+    if (!lua_istable(L, -1)) {
+        return -1;
+    }
+
+    lua_getfield(L, -1, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
         return -1;
@@ -913,7 +1142,12 @@ int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, funcname);
+    lua_getglobal(L, _name);
+    if (!lua_istable(L, -1)) {
+        return -1;
+    }
+
+    lua_getfield(L, -1, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
         return -1;
@@ -935,7 +1169,12 @@ int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nre
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, funcname);
+    lua_getglobal(L, _name);
+    if (!lua_istable(L, -1)) {
+        return -1;
+    }
+
+    lua_getfield(L, -1, funcname);
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA(buff);
         return -1;
@@ -952,38 +1191,42 @@ int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nre
 
 void LuaAppEngine::RunCode(string_t& code)
 {
-    luaL_dostring(L, w2s(code).c_str());
+    if (luaL_dostring(L, w2s(code).c_str()) != 0) {
+        LOGA(lua_tostring(L, -1));
+}
 }
 
 void LuaAppEngine::LoadFile(string_t& file)
 {
-    luaL_dofile(L, w2s(file).c_str());
+    if (luaL_dofile(L, w2s(file).c_str()) != 0) {
+        LOGA(lua_tostring(L, -1));
+}
 }
 
 
 void LuaAppEngine::onLoad()
 {
-    call("onload");
+    call("onLoad");
 }
 
-void LuaAppEngine::onFirstRun()
+void LuaAppEngine::onFirstShellRun()
 {
-    call("onfirstrun");
+    call("OnFirstShellRun");
 }
 
 void LuaAppEngine::preShell()
 {
-    call("preshell");
+    call("PreShell");
 }
 
 void LuaAppEngine::onShell()
 {
-    call("onshell");
+    call("onShell");
 }
 
 void LuaAppEngine::onDaemon()
 {
-    call("ondaemon");
+    call("onDaemon");
 }
 
 int LuaAppEngine::onClick(string_t& ctrl)
@@ -991,7 +1234,7 @@ int LuaAppEngine::onClick(string_t& ctrl)
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, "onclick");
+    lua_getglobal(L, "Shell:onClick");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA("[LUA ERROR] can't find onclick() function");
         return -1;
@@ -1007,7 +1250,7 @@ void LuaAppEngine::onTimer(int id)
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return;
 
-    lua_getglobal(L, "ontimer");
+    lua_getglobal(L, "App:onTimer");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA("[LUA ERROR] can't find ontimer() function");
         return;
