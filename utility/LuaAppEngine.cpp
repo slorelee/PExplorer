@@ -220,6 +220,7 @@ extern "C" {
 
 #define PUSH_STR(v) {lua_pushstring(L, w2s(v.str).c_str());ret++;}
 #define PUSH_INT(v) {lua_pushinteger(L, v.iVal);ret++;}
+#define PUSH_INTVAL(val) {lua_pushinteger(L, val);ret++;}
 
     int lua_os_info(lua_State* L, int top, int base)
     {
@@ -243,12 +244,17 @@ extern "C" {
         } else if (info == TEXT("winver")) {
             if (top == base + 1) {
                 v.str = g_Globals._winver;
+                PUSH_STR(v);
             } else {
                 v.str = FmtString(TEXT("%d.%d.%d.%d"),
                     g_Globals._winvers[0], g_Globals._winvers[1],
                     g_Globals._winvers[2], g_Globals._winvers[3]);
+                PUSH_STR(v);
+                PUSH_INTVAL(g_Globals._winvers[0]);
+                PUSH_INTVAL(g_Globals._winvers[1]);
+                PUSH_INTVAL(g_Globals._winvers[2]);
+                PUSH_INTVAL(g_Globals._winvers[3]);
             }
-            PUSH_STR(v);
         } else if (info == TEXT("langid")) {
             v.str = g_Globals._langID;
             PUSH_STR(v);
@@ -982,22 +988,6 @@ static char *built_code_errorhandle = "function __G__TRACKBACK__(msg)\n"
 
 char *app_built_code = "\n\
 \n\
-Alert = App.Alert\n\
-\n\
-function os.putenv(var, str)\n\
-    App:Call('putenv', var, str)\n\
-end\n\
-\n\
-os.setenv = os.putenv\n\
-\n\
-function string.envstr(str)\n\
-    return App.Call('envstr', str)\n\
-end\n\
-\n\
-function string.resstr(str)\n\
-    return App.Call('resstr', str)\n\
-end\n\
-  \n\
 \n\
 App.Debug = false\n\
 if os.getenv('WINXSHELL_DEBUG') then\n\

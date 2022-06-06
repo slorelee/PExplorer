@@ -23,10 +23,11 @@ public:
     void onDaemon();
     int onClick(string_t& ctrl);
     void onTimer(int id);
+
+    lua_State *L;
 private:
     void init(string_t& file);
     void *_frame;
     char *_name;
-    lua_State *L;
 };
 

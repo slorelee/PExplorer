@@ -574,12 +574,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     String mpath = JVAR("JVAR_MODULEPATH").ToString();
     SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
-    if (_tcsstr(ext_options, TEXT("-ui")) == 0) {
+
 #ifndef _DEBUG
-        file = mpath + TEXT("\\") + file;
+    file = mpath + TEXT("\\") + file;
 #endif
-        g_Globals._lua = new LuaAppEngine(file);
-    }
+    g_Globals._lua = new LuaAppEngine(file);
+
 
     TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
     g_Globals._locale = _T("en-US");
@@ -829,8 +829,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     if (g_Globals._hwndDesktop) {
         g_Globals._desktop_mode = true;
-        bool isfirstrun = (ShellHasBeenRun() == 0);
-        if (isfirstrun && g_Globals._lua) g_Globals._lua->onFirstRun();
+        if (g_Globals._lua && !ShellHasBeenRun()) g_Globals._lua->onFirstShellRun();
     }
 
     /* UIManager Process */
