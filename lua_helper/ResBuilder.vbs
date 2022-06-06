@@ -6,6 +6,7 @@ f.Close
 
 Set f = fs.OpenTextFile("APP_HELPERS.lua", ForAppending, TristateFalse)
 
+Require("app_helper")
 Require("debug_helper")
 Require("io_helper")
 Require("win_helper")

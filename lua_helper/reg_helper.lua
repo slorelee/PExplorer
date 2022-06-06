@@ -1,47 +1,83 @@
 -- require 'winapi'
 
+local function reg_getdata(regkey, value)
+  local data, data_type = regkey:get_value(value)
+  if data_type == winapi.REG_DWORD then
+    data = data | 0 -- to integer
+  end
+  return data, data_type
+end
+
 function reg_read(key, values)
   local res = {}
-  local data = nil
-  k,err = winapi.open_reg_key(key, false)
+  local data, data_type = nil, 0
+
+  local k, err = winapi.open_reg_key(key, false)
   if not k then return nil end
 
   if not (type(values) == 'table') then
-    data = k:get_value(values)
+    data, data_type = reg_getdata(k, values)
     k:close()
-    return data
+    return data, data_type
   end
 
-  for i,v in ipairs(values) do
-    data = k:get_value(v)
+  for i, v in ipairs(values) do
+    data = reg_getdata(k, v)
     res[v] = data
+    res[i] = data
   end
-
   k:close()
+
   return res
 end
 
-function reg_write(key, name, value, type)
-  k,err = winapi.open_reg_key(key, true)
+function reg_write(key, name, value, data_type)
+  local k, err = winapi.open_reg_key(key, true)
   if not k then -- create the key if the key isn't exists
     winapi.create_reg_key(key)
     k,err = winapi.open_reg_key(key, true) -- open again
     if not k then return nil end
   end
-  if type == nil then type = winapi.REG_SZ end
-  k:set_value(name, value, type)
+  if data_type == nil then data_type = winapi.REG_SZ end
+  k:set_value(name, value, data_type)
   k:close()
   return 1
 end
 
 function reg_delete(key, name)
+  local subkey, k, err
+  if name == nil then
+    name = key:match("[^\\]+$")
+    key = key:match(".+\\")
+    subkey = key
+  end
+
   k,err = winapi.open_reg_key(key, true)
   if not k then return nil end
-  if name == nil then
-    k:delete()
+  if subkey ~= nil then
+    k:delete(name)
   else
     k:delete_value(name)
   end
   k:close()
   return 0
 end
+
+-- Export Reg Class
+
+Reg = {}
+
+
+REG_NONE = 0
+REG_SZ  = 1
+REG_EXPAND_SZ = 2
+REG_BINARY = 3
+REG_DWORD = 4
+
+REG_LINK = 6
+REG_MULTI_SZ = 7
+REG_QWORD = 11
+
+function Reg:Read(...) return reg_read(...) end
+function Reg:Write(...) return reg_write(...) end
+function Reg:Delete(...) return reg_delete(...) end

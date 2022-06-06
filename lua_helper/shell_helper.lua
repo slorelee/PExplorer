@@ -111,6 +111,18 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   end
 end
 
+Shell ={}
+function Shell:Close()
+  app:call('closeshell')
+  app:call('sleep', 500)
+end
+
+function Shell:WaitAndClose()
+  Taskbar:WaitForReady()
+  app:call('closeshell')
+  app:call('sleep', 500)
+end
+
 Desktop = {}
 function Desktop:Refresh()
   app:call('Desktop::Refresh')
