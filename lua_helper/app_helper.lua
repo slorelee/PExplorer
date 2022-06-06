@@ -1,14 +1,4 @@
 
-function os.putenv(var, str)
-    App.Call('putenv', var, str)
-end
-
-os.setenv = os.putenv
-
-function os.info(...)
-    return App.Call('os::info', ...)
-end
-
 function string.envstr(str)
     return App.Call('envstr', str)
 end
@@ -27,5 +17,6 @@ Alert = App.Alert
 alert = Alert
 
 app = App
+app.call = App.Call
 
 
