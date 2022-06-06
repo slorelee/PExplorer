@@ -1,12 +1,10 @@
-require 'winapi'
-
 ICP_TIMER_ID = 10001 -- init control panel timer
 
-cmd_line = app:info('cmdline')
-app_path = app:info('path')
-win_ver = app:info('winver')
+cmd_line = App:Info('cmdline')
+app_path = App:Info('path')
+win_ver = App:Info('winver')
 is_x = (os.getenv("SystemDrive") == 'X:')
-is_pe = (app:info('iswinpe') == 1)                              -- Windows Preinstallation Environment
+is_pe = (App:Info('iswinpe') == 1)                              -- Windows Preinstallation Environment
 is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
 is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
 
@@ -16,31 +14,30 @@ handle_system_property = 'auto'
 --[[ add one more '-' to be '---', will enable this function
 function do_ocf(lnkfile, realfile) -- handle open containing folder menu
   -- local path = realfile:match('(.+)\\')
-  -- app:run('cmd', '/k echo ' .. path)
+  -- App:Run('cmd', '/k echo ' .. path)
 
   -- totalcmd
-  app:run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
+  App:Run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
   -- XYplorer
-  app:run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
+  App:Run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
 end
 --]]
 
-function onload()
-  -- app:call('run', 'notepad.exe')
-  -- app:run('notepad.exe')
-  app:print('WinXShell.exe loading...')
-  app:print('CommandLine:' .. cmd_line)
-  app:print('WINPE:'.. tostring(is_pe))
-  app:print('WES:' .. tostring(is_wes))
+function App:onLoad()
+  -- App:Run('notepad.exe')
+  print('WinXShell.exe loading...')
+  print('CommandLine:' .. cmd_line)
+  print('WINPE:'.. tostring(is_pe), 123, 'test', App)
+  print('WES:' .. tostring(is_wes))
 end
 
-function ondaemon()
+function App:onDaemon()
   regist_shortcut_ocf()
   regist_system_property()
   regist_protocols()
 end
 
-function onshell()
+function App:onShell()
   regist_folder_shell()
   regist_shortcut_ocf()
   regist_system_property()
@@ -92,7 +89,7 @@ function update_clock_text_sample()
   app:call('SetVar', 'ClockText', clocktext)
 end
 
-function onfirstrun()
+function App:onFirstShellRun()
   -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   if is_wes then
     if win_ver == '6.2' or win_ver == '6.3' then -- only Windows 8, 8.1
@@ -101,7 +98,7 @@ function onfirstrun()
   end
 end
 
-function onclick(ctrl)
+function Shell:onClick(ctrl)
   if ctrl == 'startmenu_reboot' then
     return onclick_startmenu_reboot()
   elseif ctrl == 'startmenu_shutdown' then
@@ -134,7 +131,7 @@ end
 
 function onclick_startmenu_controlpanel()
   if is_wes then
-    app:run('control.exe')
+    App:Run('control.exe')
     return 0
   end
   return 1
@@ -142,7 +139,7 @@ end
 
 function onclick_tray_clockarea(isdouble)
   if isdouble then
-    app:run('control.exe', 'timedate.cpl')
+    App:Run('control.exe', 'timedate.cpl')
   else
     wxsUI('UI_Calendar', 'main.jcfg')
   end
@@ -150,10 +147,10 @@ function onclick_tray_clockarea(isdouble)
 end
 
 
-function ontimer(tid)
+function App:onTimer(tid)
   if tid == ICP_TIMER_ID then
     initcontrolpanel(win_ver)
-    app:call('KillTimer', tid)
+    App:KillTimer(tid)
   end
 end
 
@@ -161,11 +158,12 @@ end
 function initcontrolpanel(ver)
   --  4161    Control Panel
   local ctrlpanel_title = app:call('resstr', '#{@shell32.dll,4161}')
-  app:run('control.exe')
-  app:call('sleep', 500)
+  App:Run('control.exe')
+  App:Sleep(500)
   if CloseWindow('CabinetWClass', ctrlpanel_title) == 0 then
     -- 32012    All Control Panel Items
     ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
     CloseWindow('CabinetWClass', ctrlpanel_title)
   end
 end
+
