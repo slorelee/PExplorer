@@ -47,8 +47,16 @@ function os.info(key, ...)
     arr['avail_gb'] = arr[3] / 1024 / 1024 / 1024
     arr['used_gb'] = arr[4] / 1024 / 1024 / 1024
     return arr
+  elseif key:lower() == 'iswinpe' then
+     return is_winpe()
   end
    return App.Call('os::info', key, ...)
+end
+
+function is_winpe()
+  local start_opt = reg_read([[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control]],
+    'SystemStartOptions')
+  return string.find(start_opt, 'minint') ~= nil
 end
 
 

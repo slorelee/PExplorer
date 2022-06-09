@@ -220,6 +220,7 @@ extern "C" {
 
 #define PUSH_STR(v) {lua_pushstring(L, w2s(v.str).c_str());ret++;}
 #define PUSH_INT(v) {lua_pushinteger(L, v.iVal);ret++;}
+#define PUSH_BOOL(v) {lua_pushboolean(L, v.iVal);ret++;}
 #define PUSH_INTVAL(val) {lua_pushinteger(L, val);ret++;}
 
     int lua_os_info(lua_State* L, int top, int base)
@@ -267,7 +268,7 @@ extern "C" {
             PUSH_STR(v);
         } else if (info == TEXT("isuefimode")) {
             v.iVal = IsUEFIMode();
-            PUSH_INT(v);
+            PUSH_BOOL(v);
         } else if (info == TEXT("tickcount")) {
             v.iVal = GetTickCount();
             PUSH_INT(v);
