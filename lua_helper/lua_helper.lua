@@ -1,4 +1,4 @@
-App:DebugPrint("lua_helper init ...")
+App:Debug("lua_helper init ...")
 
 if os.getenv('PROCESSOR_ARCHITECTURE') == 'AMD64' then
   ARCH = 'x64'
@@ -8,8 +8,8 @@ end
 
 -- update package.path, package.cpath
 
-local root = os.getenv('WINXSHELL_MODULEPATH')
-if App.Debug then
+local root = App:Info('Path')
+if App:Info('IsDebugModule') then
   root = root .. [[\..\..]]
 end
 local luapath = '.\\Libs\\?.lua;'

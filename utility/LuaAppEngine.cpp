@@ -207,7 +207,7 @@ extern void SetDpiScaling(int scale);
 
 extern "C" {
     const void *lua_app_addr = NULL;
-
+    int lua_app_loglevel = 0;
 #ifdef _DEBUG
     extern int lua_stack(lua_State* L);
 #endif
@@ -685,6 +685,14 @@ extern "C" {
             if (v.str == TEXT("ClockText")) {
                 string_t clocktext = s2w(lua_tostring(L, base + 3));
                 _tcscpy(g_Globals._varClockTextBuffer, clocktext.c_str());
+            } else if (v.str == TEXT("Debug")) {
+                if (lua_isboolean(L, base + 3)) {
+                    g_Globals._isDebug = lua_toboolean(L, base + 3);
+                }
+            } else if (v.str == TEXT("LogLevel")) {
+                if (lua_isinteger(L, base + 3)) {
+                    lua_app_loglevel = (int)lua_tointeger(L, base + 3);
+                }
             }
         } else if ((func == "settimer") || (func == "killtimer")) {
             LuaAppEngine *lua = g_Globals._lua;
@@ -885,13 +893,13 @@ extern "C" {
         } else if (name == "isshell") {
             v.iVal = isWinXShellAsShell();
             PUSH_INT(v);
-        } else if (name == "isdebug") {
+        } else if (name == "isdebugmodule") {
 #ifdef _DEBUG
             v.iVal = TRUE;
 #else
             v.iVal = FALSE;
 #endif // DEBUG
-            PUSH_STR(v);
+            PUSH_BOOL(v);
         } else if (name == "hasexplorer") {
             v.iVal = hasMSExplorer();
             PUSH_INT(v);
@@ -959,6 +967,84 @@ extern "C" {
         return 0;
     }
 
+#include<time.h>
+#define LOG_FATAL_LEVEL 1
+#define LOG_ERROR_LEVEL 2
+#define LOG_WARN_LEVEL 3
+#define LOG_INFO_LEVEL 4
+#define LOG_DEBUG_LEVEL 5
+
+    static void log_getheader(char *buff, int level)
+    {
+        time_t curtime = time(0);
+        tm tim;
+        localtime_s(&tim, &curtime);
+        char *levelname = "UNKOWN";
+
+        switch (level) {
+        case LOG_DEBUG_LEVEL:
+            levelname = "DEBUG";
+            break;
+        case LOG_INFO_LEVEL:
+            levelname = " INFO";
+            break;
+        case LOG_WARN_LEVEL:
+            levelname = " WARN";
+            break;
+        case LOG_ERROR_LEVEL:
+            levelname = "ERROR";
+            break;
+        case LOG_FATAL_LEVEL:
+            levelname = "FATAL";
+            break;
+        default:
+            break;
+        }
+
+        sprintf(buff, "%d/%02d/%02d %02d:%02d:%02d %s ", tim.tm_year + 1900, tim.tm_mon + 1,
+            tim.tm_mday, tim.tm_hour, tim.tm_min, tim.tm_sec, levelname);
+    }
+
+    int lua_log(lua_State* L)
+    {
+        int base = 0;
+        size_t len = 0;
+        const char *s = NULL;
+        int top = lua_gettop(L);
+        int level = 0;
+
+        /* skip app table self */
+        if (lua_app_addr && top >= 1) {
+            if (lua_app_addr == lua_topointer(L, 1)) {
+                base++;
+            }
+        }
+        if (lua_isinteger(L, base + 1) == 0) {
+            lua_pop(L, -1);
+            return 0;
+        }
+        level = (int)lua_tointeger(L, base + 1);
+
+        if (level <= lua_app_loglevel) {
+            char logheader[128] = { 0 };
+
+            if (base == 1) lua_remove(L, 1);
+            log_getheader(logheader, level);
+            if (top > base + 2) {
+                strcat(logheader, "======================================\n");
+            }
+
+            lua_pushstring(L, logheader);
+            lua_replace(L, 1);
+
+            if (top > base + 2) {
+                lua_pushstring(L, "\n================================================================");
+            }
+            lua_print(L);
+        }
+        return 0;
+    }
+
     static const luaL_Reg lua_reg_app_funcs[] = {
         { "Version", lua_app_version },
         { "Call", lua_app_call },
@@ -966,6 +1052,7 @@ extern "C" {
         { "JCfg", lua_app_jcfg },
         { "Print", lua_print },
         { "Alert", lua_alert },
+        { "Log", lua_log },
 #ifdef _DEBUG
         { "Stack", lua_stack },
 #endif // DEBUG
@@ -990,15 +1077,38 @@ static char *built_code_errorhandle = "function __G__TRACKBACK__(msg)\n"
 char *app_built_code = "\n\
 \n\
 \n\
-App.Debug = false\n\
-if os.getenv('WINXSHELL_DEBUG') then\n\
-  App.Debug = true\n\
+App.FATAL_LEVEL = 1\n\
+App.ERROR_LEVEL = 2\n\
+App.WARN_LEVEL = 3\n\
+App.INFO_LEVEL = 4\n\
+App.DEBUG_LEVEL = 5\n\
+\n\
+\n\
+function App:SetVar(...)\n\
+  App.Call('SetVar', ...)\n\
 end\n\
 \n\
-function App:DebugPrint(...)\n\
-  if App.Debug then\n\
-    return App.Print(...)\n\
-  end\n\
+App:SetVar('LogLevel', App.FATAL_LEVEL)\n\
+\n\
+if os.getenv('WINXSHELL_DEBUG') then\n\
+  App:SetVar('Debug', true)\n\
+  App:SetVar('LogLevel', App.DEBUG_LEVEL)\n\
+end\n\
+\n\
+function App:Fatal(...)\n\
+    return App.Log(App.FATAL_LEVEL, ...)\n\
+end\n\
+function App:Error(...)\n\
+    return App.Log(App.ERROR_LEVEL, ...)\n\
+end\n\
+function App:Warn(...)\n\
+    return App.Log(App.WARN_LEVEL, ...)\n\
+end\n\
+function App:InfoLog(...)\n\
+    return App.Log(App.INFO_LEVEL, ...)\n\
+end\n\
+function App:Debug(...)\n\
+    return App.Log(App.DEBUG_LEVEL, ...)\n\
 end\n\
   \n\
 function App:JCfg(...)\n\
@@ -1049,6 +1159,10 @@ void LuaAppEngine::init(string_t& file)
     lua_getglobal(L, "App");
     if (lua_type(L, -1) == LUA_TTABLE) {
         lua_app_addr = lua_topointer(L, -1);
+    }
+
+    if (g_Globals._isDebug) {
+        lua_app_loglevel = LOG_DEBUG_LEVEL;
     }
 
     char *rescode = (char *)LoadCustomResource(IDR_LUA_HELPER, TEXT("FILE"));

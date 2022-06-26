@@ -53,8 +53,6 @@
 
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);
 
-boolean DebugMode = FALSE;
-
 extern ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
 
@@ -645,8 +643,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #endif
 
     if (_tcsstr(ext_options, TEXT("-debug"))) {
-        DebugMode = true;
-        Sleep(10000);
+        g_Globals._isDebug = true;
     }
 
     if (_tcsstr(ext_options, TEXT("-break"))) {

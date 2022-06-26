@@ -34,6 +34,7 @@ ExplorerGlobals::ExplorerGlobals()
     _hwndDesktop = 0;
     _hwndDaemon = 0;
 
+    _isDebug = FALSE;
     _isShell = FALSE;
     _isWinPE = FALSE;
     _lua = NULL;
