@@ -887,6 +887,12 @@ extern "C" {
         } else if (name == "path") {
             v.str = JVAR("JVAR_MODULEPATH").ToString();
             PUSH_STR(v);
+        } else if (name == "name") {
+            v.str = JVAR("JVAR_MODULENAME").ToString();
+            PUSH_STR(v);
+        } else if (name == "fullpath") {
+            v.str = JVAR("JVAR_MODULEFILENAME").ToString();
+            PUSH_STR(v);
         } else if (name == "iswinpe") {
             v.iVal = g_Globals._isWinPE;
             PUSH_INT(v);
