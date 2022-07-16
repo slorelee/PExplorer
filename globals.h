@@ -62,19 +62,21 @@ typedef Desktop DesktopRef;
 extern struct ExplorerGlobals {
     ExplorerGlobals();
 
-    void    init(HINSTANCE hInstance);
+    void    Init(HINSTANCE hInstance, LPTSTR lpCmdLine);
 
-    void    read_persistent();
-    void    write_persistent();
+    void    ReadPersistent();
+    void    WritePersistent();
 
-    void set_log();
-    void log(TCHAR * msg);
-    void close_log();
+    void InitLog();
+    void Log(TCHAR * msg);
+    void CloseLog();
 
-    void    load_config();
-    void    get_modulepath();
-    void    get_systeminfo();
-    void    get_uifolder();
+
+    void    getModulePath();
+    void    getSystemInfo();
+    void    getLuaAppEngine();
+    void    getUIFolder();
+    void    loadConfig();
 
     HINSTANCE   _hInstance;
     UINT        _cfStrFName;

@@ -458,6 +458,49 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             ++lpCmdLine;
     }
 
+    if (_tcsstr(ext_options, TEXT("-?"))) {
+        MessageBoxA(g_Globals._hwndDesktop,
+            "\r\n"
+            "-?        display command line options\r\n"
+            "\r\n"
+            "-desktop        start in desktop mode regardless of an already running shell\r\n"
+            "\r\n"
+            "-install        replace previous shell application with WinXShell\r\n"
+            "\r\n"
+            "-noautostart    disable autostarts\r\n"
+            "-autostart    enable autostarts regardless of debug build\r\n"
+            "\r\n"
+            "-console        open debug console\r\n"
+            "\r\n"
+            "-break        activate debugger breakpoint\r\n",
+            "WinXShell - command line options", MB_OK);
+        return 0;
+    }
+
+#ifdef _DEBUG
+    SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
+#endif
+
+    _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
+
+    if (_tcsstr(ext_options, TEXT("-log"))) {
+        g_Globals.InitLog();
+        handle_log(g_Globals._log_file);
+    }
+
+    if (_tcsstr(ext_options, TEXT("-console"))) {
+        if (!g_Globals._log_file) {
+            g_Globals.InitLog();
+            handle_log(g_Globals._log_file);
+        }
+
+        handle_console(g_Globals._log);
+        LOGA("starting winxshell console log\n");
+    }
+
+    g_hInst = hInstance;
+    g_Globals.Init(hInstance, lpCmdLineOrg); /* init icon_cache */
+
     if (_tcsstr(ext_options, TEXT("-winpe"))) {
         g_Globals._isWinPE = TRUE;
         CloseShellProcess();
@@ -518,23 +561,17 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     autostart = false;
 #endif
 
-    _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
+    g_Globals.ReadPersistent();
 
-    g_hInst = hInstance;
-    g_Globals.init(hInstance); /* init icon_cache for UI process */
-
-    g_Globals.read_persistent();
-    g_Globals.get_modulepath();
-    g_Globals.load_config();
-    g_Globals.get_systeminfo();
-    g_Globals._cmdline = lpCmdLineOrg;
+    String mpath = JVAR("JVAR_MODULEPATH").ToString();
+    SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
 
     // for loading UI Resources, lua_helper
 #ifndef _DEBUG
-    SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+    SetCurrentDirectory(mpath.c_str());
 #else
     if (_tcsstr(ext_options, TEXT("-cd"))) {
-        SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
+        SetCurrentDirectory(mpath.c_str());
     }
 #endif
 
@@ -548,44 +585,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._hDefaultFont = CreateFontIndirect(&(ncm.lfMessageFont));
     }
 
-    if (_tcsstr(ext_options, TEXT("-log"))) {
-        g_Globals.set_log();
-        handle_log(g_Globals._log_file);
-    }
-
-    if (_tcsstr(ext_options, TEXT("-console"))) {
-        g_Globals.set_log();
-        handle_log(g_Globals._log_file);
-
-        handle_console(g_Globals._log);
-        LOGA("starting winxshell console log\n");
-    }
-
-    string_t file(_T("WinXShell.lua"));
-    TCHAR luascript[MAX_PATH + 1] = { 0 };
-    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_LUASCRIPT"), luascript, MAX_PATH);
-    if (dw != 0) file = luascript;
-
-#ifdef _DEBUG
-    SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
-#endif
-
-    String mpath = JVAR("JVAR_MODULEPATH").ToString();
-    SetEnvironmentVariable(TEXT("WINXSHELL_MODULEPATH"), mpath);
-
-#ifndef _DEBUG
-    file = mpath + TEXT("\\") + file;
-#endif
-    g_Globals._lua = new LuaAppEngine(file);
-
-
-    TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH];
-    g_Globals._locale = _T("en-US");
-    if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
-        g_Globals._locale = locale_buf;
-    }
-    SetEnvironmentVariable(TEXT("USERDEFAULT_LOCALENAME"), g_Globals._locale);
-
     CUIManager *pUIManager = NULL;
     if (_tcsstr(ext_options, TEXT("-uimgr"))) {
         HWND hwnd = CUIManager::GetUIManager();
@@ -594,13 +593,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
        }
     }
 
-   if (g_Globals._lua) g_Globals._lua->onLoad();
+    if (g_Globals._lua) g_Globals._lua->onLoad();
 
-    if (_tcsstr(ext_options, TEXT("-ui"))) {
+    if (_tcsstr(ext_options, TEXT("-jcfg")) || _tcsstr(ext_options, TEXT("-ui"))) {
 #ifndef _DEBUG
         SetCurrentDirectory(JVAR("JVAR_MODULEPATH").ToString().c_str());
 #endif
-        g_Globals.get_uifolder();
         UIProcess(hInstance, lpCmdLineOrg);
         if (pUIManager) {
             Window::MessageLoop();
@@ -785,27 +783,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         // launch the shell DDE server
         if (g_SHDOCVW_ShellDDEInit)
             (*g_SHDOCVW_ShellDDEInit)(TRUE);
-    }
-
-    if (_tcsstr(ext_options, TEXT("-?"))) {
-        MessageBoxA(g_Globals._hwndDesktop,
-                    "\r\n"
-                    "-?        display command line options\r\n"
-                    "\r\n"
-                    "-desktop        start in desktop mode regardless of an already running shell\r\n"
-                    "-nodesktop    disable desktop mode\r\n"
-                    "-explorer        display cabinet window regardless of enabled desktop mode\r\n"
-                    "\r\n"
-                    "-install        replace previous shell application with WinXShell\r\n"
-                    "\r\n"
-                    "-noautostart    disable autostarts\r\n"
-                    "-autostart    enable autostarts regardless of debug build\r\n"
-                    "\r\n"
-                    "-console        open debug console\r\n"
-                    "\r\n"
-                    "-debug        activate GDB remote debugging stub\r\n"
-                    "-break        activate debugger breakpoint\r\n",
-                    "WinXShell - command line options", MB_OK);
     }
 
     Thread *pSSOThread = NULL;

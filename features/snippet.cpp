@@ -330,3 +330,19 @@ BOOL IsUEFIMode() {
     //dw = ERROR_INVALID_FUNCTION for legacy BIOS
     return FALSE;
 }
+
+BOOL isWinPE()
+{
+    DWORD type = REG_DWORD;
+    TCHAR value[MAX_PATH] = { 0 };
+    DWORD size = MAX_PATH;
+    SHGetValue(HKEY_LOCAL_MACHINE, TEXT("SYSTEM\\CurrentControlSet\\Control"),
+        TEXT("SystemStartOptions"), &type, &value, &size);
+    if (type == REG_SZ) {
+        if (StrStr((TCHAR*)value, TEXT("MININT")) != NULL) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+

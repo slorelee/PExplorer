@@ -6,6 +6,8 @@
 #include "jconfig/jcfg.h"
 #include "utility/LuaAppEngine.h"
 
+extern BOOL isWinPE();
+
 HINSTANCE g_hInst;
 ExplorerGlobals g_Globals;
 
@@ -37,6 +39,8 @@ ExplorerGlobals::ExplorerGlobals()
     _isDebug = FALSE;
     _isShell = FALSE;
     _isWinPE = FALSE;
+
+    _uifolder = _T("");
     _lua = NULL;
 
     _exitcode = 0;
@@ -44,16 +48,26 @@ ExplorerGlobals::ExplorerGlobals()
     _varClockTextBuffer[0] = TEXT('\0');
 }
 
-void ExplorerGlobals::init(HINSTANCE hInstance)
+void ExplorerGlobals::Init(HINSTANCE hInstance, LPTSTR lpCmdLine)
 {
     _hInstance = hInstance;
 
     _SHRestricted = (DWORD(STDAPICALLTYPE *)(RESTRICTIONS)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), "SHRestricted");
     _SHSettingsChanged = (VOID(STDAPICALLTYPE *)(UINT,LPCWSTR)) GetProcAddress(GetModuleHandle(TEXT("SHELL32")), (LPCSTR)244);
+
+    _cmdline = lpCmdLine;
+
+    getModulePath();
+    getSystemInfo();
+    getLuaAppEngine();
+    getUIFolder();
+
+    loadConfig();
+
     _icon_cache.init();
 }
 
-void ExplorerGlobals::get_modulepath()
+void ExplorerGlobals::getModulePath()
 {
     TCHAR szFile[MAX_PATH + 1] = { 0 };
     String strPath = TEXT("");
@@ -73,7 +87,22 @@ void ExplorerGlobals::get_modulepath()
     JVAR("JVAR_MODULENAME") = strFileName;
 }
 
-void ExplorerGlobals::get_uifolder()
+void ExplorerGlobals::getLuaAppEngine()
+{
+    String file(_T("WinXShell.lua"));
+    TCHAR luascript[MAX_PATH + 1] = { 0 };
+
+#ifndef _DEBUG
+    file = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\") + file;
+#endif
+
+    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_LUASCRIPT"), luascript, MAX_PATH);
+    if (dw != 0) file = luascript;
+
+    _lua = new LuaAppEngine(file);
+}
+
+void ExplorerGlobals::getUIFolder()
 {
     TCHAR uifolder[MAX_PATH + 1] = { 0 };
     DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_UIFOLDER"), uifolder, MAX_PATH);
@@ -82,23 +111,6 @@ void ExplorerGlobals::get_uifolder()
     } else {
         g_Globals._uifolder = uifolder;
     }
-}
-
-void ExplorerGlobals::load_config()
-{
-    get_uifolder();
-
-    String jcfgfile = TEXT("WinXShell.jcfg");
-#ifndef _DEBUG
-    TCHAR buff[MAX_PATH + 1] = { 0 };
-    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_JCFGFILE"), buff, MAX_PATH);
-    if (dw == 0) {
-        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\WinXShell.jcfg");
-    } else {
-        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\") + buff;
-    }
-#endif
-    Load_JCfg(jcfgfile);
 }
 
 DWORD PASCAL ReadKernelVersion(WORD *wdVers)
@@ -133,38 +145,53 @@ DWORD PASCAL ReadKernelVersion(WORD *wdVers)
     return dwVersion;
 }
 
-void ExplorerGlobals::get_systeminfo()
+void ExplorerGlobals::getSystemInfo()
 {
     DWORD dwVer = ReadKernelVersion(g_Globals._winvers);
+    TCHAR locale_buf[LOCALE_NAME_MAX_LENGTH] = {0};
+
     g_Globals._winver = FmtString(TEXT("%d.%d"), HIWORD(dwVer), LOWORD(dwVer));
     g_Globals._isNT5 = !IsWindowsVistaOrGreater();
+    g_Globals._langID.printf(TEXT("%d"), GetSystemDefaultLangID());
 
-    Value v = JCFG2("JS_SYSTEMINFO", "langid");
-    String langID = v.ToString();
-    g_Globals._langID = langID;
-    if (langID == TEXT("0")) {
-        g_Globals._langID.printf(TEXT("%d"), GetSystemDefaultLangID());
+    g_Globals._locale = TEXT("en-US");
+    if (GetUserDefaultLocaleName(locale_buf, LOCALE_NAME_MAX_LENGTH) > 0) {
+        g_Globals._locale = locale_buf;
     }
+
+    g_Globals._isWinPE = isWinPE();
 }
 
-void ExplorerGlobals::read_persistent()
+void ExplorerGlobals::loadConfig()
+{
+    String jcfgfile = TEXT("WinXShell.jcfg");
+#ifndef _DEBUG
+    TCHAR buff[MAX_PATH + 1] = { 0 };
+    DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_JCFGFILE"), buff, MAX_PATH);
+    if (dw == 0) {
+        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\WinXShell.jcfg");
+    } else {
+        jcfgfile = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\") + buff;
+    }
+#endif
+    Load_JCfg(jcfgfile);
+}
+
+void ExplorerGlobals::ReadPersistent()
 {
     // read configuration file
 }
 
-void ExplorerGlobals::write_persistent()
+void ExplorerGlobals::WritePersistent()
 {
     // write configuration file
     //RecursiveCreateDirectory(_cfg_dir);
 }
 
-void ExplorerGlobals::set_log()
+void ExplorerGlobals::InitLog()
 {
     TCHAR tmpPath[MAX_PATH + 1] = { 0 };
     DWORD dwAccess = GENERIC_WRITE;
-
-    TCHAR luascript[MAX_PATH + 1] = { 0 };
-    DWORD dw = 0;
 
     String logPath = TEXT("");
     if (g_Globals._log_file) return;
@@ -189,7 +216,7 @@ void ExplorerGlobals::set_log()
     g_Globals._log_file = hFile;
 }
 
-void ExplorerGlobals::log(TCHAR *msg)
+void ExplorerGlobals::Log(TCHAR *msg)
 {
     DWORD dwWrite = 0;
     if (g_Globals._log_file) {
@@ -197,7 +224,7 @@ void ExplorerGlobals::log(TCHAR *msg)
     }
 }
 
-void ExplorerGlobals::close_log()
+void ExplorerGlobals::CloseLog()
 {
     if (g_Globals._log_file) {
         CloseHandle(g_Globals._log_file);
