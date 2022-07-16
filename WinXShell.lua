@@ -1,12 +1,7 @@
-ICP_TIMER_ID = 10001 -- init control panel timer
 
-cmd_line = App:Info('cmdline')
-app_path = App:Info('path')
-win_ver = App:Info('winver')
-is_x = (os.getenv("SystemDrive") == 'X:')
-is_pe = (App:Info('iswinpe') == 1)                              -- Windows Preinstallation Environment
-is_wes = (string.find(cmd_line, '-wes') and true or false)      -- Windows Embedded Standard
-is_win = (string.find(cmd_line, '-windows') and true or false)  -- Normal Windows
+is_pe = (os.info('isWinPE') == 1)  -- Windows Preinstallation Environment
+is_wes = App:HasOption('-wes')         -- Windows Embedded Standard
+is_win = App:HasOption('-windows')  -- Normal Windows
 
 -- 'auto', 'ui_systemInfo', 'system', '' or nil
 handle_system_property = 'auto'
@@ -26,23 +21,15 @@ end
 function App:onLoad()
   -- App:Run('notepad.exe')
   print('WinXShell.exe loading...')
-  print('CommandLine:' .. cmd_line)
+  print('CommandLine:' .. App.CmdLine)
   print('WINPE:'.. tostring(is_pe), 123, 'test', App)
   print('WES:' .. tostring(is_wes))
 end
 
 function App:onDaemon()
-  regist_shortcut_ocf()
-  regist_system_property()
-  regist_protocols()
 end
 
 function App:onShell()
-  regist_folder_shell()
-  regist_shortcut_ocf()
-  regist_system_property()
-  regist_protocols()
-
   -- wxsUI('UI_WIFI', 'main.jcfg', '-notrayicon -hidewindow')
   -- wxsUI('UI_Volume', 'main.jcfg', '-notrayicon -hidewindow')
 end
@@ -92,12 +79,6 @@ function update_clock_text_sample()
 end
 
 function App:onFirstShellRun()
-  -- VERSTR = reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
-  if is_wes then
-    if win_ver == '6.2' or win_ver == '6.3' then -- only Windows 8, 8.1
-      app:call('SetTimer', ICP_TIMER_ID, 200) -- use timer to make main shell running
-    end
-  end
 end
 
 function Shell:onClick(ctrl)
@@ -150,22 +131,6 @@ end
 
 
 function App:onTimer(tid)
-  if tid == ICP_TIMER_ID then
-    initcontrolpanel(win_ver)
-    App:KillTimer(tid)
-  end
 end
 
--- ======================================================================================
-function initcontrolpanel(ver)
-  --  4161    Control Panel
-  local ctrlpanel_title = app:call('resstr', '#{@shell32.dll,4161}')
-  App:Run('control.exe')
-  App:Sleep(500)
-  if CloseWindow('CabinetWClass', ctrlpanel_title) == 0 then
-    -- 32012    All Control Panel Items
-    ctrlpanel_title = app:call('resstr', '#{@shell32.dll,32012}')
-    CloseWindow('CabinetWClass', ctrlpanel_title)
-  end
-end
 
