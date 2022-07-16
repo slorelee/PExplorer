@@ -899,6 +899,9 @@ extern "C" {
         } else if (name == "isshell") {
             v.iVal = isWinXShellAsShell();
             PUSH_INT(v);
+        } else if (name == "isshellmode") {
+            v.iVal = g_Globals._isShell;
+            PUSH_INT(v);
         } else if (name == "isdebugmodule") {
 #ifdef _DEBUG
             v.iVal = TRUE;
@@ -1322,21 +1325,25 @@ void LuaAppEngine::onLoad()
 
 void LuaAppEngine::onFirstShellRun()
 {
-    call("OnFirstShellRun");
+    call("_onFirstShellRun");
+    call("onFirstShellRun");
 }
 
 void LuaAppEngine::preShell()
 {
+    call("_PreShell");
     call("PreShell");
 }
 
 void LuaAppEngine::onShell()
 {
+    call("_onShell");
     call("onShell");
 }
 
 void LuaAppEngine::onDaemon()
 {
+    call("_onDaemon");
     call("onDaemon");
 }
 
@@ -1356,12 +1363,17 @@ int LuaAppEngine::onClick(string_t& ctrl)
     return (int)lua_tointeger(L, 1);
 }
 
+#define TID_USER 20000
 void LuaAppEngine::onTimer(int id)
 {
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return;
 
-    lua_getglobal(L, "App:onTimer");
+    if (id < TID_USER) {
+        lua_getglobal(L, "App:_onTimer");
+    } else {
+        lua_getglobal(L, "App:onTimer");
+    }
     if (lua_type(L, -1) != LUA_TFUNCTION) {
         LOGA("[LUA ERROR] can't find ontimer() function");
         return;
