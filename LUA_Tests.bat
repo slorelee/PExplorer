@@ -89,14 +89,16 @@ function test_app()
 
 p(
 "======================App Object======================",
-"\nCmdLine:",
-App:Info('CmdLine'),
-"\nPath:",
-App:Info('Path'),
-"\nName:",
-App:Info('Name'),
-"\nFullPath:",
-App:Info('FullPath')
+"\nCmdLine:", App.CmdLine,
+"\nPath:", App.Path,
+"\nName:", App.Name,
+"\nFullPath:", App.FullPath,
+"\n",
+"\nApp:HasOption(\'-console\')", App:HasOption('-console'),
+"\nApp:HasOption(\'-debug\')", App:HasOption('-debug'),
+"\nApp:GetOption(\'-script\')", App:GetOption('-script'),
+"\nApp:GetOption(\'-theme\')", App:GetOption('-theme'),
+"\n"
 )
 App:Sleep(50)
 App:Error("[ERROR] Failed to do something.")
@@ -111,6 +113,7 @@ end
 
 function test_reg()
 
+p("\n\n\n")
 p(
 "======================Reg Object======================"
 )
@@ -157,12 +160,12 @@ end
 function test_proc()
 
 p(
-"======================Proc lib======================"
+"======================Proc/Window lib======================"
 )
 App:Run("notepad.exe")
 
 App:Sleep(500)
-local proc = Proc.Find("无标题 - 记事本")
+local proc = Window.Find("无标题 - 记事本")
 
 p(
   proc:GetClassName(),
@@ -174,7 +177,7 @@ p(proc)
 proc:Close()
 
 App:Sleep(500)
-obj = Proc.Find("无标题 - 记事本")
+obj = Window.Find("无标题 - 记事本")
 p(obj, str.fmt("Handle = 0x%x", obj:GetHandle()))
 p("Proc End")
 
