@@ -110,14 +110,14 @@ end
 
 function _clsProc:SendMessage(msg, wparam, lparam)
   local o = self.winObj
-  if o then return o:send_message(msg, wparam, lparam) end
-  return ""
+  if o then return "OK", o:send_message(msg, wparam, lparam) end
+  return "", 0
 end
 
 function _clsProc:PostWindow(msg, wparam, lparam)
   local o = self.winObj
-  if o then return o:post_message(msg, wparam, lparam) end
-  return ""
+  if o then return "OK", o:post_message(msg, wparam, lparam) end
+  return "", 0
 end
 
 function _clsProc:Close()
@@ -143,9 +143,6 @@ Proc = {}
 -- Proc.Run
 -- Proc.Exec
 
-local function findByPid(pid)
-end
-
 function Proc.Find(title_or_pid, class)
   local obj = nil
   if type(title_or_pid) == "string" then
@@ -161,13 +158,22 @@ function Proc.Match(pattern)
   return _clsProc:New(obj)
 end
 
+
+Window = {
+  __name = "AppWindow"
+}
+
+Window.Find = Proc.Find
+Window.Match = Proc.Match
+
+
 --[[
-local p = Proc.Find("*Untitled")
-p = Proc.Find(10912)
+local p = Window.Find("*Untitled")
+-- p = Proc.Find(10912)
 
 print(p:GetClassName())
 print(p:GetHandle())
-winapi.show_message(p:GetClassName(), "")
+Alert(p:GetClassName())
 p:Show()
 p:Close()
 p:Kill()

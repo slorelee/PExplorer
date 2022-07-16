@@ -1,37 +1,5 @@
 --local app = _G.app
 
-function has_option(opt, cmd)
-    if cmd == nil then cmd = app:info('cmdline') end
-    return (string.find(cmd, opt) and true or false)
-end
-
-
-function get_option(opt, cmd)
-    local val, val2
-    if cmd == nil then cmd = app:info('cmdline') end
-    val = string.match(cmd, opt .. '%s(.+)$')
-    if val == nil then return nil end
-
-    --  -xyz 'v a l u e' -abc
-    val2 = string.match(val, '^[\'](.+)[\']%s')
-    if val2 ~= nil then return val2 end
-    --  -xyz "v a l u e" -abc
-    val2 = string.match(val, '^[\"](.+)[\"]%s')
-    if val2 ~= nil then return val2 end
-
-    --  -xyz 'v a l u e'
-    val2 = string.match(val, '^[\'](.+)[\']$')
-    if val2 ~= nil then return val2 end
-    --  -xyz "v a l u e"
-    val2 = string.match(val, '^[\"](.+)[\"]$')
-    if val2 ~= nil then return val2 end
-
-    --  -xyz abc -abc
-    val2 = string.match(val, '([^%s]+)')
-    if val2 ~= nil then return val2 end
-
-    return val
-end
 
 function parse_option(opt_str)
     local opt = {}
