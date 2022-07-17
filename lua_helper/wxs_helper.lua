@@ -1,13 +1,24 @@
 -- require('io_helper')
 
+WxsHandler = {}
+TrayNotify = {}
+TrayClock = {}
+
+-- 'auto', 'ui_systemInfo', 'system', '' or nil
+WxsHandler.SystemProperty = 'auto'
+
+ -- nil or a handler function
+WxsHandler.OpenContainingFolder = nil
+
+
 function wxsUI(ui, jcfg, opt, app_path)
   if jcfg == nil then jcfg = 'main.jcfg' end
   if opt == nil then opt = '' else opt = ' ' .. opt end
-  if app_path == nil then app_path = app:info('path') end
+  if app_path == nil then app_path = App.FullPath end
   if File.exists(app_path .. '\\wxsUI\\' .. ui .. '.zip') then
     ui = ui .. '.zip'
   end
-  app:run(app_path .. '\\WinXShell.exe', ' -ui -jcfg wxsUI\\' .. ui .. '\\' .. jcfg .. opt)
+  App:Run(app_path, ' -ui -jcfg wxsUI\\' .. ui .. '\\' .. jcfg .. opt)
 end
 
 
@@ -17,7 +28,6 @@ function wxs_ui(url)
       url = url:gsub('wxs[-]ui:', '')
     end
 
-    local exe = app_path .. '\\WinXShell.exe'
     if url == "systeminfo" then
       wxsUI('UI_SystemInfo')
     elseif url == "settings" then
@@ -113,7 +123,7 @@ function regist_folder_shell()
   val = reg_read(key, 'DelegateExecute')
   if val ~= nil then reg_write(key, 'DelegateExecute_Backup', val) end
   reg_delete(key, 'DelegateExecute')
-  reg_write(key, '', '"' .. app_path .. '\\WinXShell.exe" "%1"')
+  reg_write(key, '', '"' .. App.FullPath .. '" "%1"')
 
   -- explore,opennewprocess,opennewtab
 end
@@ -139,16 +149,16 @@ function regist_protocols()
   if tonumber(win_ver) < 10 then return end
   regist_protocol('ms-settings')
   regist_protocol('ms-availablenetworks', 'App')
-  app:run(app_path .. '\\WinXShell.exe', '-Embedding')
+  app:run(App.FullPath, '-Embedding')
 end
 
 function regist_system_property() -- handle This PC's property menu
     if not is_x then return end
     --if File.exists('X:\\Windows\\explorer.exe') then return end
 
-    if handle_system_property == nil then return end
-    if handle_system_property == '' then return end
-    if handle_system_property == 'auto' then
+    if WxsHandler.SystemProperty == nil then return end
+    if WxsHandler.SystemProperty == '' then return end
+    if WxsHandler.SystemProperty == 'auto' then
         -- 'control system' works in x86_x64 with explorer.exe
         if ARCH == 'x64' and File.exists('X:\\Windows\\explorer.exe') and
             File.exists('X:\\Windows\\SysWOW64\\wow32.dll') then
@@ -166,10 +176,10 @@ function regist_system_property() -- handle This PC's property menu
     reg_write(key, '', '@shell32.dll,-33555')
     reg_write(key, 'Position', 'Bottom')
 
-    if handle_system_property == 'ui_systemInfo' then
-      reg_write(key ..'\\command', '', app_path .. '\\WinXShell.exe wxs-ui:systeminfo')
+    if WxsHandler.SystemProperty == 'ui_systemInfo' then
+      reg_write(key ..'\\command', '', App.FullPath .. ' wxs-ui:systeminfo')
     else
-      reg_write(key ..'\\command', '', app_path .. '\\WinXShell.exe wxs-open:system')
+      reg_write(key ..'\\command', '', App.FullPath .. ' wxs-open:system')
     end
 end
 
@@ -187,7 +197,7 @@ function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub]], 'Position', 'Bottom')
     local explorer_opt = ''
     -- if File.exists('X:\\Windows\\explorer.exe') then explorer_opt = '-explorer' end
-    reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub\command]], '', app_path .. '\\WinXShell.exe '.. explorer_opt ..' -ocf \"%1\"')
+    reg_write([[HKEY_CLASSES_ROOT\lnkfile\shell\OpenContainingFolderMenu_wxsStub\command]], '', App.FullPath .. ' '.. explorer_opt ..' -ocf \"%1\"')
 
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu]], '', 'disable-{37ea3a21-7493-4208-a011-7f9ea79ce9f5}')
     reg_write([[HKEY_CLASSES_ROOT\lnkfile\shellex\ContextMenuHandlers\OpenContainingFolderMenu_wxsStub]], '', '{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}')
@@ -205,4 +215,57 @@ function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
       reg_write([[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], 'ThreadingModel', 'Apartment')
     end
 
+end
+
+--------------------------------------------------------------------------------
+
+-- return the resource id for startmenu logo
+function Startmenu:SetLogoId()
+  local map = {
+    ["none"] = 0, ["windows"] = 1, ["winpe"] = 2,
+    ["custom1"] = 11, ["custom2"] = 12, ["custom3"] = 13,
+    ["default"] = 1
+  }
+  -- use next line for custom (remove "--" and change "none" to what you like)
+  -- if true then return map["none"] end
+  if is_pe then return map["winpe"] end
+  return map["windows"]
+end
+
+function Startmenu:Logoff()
+  -- return 1 -- for call system process
+end
+
+function Startmenu:Reboot()
+  -- restart computer directly
+  -- System:Reboot()
+  wxsUI('UI_Shutdown', 'full.jcfg')
+  return 0
+  -- return 1 -- for call system dialog
+end
+
+function Startmenu:Shutdown()
+  -- shutdown computer directly
+  -- System::Shutdown()
+  wxsUI('UI_Shutdown', 'full.jcfg')
+  return 0
+  -- return 1 -- for call system dialog
+end
+
+function Startmenu:ControlPanel()
+  if App:HasOption('-wes') then
+    App:Run('control.exe')
+    return 0
+  end
+  return 1
+end
+
+function TrayClock:onClick()
+  wxsUI('UI_Calendar', 'main.jcfg')
+  return 0
+end
+
+function TrayClock:onDblClick()
+  App:Run('control.exe', 'timedate.cpl')
+  return 0
 end
