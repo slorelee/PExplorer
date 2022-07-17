@@ -3,36 +3,48 @@ is_pe = (os.info('isWinPE') == 1)  -- Windows Preinstallation Environment
 is_wes = App:HasOption('-wes')         -- Windows Embedded Standard
 is_win = App:HasOption('-windows')  -- Normal Windows
 
--- 'auto', 'ui_systemInfo', 'system', '' or nil
-handle_system_property = 'auto'
-
---[[ add one more '-' to be '---', will enable this function
-function do_ocf(lnkfile, realfile) -- handle open containing folder menu
-  -- local path = realfile:match('(.+)\\')
-  -- App:Run('cmd', '/k echo ' .. path)
-
-  -- totalcmd
-  App:Run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
-  -- XYplorer
-  App:Run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
-end
---]]
-
 function App:onLoad()
   -- App:Run('notepad.exe')
   print('WinXShell.exe loading...')
   print('CommandLine:' .. App.CmdLine)
   print('WINPE:'.. tostring(is_pe), 123, 'test', App)
   print('WES:' .. tostring(is_wes))
+
+  -- 'auto', 'ui_systemInfo', 'system', '' or nil
+  WxsHandler.SystemProperty = 'auto'
+  -- nil or a handler function [  func(lnkfile, realfile)  ]
+  -- WxsHandler.OpenContainingFolder = MyOpenContainingFolderHandler
 end
 
 function App:onDaemon()
+end
+
+function App:PreShell()
+end
+
+function App:onFirstShellRun()
 end
 
 function App:onShell()
   -- wxsUI('UI_WIFI', 'main.jcfg', '-notrayicon -hidewindow')
   -- wxsUI('UI_Volume', 'main.jcfg', '-notrayicon -hidewindow')
 end
+
+function App:onTimer(tid)
+end
+
+ -- a handler of OpenContainingFolder
+function MyOpenContainingFolderHandler(lnkfile, realfile)
+  -- local path = realfile:match('(.+)\\')
+  App:Run('cmd', '/k echo ' .. realfile)
+
+  -- totalcmd
+  -- App:Run('X:\\Progra~1\\TotalCommander\\TOTALCMD64.exe', '/O /T /A \"' .. realfile .. '\"')
+  -- XYplorer
+  -- App:Run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
+end
+
+
 
 -- 如果你想使用这个自定义事件函数,
 -- 请将这个函数名变更为ondisplaychanged()。
@@ -49,18 +61,6 @@ function ondisplaychanged_sample()
   end
 end
 
--- return the resource id for startmenu logo
-function startmenu_logoid()
-  local map = {
-    ["none"] = 0, ["windows"] = 1, ["winpe"] = 2,
-    ["custom1"] = 11, ["custom2"] = 12, ["custom3"] = 13,
-    ["default"] = 1
-  }
-  -- use next line for custom (remove "--" and change "none" to what you like)
-  -- if true then return map["none"] end
-  if is_pe then return map["winpe"] end
-  return map["windows"]
-end
 
 -- 如果你想自定义时钟区域的显示信息,
 -- 请将这个函数名变更为update_clock_text()。
@@ -77,60 +77,3 @@ function update_clock_text_sample()
   local clocktext = os.date('%H:%M' .. wd_disname .. '\r\n%Y-%m-%d', now_time)
   app:call('SetVar', 'ClockText', clocktext)
 end
-
-function App:onFirstShellRun()
-end
-
-function Shell:onClick(ctrl)
-  if ctrl == 'startmenu_reboot' then
-    return onclick_startmenu_reboot()
-  elseif ctrl == 'startmenu_shutdown' then
-    return onclick_startmenu_shutdown()
-  elseif ctrl == 'startmenu_controlpanel' then
-    return onclick_startmenu_controlpanel()
-  elseif ctrl == 'tray_clockarea' then
-    return onclick_tray_clockarea()
-  elseif ctrl == 'tray_clockarea(double)' then
-    return onclick_tray_clockarea(true)
-  end
-  return 1 -- continue shell action
-end
-
-function onclick_startmenu_reboot()
-  -- restart computer directly
-  -- System:Reboot()
-  wxsUI('UI_Shutdown', 'full.jcfg')
-  return 0
-  -- return 1 -- for call system dialog
-end
-
-function onclick_startmenu_shutdown()
-  -- shutdown computer directly
-  -- System::Shutdown()
-  wxsUI('UI_Shutdown', 'full.jcfg')
-  return 0
-  -- return 1 -- for call system dialog
-end
-
-function onclick_startmenu_controlpanel()
-  if is_wes then
-    App:Run('control.exe')
-    return 0
-  end
-  return 1
-end
-
-function onclick_tray_clockarea(isdouble)
-  if isdouble then
-    App:Run('control.exe', 'timedate.cpl')
-  else
-    wxsUI('UI_Calendar', 'main.jcfg')
-  end
-  return 0
-end
-
-
-function App:onTimer(tid)
-end
-
-
