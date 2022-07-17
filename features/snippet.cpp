@@ -134,13 +134,13 @@ void OpenContainingFolder(LPTSTR pszCmdline)
     size_t pos = cmdline.find(_T("-ocf"));
     lnkfile = cmdline.substr(pos + 5);
     if (lnkfile[0U] == TEXT('\"')) lnkfile = lnkfile.substr(1, lnkfile.length() - 2);
-    TCHAR path[MAX_PATH];
+    TCHAR path[MAX_PATH] = {'\0'};
     GetShortcutPath(lnkfile.c_str(), path, MAX_PATH);
 
     String strPath = path;
     if (g_Globals._lua) {
-        if (g_Globals._lua->hasfunc("do_ocf")) {
-            g_Globals._lua->call("do_ocf", lnkfile, strPath);
+        if (g_Globals._lua->hasfunc("WxsHandler", "OpenContainingFolder")) {
+            g_Globals._lua->call(NULL, lnkfile, strPath);
             return;
         }
     }

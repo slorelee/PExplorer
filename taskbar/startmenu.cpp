@@ -1855,7 +1855,7 @@ UINT StartMenuRoot::GetLogoResId()
 
     if (clr_bits > 8) {
         if (g_Globals._lua) {
-            int logo_id = g_Globals._lua->call("startmenu_logoid", 1);
+            int logo_id = g_Globals._lua->call("StartMenu:SetLogoId", 1);
             if (logo_id == -1) logo_id = 1;
             return IDB_LOGOV + logo_id;
         }
@@ -1947,8 +1947,7 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_LOGOFF:
         CloseStartMenu(id);
         if (g_Globals._lua) {
-            string_t btn = TEXT("startmenu_logoff");
-            if (g_Globals._lua->onClick(btn) == 0) break;
+            if (g_Globals._lua->call("Startmenu:Logoff") == 0) break;
         }
         if (CommandHook(g_Globals._hwndDesktop, TEXT("logoff")) == 1) break;
         ShowLogoffDialog(g_Globals._hwndDesktop);
@@ -1957,8 +1956,7 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_RESTART:
         CloseStartMenu(id);
         if (g_Globals._lua) {
-            string_t btn = TEXT("startmenu_reboot");
-            if (g_Globals._lua->onClick(btn) == 0) break;
+            if (g_Globals._lua->call("Startmenu:Reboot") == 0) break;
         }
         if (CommandHook(g_Globals._hwndDesktop, TEXT("reboot")) == 1) break;
         ShowRestartDialog(g_Globals._hwndDesktop, EWX_REBOOT);
@@ -1969,8 +1967,7 @@ int StartMenuHandler::Command(int id, int code)
     case IDC_SHUTDOWN:
         CloseStartMenu(id);
         if (g_Globals._lua) {
-            string_t btn = TEXT("startmenu_shutdown");
-            if (g_Globals._lua->onClick(btn) == 0) break;
+            if (g_Globals._lua->call("Startmenu:Shutdown") == 0) break;
         }
         if (CommandHook(g_Globals._hwndDesktop, TEXT("shutdown")) == 1) break;
         ShowExitWindowsDialog(g_Globals._hwndDesktop);
@@ -1994,8 +1991,7 @@ int StartMenuHandler::Command(int id, int code)
         CloseStartMenu(id);
 
         if (g_Globals._lua) {
-            string_t btn = TEXT("startmenu_controlpanel");
-            if (g_Globals._lua->onClick(btn) == 0) break;
+            if (g_Globals._lua->call("Startmenu:ControlPanel") == 0) break;
         }
         if (CommandHook(_hwnd, TEXT("control")) == 1) break;
 

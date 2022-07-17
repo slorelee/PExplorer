@@ -1217,8 +1217,26 @@ static int fetch_errorfunc(lua_State *L)
 
 int LuaAppEngine::hasfunc(const char *funcname)
 {
+    int luatype = 0;
     lua_getglobal(L, funcname);
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
+    luatype = lua_type(L, -1);
+    if (luatype != LUA_TFUNCTION) {
+        return 0;
+    }
+    return 1;
+}
+
+int LuaAppEngine::hasfunc(const char *tablename, const char *funcname)
+{
+    int luatype = 0;
+    lua_getglobal(L, tablename);
+    luatype = lua_type(L, -1);
+    if (luatype != LUA_TTABLE) {
+        return 0;
+    }
+    lua_getfield(L, -1, funcname);
+    luatype = lua_type(L, -1);
+    if (luatype != LUA_TFUNCTION) {
         return 0;
     }
     return 1;
@@ -1283,15 +1301,17 @@ int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nre
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, _name);
-    if (!lua_istable(L, -1)) {
-        return -1;
-    }
+    if (funcname) {
+        lua_getglobal(L, _name);
+        if (!lua_istable(L, -1)) {
+            return -1;
+        }
 
-    lua_getfield(L, -1, funcname);
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA(buff);
-        return -1;
+        lua_getfield(L, -1, funcname);
+        if (lua_type(L, -1) != LUA_TFUNCTION) {
+            LOGA(buff);
+            return -1;
+        }
     }
     lua_pushstring(L, w2s(p1).c_str());
     lua_pushstring(L, w2s(p2).c_str());

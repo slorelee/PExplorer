@@ -142,15 +142,15 @@ HWND WinXShell_DaemonWindow::Create()
 
 #define CLOCKAREA_CLICK_TIMER 1001
 
-static void ClockArea_OnClick(HWND hwnd, int isDbClick)
+static void TrayClock_OnClick(HWND hwnd, int isDblClick)
 {
     if (hwnd) KillTimer(hwnd, CLOCKAREA_CLICK_TIMER);
     if (g_Globals._lua) {
-        string_t btn = TEXT("tray_clockarea");
-        if (isDbClick) btn = TEXT("tray_clockarea(double)");
-        if (g_Globals._lua->onClick(btn) == 0) return;
+        char *luaFunc = "TrayClock:onClick";
+        if (isDblClick) luaFunc = "TrayClock:onDblClick";
+        if (g_Globals._lua->call(luaFunc) == 0) return;
     }
-    if (isDbClick) {
+    if (isDblClick) {
         CommandHook(hwnd, TEXT("clockarea_dbclick"), TEXT("JS_DAEMON"));
     } else {
         CommandHook(hwnd, TEXT("clockarea_click"), TEXT("JS_DAEMON"));
@@ -196,7 +196,7 @@ static void EnableShowDesktop()
 
 LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
-    static int isDbClick = 0;
+    static int isDblClick = 0;
     if (nmsg == WM_CREATE) {
         /* Can't work here */
         //InstallEventHookEntry(_hwnd);
@@ -213,13 +213,13 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (wparam == HM_CLOCKAREA_CLICKED) {
             //MessageBox(NULL, TEXT("HM_CLOCKAREA_CLICKED"), TEXT(""), 0);
             SetTimer(_hwnd, CLOCKAREA_CLICK_TIMER, 500, NULL);
-            isDbClick++;
+            isDblClick++;
         }
         return S_OK;
     } else if (nmsg == WM_TIMER) {
         if (wparam == CLOCKAREA_CLICK_TIMER) {
-            ClockArea_OnClick(_hwnd, (isDbClick>1) ? 1 : 0);
-            isDbClick = 0;
+            TrayClock_OnClick(_hwnd, (isDblClick>1) ? 1 : 0);
+            isDblClick = 0;
             return S_OK;
         }
     } else if (nmsg == WM_DISPLAYCHANGE) {
