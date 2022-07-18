@@ -160,6 +160,9 @@
     <ClCompile Include="utility\Dialog.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="utility\LuaHelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -303,6 +306,9 @@
       <Filter>systemsettings</Filter>
     </ClInclude>
     <ClInclude Include="utility\Dialog.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\LuaHelper.h">
       <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1153,11 +1153,12 @@ EXTERN_C {
 
 void LuaAppEngine::init(string_t& file)
 {
+	HWND hwnd = LuaAppWindow::Create();
     L = luaL_newstate();
-    HWND hwnd = LuaAppWindow::Create();
     _frame = (void *)LuaAppWindow::get_window(hwnd);
     ((LuaAppWindow *)_frame)->_lua = this;
 
+	LuaApp.L = L;
     luaL_openlibs(L);
     luaopen_winapi_lib(L);
     _name = "App";

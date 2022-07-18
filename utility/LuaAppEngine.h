@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include "lua.hpp"
+#include "LuaHelper.h"
 #include "../DUI/Helper.h"
 
 class LuaAppEngine {
@@ -26,6 +27,8 @@ public:
     void onTimer(int id);
 
     lua_State *L;
+
+	CLuaHelper LuaApp;
 private:
     void init(string_t& file);
     void *_frame;

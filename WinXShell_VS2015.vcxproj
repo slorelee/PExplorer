@@ -440,6 +440,7 @@ cscript ResBuilder.vbs
     <ClCompile Include="utility\Dialog.cpp" />
     <ClCompile Include="utility\FolderOptions.cpp" />
     <ClCompile Include="utility\LuaAppEngine.cpp" />
+    <ClCompile Include="utility\LuaHelper.cpp" />
     <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
@@ -535,6 +536,7 @@ cscript ResBuilder.vbs
     <ClInclude Include="utility\Dialog.h" />
     <ClInclude Include="utility\FolderOptions.h" />
     <ClInclude Include="utility\LuaAppEngine.h" />
+    <ClInclude Include="utility\LuaHelper.h" />
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />
     <ClInclude Include="utility\ResourceHelper.h" />
