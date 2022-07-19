@@ -1,5 +1,3 @@
---local app = _G.app
-
 
 function parse_option(opt_str)
     local opt = {}
@@ -35,13 +33,13 @@ function exec(option, cmd)
         option = nil
     end
     local opt = parse_option(option)
-    return app:call('exec', cmd, opt.wait, opt.showcmd, opt.verb)
+    return App:Call('exec', cmd, opt.wait, opt.showcmd, opt.verb)
 end
 
 
 function link(lnk, target, param, icon, index, showcmd)
     local opt = parse_option(showcmd)
-    return app:call('link', lnk, target, param, icon, index, opt.showcmd)
+    return App:Call('link', lnk, target, param, icon, index, opt.showcmd)
 end
 
 

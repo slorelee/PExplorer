@@ -1,17 +1,25 @@
 File = {}
 Folder = {}
 
-function File.exists(path)
-  return app:call('file::exists', path) == 1
+function File.Exists(path)
+  return App.Call('file::exists', path) == 1
 end
 
-function File.delete(path)
-  local f = app:call('envstr', path)
+function File.Delete(path)
+  local f = App.Call('envstr', path)
   return os.remove(f)
 end
 
-File.remove = File.delete
+File.Remove = File.Delete
 
-function Folder.exists(path)
-  return app:call('folder::exists', path) == 1
+function Folder.Exists(path)
+  return App.Call('folder::exists', path) == 1
+end
+
+function os.exists(path)
+  if path == nil then return 1 end
+  local f = App.Call('envstr', path)
+  if File.Exists(path) then return 1 end
+  if Folder.Exists(path) then return 1 end
+  return 0
 end

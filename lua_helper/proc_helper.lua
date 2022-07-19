@@ -3,11 +3,12 @@ require "winapi"
 -- const
 -- Window operations for Window.show
 
-SW_SHOW = 0
+SW_SHOW = winapi.SW_SHOW
 SW_HIDE = winapi.SW_HIDE
 SW_MINIMIZE = winapi.SW_MINIMIZE
 SW_MAXIMIZE = winapi.SW_MAXIMIZE
 SW_SHOWNORMAL = winapi.SW_SHOWNORMAL
+SW_RESTORE = winapi.SW_RESTORE
 
 SW_MIN = SW_MINIMIZE
 SW_MAX = SW_MAXIMIZE
@@ -145,10 +146,10 @@ Proc = {}
 
 function Proc.Find(title_or_pid, class)
   local obj = nil
-  if type(title_or_pid) == "string" then
-    obj = winapi.find_window(class, title_or_pid)
-  elseif type(title_or_pid) == "number" then
+  if type(title_or_pid) == "number" then
     obj = winapi.process_from_id(title_or_pid)
+  else
+    obj = winapi.find_window(class, title_or_pid)
   end
   return _clsProc:New(obj)
 end

@@ -1,30 +1,30 @@
 function WaitForSession(user)
-    app:call('WaitForSession', user)
+    App:Call('WaitForSession', user)
 end
 
 function SwitchSession(user)
-    app:call('SwitchSession', user)
+    App:Call('SwitchSession', user)
 end
 
 function CloseShellWindow()
   Taskbar:WaitForReady()
-  app:call('closeshell')
-  app:call('sleep', 500)
+  App:Call('closeshell')
+  App:Sleep(500)
 end
 
 function ShellDaemon(wait, cmd)
   while (1) do
-    app:print('ShellDaemon')
+    print('ShellDaemon')
     if wait == true then
       Taskbar:WaitForReady()
-      app:print('WaitForReady')
-      app:call('sleep', 5000)
+      App:Print('WaitForReady')
+      App:Sleep(5000)
     end
     wait = false
     if Taskbar:IsReady(5) == false then
       exec('/wait', cmd)
     end
-    app:call('sleep', 5000)
+    App:Sleep(5000)
   end
 end
 

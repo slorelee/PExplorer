@@ -7,16 +7,16 @@ local regkey_colortheme = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\Current
 
 function System:GetSetting(key)
   if key == 'AppsColorTheme' then
-    return (reg_read(regkey_colortheme, 'AppsUseLightTheme') or 1) | 0 -- convert to integer
+    return (Reg:Read(regkey_colortheme, 'AppsUseLightTheme') or 1) | 0 -- convert to integer
   elseif key == 'SysColorTheme' then
-    return (reg_read(regkey_colortheme, 'SystemUsesLightTheme') or 1) | 0
+    return (Reg:Read(regkey_colortheme, 'SystemUsesLightTheme') or 1) | 0
   elseif key == 'ShellColorPrevalence' then
-    return (reg_read(regkey_colortheme, 'ColorPrevalence') or 1) | 0
+    return (Reg:Read(regkey_colortheme, 'ColorPrevalence') or 1) | 0
   elseif key == 'WindowColorPrevalence' then
     local regkey = regkey_user .. [[\SOFTWARE\Microsoft\Windows\DWM]]
-    return (reg_read(regkey, 'ColorPrevalence') or 1) | 0
+    return (Reg:Read(regkey, 'ColorPrevalence') or 1) | 0
   elseif key == 'Colors.Transparency' then
-    return (reg_read(regkey_colortheme, 'EnableTransparency') or 1) | 0
+    return (Reg:Read(regkey_colortheme, 'EnableTransparency') or 1) | 0
   end
   return 0
 end
@@ -24,43 +24,43 @@ end
 function System:SetSetting(key, val)
   if val ~= 0 then val = 1 end
   if key == 'ShellColorPrevalence' then
-    reg_write(regkey_colortheme, 'ColorPrevalence', val, winapi.REG_DWORD)
-    app:call('System::ChangeColorThemeNotify')
+    Reg:Write(regkey_colortheme, 'ColorPrevalence', val, winapi.REG_DWORD)
+    App:Call('System::ChangeColorThemeNotify')
   elseif key == 'WindowColorPrevalence' then
     local regkey = regkey_user .. [[\SOFTWARE\Microsoft\Windows\DWM]]
-    reg_write(regkey, 'ColorPrevalence', val, winapi.REG_DWORD)
+    Reg:Write(regkey, 'ColorPrevalence', val, winapi.REG_DWORD)
   elseif key == 'Colors.Transparency' then
-    reg_write(regkey_colortheme, 'EnableTransparency', val, winapi.REG_DWORD)
-    app:call('System::ChangeColorThemeNotify')
+    Reg:Write(regkey_colortheme, 'EnableTransparency', val, winapi.REG_DWORD)
+    App:Call('System::ChangeColorThemeNotify')
   end
   return 0
 end
 
 function System:SysColorTheme(mode)
     if mode == 'light' then
-        reg_write(regkey_colortheme, 'SystemUsesLightTheme', 1, winapi.REG_DWORD)
+        Reg:Write(regkey_colortheme, 'SystemUsesLightTheme', 1, winapi.REG_DWORD)
     else
-        reg_write(regkey_colortheme, 'SystemUsesLightTheme', 0, winapi.REG_DWORD)
+        Reg:Write(regkey_colortheme, 'SystemUsesLightTheme', 0, winapi.REG_DWORD)
     end
-    app:call('System::ChangeColorThemeNotify')
+    App:Call('System::ChangeColorThemeNotify')
 end
 
 function System:AppsColorTheme(mode)
     if mode == 'light' then
-        reg_write(regkey_colortheme, 'AppsUseLightTheme', 1, winapi.REG_DWORD)
+        Reg:Write(regkey_colortheme, 'AppsUseLightTheme', 1, winapi.REG_DWORD)
     else
-        reg_write(regkey_colortheme, 'AppsUseLightTheme', 0, winapi.REG_DWORD)
+        Reg:Write(regkey_colortheme, 'AppsUseLightTheme', 0, winapi.REG_DWORD)
     end
-    app:call('System::ChangeColorThemeNotify')
+    App:Call('System::ChangeColorThemeNotify')
 end
 
 local function power_helper(wu_param, sd_param)
   local sd = os.getenv("SystemDrive")
-  if File.exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
-    app:run('wpeutil.exe', wu_param, 0) -- SW_HIDE(0)
+  if File.Exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
+    App:Run('wpeutil.exe', wu_param, 0) -- SW_HIDE(0)
     return 0
   elseif File.exists(sd ..'\\Windows\\System32\\shutdown.exe') then
-    app:run('shutdown.exe', sd_param .. ' -t 0')
+    App:Run('shutdown.exe', sd_param .. ' -t 0')
     return 0
   end
   return 1
@@ -83,10 +83,10 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   if lnk_name == nil then lnk_name = string.match(target, '([^\\]+)' .. ext .. '$') end
   lnk_name = lnk_name .. '.lnk'
   if case_ext == '.lnk' then
-    if app:info('isshell') ~= 0 then
+    if App:Info('isshell') ~= 0 then
       exec('/hide', 'cmd.exe /c copy /y \"' .. target .. '\" \"' .. pinned_path .. lnk_name .. '\"')
     else
-      app:call(class .. '::Pin', target)
+      App:Call(class .. '::Pin', target)
     end
     return
   end
@@ -94,62 +94,62 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
 
   local lnk = target
   if name ~= nil or param ~= nil or icon ~= nil then
-    if app:info('isshell') ~= 0 then
+    if App:Info('isshell') ~= 0 then
       lnk = pinned_path .. lnk_name
     else
       lnk = '%TEMP%\\' .. class .. 'Pinned\\' .. lnk_name
     end
-    app:call('link', lnk, target, param, icon, index, showcmd)
+    App:Call('link', lnk, target, param, icon, index, showcmd)
   end
-  if app:info('isshell') ~= 0 then
+  if App:Info('isshell') ~= 0 then
     if lnk == target then
       lnk = pinned_path .. lnk_name
-      app:call('link', lnk, target)
+      App:Call('link', lnk, target)
     end
   else
-    app:call(class .. '::Pin', lnk)
+    App:Call(class .. '::Pin', lnk)
   end
 end
 
 Shell ={}
 function Shell:Close()
-  app:call('closeshell')
-  app:call('sleep', 500)
+  App:Call('closeshell')
+  App:Sleep(500)
 end
 
 function Shell:WaitAndClose()
   Taskbar:WaitForReady()
-  app:call('closeshell')
-  app:call('sleep', 500)
+  App:Call('closeshell')
+  App:Sleep(500)
 end
 
 Desktop = {}
 function Desktop:Refresh()
-  app:call('Desktop::Refresh')
+  App:Call('Desktop::Refresh')
 end
 
 function Desktop:GetWallpaper()
-  return app:call('Desktop::Getwallpaper')
+  return App:Call('Desktop::Getwallpaper')
 end
 
 function Desktop:SetWallpaper(wallpaper)
-  app:call('Desktop::Setwallpaper', wallpaper)
+  App:Call('Desktop::Setwallpaper', wallpaper)
 end
 
 function Desktop:SetIconSize(size)
-  app:call('Desktop::SetIconSize', size)
+  App:Call('Desktop::SetIconSize', size)
 end
 
 function Desktop:AutoArrange(checked)
-  app:call('Desktop::AutoArrange', checked)
+  App:Call('Desktop::AutoArrange', checked)
 end
 
 function Desktop:SnapToGrid(checked)
-  app:call('Desktop::SnapToGrid', checked)
+  App:Call('Desktop::SnapToGrid', checked)
 end
 
 function Desktop:ShowIcons(checked)
-  app:call('Desktop::ShowIcons', checked)
+  App:Call('Desktop::ShowIcons', checked)
 end
 
 Taskbar = {}
@@ -159,8 +159,8 @@ function Taskbar:IsReady(sec)
   local sh_win = winapi.find_window('Shell_TrayWnd', nil)
   local n = -1
   while (n <= sec and (sh_win == nil or sh_win:get_handle() == 0)) do
-    app:print("shell Handle:0x0")
-    app:call('sleep', 1000)
+    App:Print("shell Handle:0x0")
+    App:Sleep(1000)
     sh_win = winapi.find_window('Shell_TrayWnd', nil)
     if sec ~= -1 then n = n + 1 end
   end
@@ -175,12 +175,12 @@ function Taskbar:WaitForReady()
 end
 
 function Taskbar:GetSetting(key)
-  if key == 'AutoHide' then return app:call('Taskbar::AutoHideState') end
-  return reg_read(regkey_setting, key)
+  if key == 'AutoHide' then return App:Call('Taskbar::AutoHideState') end
+  return Reg:Read(regkey_setting, key)
 end
 
 function Taskbar:SetSetting(key, value, type)
-  return reg_write(regkey_setting, key, value, type)
+  return Reg:Write(regkey_setting, key, value, type)
 end
 
 function Taskbar:CombineButtons(value, update)
@@ -189,16 +189,16 @@ function Taskbar:CombineButtons(value, update)
   else value = 2 end --never
 
   Taskbar:SetSetting('TaskbarGlomLevel', value, winapi.REG_DWORD)
-  if update ~= 0 then app:call('Taskbar::ChangeNotify') end
+  if update ~= 0 then App:Call('Taskbar::ChangeNotify') end
 end
 
 function Taskbar:UseSmallIcons(value, update)
   Taskbar:SetSetting('TaskbarSmallIcons', value, winapi.REG_DWORD)
-  if update ~= 0 then app:call('Taskbar::ChangeNotify') end
+  if update ~= 0 then App:Call('Taskbar::ChangeNotify') end
 end
 
 function Taskbar:AutoHide(value)
-  app:call('Taskbar::AutoHide', value)
+  App:Call('Taskbar::AutoHide', value)
 end
 
 function Taskbar:Pin(target, name, param, icon, index, showcmd)
@@ -206,7 +206,15 @@ function Taskbar:Pin(target, name, param, icon, index, showcmd)
 end
 
 function Taskbar:UnPin(name)
-  app:call('Taskbar::UnPin', name)
+  App:Call('Taskbar::UnPin', name)
+end
+
+function Taskbar:Show()
+    Window.Find(nil, 'Shell_TrayWnd'):Show()
+end
+
+function Taskbar:Hide()
+    Window.Find(nil, 'Shell_TrayWnd'):Hide()
 end
 
 Startmenu = {}
@@ -215,47 +223,47 @@ function Startmenu:Pin(target, name, param, icon, index, showcmd)
 end
 
 function Startmenu:UnPin(target)
-  app:call('startmenu::unpin', target)
+  App:Call('startmenu::unpin', target)
 end
 
 Screen = {}
 
 function Screen:Adjust()
-  app:call('Desktop::UpdateWallpaper')
-  app:call('sleep', 200)
-  app:call('Taskbar::ChangeNotify')
+  App:Call('Desktop::UpdateWallpaper')
+  App:Sleep(200)
+  App:Call('Taskbar::ChangeNotify')
 end
 
 function  Screen:Get(...)
-  return app:call('Screen::Get', ...)
+  return App:Call('Screen::Get', ...)
 end
 
 function  Screen:Set(...)
-  return app:call('Screen::Set', ...)
+  return App:Call('Screen::Set', ...)
 end
 
 function Screen:GetX()
-  return app:call('Screen::Get', 'x')
+  return App:Call('Screen::Get', 'x')
 end
 
 function Screen:GetY()
-  return app:call('Screen::Get', 'y')
+  return App:Call('Screen::Get', 'y')
 end
 
 function Screen:GetRotation()
-  return app:call('Screen::Get', 'rotation')
+  return App:Call('Screen::Get', 'rotation')
 end
 
 function Screen:GetDPI()
-  return app:call('Screen::Get', 'dpi')
+  return App:Call('Screen::Get', 'dpi')
 end
 
 function Screen:Disp(w, h)
   local ret = -1
   if w == nil then
-    ret = app:call('Screen::Set', 'maxresolution')
+    ret = App:Call('Screen::Set', 'maxresolution')
   else
-    ret = app:call('Screen::Set', 'resolution', w, h)
+    ret = App:Call('Screen::Set', 'resolution', w, h)
   end
   Screen:Adjust()
   return ret
@@ -267,15 +275,39 @@ function Screen:DispTest(arr)
   for i = 1, #arr do
     w, h = string.match(arr[i], '(%d+)[x*](%d+)')
     if h ~= nil then
-      app:print(w, h)
+      App:Print(w, h)
       if Screen:Disp(tonumber(w), tonumber(h)) == 0 then return end
     end
   end
 end
 
 function Screen:DPI(scale)
-  app:call('Screen::Set', 'dpi', scale)
+  App:Call('Screen::Set', 'dpi', scale)
 end
+
+
+Volume = {}
+
+function Volume:GetName()
+  return App:Call('Volume::GetName')
+end
+
+function Volume:GetLevel()
+  return App:Call('Volume::GetLevel')
+end
+
+function Volume:SetLevel(...)
+  return App:Call('Volume::SetLevel', ...)
+end
+
+function Volume:IsMuted()
+  return App:Call('Volume::IsMuted')
+end
+
+function Volume:Mute(...)
+  return App:Call('Volume::Mute', ...)
+end
+
 
 FolderOptions = {}
 
@@ -285,11 +317,11 @@ FolderOptions = {}
 --   'ShowSuperHidden' - Always hide the system files / folders
 
 function FolderOptions:Set(opt, val)
-  app:call('FolderOptions::Set', opt, val)
+  App:Call('FolderOptions::Set', opt, val)
 end
 
 function FolderOptions:Get(opt)
-  return app:call('FolderOptions::Get', opt)
+  return App:Call('FolderOptions::Get', opt)
 end
 
 function FolderOptions:Toggle(opt)
@@ -299,11 +331,11 @@ end
 
 Dialog = {}
 function Dialog:OpenFile(...)
-  return app:call('Dialog::OpenFile', ...)
+  return App:Call('Dialog::OpenFile', ...)
 end
 
 function Dialog:BrowseFolder(...)
-  return app:call('Dialog::BrowseFolder', ...)
+  return App:Call('Dialog::BrowseFolder', ...)
 end
 
 -- Helper(alias)

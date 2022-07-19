@@ -72,17 +72,17 @@ end
 
 function mem_info()
   local mem = {}
-  mem[1], mem[2], mem[3] = app:call('os::info', 'mem')
+  mem[1], mem[2], mem[3] = App:Call('os::info', 'mem')
   return mem
 end
 
 function localename()
-  return app:call('os::info', 'localename')
+  return App:Call('os::info', 'localename')
 end
 
 function res_str(file, id)
   local strid = string.format('#{@%s,%s}', file, id)
-  return app:call('resstr', strid)
+  return App:Call('resstr', strid)
 end
 
 function mui_str(file, id)
@@ -92,9 +92,9 @@ function mui_str(file, id)
 end
 
 function win_copyright()
-  return app:call('os::info', 'copyright')
+  return App:Call('os::info', 'copyright')
 end
 
 function call_dll(...)
-  return app:call('calldll', ...)
+  return App:Call('calldll', ...)
 end

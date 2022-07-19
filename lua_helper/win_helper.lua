@@ -33,7 +33,7 @@ function SendWindow(class, title, msg, wparam, lparam)
   win = FindWindow(class, title)
   if win ~= nil then 
     hwnd = win:get_handle()
-    app:print('SendWindow(' .. string.format("%s, %s, 0x%x", title, class, hwnd) .. ')')
+    App:Print('SendWindow(' .. string.format("%s, %s, 0x%x", title, class, hwnd) .. ')')
     win:send_message(msg, wparam, lparam)
     return hwnd
   end
@@ -45,7 +45,7 @@ function PostWindow(class, title, msg, wparam, lparam)
   win = FindWindow(class, title)
   if win ~= nil then 
     hwnd = win:get_handle()
-    app:print('PostWindow(' .. string.format("%s, %s, 0x%x", title, class, hwnd) .. ')')
+    App:Print('PostWindow(' .. string.format("%s, %s, 0x%x", title, class, hwnd) .. ')')
     win:post_message(msg, wparam, lparam)
     return hwnd
   end
