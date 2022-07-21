@@ -668,7 +668,7 @@ extern "C" {
             return lua_screen_call(L, funcname, top, base);
         } else if (func.compare(0, 8, "volume::") == 0) {
             return lua_volume_call(L, funcname, top, base);
-        } else if (func.compare(0, 11, "desktop::") == 0) {
+        } else if (func.compare(0, 9, "desktop::") == 0) {
             return lua_desktop_call(L, funcname, top, base);
         } else if (func.compare(0, 9, "taskbar::") == 0) {
             return lua_tasbar_call(L, funcname, top, base);
