@@ -16,6 +16,7 @@ A useful set of Windows API functions.
 
 #undef UNICODE
 #pragma comment(lib, "mpr.lib")
+#include <Shlwapi.h>
 
 
 #define WINDOWS_LEAN_AND_MEAN
@@ -2491,8 +2492,6 @@ static void Regkey_ctor(lua_State *L, Regkey *this, HKEY k) {
       }
       return 0;
   }
-
-extern LSTATUS  SHDeleteKeyW(HKEY hkey,  const wchar_t *pszSubKey);
 
   /// delete a subkey, or the key self.
   // @param subkey the subkey (can be empty for the key self)
