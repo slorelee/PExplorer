@@ -402,7 +402,7 @@ LRESULT DesktopWindow::Init(LPCREATESTRUCT pcs)
                                         SHCNE_CREATE | SHCNE_MKDIR, WM_SHNOTIFY, 1, &ps);
 
     // create the explorer bar
-    if (JCFG_TB(2, "notaskbar").ToBool() == FALSE) {
+    if (JCFG_TB(2, "notaskbar").ToBool() == FALSE && JCFG_TB(2, "visible").ToBool() == TRUE) {
         _desktopBar = DesktopBar::Create();
         g_Globals._hwndDesktopBar = _desktopBar;
     } else {
@@ -1024,7 +1024,7 @@ LRESULT DesktopShellView::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     }
     case WM_DISPLAYCHANGE: {
         LoadWallpaper(FALSE);
-        if (JCFG_TB(2, "notaskbar").ToBool() == TRUE) {
+        if (JCFG_TB(2, "notaskbar").ToBool() == TRUE || JCFG_TB(2, "visible").ToBool() == FALSE) {
             NotifySetWorkArea();
         }
         return super::WndProc(nmsg, wparam, lparam);
