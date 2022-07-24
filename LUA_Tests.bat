@@ -1,8 +1,20 @@
 --[=[ 2>nul
 
+set WINXSHELL_LUASCRIPT=WinXShellTest.lua
 set WINXSHELL_LOGFILE=C:\Windows\Temp\WinXShell.log
+
+set WINXSHELL=WinXShell.exe
+set x8664=x64
+if not "x%PROCESSOR_ARCHITECTURE%"=="xAMD64" set x8664=x86
+if not exist %WINXSHELL% set WINXSHELL=WinXShell_%x8664%.exe
+if not exist %WINXSHELL%  set WINXSHELL=x64\Debug\WinXShell.exe
+
+rem one line code
+%WINXSHELL% -code "winapi.show_message('title', 'message')"
+
+rem code file
 :LOOP
-x64\Debug\WinXShell.exe -console -script "%~dpnx0"
+%WINXSHELL% -console -script "%~dpnx0"
 type "%WINXSHELL_LOGFILE%"
 pause
 goto :LOOP
@@ -23,6 +35,7 @@ print(app)
 
 -- Tests
 
+local Tester = {}
 local r
 local v
 
@@ -40,7 +53,7 @@ r = MsgBox('title', 'message', 'yes-no', 'warn')
 print('You clicked the [' .. r .. '] button.')
 ]]
 
-function test_builtinlib()
+function Tester.BuiltinLib()
 -- os lib
 local v = os.info('WinVer')
 local mem = os.info('Mem')
@@ -70,12 +83,32 @@ math.band(4, 5),
 )
 
 p(
-"======================string/math extends======================",
-"\nstring.envstr:",
+"======================os.exists======================",
+"\nos.exists([[%HOMEDRIVE%\\Windows\\]])",
+os.exists([[%HOMEDRIVE%\Windows\]]),
+"\nos.exists([[%HOMEDRIVE%\\Windows\\Explorer.exe]])",
+os.exists([[%HOMEDRIVE%\Windows\Explorer.exe]]),
+"\nos.exists([[C:\\WindowsPE\\]])",
+os.exists([[C:\WindowsPE\]]),
+"\nos.exists([[C:\\App.exe]])",
+os.exists([[C:\App.exe]])
+)
+
+p("======================string/math extends======================\n")
+
+local str1 = [[%SystemRoot%\System32\regedit.exe]]
+local str2 = '#{@shell32.dll,9316}'
+
+p(
+"string.envstr:",
 string.envstr([[%ProgramFiles%\WinXShell\WinXShell.exe]]),
+"\nstr1:envstr()",
+str1:envstr(),
 "\nstring.resstr:",
 string.resstr('#{@shell32.dll,9315}'),
-"\nmath.band:",
+"\nstr2:resstr()",
+str2:resstr(),
+"\nmath.band(4, 5):",
 math.band(4, 5),
 "\n"
 )
@@ -85,7 +118,7 @@ end
 
 -- App Object
 
-function test_app()
+function Tester.App()
 
 p(
 "======================App Object======================",
@@ -111,7 +144,7 @@ end
 
 --- Reg Object
 
-function test_reg()
+function Tester.Reg()
 
 p("\n\n\n")
 p(
@@ -156,8 +189,8 @@ end
 
 
 
--- Proc lib
-function test_proc()
+-- Proc/Window lib
+function Tester.Proc()
 
 p(
 "======================Proc/Window lib======================"
@@ -183,9 +216,9 @@ p("Proc End")
 
 end
 
-test_builtinlib()
-test_app()
-test_reg()
-test_proc()
+Tester.BuiltinLib()
+Tester.App()
+Tester.Reg()
+Tester.Proc()
 
 
