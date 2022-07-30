@@ -1,7 +1,36 @@
+App.ScriptEncoding = 'UTF-8'
 
 is_pe = (os.info('isWinPE') == 1)  -- Windows Preinstallation Environment
 is_wes = App:HasOption('-wes')         -- Windows Embedded Standard
 is_win = App:HasOption('-windows')  -- Normal Windows
+
+function App:Customization()
+  -- ä¸­æ–‡(Chinese): è®¾ç½® [æˆ‘çš„ç”µè„‘] - [å±æ€§] èœå•çš„å¤„ç†æ–¹å¼
+  -- English: Configure the action for [This PC] - [Property] menu
+
+  -- 'auto', 'ui_systemInfo', 'system', '' or nil
+  WxsHandler.SystemProperty = 'auto'
+
+  -- ä¸­æ–‡(Chinese): è®¾ç½® å¿«æ·æ–¹å¼ çš„ [æ‰“å¼€æ–‡ä»¶æ‰€åœ¨ä½ç½®] èœå•çš„åŠ¨ä½œå‡½æ•°
+  -- English: Bind the function for shortcut's [OpenContainingFolder] menu
+
+  -- nil or a handler function [  func(lnkfile, realfile)  ]
+  -- WxsHandler.OpenContainingFolder = MyOpenContainingFolderHandler
+
+  -- ä¸­æ–‡(Chinese): æŒ‡å®š å½“å±å¹•ç›¸å…³è®¾å®šæ”¹å˜æ—¶è§¦å‘çš„äº‹ä»¶å‡½æ•°
+  -- English: Specify the event function to be triggered when the screen related settings are changed
+  -- WxsHandler.DisplayChangedHandler = MyDisplayChangedHandler
+
+  -- ä¸­æ–‡(Chinese): è®¾ç½® ä»»åŠ¡æ  æ—¶é’Ÿæ˜¾ç¤ºä¿¡æ¯
+  -- English: Set the display text of the taskbar clock
+  -- WxsHandler.TrayClockTextFormatter = nil
+
+  if os.info('locale') == 'zh-CN' then
+    -- WxsHandler.TrayClockTextFormatter = TrayClockTextFormatter_zhCN
+  elseif os.info('locale') == 'en-US' then
+    -- WxsHandler.TrayClockTextFormatter = TrayClockTextFormatter_enUS
+  end
+end
 
 function App:onLoad()
   -- App:Run('notepad.exe')
@@ -10,10 +39,7 @@ function App:onLoad()
   print('WINPE:'.. tostring(is_pe), 123, 'test', App)
   print('WES:' .. tostring(is_wes))
 
-  -- 'auto', 'ui_systemInfo', 'system', '' or nil
-  WxsHandler.SystemProperty = 'auto'
-  -- nil or a handler function [  func(lnkfile, realfile)  ]
-  -- WxsHandler.OpenContainingFolder = MyOpenContainingFolderHandler
+  App:Customization()
 end
 
 function App:onDaemon()
@@ -44,11 +70,8 @@ function MyOpenContainingFolderHandler(lnkfile, realfile)
   -- App:Run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
 end
 
-
-
--- Èç¹ûÄãÏëÊ¹ÓÃÕâ¸ö×Ô¶¨ÒåÊÂ¼şº¯Êı,
--- Çë½«Õâ¸öº¯ÊıÃû±ä¸üÎªondisplaychanged()¡£
-function ondisplaychanged_sample()
+-- æ ¹æ®DPIè‡ªåŠ¨åˆ‡æ¢å±å¹•åˆ†è¾¨ç‡
+function MyDisplayChangedHandler()
   local cur_res_x = Screen:GetX()
   if last_res_x == cur_res_x then return end
   last_res_x = cur_res_x
@@ -61,19 +84,30 @@ function ondisplaychanged_sample()
   end
 end
 
-
--- Èç¹ûÄãÏë×Ô¶¨ÒåÊ±ÖÓÇøÓòµÄÏÔÊ¾ĞÅÏ¢,
--- Çë½«Õâ¸öº¯ÊıÃû±ä¸üÎªupdate_clock_text()¡£
--- ×Ô¶¨ÒåÏÔÊ¾Ê¾Àı:
+-- è‡ªå®šä¹‰æ—¶é’ŸåŒºåŸŸçš„æ˜¾ç¤ºä¿¡æ¯
+-- è‡ªå®šä¹‰æ˜¾ç¤ºç¤ºä¾‹:
 --[[
-    |  22:00 ĞÇÆÚÁù  |
+    |  22:00 æ˜ŸæœŸå…­  |
     |   2019-9-14    |
 ]]
 -- FYI:https://www.lua.org/pil/22.1.html
-function update_clock_text_sample()
-  local wd_name = {'ÈÕ', 'Ò»', '¶ş', 'Èı', 'ËÄ', 'Îå', 'Áù'}
+function TrayClockTextFormatter_zhCN()
+  local wd_name = {'æ—¥', 'ä¸€', 'äºŒ', 'ä¸‰', 'å››', 'äº”', 'å…­'}
   local now_time = os.time()
-  local wd_disname =  ' ĞÇÆÚ' .. wd_name[os.date('%w', now_time) + 1]
-  local clocktext = os.date('%H:%M' .. wd_disname .. '\r\n%Y-%m-%d', now_time)
-  app:call('SetVar', 'ClockText', clocktext)
+  local wd_disname =  ' æ˜ŸæœŸ' .. wd_name[os.date('%w', now_time) + 1]
+  local clocktext = os.date('%H:%M' .. TEXT(wd_disname) .. '\r\n%Y-%m-%d', now_time)
+  App:SetVar('ClockText', clocktext)
+end
+
+-- custom tray clock display text
+-- sample for:
+--[[
+    |  22:00 Sat  |
+    |  2019-9-14  |
+]]
+-- FYI:https://www.lua.org/pil/22.1.html
+function TrayClockTextFormatter_enUS()
+  local now_time = os.time()
+  local clocktext = os.date('%H:%M %a\r\n%Y-%m-%d', now_time)
+  App:SetVar('ClockText', clocktext)
 end
