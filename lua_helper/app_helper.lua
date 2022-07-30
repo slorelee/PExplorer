@@ -77,12 +77,24 @@ App.FullPath = App:Info('FullPath')
 App.CmdLine = App:Info('CmdLine')
 App.Option = Option.New(App.CmdLine)
 
+App.ScriptEncoding = 'ANSI'
+
 function App:HasOption(...)
   return self.Option:HasOption(...)
 end
 
 function App:GetOption(...)
   return self.Option:GetOption(...)
+end
+
+function TEXT(s)
+  if App.ScriptEncoding == 'ANSI' then
+    return s
+  elseif App.ScriptEncoding == 'UTF-8' then
+    return App:Call('utf8toansi', s)
+  end
+
+  return s
 end
 
 --
