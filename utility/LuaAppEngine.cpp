@@ -632,6 +632,9 @@ extern "C" {
             UINT b = (UINT)lua_tointeger(L, base + 3);
             v.iVal = (s & b);
             PUSH_INT(v);
+        } else if (func == "utf8toansi") {
+            lua_pushstring(L, (utf8toansi(lua_tostring(L, base + 2))).c_str());
+            ret++;
         } else if (func == "cd") {
             string_t str_path = s2w(lua_tostring(L, base + 2));
             SetCurrentDirectory(str_path.c_str());
