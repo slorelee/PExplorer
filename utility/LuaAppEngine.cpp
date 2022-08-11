@@ -116,16 +116,6 @@ HWND LuaAppWindow::GetHWND()
     return super::WindowHandle::_hwnd;
 }
 
-LuaAppEngine::LuaAppEngine(string_t& file)
-{
-    init(file);
-}
-
-LuaAppEngine::~LuaAppEngine()
-{
-    lua_close(L);
-}
-
 void AutoHideTaskBar(BOOL bHide)
 {
 #ifndef   ABM_SETSTATE 
@@ -974,7 +964,7 @@ extern "C" {
         }
         for (; i <= top; i++) {
             s = luaL_tolstring(L, i, &len);
-            MessageBoxA(NULL, s, "", 0);
+            MessageBoxA(NULL, s, "", MB_OK);
         }
         return 0;
     }
@@ -1100,7 +1090,7 @@ function App:SetVar(...)\n\
   App.Call('SetVar', ...)\n\
 end\n\
 \n\
-App:SetVar('LogLevel', App.FATAL_LEVEL)\n\
+App:SetVar('LogLevel', App.INFO_LEVEL)\n\
 \n\
 if os.getenv('WINXSHELL_DEBUG') then\n\
   App:SetVar('Debug', true)\n\
@@ -1154,14 +1144,24 @@ EXTERN_C {
     extern int luaopen_winapi_lib(lua_State *L);
 }
 
+LuaAppEngine::LuaAppEngine(string_t& file)
+{
+    init(file);
+}
+
+LuaAppEngine::~LuaAppEngine()
+{
+    lua_close(L);
+}
+
 void LuaAppEngine::init(string_t& file)
 {
-	HWND hwnd = LuaAppWindow::Create();
+    HWND hwnd = LuaAppWindow::Create();
     L = luaL_newstate();
     _frame = (void *)LuaAppWindow::get_window(hwnd);
     ((LuaAppWindow *)_frame)->_lua = this;
 
-	LuaApp.L = L;
+    LuaApp.L = L;
     luaL_openlibs(L);
     luaopen_winapi_lib(L);
     _name = "App";
@@ -1181,7 +1181,9 @@ void LuaAppEngine::init(string_t& file)
     char *rescode = (char *)LoadCustomResource(IDR_LUA_HELPER, TEXT("FILE"));
     if (rescode) {
         if (luaL_dostring(L, rescode) != 0) {
-            LOGA(lua_tostring(L, -1));
+            const char *msg = lua_tostring(L, -1);
+            LOGA(msg);
+            MessageBoxA(NULL, msg, "WinXShell", MB_OK);
         }
     }
     FreeCustomResource(rescode);
@@ -1189,7 +1191,9 @@ void LuaAppEngine::init(string_t& file)
     rescode = (char *)LoadCustomResource(IDR_APP_HELPERS, TEXT("FILE"));
     if (rescode) {
         if (luaL_dostring(L, rescode) != 0) {
-            LOGA(lua_tostring(L, -1));
+            const char *msg = lua_tostring(L, -1);
+            LOGA(msg);
+            MessageBoxA(NULL, msg, "WinXShell", MB_OK);
         }
     }
     FreeCustomResource(rescode);
@@ -1246,24 +1250,48 @@ int LuaAppEngine::hasfunc(const char *tablename, const char *funcname)
     return 1;
 }
 
-int LuaAppEngine::call(const char *funcname, int nres)
+int LuaAppEngine::getfunc(const char *funcname)
 {
     char buff[1024] = { 0 };
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-    lua_getglobal(L, _name);
-    if (!lua_istable(L, -1)) {
-        return -1;
-    }
+#ifdef _DEBUG
+    sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
+    LOGA(buff);
+#endif // DEBUG
+    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
 
-    lua_getfield(L, -1, funcname);
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA(buff);
-        return -1;
+    if (funcname) {
+        if (funcname[0] == ':') {
+            lua_getglobal(L, _name);
+            if (!lua_istable(L, -1)) {
+                return -1;
+            }
+            lua_getfield(L, -1, funcname + 1);
+        } else {
+            lua_getglobal(L, funcname);
+        }
+        if (lua_type(L, -1) != LUA_TFUNCTION) {
+            LOGA(buff);
+            return -1;
+        }
+        if (funcname[0] == ':') {
+            // push self
+            lua_getglobal(L, _name);
+            return 1;
+        }
     }
-    int rel = lua_pcall(L, 0, nres, lua_errorfunc);
+    return 0;
+}
+
+int LuaAppEngine::call(const char *funcname, int nres)
+{
+    int self = getfunc(funcname);
+    if (self == -1) return -1;
+
+    int rel = lua_pcall(L, self, nres, lua_errorfunc);
     if (rel == -1) return -1;
     if (nres <= 0) return 0;
     rel = (int)lua_tointeger(L, -1);
@@ -1273,24 +1301,12 @@ int LuaAppEngine::call(const char *funcname, int nres)
 
 int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
 {
-    char buff[1024] = { 0 };
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-    fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return -1;
+    int self = getfunc(funcname);
+    if (self == -1) return -1;
 
-    lua_getglobal(L, _name);
-    if (!lua_istable(L, -1)) {
-        return -1;
-    }
-
-    lua_getfield(L, -1, funcname);
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA(buff);
-        return -1;
-    }
     lua_pushinteger(L, p1);
     lua_pushinteger(L, p2);
-    int rel = lua_pcall(L, 2, nres, lua_errorfunc);
+    int rel = lua_pcall(L, 2 + self, nres, lua_errorfunc);
     if (rel == -1) return -1;
     if (nres <= 0) return 0;
     rel = (int)lua_tointeger(L, -1);
@@ -1300,26 +1316,12 @@ int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
 
 int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nres)
 {
-    char buff[1024] = { 0 };
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-    fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return -1;
+    int self = getfunc(funcname);
+    if (self == -1) return -1;
 
-    if (funcname) {
-        lua_getglobal(L, _name);
-        if (!lua_istable(L, -1)) {
-            return -1;
-        }
-
-        lua_getfield(L, -1, funcname);
-        if (lua_type(L, -1) != LUA_TFUNCTION) {
-            LOGA(buff);
-            return -1;
-        }
-    }
     lua_pushstring(L, w2s(p1).c_str());
     lua_pushstring(L, w2s(p2).c_str());
-    int rel = lua_pcall(L, 2, nres, lua_errorfunc);
+    int rel = lua_pcall(L, 2 + self, nres, lua_errorfunc);
     if (rel == -1) return -1;
     if (nres <= 0) return 0;
     rel = (int)lua_tointeger(L, -1);
@@ -1344,31 +1346,31 @@ void LuaAppEngine::LoadFile(string_t& file)
 
 void LuaAppEngine::onLoad()
 {
-    call("onLoad");
+    call(":onLoad");
 }
 
 void LuaAppEngine::onFirstShellRun()
 {
-    call("_onFirstShellRun");
-    call("onFirstShellRun");
+    call(":_onFirstShellRun");
+    call(":onFirstShellRun");
 }
 
 void LuaAppEngine::preShell()
 {
-    call("_PreShell");
-    call("PreShell");
+    call(":_PreShell");
+    call(":PreShell");
 }
 
 void LuaAppEngine::onShell()
 {
-    call("_onShell");
-    call("onShell");
+    call(":_onShell");
+    call(":onShell");
 }
 
 void LuaAppEngine::onDaemon()
 {
-    call("_onDaemon");
-    call("onDaemon");
+    call(":_onDaemon");
+    call(":onDaemon");
 }
 
 int LuaAppEngine::onClick(string_t& ctrl)

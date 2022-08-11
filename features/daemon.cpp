@@ -229,7 +229,9 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
         // Trigger Event Function
         if (g_Globals._lua) {
-            g_Globals._lua->call("ondisplaychanged");
+            if (g_Globals._lua->hasfunc("WxsHandler", "DisplayChangedHandler")) {
+                g_Globals._lua->call(NULL);
+            }
         }
 #if 0 
         // fixscreen

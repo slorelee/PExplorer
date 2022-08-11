@@ -13,6 +13,7 @@ public:
     void *getFrame() { return _frame; };
     int hasfunc(const char *funcname);
     int hasfunc(const char *tablename, const char *funcname);
+    int getfunc(const char *funcname);
     int call(const char *funcname, int nres = 0);
     int call(const char *funcname, int p1, int p2, int nres = 0);
     int call(const char * funcname, string_t & p1, string_t & p2, int nres = 0);

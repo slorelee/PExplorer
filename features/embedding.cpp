@@ -35,7 +35,7 @@ void send_wxs_protocol_url(PWSTR pszName)
     if (g_Globals._lua) {
         string_t url = pszName;
         string_t dmy = TEXT("");
-        g_Globals._lua->call("wxs_protocol", url, dmy);
+        g_Globals._lua->call(":WxsProtocol", url, dmy);
     }
 }
 
