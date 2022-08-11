@@ -9,21 +9,23 @@ WxsHandler.SystemProperty = 'auto'
 
  -- nil or a handler function
 WxsHandler.OpenContainingFolder = nil
+WxsHandler.DisplayChangedHandler = nil
+
+WxsHandler.TrayClockTextFormatter = nil
 
 
 function wxsUI(ui, jcfg, opt, app_path)
   if jcfg == nil then jcfg = 'main.jcfg' end
   if opt == nil then opt = '' else opt = ' ' .. opt end
   if app_path == nil then app_path = App.FullPath end
-  if File.Exists(app_path .. '\\wxsUI\\' .. ui .. '.zip') then
+  if File.Exists(App.Path .. '\\wxsUI\\' .. ui .. '.zip') then
     ui = ui .. '.zip'
   end
   App:Run(app_path, ' -ui -jcfg wxsUI\\' .. ui .. '\\' .. jcfg .. opt)
 end
 
-
 function wxs_ui(url)
-    App:Print(url)
+    App:Debug(url)
     if string.find(url, 'wxs-ui:', 1, true) then
       url = url:gsub('wxs[-]ui:', '')
     end
@@ -40,7 +42,7 @@ function wxs_ui(url)
 end
 
 function wxs_open(url)
-    App:Print(url)
+    App:Debug(url)
     local sd = os.getenv('SystemDrive')
     if string.find(url, 'wxs-open:', 1, true) ~= nil then
       url = url:gsub('wxs[-]open:', '')
@@ -73,7 +75,7 @@ function wxs_open(url)
 end
 
 function ms_settings(url)
-    App:Print(url)
+    App:Debug(url)
     if string.find(url, 'ms-settings:', 1, true) == nil then return end
     url = url:gsub('ms[-]settings:', '')
 
@@ -146,6 +148,7 @@ end
 
 function regist_protocols()
   if os.getenv('WIN_VSDEBUG') ~= nil then return end
+  local win_ver = os.info('winver')['1.2']
   if tonumber(win_ver) < 10 then return end
   regist_protocol('ms-settings')
   regist_protocol('ms-availablenetworks', 'App')
@@ -153,17 +156,17 @@ function regist_protocols()
 end
 
 function regist_system_property() -- handle This PC's property menu
-    if not is_x then return end
+    if not os.info('isX') then return end
     --if File.Exists('X:\\Windows\\explorer.exe') then return end
 
     if WxsHandler.SystemProperty == nil then return end
     if WxsHandler.SystemProperty == '' then return end
     if WxsHandler.SystemProperty == 'auto' then
         -- 'control system' works in x86_x64 with explorer.exe
-        if ARCH == 'x64' and File.Exists('X:\\Windows\\explorer.exe') and
+        if os.ARCH == 'x64' and File.Exists('X:\\Windows\\explorer.exe') and
             File.Exists('X:\\Windows\\SysWOW64\\wow32.dll') then
             return
-        elseif ARCH == 'x86' and File.Exists('X:\\Windows\\explorer.exe') then
+        elseif os.ARCH == 'x86' and File.Exists('X:\\Windows\\explorer.exe') then
             return
         end
     end
@@ -184,7 +187,7 @@ function regist_system_property() -- handle This PC's property menu
 end
 
 function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
-    if not is_x then return end
+    if not os.info('isX') then return end
     if File.Exists('X:\\Windows\\explorer.exe') then
       if File.Exists('X:\\Windows\\System32\\ieframe.dll') then return end
     end
@@ -205,11 +208,11 @@ function regist_shortcut_ocf() -- handle shortcut's OpenContainingFolder menu
 
     Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}]], '', 'wxsStub')
     local stub_dll = 'wxsStub.dll'
-    if ARCH ~= 'x64' then stub_dll = 'wxsStub32.dll' end
+    if os.ARCH ~= 'x64' then stub_dll = 'wxsStub32.dll' end
     Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], '', App.Path .. '\\' .. stub_dll)
     Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], 'ThreadingModel', 'Apartment')
 
-    if ARCH == 'x64' then
+    if os.ARCH == 'x64' then
       Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}]], '', 'wxsStub')
       Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], '', App.Path .. '\\wxsStub32.dll')
       Reg:Write([[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Classes\CLSID\{B1FD8E8F-DC08-41BC-AF14-AAC87FE3073B}\InProcServer32]], 'ThreadingModel', 'Apartment')
@@ -228,7 +231,7 @@ function Startmenu:SetLogoId()
   }
   -- use next line for custom (remove "--" and change "none" to what you like)
   -- if true then return map["none"] end
-  if is_pe then return map["winpe"] end
+  if os.info('isWinPE') then return map["winpe"] end
   return map["windows"]
 end
 

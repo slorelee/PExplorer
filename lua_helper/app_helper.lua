@@ -106,7 +106,7 @@ ICP_TIMER_ID = TID_APP + 1 -- init control panel timer
 
 function App:_onFirstShellRun()
   -- VERSTR = Reg:Read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
-  local win_ver = App:Info('winver')
+  local win_ver = os.info('winver')['1.2']
   if App.Arg:Has('-wes') then
     if win_ver == '6.2' or win_ver == '6.3' then -- only Windows 8, 8.1
       App:SetTimer(ICP_TIMER_ID, 200) -- use timer to make main shell running
@@ -132,9 +132,14 @@ end
 
 function App:_onTimer(tid)
   if tid == ICP_TIMER_ID then
+    local win_ver = os.info('winver')['1.2']
     App:initControlPanel(win_ver)
     App:KillTimer(tid)
   end
+end
+
+function App:WxsProtocol(url, dumy)
+  return wxs_protocol(url)
 end
 
 function App:initControlPanel(ver)
@@ -149,10 +154,12 @@ function App:initControlPanel(ver)
   end
 end
 
-
 --
 
 app = App
 app.call = App.Call
+
+get_option = App.GetOption
+has_option = App.HasOption
 
 --

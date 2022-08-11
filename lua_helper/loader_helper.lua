@@ -8,8 +8,7 @@ end
 
 function CloseShellWindow()
   Taskbar:WaitForReady()
-  App:Call('closeshell')
-  App:Sleep(500)
+  Shell:Close()
 end
 
 function ShellDaemon(wait, cmd)
@@ -31,5 +30,7 @@ end
 function shel(cmd)
   local wait_opt = 'false'
   if os.getenv('USERNAME') ~= 'SYSTEM' then wait_opt = 'true' end
-  exec('WinXShell.exe -luacode "ShellDaemon(' .. wait_opt .. ',[[' .. cmd .. ']])"')
+  exec(App.Name .. ' -code "ShellDaemon(' .. wait_opt .. ',[[' .. cmd .. ']])"')
 end
+
+LINK = os.link

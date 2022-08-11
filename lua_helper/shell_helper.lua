@@ -119,8 +119,7 @@ end
 
 function Shell:WaitAndClose()
   Taskbar:WaitForReady()
-  App:Call('closeshell')
-  App:Sleep(500)
+  Shell:Close()
 end
 
 Desktop = {}
@@ -150,6 +149,10 @@ end
 
 function Desktop:ShowIcons(checked)
   App:Call('Desktop::ShowIcons', checked)
+end
+
+function Desktop:Link(lnk, ...)
+  os.link( '%Desktop%\\' .. lnk , ...)
 end
 
 Taskbar = {}
@@ -224,6 +227,10 @@ end
 
 function Startmenu:UnPin(target)
   App:Call('startmenu::unpin', target)
+end
+
+function Startmenu:Link(lnk, ...)
+  os.link( '%Programs%\\' .. lnk , ...)
 end
 
 Screen = {}
@@ -339,14 +346,8 @@ function Dialog:BrowseFolder(...)
 end
 
 -- Helper(alias)
-function PinToTaskbar(target, name, param, icon, index, showcmd)
-  Taskbar:Pin(target, name, param, icon, index, showcmd)
-end
+function LinkToDesktop(...) Desktop:Link(...) end
+function LinkToStartmenu(...) Startmenu:Link(...) end
 
-function PinToStartMenu(target, name, param, icon, index, showcmd)
-  Startmenu:Pin(target, name, param, icon, index, showcmd)
-end
-
-function LINK(lnk, target, param, icon, index, showcmd)
-  link(lnk, target, param, icon, index, showcmd)
-end
+function PinToTaskbar(...) Taskbar:Pin(...) end
+function PinToStartMenu(...) Startmenu:Pin(...) end

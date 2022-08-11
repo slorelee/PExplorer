@@ -42,6 +42,8 @@ function link(lnk, target, param, icon, index, showcmd)
     return App:Call('link', lnk, target, param, icon, index, opt.showcmd)
 end
 
+os.exec = exec
+os.link = link
 
 --[[
 -- test

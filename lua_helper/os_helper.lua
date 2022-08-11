@@ -5,6 +5,9 @@ end
 
 os.setenv = os.putenv
 
+local _osinfo_isWinPE = nil
+local _osinfo_isX = nil
+
 function os.info(key, ...)
   local arr = {}
   if key == nil then return end
@@ -48,25 +51,29 @@ function os.info(key, ...)
     arr['used_gb'] = arr[4] / 1024 / 1024 / 1024
     return arr
   elseif key:lower() == 'iswinpe' then
-     return is_winpe()
+    if _osinfo_isWinPE == nil then _osinfo_isWinPE = is_winpe() end
+    return _osinfo_isWinPE
+  elseif key:lower() == 'isx' then
+    if _osinfo_isX == nil then _osinfo_isX = (os.getenv("SystemDrive") == 'X:') end
+    return _osinfo_isX
   end
    return App.Call('os::info', key, ...)
 end
 
 function is_winpe()
-  local start_opt = reg_read([[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control]],
+  local start_opt = Reg:Read([[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control]],
     'SystemStartOptions')
   return string.find(start_opt, 'minint') ~= nil
 end
 
 
 function os_ver_info()
-  return reg_read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]]
+  return  Reg:Read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]]
     ,{'ProductName', 'CSDVersion'})
 end
 
 function cpu_info()
-  return reg_read([[HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0]]
+  return  Reg:Read([[HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0]]
     ,{'ProcessorNameString', '~MHz'})
 end
 

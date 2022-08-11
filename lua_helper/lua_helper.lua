@@ -6,6 +6,8 @@ else
   ARCH = 'x86'
 end
 
+os.ARCH = ARCH
+
 -- update package.path, package.cpath
 
 local root = App:Info('Path')
@@ -18,9 +20,9 @@ if root then
 end
 package.path = luapath .. package.path
 
-local dllpath = string.format('.\\Libs\\%s\\?.dll;', ARCH)
+local dllpath = string.format('.\\Libs\\%s\\?.dll;', os.ARCH)
 if root then
-  dllpath = string.format(root .. '\\Libs\\%s\\?.dll;', ARCH)
+  dllpath = string.format(root .. '\\Libs\\%s\\?.dll;', os.ARCH)
 end
 package.cpath = dllpath .. package.cpath
 
