@@ -207,9 +207,9 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         InstallEventHookEntry(_hwnd);
         EnableShowDesktop();
     } else if (nmsg == WM_CLOCKAREA_EVENT) {
-#ifdef _DEBUG
-        PrintMessage(0, nmsg, wparam, lparam);
-#endif
+        if (g_Globals._isDebug) {
+            PrintMessage(0, nmsg, wparam, lparam);
+        }
         if (wparam == HM_CLOCKAREA_CLICKED) {
             //MessageBox(NULL, TEXT("HM_CLOCKAREA_CLICKED"), TEXT(""), 0);
             SetTimer(_hwnd, CLOCKAREA_CLICK_TIMER, 500, NULL);

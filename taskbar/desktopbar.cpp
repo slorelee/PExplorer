@@ -446,11 +446,11 @@ static void NotifySetWorkArea(HWND hwnd) {
 
 LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
-#ifdef _DEBUG
-    if (nmsg != WM_SETCURSOR && nmsg != WM_TIMER && nmsg != PM_RESIZE_CHILDREN && nmsg != WM_ENTERIDLE &&
-        nmsg != WM_COPYDATA && nmsg != PM_RESIZE_CHILDREN)
-     LOG(FmtString(TEXT("NMSG - 0x%x"), nmsg));
-#endif
+    if (g_Globals._isDebug) {
+        if (nmsg != WM_SETCURSOR && nmsg != WM_TIMER && nmsg != PM_RESIZE_CHILDREN && nmsg != WM_ENTERIDLE &&
+            nmsg != WM_COPYDATA && nmsg != PM_RESIZE_CHILDREN)
+            LOG(FmtString(TEXT("NMSG - 0x%x"), nmsg));
+    }
     switch (nmsg) {
     case WM_NCHITTEST: {
 #ifndef TASKBAR_AT_TOP

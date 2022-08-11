@@ -729,7 +729,7 @@ bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out)
         return false;
 }
 
-#ifdef _DEBUG
+
 static char *getmsgstr(UINT msgid)
 {
     char *msg = NULL;
@@ -778,4 +778,4 @@ void PrintMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         LOGA(buff);
     }
 }
-#endif
+

@@ -1110,8 +1110,6 @@ protected:
 
 extern bool SplitFileSysURL(LPCTSTR url, String &dir_out, String &fname_out);
 
-#ifdef _DEBUG
 void PrintMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-#endif
 
 #endif // __cplusplus

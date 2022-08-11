@@ -1226,9 +1226,18 @@ static int fetch_errorfunc(lua_State *L)
 int LuaAppEngine::hasfunc(const char *funcname)
 {
     int luatype = 0;
+    char buff[1024] = { 0 };
+
+    if (g_Globals._isDebug) {
+        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
+        LOGA(buff);
+    }
+    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+
     lua_getglobal(L, funcname);
     luatype = lua_type(L, -1);
     if (luatype != LUA_TFUNCTION) {
+        LOGA(buff);
         return 0;
     }
     return 1;
@@ -1237,14 +1246,24 @@ int LuaAppEngine::hasfunc(const char *funcname)
 int LuaAppEngine::hasfunc(const char *tablename, const char *funcname)
 {
     int luatype = 0;
+    char buff[1024] = { 0 };
+
+    if (g_Globals._isDebug) {
+        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
+        LOGA(buff);
+    }
+    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+
     lua_getglobal(L, tablename);
     luatype = lua_type(L, -1);
     if (luatype != LUA_TTABLE) {
+        LOGA(buff);
         return 0;
     }
     lua_getfield(L, -1, funcname);
     luatype = lua_type(L, -1);
     if (luatype != LUA_TFUNCTION) {
+        LOGA(buff);
         return 0;
     }
     return 1;
@@ -1254,35 +1273,37 @@ int LuaAppEngine::getfunc(const char *funcname)
 {
     char buff[1024] = { 0 };
 
+    if (!funcname) return 0;
+
     fetch_errorfunc(L);
     if (lua_errorfunc == MININT) return -1;
 
-#ifdef _DEBUG
-    sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
-    LOGA(buff);
-#endif // DEBUG
+    if (g_Globals._isDebug) {
+        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
+        LOGA(buff);
+    }
     sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
 
-    if (funcname) {
-        if (funcname[0] == ':') {
-            lua_getglobal(L, _name);
-            if (!lua_istable(L, -1)) {
-                return -1;
-            }
-            lua_getfield(L, -1, funcname + 1);
-        } else {
-            lua_getglobal(L, funcname);
-        }
-        if (lua_type(L, -1) != LUA_TFUNCTION) {
+    if (funcname[0] == ':') {
+        lua_getglobal(L, _name);
+        if (!lua_istable(L, -1)) {
             LOGA(buff);
             return -1;
         }
-        if (funcname[0] == ':') {
-            // push self
-            lua_getglobal(L, _name);
-            return 1;
-        }
+        lua_getfield(L, -1, funcname + 1);
+    } else {
+        lua_getglobal(L, funcname);
     }
+    if (lua_type(L, -1) != LUA_TFUNCTION) {
+        LOGA(buff);
+        return -1;
+    }
+    if (funcname[0] == ':') {
+        // push self
+        lua_getglobal(L, _name);
+        return 1;
+    }
+
     return 0;
 }
 

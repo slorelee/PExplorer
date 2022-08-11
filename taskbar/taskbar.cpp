@@ -354,9 +354,9 @@ int TaskBar::Command(int id, int code)
 int TaskBar::Notify(int id, NMHDR *pnmh)
 {
     if (pnmh->hwndFrom == _htoolbar) {
-#ifdef _DEBUG
-        _log_(FmtString(TEXT("TaskBar::Notify(%d)"), pnmh->code));
-#endif
+        if (g_Globals._isDebug) {
+            _log_(FmtString(TEXT("TaskBar::Notify(%d)"), pnmh->code));
+        }
         switch (pnmh->code) {
         case NM_RCLICK: {
             TBBUTTONINFO btninfo;
@@ -425,9 +425,10 @@ int TaskBar::Notify(int id, NMHDR *pnmh)
                         }
                     }
 
-#ifdef _DEBUG
-                    _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
-#endif
+                    if (g_Globals._isDebug) {
+                        _log_(FmtString(TEXT("TaskBar::Notify(NM_CUSTOMDRAW) %d"), lptbcd->nmcd.uItemState));
+                    }
+
                     if (lptbcd->nmcd.uItemState == 0 && _thumbnail) {
                         KillTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL);
                         SetTimer(_hwnd, ID_TIMER_DESTORYTHUMBNAIL, 500, NULL);
