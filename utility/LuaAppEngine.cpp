@@ -1223,6 +1223,7 @@ static int fetch_errorfunc(lua_State *L)
     return errfunc;
 }
 
+#ifdef _DEBUG
 int LuaAppEngine::hasfunc(const char *funcname)
 {
     int luatype = 0;
@@ -1268,10 +1269,15 @@ int LuaAppEngine::hasfunc(const char *tablename, const char *funcname)
     }
     return 1;
 }
+#endif // _DEBUG
 
 int LuaAppEngine::getfunc(const char *funcname)
 {
-    char buff[1024] = { 0 };
+    char func_buff[64] = { 0 };
+    char msg_buff[1024] = { 0 };
+    char *table = _name;
+    char *method_colon = NULL;
+    char *table_method = NULL;
 
     if (!funcname) return 0;
 
@@ -1279,28 +1285,38 @@ int LuaAppEngine::getfunc(const char *funcname)
     if (lua_errorfunc == MININT) return -1;
 
     if (g_Globals._isDebug) {
-        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
-        LOGA(buff);
+        sprintf(msg_buff, "[DEBUG] getfunc %s() function", funcname);
+        LOGA(msg_buff);
     }
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
+    sprintf(msg_buff, "[LUA ERROR] can't find %s() function", funcname);
 
-    if (funcname[0] == ':') {
-        lua_getglobal(L, _name);
+    strcpy(func_buff, funcname);
+    method_colon = strchr(func_buff, ':');
+    table_method = method_colon;
+    if (table_method == NULL) {
+        table_method = strchr(func_buff, '.');
+    }
+    if (table_method != NULL) {
+        if (funcname[0] != ':') {
+            *table_method = '\0';
+            table = func_buff;
+        }
+        lua_getglobal(L, table);
         if (!lua_istable(L, -1)) {
-            LOGA(buff);
+            LOGA(msg_buff);
             return -1;
         }
-        lua_getfield(L, -1, funcname + 1);
+        lua_getfield(L, -1, table_method + 1);
     } else {
         lua_getglobal(L, funcname);
     }
     if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA(buff);
+        LOGA(msg_buff);
         return -1;
     }
-    if (funcname[0] == ':') {
+    if (method_colon != NULL) {
         // push self
-        lua_getglobal(L, _name);
+        lua_getglobal(L, table);
         return 1;
     }
 

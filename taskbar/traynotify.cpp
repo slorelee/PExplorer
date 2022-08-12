@@ -1705,9 +1705,7 @@ HWND ClockWindow::Create(HWND hwndParent)
     // Arbitrary high time so that the created clock window is big enough
     SYSTEMTIME st = { 1601, 1, 0, 1, 23, 59, 59, 999 };
     if (g_Globals._lua) {
-        if (g_Globals._lua->hasfunc("WxsHandler", "TrayClockTextFormatter")) {
-            g_Globals._lua->call(NULL);
-        }
+        g_Globals._lua->call("WxsHandler.TrayClockTextFormatter");
     }
     String clocktext = g_Globals._varClockTextBuffer;
     if (clocktext != TEXT("")) {
@@ -1800,9 +1798,7 @@ bool ClockWindow::FormatTime()
 
     if (g_Globals._varClockTextBuffer[0] != TEXT('\0')) {
         if (g_Globals._lua) {
-            if (g_Globals._lua->hasfunc("WxsHandler", "TrayClockTextFormatter")) {
-                g_Globals._lua->call(NULL);
-            }
+            g_Globals._lua->call("WxsHandler.TrayClockTextFormatter");
         }
         _tcscpy(buffer, g_Globals._varClockTextBuffer);
     } else {
