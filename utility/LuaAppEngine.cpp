@@ -57,6 +57,7 @@ enum TokenValue {
     TOK_STRARR,
     TOK_LIST,
     TOK_ELEM,
+    TOK_NUMBER,
     TOK_UNDEFINED,
 };
 
@@ -67,6 +68,7 @@ typedef struct _Token {
         LPVOID pObj;
         int iVal;
         bool bVal;
+        double dVal;
     };
     string_t attr; //element
 } Token;
@@ -922,7 +924,84 @@ extern "C" {
             return 1;
         }
 
+        Value jVal;
+        luaL_checktype(L, 1, LUA_TSTRING);
+        std::string key1 = lua_tostring(L, 1);
+        if (top == 1) {
+            jVal = JCfg_GetValue(&g_JCfg, s2w(key1), Value());
+        } else {
+            luaL_checktype(L, 2, LUA_TSTRING);
+            std::string key2 = lua_tostring(L, 2);
+            if (top == 2) {
+                jVal = JCfg_GetValue(&g_JCfg, s2w(key1), s2w(key2), Value());
+            } else {
+                luaL_checktype(L, 3, LUA_TSTRING);
+                std::string key3 = lua_tostring(L, 3);
+                jVal = JCfg_GetValue(&g_JCfg, s2w(key1), s2w(key2), s2w(key3), Value());
+            }
+        }
+        if (jVal.GetType() == NULLVal) {
+            lua_pushnil(L);
+        } else if (jVal.GetType() == StringVal) {
+            lua_pushstring(L, w2s(jVal.ToString()).c_str());
+        } else if (jVal.GetType() == IntVal) {
+            lua_pushinteger(L, jVal.ToInt());
+        } else if (jVal.GetType() == FloatVal) {
+            lua_pushnumber(L, jVal.ToFloat());
+        } else if (jVal.GetType() == DoubleVal) {
+            lua_pushnumber(L, jVal.ToDouble());
+        } else if (jVal.GetType() == BoolVal) {
+            lua_pushboolean(L, jVal.ToBool());
+        } else {
+            lua_pushnil(L);
+        }
         return 1;
+    }
+
+    int lua_app_var(lua_State* L)
+    {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+        int base = 0;
+        int top = lua_gettop(L);
+
+        if (top <= 0) return 0;
+
+        if (lua_type(L, 1) == LUA_TTABLE) {
+            //skip self for app:call
+            base++;
+            top--;
+        }
+
+        if (top <= 1) return 0;
+
+        Value jVal;
+        string_t varname = TEXT("");
+
+        luaL_checktype(L, base + 1, LUA_TSTRING);
+        varname = s2w(lua_tostring(L, base + 1));
+        
+        if ((lua_type(L, (base + 2)) == LUA_TSTRING)) {
+            v.str = s2w(lua_tostring(L, base + 2));
+            jVal = Value(v.str);
+        } else if (lua_isboolean(L, base + 2)) {
+            v.bVal = lua_toboolean(L, base + 2);
+            jVal = Value(v.bVal);
+        } else if (lua_isinteger(L, base + 2)) {
+            v.iVal = (int)lua_tointeger(L, base + 2);
+            jVal = Value(v.iVal);
+        } else if (lua_isnil(L, base + 2)) {
+            jVal = Value();
+        } else if (lua_isnumber(L, base + 2)) {
+            v.type = TOK_NUMBER;
+            v.dVal = lua_tonumber(L, base + 2);
+            jVal = Value(v.dVal);
+        } else {
+            v.str = TEXT("UNKNOWN VAR TYPE");
+            jVal = Value(v.str);
+        }
+        g_JVARMap[varname] = jVal;
+        return 0;
     }
 
     int lua_print(lua_State* L)
@@ -1052,6 +1131,7 @@ extern "C" {
         { "Call", lua_app_call },
         { "Info", lua_app_info },
         { "JCfg", lua_app_jcfg },
+        { "JVar", lua_app_var },
         { "Print", lua_print },
         { "Alert", lua_alert },
         { "Log", lua_log },
@@ -1115,6 +1195,10 @@ end\n\
   \n\
 function App:JCfg(...)\n\
   return App.JCfg(...)\n\
+end\n\
+\n\
+function App:Var(...)\n\
+  return App.JVar(...)\n\
 end\n\
 \n\
 function App:SetTimer(...)\n\
