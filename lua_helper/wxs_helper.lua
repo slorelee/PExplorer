@@ -6,6 +6,7 @@ TrayClock = {}
 
 -- 'auto', 'ui_systemInfo', 'system', '' or nil
 WxsHandler.SystemProperty = 'auto'
+WxsHandler.HandleShowDesktop = true
 
  -- nil or a handler function
 WxsHandler.OpenContainingFolder = nil
@@ -109,6 +110,18 @@ function wxs_protocol(url)
   else
     ms_settings(url)
   end
+end
+
+function handle_showdesktop_switcher()
+  local win_ver = os.info('winver')[3]
+
+  App:Var('HandleShowDesktop', WxsHandler.HandleShowDesktop)
+
+  if WxsHandler.HandleShowDesktop == true and win_ver >= 22621 then
+    WxsHandler.HandleShowDesktop = false
+    App:Var('HandleShowDesktop', WxsHandler.HandleShowDesktop)
+  end
+
 end
 
 function regist_folder_shell()

@@ -115,6 +115,8 @@ function App:_onFirstShellRun()
 end
 
 function App:_onDaemon()
+  handle_showdesktop_switcher()
+
   regist_shortcut_ocf()
   regist_system_property()
   regist_protocols()
@@ -125,9 +127,8 @@ end
 
 function App:_onShell()
   regist_folder_shell()
-  regist_shortcut_ocf()
-  regist_system_property()
-  regist_protocols()
+
+  App:_onDaemon()
 end
 
 function App:_onTimer(tid)
