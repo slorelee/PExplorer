@@ -1,9 +1,6 @@
 #pragma once
 
-#include <stdio.h>
-#include "lua.hpp"
-#include "LuaHelper.h"
-#include "../DUI/Helper.h"
+#include "LuaEngine.h"
 
 class LuaAppEngine {
 
@@ -31,7 +28,7 @@ public:
 
     lua_State *L;
 
-	CLuaHelper LuaApp;
+    CLuaHelper LuaApp;
 private:
     void init(string_t& file);
     void *_frame;

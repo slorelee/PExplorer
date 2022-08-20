@@ -333,25 +333,13 @@ cscript ResBuilder.vbs
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DUI\LuaEngine.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="DUI\SUIInterpreter.cpp">
+    <ClCompile Include="DUI\LuaUIEngine.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="DUI\SUIModule.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="DUI\SUIParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -411,6 +399,20 @@ cscript ResBuilder.vbs
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="luaengine\DesktopHelper.cpp" />
+    <ClCompile Include="luaengine\DialogHelper.cpp" />
+    <ClCompile Include="luaengine\FolderOptionsHelper.cpp" />
+    <ClCompile Include="luaengine\PolicyHelper.cpp" />
+    <ClCompile Include="luaengine\ScreenHelper.cpp" />
+    <ClCompile Include="luaengine\SessionHelper.cpp" />
+    <ClCompile Include="luaengine\LuaAppEngine.cpp" />
+    <ClCompile Include="luaengine\LuaEngine.cpp" />
+    <ClCompile Include="luaengine\LuaHelper.cpp" />
+    <ClCompile Include="luaengine\ShellHelper.cpp" />
+    <ClCompile Include="luaengine\StartmenuHelper.cpp" />
+    <ClCompile Include="luaengine\SystemHelper.cpp" />
+    <ClCompile Include="luaengine\TaskbarHelper.cpp" />
+    <ClCompile Include="luaengine\VolumeHelper.cpp" />
     <ClCompile Include="shell\fileexplorer.cpp" />
     <ClCompile Include="systemsettings\DesktopCommand.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -439,8 +441,6 @@ cscript ResBuilder.vbs
     </ClCompile>
     <ClCompile Include="utility\Dialog.cpp" />
     <ClCompile Include="utility\FolderOptions.cpp" />
-    <ClCompile Include="utility\LuaAppEngine.cpp" />
-    <ClCompile Include="utility\LuaHelper.cpp" />
     <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
@@ -517,10 +517,8 @@ cscript ResBuilder.vbs
     <ClInclude Include="customization\powermenu.h" />
     <ClInclude Include="customization\startbutton.h" />
     <ClInclude Include="DUI\Helper.h" />
-    <ClInclude Include="DUI\LuaEngine.h" />
-    <ClInclude Include="DUI\SUIInterpreter.h" />
+    <ClInclude Include="DUI\LuaUIEngine.h" />
     <ClInclude Include="DUI\SUIModule.h" />
-    <ClInclude Include="DUI\SUIParser.h" />
     <ClInclude Include="DUI\UICreator.h" />
     <ClInclude Include="DUI\UIManager.h" />
     <ClInclude Include="DUI\UI_Volume.h" />
@@ -528,6 +526,9 @@ cscript ResBuilder.vbs
     <ClInclude Include="features\features.h" />
     <ClInclude Include="features\reshelper.h" />
     <ClInclude Include="jconfig\jcfg.h" />
+    <ClInclude Include="luaengine\LuaAppEngine.h" />
+    <ClInclude Include="luaengine\LuaEngine.h" />
+    <ClInclude Include="luaengine\LuaHelper.h" />
     <ClInclude Include="shell\fileexplorer.h" />
     <ClInclude Include="systemsettings\DesktopCommand.h" />
     <ClInclude Include="systemsettings\MonitorAdapter.h" />
@@ -535,8 +536,6 @@ cscript ResBuilder.vbs
     <ClInclude Include="systemsettings\WLAN.h" />
     <ClInclude Include="utility\Dialog.h" />
     <ClInclude Include="utility\FolderOptions.h" />
-    <ClInclude Include="utility\LuaAppEngine.h" />
-    <ClInclude Include="utility\LuaHelper.h" />
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />
     <ClInclude Include="utility\ResourceHelper.h" />

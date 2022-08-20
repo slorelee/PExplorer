@@ -48,7 +48,7 @@
 #include "jconfig/jcfg.h"
 
 #include "DUI/UIManager.h"
-#include "utility/LuaAppEngine.h"
+#include "luaengine/LuaAppEngine.h"
 #include "features/features.h"
 
 DynamicLoadLibFct<void(__stdcall *)(BOOL)> g_SHDOCVW_ShellDDEInit(TEXT("SHDOCVW"), 118);

@@ -69,14 +69,8 @@
     <ClCompile Include="DUI\UICreator.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
-    <ClCompile Include="DUI\SUIParser.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
     <ClCompile Include="systemsettings\MonitorAdapter.cpp">
       <Filter>systemsettings</Filter>
-    </ClCompile>
-    <ClCompile Include="DUI\SUIInterpreter.cpp">
-      <Filter>DUI</Filter>
     </ClCompile>
     <ClCompile Include="DUI\UI_WIFI.cpp">
       <Filter>DUI</Filter>
@@ -90,9 +84,6 @@
     <ClCompile Include="utility\TrayHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
-    <ClCompile Include="DUI\LuaEngine.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
     <ClCompile Include="DUI\SUIModule.cpp">
       <Filter>DUI</Filter>
     </ClCompile>
@@ -104,9 +95,6 @@
     </ClCompile>
     <ClCompile Include="DUI\UI_Volume.cpp">
       <Filter>DUI</Filter>
-    </ClCompile>
-    <ClCompile Include="utility\LuaAppEngine.cpp">
-      <Filter>utility</Filter>
     </ClCompile>
     <ClCompile Include="commandverb\ExecuteCommandVerb.cpp">
       <Filter>commandverb</Filter>
@@ -160,8 +148,50 @@
     <ClCompile Include="utility\Dialog.cpp">
       <Filter>utility</Filter>
     </ClCompile>
-    <ClCompile Include="utility\LuaHelper.cpp">
-      <Filter>utility</Filter>
+    <ClCompile Include="luaengine\LuaAppEngine.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\LuaHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\LuaEngine.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\TaskbarHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="DUI\LuaUIEngine.cpp">
+      <Filter>DUI</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\SessionHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\ShellHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\ScreenHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\FolderOptionsHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\DesktopHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\StartmenuHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\DialogHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\PolicyHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\SystemHelper.cpp">
+      <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="luaengine\VolumeHelper.cpp">
+      <Filter>luaengine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,14 +260,8 @@
     <ClInclude Include="DUI\UIManager.h">
       <Filter>DUI</Filter>
     </ClInclude>
-    <ClInclude Include="DUI\SUIParser.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
     <ClInclude Include="systemsettings\MonitorAdapter.h">
       <Filter>systemsettings</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\SUIInterpreter.h">
-      <Filter>DUI</Filter>
     </ClInclude>
     <ClInclude Include="DUI\UI_WIFI.h">
       <Filter>DUI</Filter>
@@ -251,9 +275,6 @@
     <ClInclude Include="utility\TrayHelper.h">
       <Filter>utility</Filter>
     </ClInclude>
-    <ClInclude Include="DUI\LuaEngine.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
     <ClInclude Include="DUI\SUIModule.h">
       <Filter>DUI</Filter>
     </ClInclude>
@@ -265,9 +286,6 @@
     </ClInclude>
     <ClInclude Include="DUI\UI_Volume.h">
       <Filter>DUI</Filter>
-    </ClInclude>
-    <ClInclude Include="utility\LuaAppEngine.h">
-      <Filter>utility</Filter>
     </ClInclude>
     <ClInclude Include="commandverb\ShellHelpers.h">
       <Filter>commandverb</Filter>
@@ -308,8 +326,17 @@
     <ClInclude Include="utility\Dialog.h">
       <Filter>utility</Filter>
     </ClInclude>
-    <ClInclude Include="utility\LuaHelper.h">
-      <Filter>utility</Filter>
+    <ClInclude Include="luaengine\LuaAppEngine.h">
+      <Filter>luaengine</Filter>
+    </ClInclude>
+    <ClInclude Include="luaengine\LuaHelper.h">
+      <Filter>luaengine</Filter>
+    </ClInclude>
+    <ClInclude Include="luaengine\LuaEngine.h">
+      <Filter>luaengine</Filter>
+    </ClInclude>
+    <ClInclude Include="DUI\LuaUIEngine.h">
+      <Filter>DUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -558,6 +585,9 @@
     </Filter>
     <Filter Include="vendor\winapi">
       <UniqueIdentifier>{6378234b-651b-4dc3-8021-a89a4460dc64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="luaengine">
+      <UniqueIdentifier>{f0e0b86c-6c9f-460b-ac93-005adc88dc12}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@
 // Martin Fuchs, 23.07.2003
 //
 
-#include "utility/LuaAppEngine.h"
+#include "luaengine/LuaAppEngine.h"
 #include "features/reshelper.h"
 
 /// management of file types

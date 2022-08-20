@@ -251,7 +251,7 @@ TCHAR *CompletePath(TCHAR *target, TCHAR *out)
 // Create shortcut
 HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
     PTSTR param = NULL, PTSTR icon = NULL,
-    INT iIcon = 0, INT iShowCmd = SW_SHOWNORMAL)
+    int iIcon = 0, int iShowCmd = SW_SHOWNORMAL)
 {
     if (target == NULL) {
         return ERROR_PATH_NOT_FOUND;

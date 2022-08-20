@@ -4,7 +4,7 @@
 #include "globals.h"
 #include "vendor/json.h"
 #include "jconfig/jcfg.h"
-#include "utility/LuaAppEngine.h"
+#include "luaengine/LuaAppEngine.h"
 
 extern BOOL isWinPE();
 
