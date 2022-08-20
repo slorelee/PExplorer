@@ -168,9 +168,15 @@ EXTERN_C {
     int lua_os_link(lua_State* L, int top, int base) {
         int ret = 0;
         Token v = { TOK_UNSET };
-        string_t str_lnk = s2w(lua_tostring(L, base + 2));
-        string_t str_target = s2w(lua_tostring(L, base + 3));
+        string_t str_lnk, str_target;
         string_t str_param, str_icon;
+
+        if (!lua_isstring(L, base + 2)) return 0;
+        if (!lua_isstring(L, base + 3)) return 0;
+
+        str_lnk = s2w(lua_tostring(L, base + 2));
+        str_target = s2w(lua_tostring(L, base + 3));
+
         resstr_expand(str_lnk);
         resstr_expand(str_target);
         PTSTR lnk = (PTSTR)str_lnk.c_str();
@@ -269,7 +275,13 @@ EXTERN_C {
         } else if (func == "cd") {
             string_t str_path = s2w(lua_tostring(L, base + 2));
             SetCurrentDirectory(str_path.c_str());
-        } else if (func == "FakeExplorer") {
+        } else if (func == "run") {
+            return lua_os_run(L, top, base);
+        } else if (func == "exec") {
+            return lua_os_exec(L, top, base);
+        } else if (func == "link") {
+            return lua_os_link(L, top, base);
+        } else if (func == "fakeexplorer") {
             FakeExplorer();
         } else if (func == "os::info") {
             return lua_os_info(L, top, base);
@@ -322,12 +334,6 @@ EXTERN_C {
             } else {
                 PlaySoundA(lua_tostring(L, base + 2), NULL, SND_FILENAME);
             }
-        } else if (func == "run") {
-            return lua_os_run(L, top, base);
-        } else if (func == "exec") {
-            return lua_os_exec(L, top, base);
-        } else if (func == "link") {
-            return lua_os_link(L, top, base);
         } else if (func == "rundll") {
             return lua_os_rundll(L, top, base);
         } else {

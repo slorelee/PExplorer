@@ -8,9 +8,14 @@ EXTERN_C {
         int lua_desktop_call(lua_State* L, const char *funcname, int top, int base) {
         int ret = 0;
         Token v = { TOK_UNSET };
+        char strPath[MAX_PATH + 1] = { 0 };
 
         std::string func = funcname;
-        if (func == "desktop::updatewallpaper") {
+        if (func == "desktop::getpath") {
+            SHGetSpecialFolderPathA(0, strPath, CSIDL_DESKTOPDIRECTORY, FALSE);
+            lua_pushstring(L, strPath);
+            ret++;
+        } else if (func == "desktop::updatewallpaper") {
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "desktop::getwallpaper") {
             TCHAR wpPath[MAX_PATH] = { 0 };
