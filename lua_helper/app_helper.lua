@@ -156,11 +156,3 @@ function App:initControlPanel(ver)
 end
 
 --
-
-app = App
-app.call = App.Call
-
-get_option = App.GetOption
-has_option = App.HasOption
-
---

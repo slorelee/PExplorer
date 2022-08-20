@@ -18,6 +18,7 @@ Require("shell_helper")
 Require("wxs_helper")
 Require("loader_helper")
 Require("i18n")
+Require("compat_helper")
 
 f.Close
 
