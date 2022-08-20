@@ -123,8 +123,14 @@ function Shell:WaitAndClose()
 end
 
 Desktop = {}
+Desktop.Path = ""
+
 function Desktop:Refresh()
   App:Call('Desktop::Refresh')
+end
+
+function Desktop:GetPath()
+  return App:Call('Desktop::GetPath')
 end
 
 function Desktop:GetWallpaper()
@@ -152,8 +158,11 @@ function Desktop:ShowIcons(checked)
 end
 
 function Desktop:Link(lnk, ...)
-  os.link( '%Desktop%\\' .. lnk , ...)
+  os.link(Desktop.Path .. '\\' .. lnk , ...)
 end
+
+Desktop.Path = Desktop:GetPath()
+
 
 Taskbar = {}
 local regkey_setting = [[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]]
@@ -221,6 +230,12 @@ function Taskbar:Hide()
 end
 
 Startmenu = {}
+Startmenu.ProgramsPath = ""
+
+function Startmenu:GetProgramsPath()
+  return App:Call('Startmenu::GetProgramsPath')
+end
+
 function Startmenu:Pin(target, name, param, icon, index, showcmd)
   PinCommand('Startmenu',target, name, param, icon, index, showcmd)
 end
@@ -230,8 +245,11 @@ function Startmenu:UnPin(target)
 end
 
 function Startmenu:Link(lnk, ...)
-  os.link( '%Programs%\\' .. lnk , ...)
+  os.link(Startmenu.ProgramsPath .. '\\' .. lnk , ...)
 end
+
+Startmenu.ProgramsPath = Startmenu:GetProgramsPath()
+
 
 Screen = {}
 
