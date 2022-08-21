@@ -17,27 +17,34 @@ CDialog *CDialog::Init()
     return Dialog;
 }
 
-DWORD CDialog::OpenFile(const TCHAR *title, const TCHAR *filters, const TCHAR *dir)
+#define MODE_OPENFILE    0
+#define MODE_SAVEFILE    1
+
+DWORD CDialog::OpenSaveFile(int mode, DWORD options, const TCHAR *title, const TCHAR *filters, const TCHAR *dir)
 {
     HRESULT hr;
-    IFileOpenDialog *pDlg = NULL;
+    IFileDialog *pDlg = NULL;
     COMDLG_FILTERSPEC aFileTypes[MAX_FILTER_NUM] = {
         { L"All Files", L"*.*" }
     };
-    // Create the file-open dialog COM object.
-    hr = CoCreateInstance(CLSID_FileOpenDialog,
+
+    CLSID rclsid = CLSID_FileOpenDialog;
+    if (mode == MODE_SAVEFILE) {
+        rclsid = CLSID_FileSaveDialog;
+    }
+    hr = CoCreateInstance(rclsid,
         NULL,
         CLSCTX_INPROC_SERVER,
         IID_PPV_ARGS(&pDlg));
 
     if (FAILED(hr)) return 0;
 
-    // SelectOption
+
     TCHAR *pSelectFile = NULL;
 
-
+    // SelectOption
     if (title) pDlg->SetTitle(title);
-    pDlg->SetOptions(FOS_NOVALIDATE | FOS_FILEMUSTEXIST | FOS_ALLNONSTORAGEITEMS | FOS_ALLOWMULTISELECT | FOS_NODEREFERENCELINKS);
+    if (options >= 0) pDlg->SetOptions(options);
 
     if (filters) {
         int n = 0;
@@ -89,6 +96,21 @@ DWORD CDialog::OpenFile(const TCHAR *title, const TCHAR *filters, const TCHAR *d
 
     return 0;
 }
+
+DWORD CDialog::OpenFile(const TCHAR *title, const TCHAR *filters, const TCHAR *dir)
+{
+    DWORD options = FOS_NOVALIDATE | FOS_NOCHANGEDIR | FOS_FILEMUSTEXIST |
+        FOS_PATHMUSTEXIST | FOS_ALLOWMULTISELECT | FOS_NODEREFERENCELINKS;
+    return OpenSaveFile(MODE_OPENFILE, options, title, filters, dir);
+}
+
+DWORD CDialog::SaveFile(const TCHAR *title, const TCHAR *filters, const TCHAR *dir)
+{
+    DWORD options = FOS_OVERWRITEPROMPT | FOS_NOCHANGEDIR | FOS_STRICTFILETYPES |
+        FOS_NOREADONLYRETURN | FOS_NODEREFERENCELINKS;
+    return OpenSaveFile(MODE_SAVEFILE, options, title, filters, dir);
+}
+
 
 DWORD CDialog::BrowseFolder(const TCHAR * title, int csidl)
 {

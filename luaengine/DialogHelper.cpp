@@ -9,12 +9,19 @@ EXTERN_C {
         Token v = { TOK_UNSET };
 
         std::string func = funcname;
-        if (func == "dialog::openfile") {
+        if (func == "dialog::opensavefile" || func == "dialog::openfile" || func == "dialog::savefile") {
+            int mode = 0;
+            DWORD options = 0;
             TCHAR titleBuff[MAX_PATH] = { 0 };
             TCHAR dirBuff[MAX_PATH] = { 0 };
             const TCHAR *title = NULL;
             const TCHAR *filters = NULL;
             const TCHAR *dir = NULL;
+            if (func == "dialog::opensavefile") {
+                mode = (int)lua_tointeger(L, base + 2);
+                options = (DWORD)lua_tonumber(L, base + 3);
+                base += 2;
+            }
             if (lua_type(L, base + 2) == LUA_TSTRING) {
                 v.str = s2w(lua_tostring(L, base + 2));
                 lstrcpy(titleBuff, v.str.c_str());
@@ -30,7 +37,13 @@ EXTERN_C {
                 v.str = s2w(lua_tostring(L, base + 3));
                 filters = v.str.c_str();
             }
-            v.iVal = Dialog->OpenFile(title, filters, dir);
+            if (func == "dialog::opensavefile") {
+                v.iVal = Dialog->OpenSaveFile(mode, options, title, filters, dir);
+            } else if (func == "dialog::openfile") {
+                v.iVal = Dialog->OpenFile(title, filters, dir);
+            } else {
+                v.iVal = Dialog->SaveFile(title, filters, dir);
+            }
             v.str = (TCHAR *)Dialog->SelectedFileName;
             PUSH_STR(v);
             PUSH_INT(v);
