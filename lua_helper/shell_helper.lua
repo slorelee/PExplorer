@@ -359,6 +359,14 @@ function Dialog:OpenFile(...)
   return App:Call('Dialog::OpenFile', ...)
 end
 
+function Dialog:SaveFile(...)
+  return App:Call('Dialog::SaveFile', ...)
+end
+
+function Dialog:OpenSaveFile(...)
+  return App:Call('Dialog::OpenSaveFile', ...)
+end
+
 function Dialog:BrowseFolder(...)
   return App:Call('Dialog::BrowseFolder', ...)
 end
