@@ -24,7 +24,7 @@ public:
     void onShell();
     void onDaemon();
     int onClick(string_t& ctrl);
-    void onTimer(int id);
+    int onTimer(int id);
 
     lua_State *L;
 

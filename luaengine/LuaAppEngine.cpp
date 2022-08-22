@@ -555,12 +555,6 @@ function App:Var(...)\n\
   return App.JVar(...)\n\
 end\n\
 \n\
-function App:SetTimer(...)\n\
-  App.Call('SetTimer', ...)\n\
-end\n\
-function App:KillTimer(...)\n\
-  App.Call('KillTimer', ...)\n\
-end\n\
 function App:Run(...)\n\
   App.Call('run', ...)\n\
 end\n\
@@ -864,22 +858,14 @@ int LuaAppEngine::onClick(string_t& ctrl)
     return (int)lua_tointeger(L, 1);
 }
 
-#define TID_USER 20000
-void LuaAppEngine::onTimer(int id)
-{
-    fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return;
 
-    if (id < TID_USER) {
-        lua_getglobal(L, "App:_onTimer");
-    } else {
-        lua_getglobal(L, "App:onTimer");
-    }
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA("[LUA ERROR] can't find ontimer() function");
-        return;
-    }
+int LuaAppEngine::onTimer(int id)
+{
+    int self = getfunc(":_onTimer");
+    if (self == -1) return -1;
+
     lua_pushinteger(L, id);
-    int rel = lua_pcall(L, 1, 0, lua_errorfunc);
-    if (rel == -1) return;
+    int rel = lua_pcall(L, self + 1, 0, lua_errorfunc);
+    if (rel == -1) return -1;
+    return 0;
 }
