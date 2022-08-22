@@ -100,18 +100,76 @@ end
 --
 
 TID_APP = 10000
-TID_USER = 20000
+TID_AUTO = 20000
+TID_USER = 30000
 
-ICP_TIMER_ID = TID_APP + 1 -- init control panel timer
+AppTimer = {}
+AppTimerId = {}
+AppTimerStrId = {}
+AppTimer.NextId = TID_AUTO
+
+function App:SetTimer(tid, interval)
+  local timerid = 0
+  local strid = tostring(tid)
+  if type(tid) == "number" then
+     if math.type(tid) == "integer" then
+        timerid = tid
+     end
+  end
+  if timerid == 0 then
+    timerid = AppTimer.NextId
+    AppTimer.NextId = AppTimer.NextId + 1
+  end
+  AppTimerId[timerid] = strid
+  AppTimerStrId[strid] = timerid
+  App:Debug("[DEBUG] App:SetTimer(" .. timerid .. "['" .. strid .. "'] ," .. interval)
+  App.Call('SetTimer', timerid, interval)
+end
+
+function App:KillTimer(tid)
+  local timerid = AppTimerStrId[tostring(tid)]
+  if timerid ~= nil then
+    App.Call('KillTimer', timerid)
+  end
+end
+
+
+function App:_onTimer(tid)
+  local strid = AppTimerId[tid]
+  if strid == nil then
+    App:Info("[INFO] The AppTimer['" .. tid .."'] function is not defined.")
+  elseif type(AppTimer[strid]) ~= "function" then
+    App:Error("[ERROR] The AppTimer['" .. tid .."'] is not function.")
+    return
+  end
+  if strid == nil then
+    App:onTimer(tid)
+    return
+  end
+  AppTimer[strid](tid)
+end
+
+function App:onTimer(tid)
+  App:Info("[INFO] App:onTimer(" .. tid ..").")
+end
+
+---
 
 function App:_onFirstShellRun()
   -- VERSTR = Reg:Read([[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion]], 'CurrentVersion')
   local win_ver = os.info('winver')['1.2']
   if App.Arg:Has('-wes') then
     if win_ver == '6.2' or win_ver == '6.3' then -- only Windows 8, 8.1
-      App:SetTimer(ICP_TIMER_ID, 200) -- use timer to make main shell running
+      -- init control panel timer
+      App:SetTimer('_InitControlPanel', 200) -- use timer to make main shell running
     end
   end
+end
+
+AppTimer['_InitControlPanel'] = function(tid)
+  local win_ver = os.info('winver')['1.2']
+  App:initControlPanel(win_ver)
+  App:KillTimer(tid)
 end
 
 function App:_onDaemon()
@@ -129,14 +187,6 @@ function App:_onShell()
   regist_folder_shell()
 
   App:_onDaemon()
-end
-
-function App:_onTimer(tid)
-  if tid == ICP_TIMER_ID then
-    local win_ver = os.info('winver')['1.2']
-    App:initControlPanel(win_ver)
-    App:KillTimer(tid)
-  end
 end
 
 function App:WxsProtocol(url, dumy)

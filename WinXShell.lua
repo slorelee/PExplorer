@@ -37,7 +37,6 @@ function App:onLoad()
   print('WinXShell.exe loading...')
   print('CommandLine:' .. App.CmdLine)
   print('WINPE:'.. tostring(is_pe), 123, 'test', App)
-  print('WES:' .. tostring(is_wes))
 
   App:Customization()
 end
