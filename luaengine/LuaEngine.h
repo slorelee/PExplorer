@@ -8,14 +8,6 @@
 #include "LuaHelper.h"
 #include "../DUI/Helper.h"
 
-#ifndef string_t
-#ifdef UNICODE
-#define string_t std::wstring
-#else
-#define string_t string
-#endif
-#endif
-
 enum TokenValue {
     TOK_UNSET = 0,
     TOK_STRING,

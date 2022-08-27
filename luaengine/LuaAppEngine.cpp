@@ -569,9 +569,6 @@ end\n\
 Shell = {}\n\
 \n";
 
-static int lua_errorfunc = MININT;
-
-
 EXTERN_C {
     extern int luaopen_winapi_lib(lua_State *L);
 }
@@ -593,13 +590,16 @@ void LuaAppEngine::init(string_t& file)
     _frame = (void *)LuaAppWindow::get_window(hwnd);
     ((LuaAppWindow *)_frame)->_lua = this;
 
-    LuaApp.L = L;
+    _name = "App";
+
     luaL_openlibs(L);
     luaopen_winapi_lib(L);
-    _name = "App";
+
     luaL_requiref(L, _name, luaopen_app_module, 1);
     luaL_dostring(L, built_code_errorhandle);
     luaL_dostring(L, app_built_code);
+
+    LuaApp.Init(L, _name);
 
     lua_getglobal(L, "App");
     if (lua_type(L, -1) == LUA_TTABLE) {
@@ -637,165 +637,19 @@ void LuaAppEngine::init(string_t& file)
     }
 }
 
-static int fetch_errorfunc(lua_State *L)
-{
-    if (lua_errorfunc != MININT) return lua_errorfunc;
-
-    int top = lua_gettop(L);
-    lua_getglobal(L, "__G__TRACKBACK__");
-
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA("[LUA ERROR] can't find function <__G__TRACKBACK__>err");
-        lua_settop(L, top);
-        return MININT;
-    }
-
-    int errfunc = lua_gettop(L);
-    lua_errorfunc = errfunc;
-    return errfunc;
-}
-
-#ifdef _DEBUG
-int LuaAppEngine::hasfunc(const char *funcname)
-{
-    int luatype = 0;
-    char buff[1024] = { 0 };
-
-    if (g_Globals._isDebug) {
-        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
-        LOGA(buff);
-    }
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-
-    lua_getglobal(L, funcname);
-    luatype = lua_type(L, -1);
-    if (luatype != LUA_TFUNCTION) {
-        LOGA(buff);
-        return 0;
-    }
-    return 1;
-}
-
-int LuaAppEngine::hasfunc(const char *tablename, const char *funcname)
-{
-    int luatype = 0;
-    char buff[1024] = { 0 };
-
-    if (g_Globals._isDebug) {
-        sprintf(buff, "[DEBUG] getfunc %s() function", funcname);
-        LOGA(buff);
-    }
-    sprintf(buff, "[LUA ERROR] can't find %s() function", funcname);
-
-    lua_getglobal(L, tablename);
-    luatype = lua_type(L, -1);
-    if (luatype != LUA_TTABLE) {
-        LOGA(buff);
-        return 0;
-    }
-    lua_getfield(L, -1, funcname);
-    luatype = lua_type(L, -1);
-    if (luatype != LUA_TFUNCTION) {
-        LOGA(buff);
-        return 0;
-    }
-    return 1;
-}
-#endif // _DEBUG
-
-int LuaAppEngine::getfunc(const char *funcname)
-{
-    char func_buff[64] = { 0 };
-    char msg_buff[1024] = { 0 };
-    char *table = _name;
-    char *method_colon = NULL;
-    char *table_method = NULL;
-
-    if (!funcname) return 0;
-
-    fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return -1;
-
-    if (g_Globals._isDebug) {
-        sprintf(msg_buff, "[DEBUG] getfunc %s() function", funcname);
-        LOGA(msg_buff);
-    }
-    sprintf(msg_buff, "[LUA ERROR] can't find %s() function", funcname);
-
-    strcpy(func_buff, funcname);
-    method_colon = strchr(func_buff, ':');
-    table_method = method_colon;
-    if (table_method == NULL) {
-        table_method = strchr(func_buff, '.');
-    }
-    if (table_method != NULL) {
-        if (funcname[0] != ':') {
-            *table_method = '\0';
-            table = func_buff;
-        }
-        lua_getglobal(L, table);
-        if (!lua_istable(L, -1)) {
-            LOGA(msg_buff);
-            return -1;
-        }
-        lua_getfield(L, -1, table_method + 1);
-    } else {
-        lua_getglobal(L, funcname);
-    }
-    if (lua_type(L, -1) != LUA_TFUNCTION) {
-        LOGA(msg_buff);
-        return -1;
-    }
-    if (method_colon != NULL) {
-        // push self
-        lua_getglobal(L, table);
-        return 1;
-    }
-
-    return 0;
-}
-
 int LuaAppEngine::call(const char *funcname, int nres)
 {
-    int self = getfunc(funcname);
-    if (self == -1) return -1;
-
-    int rel = lua_pcall(L, self, nres, lua_errorfunc);
-    if (rel == -1) return -1;
-    if (nres <= 0) return 0;
-    rel = (int)lua_tointeger(L, -1);
-    lua_pop(L, 1);
-    return rel;
+    return LuaApp.Call(funcname, nres);
 }
 
 int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
 {
-    int self = getfunc(funcname);
-    if (self == -1) return -1;
-
-    lua_pushinteger(L, p1);
-    lua_pushinteger(L, p2);
-    int rel = lua_pcall(L, 2 + self, nres, lua_errorfunc);
-    if (rel == -1) return -1;
-    if (nres <= 0) return 0;
-    rel = (int)lua_tointeger(L, -1);
-    lua_pop(L, 1);
-    return rel;
+    return LuaApp.Call(funcname, p1, p2, nres);
 }
 
 int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nres)
 {
-    int self = getfunc(funcname);
-    if (self == -1) return -1;
-
-    lua_pushstring(L, w2s(p1).c_str());
-    lua_pushstring(L, w2s(p2).c_str());
-    int rel = lua_pcall(L, 2 + self, nres, lua_errorfunc);
-    if (rel == -1) return -1;
-    if (nres <= 0) return 0;
-    rel = (int)lua_tointeger(L, -1);
-    lua_pop(L, 1);
-    return rel;
+    return LuaApp.Call(funcname, p1, p2, nres);
 }
 
 void LuaAppEngine::RunCode(string_t& code)
@@ -812,40 +666,38 @@ void LuaAppEngine::LoadFile(string_t& file)
     }
 }
 
-
 void LuaAppEngine::onLoad()
 {
-    call(":onLoad");
+    LuaApp.Call(":onLoad");
 }
 
 void LuaAppEngine::onFirstShellRun()
 {
-    call(":_onFirstShellRun");
-    call(":onFirstShellRun");
+    LuaApp.Call(":_onFirstShellRun");
+    LuaApp.Call(":onFirstShellRun");
 }
 
 void LuaAppEngine::preShell()
 {
-    call(":_PreShell");
-    call(":PreShell");
+    LuaApp.Call(":_PreShell");
+    LuaApp.Call(":PreShell");
 }
 
 void LuaAppEngine::onShell()
 {
-    call(":_onShell");
-    call(":onShell");
+    LuaApp.Call(":_onShell");
+    LuaApp.Call(":onShell");
 }
 
 void LuaAppEngine::onDaemon()
 {
-    call(":_onDaemon");
-    call(":onDaemon");
+    LuaApp.Call(":_onDaemon");
+    LuaApp.Call(":onDaemon");
 }
 
 int LuaAppEngine::onClick(string_t& ctrl)
 {
-    fetch_errorfunc(L);
-    if (lua_errorfunc == MININT) return -1;
+    if (LuaApp._errorfunc == MININT) return -1;
 
     lua_getglobal(L, "Shell:onClick");
     if (lua_type(L, -1) != LUA_TFUNCTION) {
@@ -853,7 +705,7 @@ int LuaAppEngine::onClick(string_t& ctrl)
         return -1;
     }
     lua_pushstring(L, w2s(ctrl).c_str());
-    int rel = lua_pcall(L, 1, 0, lua_errorfunc);
+    int rel = lua_pcall(L, 1, 0, LuaApp._errorfunc);
     if (rel == -1) return -1;
     return (int)lua_tointeger(L, 1);
 }
@@ -861,11 +713,11 @@ int LuaAppEngine::onClick(string_t& ctrl)
 
 int LuaAppEngine::onTimer(int id)
 {
-    int self = getfunc(":_onTimer");
+    int self = LuaApp.GetFunc(":_onTimer");
     if (self == -1) return -1;
 
     lua_pushinteger(L, id);
-    int rel = lua_pcall(L, self + 1, 0, lua_errorfunc);
+    int rel = lua_pcall(L, self + 1, 0, LuaApp._errorfunc);
     if (rel == -1) return -1;
     return 0;
 }
