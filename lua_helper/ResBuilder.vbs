@@ -19,7 +19,7 @@ Require("wxs_helper")
 Require("loader_helper")
 Require("i18n")
 Require("compat_helper")
-
+Require("ui_helper")
 f.Close
 
 Function ReadTextFile(file)
