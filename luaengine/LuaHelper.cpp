@@ -114,7 +114,7 @@ CLuaHelper::CLuaHelper()
 {
     L = NULL;
     _ownername = "LUAHELPER_OWNER";
-    _errorfunc == MININT;
+    _errorfunc = MININT;
 }
 
 void CLuaHelper::Init(lua_State *l, char *owner)
@@ -211,9 +211,7 @@ int CLuaHelper::GetFunc(const char *funcname)
     char *method_colon = NULL;
     char *table_method = NULL;
 
-    if (!funcname) return 0;
-
-    fetch_errorfunc(L);
+    if (!funcname) return -1;
     if (lua_errorfunc == MININT) return -1;
 
     if (g_Globals._isDebug) {
