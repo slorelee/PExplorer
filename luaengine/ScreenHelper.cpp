@@ -160,13 +160,15 @@ EXTERN_C {
     int lua_screen_call(lua_State* L, const char *funcname, int top, int base) {
         int ret = 0;
         Token v = { TOK_UNSET };
-
+        TCHAR method[255] = { 0 };
         std::string func = funcname;
         if (func == "screen::get") {
             MonitorAdapter m_monitorAdapter;
             int w, h, f, b;
             m_monitorAdapter.GetCurrentResolution(w, h, f, b);
             v.str = s2w(lua_tostring(L, base + 2));
+            lstrcpy(method, v.str.c_str());
+            v.str = _wcslwr(method);
             if (v.str == TEXT("x") || v.str == TEXT("width")) {
                 v.iVal = w;
             } else if (v.str == TEXT("y") || v.str == TEXT("height")) {
@@ -201,6 +203,8 @@ EXTERN_C {
         } else if (func == "screen::set") {
             v.iVal = 0;
             v.str = s2w(lua_tostring(L, base + 2));
+            lstrcpy(method, v.str.c_str());
+            v.str = _wcslwr(method);
             if (v.str == TEXT("rotation")) {
                 int r = (int)lua_tointeger(L, base + 3);
                 SetScreenRotation(r);
