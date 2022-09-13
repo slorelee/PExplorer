@@ -252,6 +252,7 @@ ExpendJString(Value *v)
     if (val[0] != TEXT('#')) return;
     val = val.substr(1);
     for (Object::ValueMap::iterator it = g_JVARMap.begin(); it != g_JVARMap.end(); ++it) {
+        if ((it->second).GetType() != StringVal) continue;
         string_t exp = TEXT("#{") + it->first + TEXT("}");
         if (val.find(TEXT("#{")) != string_t::npos) {
             string_replace(val, exp, it->second.ToString());
