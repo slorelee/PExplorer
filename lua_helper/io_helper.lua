@@ -12,9 +12,20 @@ end
 
 File.Remove = File.Delete
 
+function File.GetFullPath(path)
+  return App.Call('path::getfullpath', path)
+end
+
+function File.GetShortPath(path)
+  return App.Call('path::getshortpath', path)
+end
+
 function Folder.Exists(path)
   return App.Call('folder::exists', path) == 1
 end
+
+Folder.GetFullPath = File.GetFullPath
+Folder.GetShortPath = File.GetShortPath
 
 function os.exists(path)
   if path == nil then return 1 end

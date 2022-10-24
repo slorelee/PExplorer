@@ -117,6 +117,27 @@ EXTERN_C {
         return ret;
     }
 
+    int lua_path_trans(lua_State* L, int top, int base, int toshortpath) {
+        int ret = 0;
+        Token v = { TOK_UNSET };
+        TCHAR buff[MAX_PATH] = { 0 };
+        v.str = s2w(lua_tostring(L, base + 2));
+        varstr_expand(v.str);
+        if (toshortpath == 0) {
+            ret = GetLongPathName(v.str.c_str(), buff, MAX_PATH);
+        } else {
+            ret = GetShortPathName(v.str.c_str(), buff, MAX_PATH);
+        }
+        if (ret > 0) {
+            v.str = buff;
+        } else {
+            v.str = TEXT("");
+        }
+        ret = 0;
+        PUSH_STR(v);
+        return ret;
+    }
+
     /*
     int lua_xx_yyy(lua_State* L, int top, int base) {
         int ret = 0;
@@ -299,6 +320,10 @@ EXTERN_C {
             if (v.iVal == 1) v.iVal = PathIsDirectory(v.str.c_str());
             if (v.iVal == FILE_ATTRIBUTE_DIRECTORY) v.iVal = 1;
             PUSH_INT(v);
+        } else if (func == "path::getfullpath") {
+            return lua_path_trans(L, top, base, 0);
+        } else if (func == "path::getshortpath") {
+            return lua_path_trans(L, top, base, 1);
         } else if (func == "system::changecolorthemenotify") {
             // g_Globals._SHSettingsChanged(0, TEXT("ImmersiveColorSet"));
             SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("ImmersiveColorSet")));
