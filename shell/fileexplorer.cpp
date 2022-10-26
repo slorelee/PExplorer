@@ -613,38 +613,38 @@ int explorer_open_frame(int cmdShow, LPTSTR lpCmdLine, int mode)
     String explorer_path = JCFG2_DEF("JS_FILEEXPLORER", "3rd_filename", TEXT("")).ToString();
     BOOL seperate_mode = JCFG2_DEF("JS_FILEEXPLORER", "seperate_mode", true).ToBool();
     String explorer_open;
+    String explorer_open_key = TEXT("3rd_open_arguments");
     String explorer_parameters;
+    int rc = 0;
     if (lpCmdLine == NULL) lpCmdLine = TEXT("");
     explorer_parameters = lpCmdLine;
+
+    if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
+        explorer_path = JCFG2_DEF("JS_QUICKLAUNCH", "3rd_filename", explorer_path).ToString();
+    } else if (mode == EXPLORER_OPEN_HOTKEY) {
+        explorer_path = JCFG3_DEF("JS_FILEEXPLORER", "WIN+E", "3rd_filename", explorer_path).ToString();
+    }
     if (explorer_path.empty()) {
         if (!g_Globals._desktop_mode || !seperate_mode) {
             explorer_show_frame(cmdShow, lpCmdLine);
             return 1;
         }
-
         explorer_path = JVAR("JVAR_MODULEPATH").ToString() + TEXT("\\") + JVAR("JVAR_MODULENAME").ToString();
-
-        if (mode == EXPLORER_OPEN_NORMAL) {
-            explorer_open = JCFG2_DEF("JS_FILEEXPLORER", "open_arguments", TEXT("%s")).ToString();
-        }
-        else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
-            explorer_open = JCFG2_DEF("JS_QUICKLAUNCH", "open_arguments", TEXT("")).ToString();
-        }
-        explorer_parameters = FmtString(explorer_open, lpCmdLine);
-        launch_file(g_Globals._hwndDesktop, explorer_path.c_str(), cmdShow, explorer_parameters.c_str());
-        return 1;
+        explorer_open_key = TEXT("open_arguments");
+        rc = 1;
     }
 
     if (mode == EXPLORER_OPEN_NORMAL) {
-        explorer_open = JCFG2_DEF("JS_FILEEXPLORER", "3rd_open_arguments", TEXT("%s")).ToString();
-    }
-    else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
-        explorer_open = JCFG2_DEF("JS_QUICKLAUNCH", "3rd_open_arguments", TEXT("")).ToString();
+        explorer_open = JCFG2U_DEF("JS_FILEEXPLORER", explorer_open_key, TEXT("%s")).ToString();
+    } else if (mode == EXPLORER_OPEN_QUICKLAUNCH) {
+        explorer_open = JCFG2U_DEF("JS_QUICKLAUNCH", explorer_open_key, TEXT("")).ToString();
+    } else if (mode == EXPLORER_OPEN_HOTKEY) {
+        explorer_open = JCFG3U_DEF("JS_FILEEXPLORER", "WIN+E", explorer_open_key, TEXT("")).ToString();
     }
 
     explorer_parameters = FmtString(explorer_open, lpCmdLine);
     launch_file(g_Globals._hwndDesktop, explorer_path.c_str(), cmdShow, explorer_parameters.c_str());
-    return 0;
+    return rc;
 }
 
 int OpenShellFolders(HWND hwnd, LPIDA pida)

@@ -45,6 +45,9 @@ extern bool JCfg_TaskThumbnailEnabled();
 #define JCFG2_DEF(key1, key2, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), Value((defval)))
 #define JCFG3_DEF(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), TEXT(key3), Value((defval)))
 
+#define JCFG2U_DEF(key1, key2, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), (key2), Value((defval)))
+#define JCFG3U_DEF(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), TEXT(key2), (key3), Value((defval)))
+
 #define JCFG_CMD(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, TEXT(key1), key2, TEXT(key3), Value((defval)))
 #define JCFG_CMDW(key1, key2, key3, defval) JCfg_GetValue(&g_JCfg, key1, key2, TEXT(key3), Value((defval)))
 

@@ -434,7 +434,7 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
 {
     switch (id_hotkey) {
     case IDHK_EXPLORER:
-        explorer_open_frame(SW_SHOWNORMAL);
+        explorer_open_frame(SW_SHOWNORMAL, NULL, EXPLORER_OPEN_HOTKEY);
         break;
 
     case IDHK_RUN:
