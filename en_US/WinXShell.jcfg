@@ -35,6 +35,9 @@
   },
   "JS_FILEEXPLORER": {
     "#3rd_filename": "##{JVAR_MODULEPATH}\\explorer++.exe",
+    "WIN+E": {
+      "#3rd_filename": ""
+    },
     "#padding-bottom": 20
   },
   "JS_DESKTOP": {
@@ -75,6 +78,7 @@
     }
   },
   "JS_TASKBAR": {
+    "visible": true,
     "smallicon": false,
     "thumbnail": true,
     "task_close_button": true,
@@ -111,6 +115,7 @@
   },
   "::QL": {
     "maxiconsinrow": 20,
+    "#3rd_filename": "",
     "3rd_startup_arguments": "",
     "hide_showdesktop": false,
     "hide_fileexplorer": false,
