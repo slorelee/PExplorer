@@ -287,3 +287,7 @@ function UIWindow:OnShow()
         onshow()
     end
 end
+
+function UIWindow:Close()
+    sui:close()
+end
