@@ -139,8 +139,9 @@ void OpenContainingFolder(LPTSTR pszCmdline)
 
     String strPath = path;
     if (g_Globals._lua) {
-        g_Globals._lua->call("WxsHandler.OpenContainingFolder", lnkfile, strPath);
-        return;
+        if (g_Globals._lua->call("WxsHandler.OpenContainingFolder", lnkfile, strPath) != -1) {
+            return;
+        }
     }
 
     //if (!PathIsDirectory(path)) {
