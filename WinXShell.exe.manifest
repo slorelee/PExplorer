@@ -7,6 +7,11 @@
     type="win32"
 />
 <description>WinXShell</description>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+  </application>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity
