@@ -102,6 +102,9 @@ function win_copyright()
   return App:Call('os::info', 'copyright')
 end
 
-function call_dll(...)
-  return App:Call('calldll', ...)
+function rundll(...)
+  return App:Call('rundll', ...)
 end
+
+os.rundll = rundll
+
