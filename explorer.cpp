@@ -35,6 +35,7 @@
 #include <locale.h>    // for setlocale()
 
 #include <wincon.h>
+#include <Windows.h>
 
 #ifndef _WIN32_WINNT_WINBLUE
 #define _WIN32_WINNT_WINBLUE                0x0603
@@ -480,6 +481,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 #ifdef _DEBUG
     SetEnvironmentVariable(TEXT("WINXSHELL_DEBUG"), TEXT("1"));
 #endif
+
+#if 0
+    HMODULE hModule = LoadLibraryA("user32.dll");
+    if (hModule) {
+        typedef UINT(* func)();
+        func _GetDpiForSystem = (func)GetProcAddress(hModule, "GetDpiForSystem");
+        if (_GetDpiForSystem) {
+            UINT dpi = _GetDpiForSystem();
+            FreeLibrary(hModule);
+        }
+    }
+#endif // 0
 
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
