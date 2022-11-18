@@ -483,6 +483,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
     _tsetlocale(LC_ALL, TEXT("")); //set locale for support multibyte character
 
+    if (_tcsstr(ext_options, TEXT("-debug"))) {
+        g_Globals._isDebug = true;
+    }
+
     if (_tcsstr(ext_options, TEXT("-log"))) {
         g_Globals.InitLog();
         handle_log(g_Globals._log_file);
@@ -639,10 +643,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     else
         return g_Globals._exitcode;    // no shell to launch, so exit immediatelly
 #endif
-
-    if (_tcsstr(ext_options, TEXT("-debug"))) {
-        g_Globals._isDebug = true;
-    }
 
     if (_tcsstr(ext_options, TEXT("-break"))) {
         LOGA("debugger breakpoint");
