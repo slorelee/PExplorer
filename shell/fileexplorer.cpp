@@ -577,10 +577,26 @@ static void Shell32DllHacker()
 }
 */
 
+
+#include <windef.h>
+
 #ifndef ROSSHELL
 void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 {
     ExplorerCmd cmd;
+
+    HMODULE hModule = LoadLibraryA("user32.dll");
+    if (hModule) {
+        typedef UINT(*func)(UINT);
+        func _SetThreadDpiAwarenessContext = (func)GetProcAddress(hModule, "SetThreadDpiAwarenessContext");
+        if (_SetThreadDpiAwarenessContext) {
+            // 0x7811  <dpiAware>true</dpiAware>
+            // 0x6010  <dpiAware>false</dpiAware>
+            UINT DpiAwareness = 0x7811;
+            _SetThreadDpiAwarenessContext(DpiAwareness);
+            FreeLibrary(hModule);
+        }
+    }
 
     if (g_Globals._hMainWnd) {
         if (IsIconic(g_Globals._hMainWnd))
