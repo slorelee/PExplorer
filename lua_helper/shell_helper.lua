@@ -66,6 +66,10 @@ local function power_helper(wu_param, sd_param)
   return 1
 end
 
+function System:CreatePageFile(file, min, max)
+  return App:Call('System::CreatePageFile', file, min, max);
+end
+
 function System:Reboot()
   return power_helper('Reboot', '-r')
 end
