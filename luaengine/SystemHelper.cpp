@@ -1,5 +1,7 @@
 #include "precomp.h"
 
+#include<winternl.h>
+#include<Shlwapi.h>
 #include "LuaEngine.h"
 
 extern BOOL IsUEFIMode();
@@ -48,6 +50,62 @@ int osinfo_mem(lua_State* L) {
     return ret;
 }
 
+// Get privilege
+HRESULT Priv(PCTSTR ptzName)
+{
+    HANDLE hToken;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
+        return FALSE;
+    }
+    TOKEN_PRIVILEGES tPriv;
+    LookupPrivilegeValue(NULL, ptzName, &tPriv.Privileges[0].Luid);
+    tPriv.PrivilegeCount = 1;
+    tPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    return AdjustTokenPrivileges(hToken, FALSE, &tPriv, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+}
+
+#define REG_MemMgr TEXT("SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management")
+#define Session_Manager TEXT("SYSTEM\\CurrentControlSet\\Control\\Session Manager")
+#define REG_PageFile TEXT("PagingFiles")
+
+int CreatePagingFile(string_t *path, int min, int max) {
+    ULARGE_INTEGER ulMin, ulMax;
+    HRESULT hResult = (1024 * 1024);
+    UNICODE_STRING sPath;
+    WCHAR wzPath[MAX_PATH] = { 0 };
+
+    ulMin.QuadPart = min * hResult;
+    ulMax.QuadPart = max * hResult;
+
+    sPath.Length = path->length() * sizeof(WCHAR);
+    sPath.MaximumLength = sPath.Length + sizeof(WCHAR);
+    lstrcpyn(wzPath, path->c_str(), path->length());
+    sPath.Buffer = wzPath;
+
+    // Get function address
+    typedef NTSTATUS(NTAPI* PNtCreatePagingFile)(PUNICODE_STRING sPath, PULARGE_INTEGER puInitSize, PULARGE_INTEGER puMaxSize, ULONG uPriority);
+    PNtCreatePagingFile NtCreatePagingFile = (PNtCreatePagingFile)GetProcAddress(GetModuleHandle(TEXT("NTDLL")), "NtCreatePagingFile");
+    if (!NtCreatePagingFile) {
+        return -1;
+    }
+    // Create page file
+    Priv(SE_CREATE_PAGEFILE_NAME);
+    hResult = NtCreatePagingFile(&sPath, &ulMin, &ulMax, 0);
+    if (hResult == S_OK) {
+        // Log to Windows Registry
+        TCHAR tzStr[MAX_PATH*5];
+        DWORD i = sizeof(tzStr);
+        if (SHGetValue(HKEY_LOCAL_MACHINE, REG_MemMgr, REG_PageFile, NULL, tzStr, &i) != S_OK) {
+            i = 0;
+        } else {
+            i = (i / sizeof(TCHAR)) - 1;
+        }
+        i += _stprintf(tzStr + i, TEXT("%s %d %d"), path->c_str(), min, max);
+        tzStr[++i] = TEXT('\0');
+        SHSetValue(HKEY_LOCAL_MACHINE, REG_MemMgr, REG_PageFile, REG_MULTI_SZ, tzStr, i * sizeof(TCHAR));
+    }
+    return 0;
+}
 
 EXTERN_C {
     int lua_os_info(lua_State* L, int top, int base) {
@@ -342,6 +400,18 @@ EXTERN_C {
             v.iVal = 2;
             if (v.str == TEXT("SYSTEM")) v.iVal = 1;
             SwitchSession(v.iVal);
+        } else if (func == "system::createpagefile") {
+            int iMin, iMax;
+            if (!lua_isinteger(L, base + 3)) {
+                return -1;
+            }
+            if (!lua_isinteger(L, base + 4)) {
+                return -1;
+            }
+            v.str = s2w(lua_tostring(L, base + 2));
+            iMin = (int)lua_tointeger(L, base + 3);
+            iMax = (int)lua_tointeger(L, base + 4);
+            if (CreatePagingFile(&v.str, iMin, iMax)) return -1;
         } else if (func == "beep") {
             if (lua_isinteger(L, base + 2)) {
                 int type = (int)lua_tointeger(L, base + 2);
