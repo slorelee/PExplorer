@@ -69,17 +69,30 @@ HRESULT Priv(PCTSTR ptzName)
 #define REG_PageFile TEXT("PagingFiles")
 
 int CreatePagingFile(string_t *path, int min, int max) {
+    int len = 0;
     ULARGE_INTEGER ulMin, ulMax;
     HRESULT hResult = (1024 * 1024);
     UNICODE_STRING sPath;
-    WCHAR wzPath[MAX_PATH] = { 0 };
+    TCHAR wzDrive[MAX_PATH] = { 0 };
+    TCHAR wzPath[MAX_PATH] = { 0 };
+
+    lstrcpyn(wzDrive, path->c_str(), 4);
+    len = QueryDosDevice(wzDrive, wzPath, MAX_PATH);
+    if (len <= 0) {
+        return -1;
+    }
+    lstrcat(wzDrive, TEXT("\\pagefile.sys"));
+    path->assign(wzDrive);
+
+    lstrcat(wzPath, TEXT("\\pagefile.sys"));
+    len = lstrlen(wzPath);
 
     ulMin.QuadPart = min * hResult;
     ulMax.QuadPart = max * hResult;
 
-    sPath.Length = path->length() * sizeof(WCHAR);
-    sPath.MaximumLength = sPath.Length + sizeof(WCHAR);
-    lstrcpyn(wzPath, path->c_str(), path->length());
+    sPath.Length = len * sizeof(WCHAR);
+    sPath.MaximumLength = len + sizeof(WCHAR);
+
     sPath.Buffer = wzPath;
 
     // Get function address
@@ -403,15 +416,15 @@ EXTERN_C {
         } else if (func == "system::createpagefile") {
             int iMin, iMax;
             if (!lua_isinteger(L, base + 3)) {
-                return -1;
+                return 0;
             }
             if (!lua_isinteger(L, base + 4)) {
-                return -1;
+                return 0;
             }
             v.str = s2w(lua_tostring(L, base + 2));
             iMin = (int)lua_tointeger(L, base + 3);
             iMax = (int)lua_tointeger(L, base + 4);
-            if (CreatePagingFile(&v.str, iMin, iMax)) return -1;
+            if (CreatePagingFile(&v.str, iMin, iMax)) return 0;
         } else if (func == "beep") {
             if (lua_isinteger(L, base + 2)) {
                 int type = (int)lua_tointeger(L, base + 2);
