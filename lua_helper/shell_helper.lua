@@ -54,6 +54,10 @@ function System:AppsColorTheme(mode)
     App:Call('System::ChangeColorThemeNotify')
 end
 
+function System:ReloadCursors()
+    App:Call('system::setcursors')
+end
+
 local function power_helper(wu_param, sd_param)
   local sd = os.getenv("SystemDrive")
   if File.Exists(sd ..'\\Windows\\System32\\Wpeutil.exe') then
