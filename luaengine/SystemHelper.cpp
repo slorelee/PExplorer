@@ -425,6 +425,11 @@ EXTERN_C {
             iMin = (int)lua_tointeger(L, base + 3);
             iMax = (int)lua_tointeger(L, base + 4);
             if (CreatePagingFile(&v.str, iMin, iMax)) return 0;
+        } else if (func == "system::setcursors") {
+            if ((lua_type(L, (base + 2)) == LUA_TSTRING)) {
+                v.str = s2w(lua_tostring(L, base + 2));
+            }
+            SystemParametersInfo(SPI_SETCURSORS, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
         } else if (func == "beep") {
             if (lua_isinteger(L, base + 2)) {
                 int type = (int)lua_tointeger(L, base + 2);
