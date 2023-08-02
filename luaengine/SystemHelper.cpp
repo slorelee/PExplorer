@@ -68,10 +68,12 @@ HRESULT Priv(PCTSTR ptzName)
 #define Session_Manager TEXT("SYSTEM\\CurrentControlSet\\Control\\Session Manager")
 #define REG_PageFile TEXT("PagingFiles")
 
-int CreatePagingFile(string_t *path, int min, int max) {
+#define MB_TO_BYTES(mb) (1024ULL * 1024ULL * mb)
+
+int CreatePagingFile(string_t *path, int min_mb, int max_mb) {
     int len = 0;
     ULARGE_INTEGER ulMin, ulMax;
-    HRESULT hResult = (1024 * 1024);
+    HRESULT hResult = 0;
     UNICODE_STRING sPath;
     TCHAR wzDrive[MAX_PATH] = { 0 };
     TCHAR wzPath[MAX_PATH] = { 0 };
@@ -87,8 +89,8 @@ int CreatePagingFile(string_t *path, int min, int max) {
     lstrcat(wzPath, TEXT("\\pagefile.sys"));
     len = lstrlen(wzPath);
 
-    ulMin.QuadPart = min * hResult;
-    ulMax.QuadPart = max * hResult;
+    ulMin.QuadPart = MB_TO_BYTES(min_mb);
+    ulMax.QuadPart = MB_TO_BYTES(max_mb);
 
     sPath.Length = len * sizeof(WCHAR);
     sPath.MaximumLength = len + sizeof(WCHAR);
@@ -113,7 +115,7 @@ int CreatePagingFile(string_t *path, int min, int max) {
         } else {
             i = (i / sizeof(TCHAR)) - 1;
         }
-        i += _stprintf(tzStr + i, TEXT("%s %d %d"), path->c_str(), min, max);
+        i += _stprintf(tzStr + i, TEXT("%s %d %d"), path->c_str(), min_mb, max_mb);
         tzStr[++i] = TEXT('\0');
         SHSetValue(HKEY_LOCAL_MACHINE, REG_MemMgr, REG_PageFile, REG_MULTI_SZ, tzStr, i * sizeof(TCHAR));
     }
