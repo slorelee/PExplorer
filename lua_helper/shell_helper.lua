@@ -74,12 +74,27 @@ function System:CreatePageFile(file, min, max)
   return App:Call('System::CreatePageFile', file, min, max);
 end
 
+function System:EnableEUDC(fEnableEUDC)
+  return App:Call('System::EnableEUDC', fEnableEUDC);
+end
+
+function System:AppxSysprepInit()
+  return App:Call('System::AppxSysprepInit');
+end
+
 function System:Reboot()
   return power_helper('Reboot', '-r')
 end
 
 function System:Shutdown()
   return power_helper('Shutdown', '-s')
+end
+
+
+WinPE = {}
+function WinPE:SystemInit()
+  System:EnableEUDC(1)
+  System:AppxSysprepInit()
 end
 
 local function PinCommand(class, target, name, param, icon, index, showcmd)

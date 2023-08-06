@@ -122,6 +122,43 @@ int CreatePagingFile(string_t *path, int min_mb, int max_mb) {
     return 0;
 }
 
+int EnableEUDC(BOOL fEnableEUDC) {
+    int rc = 1;
+    typedef void (WINAPI* EnableEUDCProc)(BOOL);
+    EnableEUDCProc EnableEUDC;
+    HMODULE hm = LoadLibrary(TEXT("Gdi32.dll"));
+    if (NULL != hm) {
+        EnableEUDC = (EnableEUDCProc)GetProcAddress(hm, "EnableEUDC");
+        if (NULL != EnableEUDC) {
+            EnableEUDC(fEnableEUDC);
+            rc = 0;
+        }
+        FreeLibrary(hm);
+    }
+    return rc;
+}
+
+int AppxSysprepInit() {
+    int rc = 1;
+    typedef void (WINAPI* AppxSysprepFunc)(void);
+    AppxSysprepFunc AppxSysprepSpecializeOnline;
+    HRESULT hrIni = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    HMODULE hm = LoadLibrary(TEXT("AppxSysPrep.dll"));
+    if (NULL != hm) {
+        AppxSysprepSpecializeOnline = (AppxSysprepFunc)GetProcAddress(hm, "AppxSysprepSpecializeOnline");
+        if (NULL != AppxSysprepSpecializeOnline) {
+            AppxSysprepSpecializeOnline();
+            rc = 0;
+        }
+        FreeLibrary(hm);
+    }
+
+    if (hrIni == S_OK || hrIni == S_FALSE) {
+        CoUninitialize();
+    }
+    return rc;
+}
+
 EXTERN_C {
     int lua_os_info(lua_State* L, int top, int base) {
         int ret = 0;
@@ -432,6 +469,13 @@ EXTERN_C {
                 v.str = s2w(lua_tostring(L, base + 2));
             }
             SystemParametersInfo(SPI_SETCURSORS, 0, NULL, SPIF_SENDWININICHANGE | SPIF_UPDATEINIFILE);
+        } else if (func == "system::enableeudc") {
+            int f = (int)lua_tointeger(L, base + 2);
+            v.iVal = EnableEUDC(f);
+            PUSH_INT(v);
+        } else if (func == "system::appxsysprepinit") {
+            v.iVal = AppxSysprepInit();
+            PUSH_INT(v);
         } else if (func == "beep") {
             if (lua_isinteger(L, base + 2)) {
                 int type = (int)lua_tointeger(L, base + 2);
