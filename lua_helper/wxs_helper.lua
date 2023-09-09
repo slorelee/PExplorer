@@ -163,6 +163,7 @@ function regist_protocols()
   if os.getenv('WIN_VSDEBUG') ~= nil then return end
   local win_ver = os.info('winver')['1.2']
   if tonumber(win_ver) < 10 then return end
+  if File.Exists('X:\\Windows\\System32\\AppxSysprep.dll') then return end
   regist_protocol('ms-settings')
   regist_protocol('ms-availablenetworks', 'App')
   App:Run(App.FullPath, '-Embedding')
