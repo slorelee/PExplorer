@@ -142,18 +142,15 @@ int AppxSysprepInit() {
     int rc = 1;
     typedef void (WINAPI* AppxSysprepFunc)(void);
     AppxSysprepFunc AppxSysprepSpecializeOnline;
-    HRESULT hrIni = CoInitializeEx(NULL, COINIT_MULTITHREADED);
     HMODULE hm = LoadLibrary(TEXT("AppxSysPrep.dll"));
     if (NULL != hm) {
+        CoInitializeEx(NULL, COINIT_MULTITHREADED);
         AppxSysprepSpecializeOnline = (AppxSysprepFunc)GetProcAddress(hm, "AppxSysprepSpecializeOnline");
         if (NULL != AppxSysprepSpecializeOnline) {
             AppxSysprepSpecializeOnline();
             rc = 0;
         }
         FreeLibrary(hm);
-    }
-
-    if (hrIni == S_OK || hrIni == S_FALSE) {
         CoUninitialize();
     }
     return rc;
