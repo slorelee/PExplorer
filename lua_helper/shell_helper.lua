@@ -74,6 +74,11 @@ function System:CreatePageFile(file, min, max)
   return App:Call('System::CreatePageFile', file, min, max);
 end
 
+function System:NetJoin(domain, joinOpt, server, accountOU, account, password)
+  domain = domain or 'WORKGROUP'
+  return os.rundll('Netapi32.dll', 'NetJoinDomain', server, domain, accountOU, account, password, joinOpt)
+end
+
 function System:EnableEUDC(fEnableEUDC)
   return App:Call('System::EnableEUDC', fEnableEUDC);
 end
