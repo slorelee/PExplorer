@@ -583,6 +583,7 @@ static void Shell32DllHacker()
 #ifndef ROSSHELL
 void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 {
+    char envkey[64] = { 0 };
     ExplorerCmd cmd;
 
     HMODULE hModule = LoadLibraryA("user32.dll");
@@ -617,6 +618,9 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 
     if (g_Globals._hwndDesktopBar == (HWND)0) {
         HookGetShellWindow();
+
+        sprintf(envkey, "FileExpRefresh_Handled_%d", GetCurrentProcessId());
+        SetEnvironmentVariableA(envkey, "1");
     }
 
     // create main window

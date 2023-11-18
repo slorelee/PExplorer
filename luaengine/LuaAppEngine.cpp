@@ -8,6 +8,7 @@
 
 
 extern BOOL hasMSExplorer();
+extern int SetFileExplorerRefreshHook(LPCTSTR path);
 
 extern void wxsOpen(LPTSTR cmd);
 
@@ -190,6 +191,11 @@ extern "C" {
                 int ms = (int)lua_tointeger(L, base + 2);
                 Sleep(ms);
             }
+        } else if (func == "fileexprefresh") {
+            v.str = JVAR("JVAR_MODULEPATH").ToString();
+            v.iVal = SetFileExplorerRefreshHook(v.str.c_str());
+            g_Globals._exitcode = v.iVal;
+            PUSH_INT(v);
         } else if (func == "wxs_open") {
             v.str = s2w(lua_tostring(L, base + 2));
             wxsOpen((LPTSTR)v.str.c_str());

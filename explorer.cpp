@@ -60,6 +60,8 @@ boolean SelectOpt = FALSE;
 void UIProcess(HINSTANCE hInst, String cmdline);
 extern void InstallCADHookEntry();
 
+extern int SetFileExplorerRefreshHook(LPCTSTR path);
+
 bool FileTypeManager::is_exe_file(LPCTSTR ext)
 {
     static const LPCTSTR s_executable_extensions[] = {
@@ -778,6 +780,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
             ChangeUserProfileEnv();
         }
+
+        SetFileExplorerRefreshHook(JVAR("JVAR_MODULEPATH").ToString().c_str());
 
         //create a ApplicationManager_DesktopShellWindow window for ClassicShell startmenu
         AM_DesktopShellWindow::Create();

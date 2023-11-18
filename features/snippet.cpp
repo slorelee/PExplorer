@@ -345,3 +345,51 @@ BOOL isWinPE()
     return FALSE;
 }
 
+int SetFileExplorerRefreshHook(LPCTSTR path) {
+    typedef BOOL(*typedef_SetGlobalHook)();
+    typedef BOOL(*typedef_UnsetGlobalHook)();
+    TCHAR filepath[MAX_PATH] = { 0 };
+    HMODULE hDll = NULL;
+    typedef_SetGlobalHook SetGlobalHook = NULL;
+    typedef_UnsetGlobalHook UnsetGlobalHook = NULL;
+    BOOL bRet = FALSE;
+    int rc = 1;
+
+    StrCpy(filepath, path);
+#ifdef _WIN64
+    StrCat(filepath, TEXT("\\FileExpRefresh\\wxsStub.dll"));
+#else
+    StrCat(filepath, TEXT("\\FileExpRefresh\\wxsStub32.dll"));
+#endif // _WIN64
+    LOG(filepath);
+    do {
+        hDll = ::LoadLibrary(filepath);
+        if (NULL == hDll) {
+            printf("LoadLibrary Error[%d]\n", GetLastError());
+            break;
+        }
+        SetGlobalHook = (typedef_SetGlobalHook)GetProcAddress(hDll, "SetGlobalHook");
+        if (NULL == SetGlobalHook) {
+            printf("GetProcAddress Error[%d]\n", GetLastError());
+            break;
+        }
+        bRet = SetGlobalHook();
+        if (bRet) {
+            LOGA("SetFileExplorerRefreshHook OK.\n");
+            rc = 0;
+        } else {
+            LOGA("SetFileExplorerRefreshHook ERROR.\n");
+        }
+        /*
+        system("pause");
+        UnsetGlobalHook = (typedef_UnsetGlobalHook)GetProcAddress(hDll, "UnsetGlobalHook");
+        if (NULL == UnsetGlobalHook) {
+            printf("GetProcAddress Error[%d]\n", GetLastError());
+            break;
+        }
+        UnsetGlobalHook();
+        printf("UnsetGlobalHook OK.\n");
+        */
+    } while (FALSE);
+    return rc;
+}
