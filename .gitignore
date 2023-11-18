@@ -2,6 +2,15 @@
 *.db
 *.sdf
 *.user
+*.exp
+*.iobj
+*.ipdb
+*.pdb
+*.obj
+*.tlog
+*.tlog/*.*
+*.opendb
+*.log
 .vs/
 ipch/
 Win32/
@@ -12,6 +21,8 @@ lua_helper/*.bat
 lua_helper/*.exe
 lua_helper/x86/
 lua_helper/x64/
+FileExpRefresh/*/wxsStub.lib
+FileExpRefresh/*/wxsStub32.lib
 wallpaper.jpg
 wxsStub.dll
 wxsStub32.dll
