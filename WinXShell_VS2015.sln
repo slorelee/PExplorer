@@ -7,16 +7,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinXShell", "WinXShell_VS20
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Release|ARM = Release|ARM
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|ARM.ActiveCfg = Debug|ARM
+		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|ARM.Build.0 = Debug|ARM
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|Win32.ActiveCfg = Debug|Win32
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|Win32.Build.0 = Debug|Win32
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|x64.ActiveCfg = Debug|x64
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Debug|x64.Build.0 = Debug|x64
+		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Release|ARM.ActiveCfg = Release|ARM
+		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Release|ARM.Build.0 = Release|ARM
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Release|Win32.ActiveCfg = Release|Win32
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Release|Win32.Build.0 = Release|Win32
 		{BFBAE588-8C68-4303-9BF6-C830087D8F25}.Release|x64.ActiveCfg = Release|x64
@@ -24,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19FC4DE5-1CF1-4D74-BB0B-EC917B52B90D}
 	EndGlobalSection
 EndGlobal
