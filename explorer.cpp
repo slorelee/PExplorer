@@ -517,9 +517,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         LOGA("starting winxshell console log\n");
     }
 
-    g_hInst = hInstance;
-    g_Globals.Init(hInstance, lpCmdLineOrg); /* init icon_cache */
-
     if (_tcsstr(ext_options, TEXT("-winpe"))) {
         g_Globals._isWinPE = TRUE;
         CloseShellProcess();
@@ -569,6 +566,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         startup_desktop = !any_desktop_running;
     }
 
+    if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
+        ChangeUserProfileEnv();
+    }
+
+    g_hInst = hInstance;
+    g_Globals.Init(hInstance, lpCmdLineOrg); /* init icon_cache */
 
     bool autostart = !any_desktop_running;
 
@@ -776,10 +779,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         }
 
         if (g_Globals._lua) g_Globals._lua->preShell();
-
-        if (!_tcsstr(ext_options, TEXT("-keep_userprofile"))) {
-            ChangeUserProfileEnv();
-        }
 
         SetFileExplorerRefreshHook(JVAR("JVAR_MODULEPATH").ToString().c_str());
 
