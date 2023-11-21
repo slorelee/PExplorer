@@ -87,6 +87,10 @@ function App:GetOption(...)
   return self.Option:GetOption(...)
 end
 
+function App:Pause()
+  App:Call('Pause')
+end
+
 function TEXT(s)
   if App.ScriptEncoding == 'ANSI' then
     return s

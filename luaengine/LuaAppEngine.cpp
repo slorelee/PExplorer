@@ -191,6 +191,8 @@ extern "C" {
                 int ms = (int)lua_tointeger(L, base + 2);
                 Sleep(ms);
             }
+        } else if (func == "pause") {
+            WaitForSingleObject(GetCurrentProcess(), INFINITE);
         } else if (func == "fileexprefresh") {
             v.str = JVAR("JVAR_MODULEPATH").ToString();
             v.iVal = SetFileExplorerRefreshHook(v.str.c_str());
