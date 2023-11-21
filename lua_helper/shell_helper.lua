@@ -139,7 +139,11 @@ local function PinCommand(class, target, name, param, icon, index, showcmd)
   end
 end
 
-Shell ={}
+Shell = {}
+function Shell:Run(cmd)
+  shel(cmd)
+end
+
 function Shell:Close()
   App:Call('closeshell')
   App:Sleep(500)
