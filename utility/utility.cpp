@@ -328,7 +328,7 @@ DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd, PTSTR ptzVerb)
     HANDLE hProcess = NULL;
     HANDLE hThread = NULL;
     DWORD dwExitCode = 0;
-
+    DWORD dwCreationFlags = 0;
     TCHAR tzExpandCmd[MAX_PATH * 10];
     ExpandEnvironmentStrings(ptzCmd, tzExpandCmd, MAX_PATH * 10);
 
@@ -352,7 +352,11 @@ DWORD Exec(PTSTR ptzCmd, BOOL bWait, INT iShowCmd, PTSTR ptzVerb)
         si.lpDesktop = TEXT("WinSta0\\Default");
         si.dwFlags = STARTF_USESHOWWINDOW;
         si.wShowWindow = iShowCmd;
-        bResult = CreateProcess(NULL, tzExpandCmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+        if (iShowCmd == SW_HIDE) {
+            // si.lpDesktop = NULL;
+            dwCreationFlags = CREATE_NO_WINDOW;
+        }
+        bResult = CreateProcess(NULL, tzExpandCmd, NULL, NULL, FALSE, dwCreationFlags, NULL, NULL, &si, &pi);
         if (!bResult) return S_FALSE;
 
         hProcess = pi.hProcess;
