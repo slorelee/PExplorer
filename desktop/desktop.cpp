@@ -94,12 +94,13 @@ static BOOL CALLBACK MinimizeWindowEnumFct(HWND hwnd, LPARAM lparam)
     if (hwnd == g_Globals._hwndDesktopBar || hwnd == g_Globals._hwndDesktop) return TRUE;
     DWORD style = GetWindowStyle(hwnd);
     DWORD ex_style = GetWindowExStyle(hwnd);
-    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && (style & WS_MINIMIZEBOX) && !(ex_style & WS_EX_TOPMOST)) {
+    if (IsWindowVisible(hwnd) && !IsIconic(hwnd) && (style & WS_MINIMIZEBOX) 
+        && !(ex_style & WS_EX_TOPMOST) && !(ex_style & WS_EX_TOOLWINDOW)) {
         if (IsIgnoredWindow(hwnd)) return TRUE;
         RECT rect;
         if (GetWindowRect(hwnd, &rect)) {
             if (rect.right > 0 && rect.bottom > 0 &&
-                rect.right > rect.left && rect.bottom > rect.top) {
+                rect.right >= rect.left && rect.bottom >= rect.top) {
                 minimized.push_back(MinimizeStruct(hwnd, style));
             }
         }
