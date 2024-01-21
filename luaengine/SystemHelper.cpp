@@ -156,6 +156,11 @@ int AppxSysprepInit() {
     return rc;
 }
 
+void AppActivate(HWND hwnd) {
+    SetForegroundWindow(hwnd);
+    SetFocus(hwnd);
+}
+
 EXTERN_C {
     int lua_os_info(lua_State* L, int top, int base) {
         int ret = 0;
@@ -411,6 +416,9 @@ EXTERN_C {
             return lua_os_link(L, top, base);
         } else if (func == "fakeexplorer") {
             FakeExplorer();
+        } else if (func == "appactivate") {
+            v.iVal = (int)lua_tointeger(L, base + 2);
+            AppActivate((HWND)v.iVal);
         } else if (func == "os::info") {
             return lua_os_info(L, top, base);
         } else if (func == "file::exists") {
