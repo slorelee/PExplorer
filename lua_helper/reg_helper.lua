@@ -81,3 +81,19 @@ REG_QWORD = 11
 function Reg:Read(...) return reg_read(...) end
 function Reg:Write(...) return reg_write(...) end
 function Reg:Delete(...) return reg_delete(...) end
+
+function Reg:GetSubKeys(key)
+  local k, err
+  k, err = winapi.open_reg_key(key, true)
+  if not k then
+    return nil
+  end
+  local keys = k:get_keys()
+  k:close()
+  if #keys >= 1 then
+    table.remove(keys, 1) -- remove self
+    return keys
+  end
+  return nil
+end
+
