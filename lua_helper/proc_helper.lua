@@ -21,11 +21,12 @@ local _clsProc = {
   winObj = nil,
   procObj = nil
 
---[[
+  --[[
   GetClassName()
   GetFileName()
   GetHandle()
   Show()
+  Activate()
   Hide()
   Minimize()
   Maximize()
@@ -40,25 +41,25 @@ local _clsProc = {
 
 
 function _clsProc.New(self, win_or_proc, o)
-    o = o or {}
-    self.__index = self
-    setmetatable(o, self)
-    self.winObj = nil
-    self.procObj = nil
+  o = o or {}
+  self.__index = self
+  setmetatable(o, self)
+  self.winObj = nil
+  self.procObj = nil
     if not win_or_proc then return o end
 
-    if win_or_proc.__name == "Window" then
-      if win_or_proc:get_handle() > 0 then
-         self.winObj = win_or_proc
-         self.procObj = win_or_proc:get_process()
-      end
+  if win_or_proc.__name == "Window" then
+    if win_or_proc:get_handle() > 0 then
+      self.winObj = win_or_proc
+      self.procObj = win_or_proc:get_process()
     end
+  end
 
-    if win_or_proc.__name == "Process" then
-        self.procObj = win_or_proc
-    end
+  if win_or_proc.__name == "Process" then
+    self.procObj = win_or_proc
+  end
 
-    return o
+  return o
 end
 
 function _clsProc:GetClassName()
@@ -95,6 +96,11 @@ function _clsProc:Show(flag, active)
     if active then o:set_foreground() end
   end
   return rc
+end
+
+function _clsProc:Activate()
+  local hwnd = self.GetHandle()
+  App:Call('AppActivate', hwnd)
 end
 
 function _clsProc:Hide()

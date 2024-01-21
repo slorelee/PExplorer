@@ -52,6 +52,13 @@ function PostWindow(class, title, msg, wparam, lparam)
   return nil
 end
 
+function ActivateWindow(class, title)
+  local win = FindWindow(class, title)
+  if win ~= nil then
+    win:set_foreground()
+  end
+end
+
 function CloseWindow(class, title)
   return SendWindow(class, title, WM_SYSCOMMAND, SC_CLOSE, 0)
 end
