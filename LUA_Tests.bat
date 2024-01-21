@@ -162,7 +162,7 @@ print(
   str.fmt("v['CurrentBuild'] = %s, v['UBR'] = %d", v['CurrentBuild'], v['UBR'])
 )
 
-regkey= [[HKEY_CURRENT_USER\SOFTWARE\WinXShell\Tests]]
+regkey = [[HKEY_CURRENT_USER\SOFTWARE\WinXShell\Tests]]
 
 Reg:Write(regkey, '', 'DefaultItemValue')
 Reg:Write(regkey, 'Test', 'Test String')
@@ -175,6 +175,12 @@ print(Reg:Read(regkey, 'Test'))
 
 -- Reg:Delete([[HKEY_CURRENT_USER\SOFTWARE\WinXShell\Tests]], 'Test')
 -- Reg:Delete([[HKEY_CURRENT_USER\SOFTWARE\WinXShell\Tests]])
+
+print("GetSubKeys for [HKEY_CLASSES_ROOT\\Folder]:")
+local subkeys = Reg:GetSubKeys([[HKEY_CLASSES_ROOT\Folder]])
+for i, v in ipairs(subkeys ) do
+  print(str.fmt("%d:%s", i, v))
+end
 
 -- Downward Compatibility
 
