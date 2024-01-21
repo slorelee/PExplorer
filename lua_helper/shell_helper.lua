@@ -154,6 +154,17 @@ function Shell:WaitAndClose()
   Shell:Close()
 end
 
+Shell.onHotKey = {}
+Shell.onHotKey['WIN+S'] = function()
+end
+
+Shell.onHotKey['WIN+F'] = function()
+end
+
+function Shell:_onHotKey(hotkey)
+  Shell.onHotKey[hotkey]()
+end
+
 Desktop = {}
 Desktop.Path = ""
 

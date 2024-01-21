@@ -58,6 +58,14 @@ end
 function App:onTimer(tid)
 end
 
+Shell.onHotKey['WIN+S'] = function()
+  App:Debug("WIN+S hotkey is pressed.")
+end
+
+Shell.onHotKey['WIN+F'] = function()
+  App:Debug("WIN+F hotkey is pressed.")
+end
+
  -- a handler of OpenContainingFolder
 function MyOpenContainingFolderHandler(lnkfile, realfile)
   -- local path = realfile:match('(.+)\\')
@@ -69,7 +77,7 @@ function MyOpenContainingFolderHandler(lnkfile, realfile)
   -- App:Run('X:\\Progra~1\\XYplorer\\XYplorer.exe', '/select=\"' .. realfile .. '\"')
 end
 
--- 根据DPI自动切换屏幕分辨率
+-- 根据屏幕分辨率自动切换DPI
 function MyDisplayChangedHandler()
   local cur_res_x = Screen:GetX()
   if last_res_x == cur_res_x then return end

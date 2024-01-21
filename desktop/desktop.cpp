@@ -428,6 +428,9 @@ void DesktopWindow::RegisterHotkeys(BOOL unreg)
     if (g_Globals._hwndDesktopBar == (HWND)0) {
         AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_DESKTOP, MOD_WIN, 'D');
     }
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_WIN_S, MOD_WIN, 'S');
+    AUTOREGISTERHOTKEY(unreg, _hwnd, IDHK_WIN_F, MOD_WIN, 'F');
+
     ///@todo register all common hotkeys
 }
 
@@ -449,6 +452,23 @@ void DesktopWindow::ProcessHotKey(int id_hotkey)
     case IDHK_DESKTOP:
          g_Globals._desktop.ToggleMinimize();
         break;
+
+    case IDHK_WIN_S: {
+        if (g_Globals._lua) {
+            string_t hotkey = TEXT("WIN+S");
+            string_t dmy = TEXT("");
+            g_Globals._lua->call("Shell:_onHotKey", hotkey, dmy);
+        }
+        break;
+    }
+    case IDHK_WIN_F: {
+        if (g_Globals._lua) {
+            string_t hotkey = TEXT("WIN+F");
+            string_t dmy = TEXT("");
+            g_Globals._lua->call("Shell:_onHotKey", hotkey, dmy);
+        }
+        break;
+    }
     //@todo implement all common hotkeys
     }
 }
