@@ -19,6 +19,8 @@ extern BOOL FreeCustomResource(LPVOID res);
 extern Token GetResolutionList(int n = -1);
 extern Token SetResolutionByStr(string_t wh);
 
+extern int CreateGUID(char *guidbuff, size_t size);
+
 struct LuaAppWindow : public Window {
     typedef Window super;
     LuaAppWindow(HWND hwnd);
@@ -191,6 +193,11 @@ extern "C" {
                 int ms = (int)lua_tointeger(L, base + 2);
                 Sleep(ms);
             }
+        } else if (func == "createguid") {
+            char buff[64] = { 0 };
+            v.iVal = CreateGUID(buff, sizeof(buff));
+            v.str = s2w(buff);
+            PUSH_STR(v);
         } else if (func == "pause") {
             WaitForSingleObject(GetCurrentProcess(), INFINITE);
         } else if (func == "fileexprefresh") {
@@ -572,6 +579,10 @@ end\n\
 \n\
 function App:Sleep(...)\n\
   App.Call('sleep', ...)\n\
+end\n\
+\n\
+function App:CreateGUID()\n\
+  return App.Call('createguid')\n\
 end\n\
 \n\
 Shell = {}\n\

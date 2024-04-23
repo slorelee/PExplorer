@@ -4,6 +4,8 @@
 #include<Shlwapi.h>
 #include "LuaEngine.h"
 
+#pragma comment(lib, "rpcrt4.lib")
+
 extern BOOL IsUEFIMode();
 
 extern HRESULT CreateShortcut(PTSTR lnk, PTSTR target, PTSTR param, PTSTR icon, int iIcon, int iShowCmd);
@@ -159,6 +161,25 @@ int AppxSysprepInit() {
 void AppActivate(HWND hwnd) {
     SetForegroundWindow(hwnd);
     SetFocus(hwnd);
+}
+
+int CreateGUID(char *guidbuff, size_t size) {
+    char guidString[64] = { 0 };
+    UUID guid;
+    RPC_STATUS status = UuidCreate(&guid);
+
+    if (status != RPC_S_OK) {
+        LOGA("UuidCreate failed.");
+        return 1;
+    }
+
+    _snprintf_s(guidString, sizeof(guidString), "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+        guid.Data1, guid.Data2, guid.Data3,
+        guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+        guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+    memcpy(guidbuff, guidString, size);
+    return 0;
 }
 
 EXTERN_C {
