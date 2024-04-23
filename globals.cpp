@@ -113,10 +113,10 @@ void ExplorerGlobals::getUIFolder()
     }
 }
 
-DWORD PASCAL ReadKernelVersion(WORD *wdVers)
+DWORD ReadFileVersion(const wchar_t *fileName, WORD *wdVers)
 {
     DWORD dwVersion = 0;
-    HMODULE hinstDLL = LoadLibraryExW(L"kernel32.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
+    HMODULE hinstDLL = LoadLibraryExW(fileName, NULL, LOAD_LIBRARY_AS_DATAFILE);
     if (hinstDLL != NULL) {
         HRSRC hResInfo = FindResource(hinstDLL, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
         if (hResInfo != NULL) {
@@ -143,6 +143,11 @@ DWORD PASCAL ReadKernelVersion(WORD *wdVers)
         FreeLibrary(hinstDLL);
     }
     return dwVersion;
+}
+
+DWORD PASCAL ReadKernelVersion(WORD *wdVers)
+{
+    return ReadFileVersion(L"kernel32.dll", wdVers);
 }
 
 void ExplorerGlobals::getSystemInfo()
