@@ -59,10 +59,9 @@ void ExplorerGlobals::Init(HINSTANCE hInstance, LPTSTR lpCmdLine)
 
     getModulePath();
     getSystemInfo();
+    loadConfig();
     getLuaAppEngine();
     getUIFolder();
-
-    loadConfig();
 
     _icon_cache.init();
 }

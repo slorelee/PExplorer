@@ -99,6 +99,7 @@
     "clockarea_dbclick": {
       "command": "timedate.cpl"
     },
+    "disable_showdesktop": false,
     "screen_brightness": 100
   },
   "::文件管理器": {

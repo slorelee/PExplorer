@@ -177,8 +177,6 @@ AppTimer['_InitControlPanel'] = function(tid)
 end
 
 function App:_onDaemon()
-  handle_showdesktop_switcher()
-
   regist_shortcut_ocf()
   regist_system_property()
   regist_protocols()

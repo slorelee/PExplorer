@@ -16,9 +16,16 @@ extern void CreateBrightnessLayer(HINSTANCE hInstance);
 #define WM_CLOCKAREA_EVENT (WM_USER + 100)
 #define HM_CLOCKAREA_CLICKED 1
 
+#define CLOCKAREA_CLICK_TIMER 1001
+#define DISABLE_SHOWDESKTOP_TIMER 1002
+
 void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
                              LONG idObject, LONG idChild,
                              DWORD dwEventThread, DWORD dwmsEventTime);
+
+extern UINT *pUWM_HOOKMESSAGE;
+extern void EnableShowDesktop(HWND hwnd, UINT tid);
+extern void RemoveShowDesktopHookEntry();
 
 // Global variable.
 static HWINEVENTHOOK g_evthook = NULL;
@@ -128,6 +135,7 @@ WinXShell_DaemonWindow::WinXShell_DaemonWindow(HWND hwnd)
 WinXShell_DaemonWindow::~WinXShell_DaemonWindow()
 {
     if (g_evthook) UnhookWinEvent(g_evthook);
+    RemoveShowDesktopHookEntry();
 }
 
 
@@ -139,8 +147,6 @@ HWND WinXShell_DaemonWindow::Create()
                                0, 0, 0, 0, 0);
     return hwnd;
 }
-
-#define CLOCKAREA_CLICK_TIMER 1001
 
 static void TrayClock_OnClick(HWND hwnd, int isDblClick)
 {
@@ -189,11 +195,6 @@ void InstallCADHookEntry()
     }
 }
 
-static void EnableShowDesktop()
-{
-    if (g_Globals._isShell) return;
-}
-
 LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDblClick = 0;
@@ -205,7 +206,7 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         //update_property_handler();
     } else if (nmsg == WM_TASKBARCREATED) {
         InstallEventHookEntry(_hwnd);
-        EnableShowDesktop();
+        EnableShowDesktop(_hwnd, DISABLE_SHOWDESKTOP_TIMER);
     } else if (nmsg == WM_CLOCKAREA_EVENT) {
         if (g_Globals._isDebug) {
             PrintMessage(0, nmsg, wparam, lparam);
@@ -220,6 +221,10 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         if (wparam == CLOCKAREA_CLICK_TIMER) {
             TrayClock_OnClick(_hwnd, (isDblClick>1) ? 1 : 0);
             isDblClick = 0;
+            return S_OK;
+        } else if (wparam == DISABLE_SHOWDESKTOP_TIMER) {
+            HWND hObjWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+            if (hObjWnd) SendMessage(hObjWnd, WM_USER + 0x1BA, 1, 0);
             return S_OK;
         }
     } else if (nmsg == WM_DISPLAYCHANGE) {
@@ -244,6 +249,12 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         }
 #endif
         // fallthough
+    } else if (pUWM_HOOKMESSAGE && nmsg == *pUWM_HOOKMESSAGE) {
+        switch (wparam) {
+        case 1:
+            g_Globals._desktop.ToggleMinimize();
+            break;
+        }
     }
     return super::WndProc(nmsg, wparam, lparam);
 }
@@ -329,9 +340,14 @@ int daemon_entry(int standalone)
         if (g_Globals._lua) g_Globals._lua->onDaemon();
     }
 
+    bool val = JCFG2_DEF("JS_DAEMON", "handle_showdesktop", (g_Globals._isWinPE == TRUE)).ToBool();
+    JVAR("HandleShowDesktop") = val;
+    val = JCFG2_DEF("JS_DAEMON", "disable_showdesktop", false).ToBool();
+    JVAR("DisableShowDesktop") = val;
+
     InstallEventHookEntry(daemon);
     InstallCADHookEntry();
-    EnableShowDesktop();
+    EnableShowDesktop(daemon, DISABLE_SHOWDESKTOP_TIMER);
     update_property_handler();
 
     int brightness = JCFG2_DEF("JS_DAEMON", "screen_brightness", 100).ToInt();
