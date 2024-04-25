@@ -25,6 +25,7 @@ local _clsProc = {
   GetClassName()
   GetFileName()
   GetHandle()
+  IsVisible()
   Show()
   Activate()
   Hide()
@@ -46,7 +47,7 @@ function _clsProc.New(self, win_or_proc, o)
   setmetatable(o, self)
   self.winObj = nil
   self.procObj = nil
-    if not win_or_proc then return o end
+  if not win_or_proc then return o end
 
   if win_or_proc.__name == "Window" then
     if win_or_proc:get_handle() > 0 then
@@ -80,6 +81,11 @@ function _clsProc:GetHandle()
   return 0
 end
 
+function _clsProc:IsVisible()
+  local o = self.winObj
+  if o then return o:is_visible() end
+  return 0
+end
 
 function _clsProc:Show(flag, active)
   local rc = ""
