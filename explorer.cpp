@@ -58,7 +58,6 @@ extern ExplorerGlobals g_Globals;
 boolean SelectOpt = FALSE;
 
 void UIProcess(HINSTANCE hInst, String cmdline);
-extern void InstallCADHookEntry();
 
 extern int SetFileExplorerRefreshHook(LPCTSTR path);
 

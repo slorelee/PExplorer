@@ -18,6 +18,8 @@ extern void CreateBrightnessLayer(HINSTANCE hInstance);
 
 #define CLOCKAREA_CLICK_TIMER 1001
 #define DISABLE_SHOWDESKTOP_TIMER 1002
+#define CAPSLOCK_DOUBLE_TIMER 1010
+#define CAPSLOCK_RESET_TIMER 1011
 
 void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
                              LONG idObject, LONG idChild,
@@ -32,7 +34,7 @@ static HWINEVENTHOOK g_evthook = NULL;
 static HWND g_daemon = NULL;
 static HWND g_clockarea = NULL;
 
-void InstallEventHook(HWND hwnd)
+void InstallEventHook()
 {
     BOOL rc = FALSE;
     HWND hObjWnd = NULL;
@@ -50,8 +52,6 @@ void InstallEventHook(HWND hwnd)
         UnhookWinEvent(g_evthook);
         g_evthook = NULL;
     }
-
-    g_daemon = hwnd;
     g_clockarea = hObjWnd;
 
     if (dwObjProcessId != 0) {
@@ -81,35 +81,52 @@ void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd,
 
 // Ctrl+Alt+Del handler
 // Ctrl+Shift+Esc handler
-static HHOOK g_hCADHook = NULL;
+// CapsLock handler
+static BOOL handle_CAD_press = TRUE;
+static BOOL handle_CAPS_double = FALSE;
+static int nCAPSPressed = 0;
+
+static HHOOK g_hKeyEventHook = NULL;
 TCHAR TASKMANAGER[] = TEXT("TaskMgr.exe");
-LRESULT CALLBACK HandleCADProc(INT iCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK HandleKeyEventProc(INT iCode, WPARAM wParam, LPARAM lParam)
 {
-    if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_DELETE)) {
-        if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
-            Exec(TASKMANAGER, FALSE);
-            return TRUE;
+    if (handle_CAD_press) {
+        if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_DELETE)) {
+            if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
+                Exec(TASKMANAGER, FALSE);
+                return TRUE;
+            }
+        }  else if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_ESCAPE)) {
+            if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
+                Exec(TASKMANAGER, FALSE);
+                return TRUE;
+            }
         }
-    } else if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_ESCAPE)) {
-        if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
-            Exec(TASKMANAGER, FALSE);
-            return TRUE;
+    }
+    if (handle_CAPS_double) {
+        if ((iCode == HC_ACTION) && (wParam == WM_KEYDOWN) && (((LPKBDLLHOOKSTRUCT)lParam)->vkCode == VK_CAPITAL)) {
+            nCAPSPressed++;
+            SetTimer(g_daemon, CAPSLOCK_RESET_TIMER, 500, NULL);
+            if (nCAPSPressed >= 2) {
+                nCAPSPressed = 0;
+                SetTimer(g_daemon, CAPSLOCK_DOUBLE_TIMER, 100, NULL);
+            }
         }
     }
 
-    return CallNextHookEx(g_hCADHook, iCode, wParam, lParam);
+    return CallNextHookEx(g_hKeyEventHook, iCode, wParam, lParam);
 }
 
-VOID InstallCADHook(BOOL Install)
+VOID InstallKeyEventHook(BOOL Install)
 {
     if (Install) {
-        if (!g_hCADHook) {
-            g_hCADHook = SetWindowsHookEx(WH_KEYBOARD_LL, HandleCADProc, g_hInst, 0);
+        if (!g_hKeyEventHook) {
+            g_hKeyEventHook = SetWindowsHookEx(WH_KEYBOARD_LL, HandleKeyEventProc, g_hInst, 0);
         }
     } else {
-        if (g_hCADHook) {
-            UnhookWindowsHookEx(g_hCADHook);
-            g_hCADHook = NULL;
+        if (g_hKeyEventHook) {
+            UnhookWindowsHookEx(g_hKeyEventHook);
+            g_hKeyEventHook = NULL;
         }
     }
 }
@@ -176,36 +193,39 @@ static bool IsX()
     return inited == 1;
 }
 
-static void InstallEventHookEntry(HWND hwnd)
+static void InstallEventHookEntry()
 {
     if (g_Globals._isShell) return;
     //hijack clockarea click event
     if (JCFG2_DEF("JS_DAEMON", "handle_clockarea_click", IsX()).ToBool() != FALSE) {
         // sets up the event hook.
-        InstallEventHook(hwnd);
+        InstallEventHook();
     }
 }
 
-void InstallCADHookEntry()
+void InstallKeyEventHookEntry()
 {
+    handle_CAD_press = FALSE;
+    handle_CAPS_double = FALSE;
     // Ctrl+Alt+Del handler
     if (JCFG2_DEF("JS_DAEMON", "handle_CAD_press", IsX()).ToBool() != FALSE) {
+        handle_CAD_press = TRUE;
+    }
+    // CAPS Lock handler
+    if (JCFG2_DEF("JS_DAEMON", "handle_CAPS_double", false).ToBool() != FALSE) {
+        handle_CAPS_double = TRUE;
+    }
+    if (handle_CAD_press || handle_CAPS_double) {
         // sets up the KEYBOARD hook.
-        InstallCADHook(TRUE);
+        InstallKeyEventHook(TRUE);
     }
 }
 
 LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
 {
     static int isDblClick = 0;
-    if (nmsg == WM_CREATE) {
-        /* Can't work here */
-        //InstallEventHookEntry(_hwnd);
-        //InstallCADHookEntry();
-        //EnableShowDesktop();
-        //update_property_handler();
-    } else if (nmsg == WM_TASKBARCREATED) {
-        InstallEventHookEntry(_hwnd);
+    if (nmsg == WM_TASKBARCREATED) {
+        InstallEventHookEntry();
         EnableShowDesktop(_hwnd, DISABLE_SHOWDESKTOP_TIMER);
     } else if (nmsg == WM_CLOCKAREA_EVENT) {
         if (g_Globals._isDebug) {
@@ -225,6 +245,19 @@ LRESULT WinXShell_DaemonWindow::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
         } else if (wparam == DISABLE_SHOWDESKTOP_TIMER) {
             HWND hObjWnd = FindWindow(TEXT("Shell_TrayWnd"), NULL);
             if (hObjWnd) SendMessage(hObjWnd, WM_USER + 0x1BA, 1, 0);
+            return S_OK;
+        } else if (wparam == CAPSLOCK_DOUBLE_TIMER) {
+            KillTimer(_hwnd, CAPSLOCK_DOUBLE_TIMER);
+            if (g_Globals._lua) {
+                string_t hotkey = TEXT("CAPSLOCK x 2");
+                string_t dmy = TEXT("");
+                g_Globals._lua->call("Shell:_onHotKey", hotkey, dmy);
+            }
+            return S_OK;
+        } else if (wparam == CAPSLOCK_RESET_TIMER) {
+            nCAPSPressed = 0;
+            KillTimer(_hwnd, CAPSLOCK_DOUBLE_TIMER);
+            KillTimer(_hwnd, CAPSLOCK_RESET_TIMER);
             return S_OK;
         }
     } else if (nmsg == WM_DISPLAYCHANGE) {
@@ -335,6 +368,7 @@ int daemon_entry(int standalone)
     }
     HWND daemon = create_daemonwindow();
     g_Globals._hwndDaemon = daemon;
+    g_daemon = daemon;
 
     if (standalone != 0) {
         if (g_Globals._lua) g_Globals._lua->onDaemon();
@@ -345,8 +379,8 @@ int daemon_entry(int standalone)
     val = JCFG2_DEF("JS_DAEMON", "disable_showdesktop", false).ToBool();
     JVAR("DisableShowDesktop") = val;
 
-    InstallEventHookEntry(daemon);
-    InstallCADHookEntry();
+    InstallEventHookEntry();
+    InstallKeyEventHookEntry();
     EnableShowDesktop(daemon, DISABLE_SHOWDESKTOP_TIMER);
     update_property_handler();
 

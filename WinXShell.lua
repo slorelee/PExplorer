@@ -78,6 +78,10 @@ Shell.onHotKey['WIN+F'] = function()
   App:Debug("WIN+F hotkey is pressed.")
 end
 
+Shell.onHotKey['CAPSLOCK x 2'] = function()
+  App:Debug("CAPSLOCK x 2 pressed.")
+end
+
  -- a handler of OpenContainingFolder
 function MyOpenContainingFolderHandler(lnkfile, realfile)
   -- local path = realfile:match('(.+)\\')
