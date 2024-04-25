@@ -30,6 +30,7 @@
 
 #include "../resource.h"
 
+#include "../DUI/Helper.h"
 #include "desktopbar.h"
 #include "taskbar.h"
 #include "startmenu.h"
@@ -124,6 +125,26 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     int start_btn_padding = JCFG2_DEF("JS_STARTMENU", "start_padding", 0).ToInt();
     start_btn_width = JCFG2_DEF("JS_STARTMENU", "start_width", start_btn_width).ToInt();
     _taskbar_pos = start_btn_width + DPI_SX(start_btn_padding) + 1;
+
+    {
+        string_t def_value = TEXT("");
+        string_t start_command = TEXT("");
+
+        memset(_startAction, 0, sizeof(_startAction));
+        if (start_icon.compare(TEXT("empty")) == 0) {
+            def_value = TEXT("none");
+        }
+        start_command = JCFG2_DEF("JS_STARTMENU", "start_command", def_value).ToString();
+        if (start_command == TEXT("")) {
+            if (def_value == TEXT("none")) {
+                strcpy(_startAction, "none");
+            }
+        } else if (start_command.compare(TEXT("none")) == 0) {
+            strcpy(_startAction, "none");
+        } else {
+            strcpy(_startAction, (w2s(start_command)).c_str());
+        }
+    }
     // create "Start" button
     static WNDCLASS wc;
     GetClassInfo(NULL, TEXT("BUTTON"), &wc);
@@ -317,7 +338,7 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
     switch (id_hotkey) {
     case IDHK_DESKTOP: {
         if (_startMenuRoot && _startMenuRoot->IsStartMenuVisible()) {
-            ShowOrHideStartMenu();
+            ShowOrHideStartMenu(_startAction);
         } else {
             g_Globals._desktop.ToggleMinimize();
         }
@@ -325,7 +346,7 @@ void DesktopBar::ProcessHotKey(int id_hotkey)
     }
 
     case IDHK_STARTMENU:
-        ShowOrHideStartMenu();
+        ShowOrHideStartMenu(_startAction);
         break;
     }
 }
@@ -486,7 +507,7 @@ LRESULT DesktopBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
             else
                 return 0;           // disable any other resizing
         } else if (wparam == SC_TASKLIST)
-            ShowOrHideStartMenu();
+            ShowOrHideStartMenu(_startAction);
         goto def;
 
     case WM_SIZE:
@@ -691,25 +712,13 @@ extern void send_wxs_protocol_url(PWSTR pszName);
 
 int DesktopBar::Command(int id, int code)
 {
-    static int isStartButtonHooked = -1;
     if (id == IDC_TOGGLEDESKTOP) id = ID_MINIMIZE_ALL;
     switch (id) {
     case IDC_FILERUN:
         _startMenuRoot->Command(IDC_LAUNCH, 0);
         break;
     case IDC_START: {
-        if (isStartButtonHooked == -1) {
-            String def_value = TEXT("");
-            BOOL isEmptyStartIcon = JCFG2_DEF("JS_STARTMENU", "start_icon", TEXT("")).ToString().compare(TEXT("empty")) == 0;
-            if (isEmptyStartIcon) {
-                def_value = TEXT("none");
-            }
-            isStartButtonHooked = 0;
-            if (JCFG2_DEF("JS_STARTMENU", "start_command", def_value).ToString().compare(TEXT("none")) == 0) {
-                isStartButtonHooked = 1;
-            }
-        }
-        if (!isStartButtonHooked) ShowOrHideStartMenu();
+        ShowOrHideStartMenu(_startAction);
         break;
     }
     case ID_ABOUT_EXPLORER:
@@ -772,8 +781,17 @@ int DesktopBar::Command(int id, int code)
 }
 
 
-void DesktopBar::ShowOrHideStartMenu()
+void DesktopBar::ShowOrHideStartMenu(const char *startAction)
 {
+    if (startAction[0] != '\0') {
+        if (stricmp(startAction, "none") == 0) return;
+
+        if (g_Globals._lua) {
+            g_Globals._lua->call(startAction);
+            return;
+        }
+    }
+
     if (_startMenuRoot) {
         // set the Button, if not set
         if (!Button_GetState(_hwndStartButton))

@@ -223,6 +223,8 @@ end
 
 --------------------------------------------------------------------------------
 
+StartButton = {}
+
 -- return the resource id for startmenu logo
 function Startmenu:SetLogoId()
   local map = {

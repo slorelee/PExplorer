@@ -58,6 +58,18 @@ end
 function App:onTimer(tid)
 end
 
+-- need to update "JS_STARTMENU" : {"start_command": "StartButton:onClick"} in WinXShell.jcfg
+function StartButton:onClick()
+    App:Debug(StartButton:onClick())
+    local cl = Window.Find('CLaunch', 'CLaunchWndClass')
+    App:Debug(cl:IsVisible())
+    if cl:IsVisible() then
+      cl:Hide()
+    else
+      App:Run("%ProgramFiles%\\CLaunch\\CLaunch.exe")
+    end
+end
+
 Shell.onHotKey['WIN+S'] = function()
   App:Debug("WIN+S hotkey is pressed.")
 end
