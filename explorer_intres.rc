@@ -117,6 +117,7 @@ BEGIN
     "\r\n"
     "#include ""explorer-en.rc""\r\n"
     "#include ""explorer-ja.rc""\r\n"
+    "#include ""explorer-ru.rc""\r\n"
     "\r\n"
     "#pragma code_page(65001)"
     "#include ""explorer-zh.rc""\r\n"
@@ -315,7 +316,11 @@ CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "WinXShell.exe.m
 #include "explorer-ja.rc"
 #endif
 
+// UTF-8
 #pragma code_page(65001)
+#ifdef LANGUAGE_RU_RU
+#include "explorer-ru.rc"
+#endif
 #ifdef LANGUAGE_ZH_CN
     #include "explorer-zh.rc"
 #endif

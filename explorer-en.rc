@@ -59,8 +59,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "WinXShell &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About WinXShell...",          ID_ABOUT_EXPLORER
+        MENUITEM "WinXShell &FAQ...",           ID_EXPLORER_FAQ
+        MENUITEM "&About WinXShell...",         ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END
@@ -118,8 +118,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "WinXShell &FAQ...",            ID_EXPLORER_FAQ
-        MENUITEM "&About WinXShell...",          ID_ABOUT_EXPLORER
+        MENUITEM "WinXShell &FAQ...",           ID_EXPLORER_FAQ
+        MENUITEM "&About WinXShell...",         ID_ABOUT_EXPLORER
         MENUITEM "About &OS...",                ID_ABOUT_WINDOWS
     END
 END

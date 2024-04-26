@@ -69,8 +69,8 @@
 #define IDR_MAINFRAME                   109
 #define IDR_LUA_HELPER                  110
 #define IDR_APP_HELPERS                 111
-#define IDM_MDIFRAME                    110
 #define ID_EXECUTE                      111
+#define IDM_MDIFRAME                    112
 #define IDM_SDIFRAME                    113
 #define IDI_LOGOFF                      124
 #define IDI_FOLDERARROW                 125

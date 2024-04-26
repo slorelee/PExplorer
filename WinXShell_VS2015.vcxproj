@@ -778,6 +778,8 @@ cscript ResBuilder.vbs
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="explorer-en.rc" />
+    <ResourceCompile Include="explorer-ja.rc" />
+    <ResourceCompile Include="explorer-ru.rc" />
     <ResourceCompile Include="explorer-zh.rc" />
     <ResourceCompile Include="explorer_intres.rc" />
   </ItemGroup>
