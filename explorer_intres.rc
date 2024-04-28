@@ -75,58 +75,6 @@ BEGIN
     VK_F5,          ID_REFRESH,             VIRTKEY, NOINVERT
 END
 
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include <windows.h>\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "#ifndef ROSSHELL\r\n"
-    "IDB_IMAGES BITMAP DISCARDABLE ""res/images.bmp""\r\n"
-    "IDB_TOOLBAR BITMAP DISCARDABLE ""res/toolbar.bmp""\r\n"
-    "#endif\r\n"
-    "#ifndef __REACTOS__\r\n"
-    "LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL\r\n"
-    "STRINGTABLE DISCARDABLE \r\n"
-    "BEGIN\r\n"
-    "IDS_VERSION_STR ""RC 5.0.0""\r\n"
-    "#ifdef UNICODE\r\n"
-    "IDS_EXPLORER_VERSION_STR ""WinXShell %0s""\r\n"
-    "#else\r\n"
-    "IDS_EXPLORER_VERSION_STR ""WinXShell Ansi %0s""\r\n"
-    "#endif\r\n"
-    "END\r\n"
-    "#endif\r\n"
-    "#ifndef _DEBUG\r\n"
-    "CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE ""explorer.exe.manifest""\r\n"
-    "#endif\r\n"
-    "\r\n"
-    "#include ""explorer-en.rc""\r\n"
-    "#include ""explorer-ja.rc""\r\n"
-    "#include ""explorer-ru.rc""\r\n"
-    "\r\n"
-    "#pragma code_page(65001)"
-    "#include ""explorer-zh.rc""\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Icon
@@ -246,9 +194,12 @@ IDR_APP_HELPERS           FILE                    "lua_helper/APP_HELPERS.lua"
 // Version
 //
 
+#define PRODUCT_VERSION_STR "5.0.0.0"
+#define PRODUCT_COPYRIGHT_STR "(c) 2015-2022 Slore"
+#define RELEASE_DATE 20,22,11,11
+
 1 VERSIONINFO
- FILEVERSION 20,22,11,11
- PRODUCTVERSION 5.0.0.0
+FILEVERSION RELEASE_DATE
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -265,12 +216,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "FreeMan"
             VALUE "FileDescription", "Windows WinXShell"
-            VALUE "FileVersion", "20,22,11,11"
             VALUE "InternalName", "WinXShell"
             VALUE "LegalCopyright", "(c) FreeMan. All rights reserved."
             VALUE "OriginalFilename", "WinXShell.exe"
             VALUE "ProductName", "WINXSHELL.EXE"
-            VALUE "ProductVersion", "5.0.0.0"
+            VALUE "ProductVersion", PRODUCT_VERSION_STR
         END
     END
     BLOCK "VarFileInfo"
@@ -293,18 +243,17 @@ END
 IDB_IMAGES BITMAP DISCARDABLE "res/images.bmp"
 IDB_TOOLBAR BITMAP DISCARDABLE "res/toolbar.bmp"
 #endif
-#ifndef __REACTOS__
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 STRINGTABLE DISCARDABLE 
 BEGIN
-IDS_VERSION_STR "RC 5.0.0"
+IDS_VERSION_STR PRODUCT_VERSION_STR
 #ifdef UNICODE
 IDS_EXPLORER_VERSION_STR "WinXShell %0s"
 #else
 IDS_EXPLORER_VERSION_STR "WinXShell Ansi %0s"
 #endif
+IDS_COPYRIGHT_STR PRODUCT_COPYRIGHT_STR
 END
-#endif
 #ifndef _DEBUG
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST DISCARDABLE PURE "WinXShell.exe.manifest"
 #endif

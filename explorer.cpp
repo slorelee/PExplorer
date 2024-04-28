@@ -307,6 +307,7 @@ struct ExplorerAboutDlg : public
 
         FmtString ver_txt(ResString(IDS_EXPLORER_VERSION_STR), (LPCTSTR)ResString(IDS_VERSION_STR));
         SetWindowText(GetDlgItem(hwnd, IDC_VERSION_TXT), ver_txt);
+        SetWindowText(GetDlgItem(hwnd, IDC_COPYRIGHT_TXT), ResString(IDS_COPYRIGHT_STR));
 
         HWND hwnd_winver = GetDlgItem(hwnd, IDC_WIN_VERSION);
         SetWindowText(hwnd_winver, get_windows_version_str());
