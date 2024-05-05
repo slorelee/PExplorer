@@ -673,6 +673,7 @@ cscript ResBuilder.vbs
     <ClInclude Include="luaengine\LuaAppEngine.h" />
     <ClInclude Include="luaengine\LuaEngine.h" />
     <ClInclude Include="luaengine\LuaHelper.h" />
+    <ClInclude Include="luaengine\WindowCompositionAttribute.h" />
     <ClInclude Include="shell\fileexplorer.h" />
     <ClInclude Include="systemsettings\DesktopCommand.h" />
     <ClInclude Include="systemsettings\MonitorAdapter.h" />

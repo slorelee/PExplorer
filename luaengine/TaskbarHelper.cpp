@@ -1,6 +1,9 @@
 #include "precomp.h"
 
+#include "WindowCompositionAttribute.h"
 #include "LuaEngine.h"
+
+pfnSetWindowCompositionAttribute setWindowCompositionAttribute = NULL;
 
 void AutoHideTaskBar(BOOL bHide)
 {
@@ -29,6 +32,50 @@ int TaskBarAutoHideState()
     return 0;
 }
 
+BOOL SetWindowTransparency(HWND hwnd, const TCHAR *mode, UINT transparency, COLORREF color) {
+    BOOL retVal = FALSE;
+    if (setWindowCompositionAttribute == NULL) {
+        HMODULE huser = GetModuleHandle(L"user32.dll");
+        setWindowCompositionAttribute = (pfnSetWindowCompositionAttribute)
+            GetProcAddress(huser, "SetWindowCompositionAttribute");
+    }
+    if (setWindowCompositionAttribute) {
+        ACCENT_POLICY accent = { ACCENT_ENABLE_BLURBEHIND, 0, 0x00000000, 0 };
+        WINDOWCOMPOSITIONATTRIBDATA data;
+        if (_tcsicmp(mode, TEXT("acrylic")) == 0) {
+            accent.AccentState = ACCENT_ENABLE_ACRYLICBLURBEHIND;
+        } else if (_tcsicmp(mode, TEXT("transparent")) == 0) {
+            accent.AccentState = ACCENT_ENABLE_TRANSPARENTGRADIENT;
+            accent.AccentFlags = 2;
+        }
+        if (transparency > 100) transparency = 100;
+        transparency = (100 - transparency) * 255 / 100;
+        accent.GradientColor = color | (transparency << 24);
+        data.Attrib = WCA_ACCENT_POLICY;
+        data.pvData = &accent;
+        data.cbData = sizeof(accent);
+        retVal = setWindowCompositionAttribute(hwnd, &data);
+    }
+    return retVal;
+}
+
+void TaskbarTransparency(HWND hwnd, const TCHAR *mode, UINT transparency, COLORREF color)
+{
+    HWND taskbar = hwnd;
+    TCHAR sysPathBuff[MAX_PATH] = { 0 };
+    GetWindowsDirectory(sysPathBuff, MAX_PATH);
+    string_t dwmPath = sysPathBuff;
+#ifdef _WIN64
+    dwmPath.append(TEXT("\\System32\\dwm.exe"));
+#else
+    dwmPath.append(TEXT("\\SysNative\\dwm.exe"));
+#endif
+    if (!PathFileExists(dwmPath.c_str())) {
+        return;
+    }
+    if (!taskbar)taskbar = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+    if (taskbar) SetWindowTransparency(taskbar, mode, transparency, color);
+}
 
 EXTERN_C {
 
@@ -49,6 +96,10 @@ EXTERN_C {
         } else if (func == "taskbar::autohidestate") {
             v.iVal = TaskBarAutoHideState();
             PUSH_INT(v);
+        } else if (func == "taskbar::settransparency") {
+            string_t mode = s2w(lua_tostring(L, base + 2));
+            int val = (int)lua_tointeger(L, base + 3);
+            TaskbarTransparency(NULL, mode.c_str(), val, 0x0);
         } else if (func == "taskbar::pin") {
             if (isWinXShellAsShell()) return ret;
             string_t str_file = s2w(lua_tostring(L, base + 2));

@@ -128,6 +128,9 @@
     "blue": {
       "taskbar": {
         "bkcolor": [0, 120, 215],
+        "#bkmode_values": "opaque; transparent; acrylic",
+        "bkmode": "opaque",
+        "transparency": 100,
         "task_line_color": [238, 238, 238],
         "textcolor": "0xffffff"
       }
@@ -135,6 +138,9 @@
     "dark": {
       "taskbar": {
         "bkcolor": [38, 38, 38],
+        "#bkmode_values": "opaque; transparent; acrylic",
+        "bkmode": "transparent",
+        "transparency": 64,
         "task_line_color": [238, 238, 238],
         "textcolor": "0xffffff"
       }
@@ -143,6 +149,9 @@
       "taskbar": {
         "style": "light",
         "bkcolor": [238, 238, 238],
+        "#bkmode_values": "opaque; transparent; acrylic",
+        "bkmode": "acrylic",
+        "transparency": 100,
         "task_line_color": [0, 120, 215],
         "textcolor": "0x000000"
       }

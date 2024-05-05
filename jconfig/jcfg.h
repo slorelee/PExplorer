@@ -68,6 +68,7 @@ extern bool JCfg_TaskThumbnailEnabled();
 
 #define JCFG_THEME_DEF(key1, key2, key3, defval) (JCfg_GetValue(&g_JCfg, TEXT("JS_THEMES"), JCFG2(key1, "theme"), TEXT(key2), TEXT(key3), defval))
 #define JCFG_THEME_COLOR(key1, key2, key3) (JCFG_THEME_DEF(key1, key2, key3, Value(0)))
+#define JCFG_THEME_VALUE(key1, key2, key3, defval) (JCFG_THEME_DEF(key1, key2, key3, defval))
 
 #define DESKTOP_BKCOLOR() (JValueToColor(JCFG2("JS_DESKTOP", "bkcolor")))
 #define TASKBAR_BKCOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "bkcolor")))
@@ -75,6 +76,9 @@ extern bool JCfg_TaskThumbnailEnabled();
 #define TASKBAR_TASKLINECOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "task_line_color")))
 
 #define TASKBAR_GETTHEMESTYLE() (JCFG_THEME_DEF("JS_TASKBAR", "taskbar", "style", TEXT("dark")))
+#define TASKBAR_GETBKMODE() (JCFG_THEME_VALUE("JS_TASKBAR", "taskbar", "bkmode", TEXT("")))
+#define TASKBAR_GETBKTRANSPARENCY(transparency) (JCFG_THEME_VALUE("JS_TASKBAR", "taskbar", "transparency", Value(transparency)))
+#define TASKBAR_GETBKTRANSPARENCYCOLOR() (JValueToColor(JCFG_THEME_COLOR("JS_TASKBAR", "taskbar", "transparency_color")))
 
 #define TASKBAR_BRUSH() (g_JCfg_taskbar_bkbrush)
 #define TASKBAR_TEXTCOLOR() (g_JCfg_taskbar_textcolor)

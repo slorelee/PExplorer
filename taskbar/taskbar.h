@@ -100,6 +100,7 @@ protected:
 
     static BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lparam);
 
+    void    ApplyBackgroundStyle();
     void    Refresh();
     void    ResizeButtons();
 };

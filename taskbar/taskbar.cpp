@@ -47,6 +47,8 @@ extern void InitThumbnailWindow(HWND taskbar, HWND toolbar);
 extern int DrawThumbnailWindow(HINSTANCE hInstance, HWND hWndSrc, LPCTSTR lpClassName, LPCTSTR lpWindowName, int id);
 extern void DestoryThumbnailWindow();
 
+extern void TaskbarTransparency(HWND hwnd, const TCHAR *mode, UINT transparency, COLORREF color);
+
 // constants for RegisterShellHook()
 #define RSH_UNREGISTER          0
 #define RSH_REGISTER            1
@@ -271,6 +273,8 @@ LRESULT TaskBar::Init(LPCREATESTRUCT pcs)
     if (_thumbnail) {
         InitThumbnailWindow(_hwnd, _htoolbar);
     }
+
+    ApplyBackgroundStyle();
     return 0;
 }
 
@@ -280,6 +284,7 @@ LRESULT TaskBar::WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam)
     case WM_SIZE:
         SendMessage(_htoolbar, WM_SIZE, 0, 0);
         ResizeButtons();
+        // ApplyBackgroundStyle();
         break;
 
     case WM_TIMER:
@@ -762,6 +767,25 @@ BOOL CALLBACK TaskBar::EnumWndProc(HWND hwnd, LPARAM lparam)
     }
 
     return TRUE;
+}
+
+void TaskBar::ApplyBackgroundStyle()
+{
+    static String bkmode = TEXT("-");
+    int transparency = 100;
+    COLORREF transparency_color = 0;
+    if (bkmode == TEXT("")) return;
+
+    if (bkmode == TEXT("-")) {
+        bkmode = TASKBAR_GETBKMODE().ToString();
+        if (bkmode == TEXT("opaque")) {
+            bkmode = TEXT("");
+            return;
+        }
+        transparency = TASKBAR_GETBKTRANSPARENCY(100);
+        transparency_color = TASKBAR_GETBKTRANSPARENCYCOLOR();
+    }
+    TaskbarTransparency(GetParent(_hwnd), bkmode.c_str(), transparency, transparency_color);
 }
 
 void TaskBar::Refresh()

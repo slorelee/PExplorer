@@ -338,6 +338,9 @@
     <ClInclude Include="DUI\LuaUIEngine.h">
       <Filter>DUI</Filter>
     </ClInclude>
+    <ClInclude Include="luaengine\WindowCompositionAttribute.h">
+      <Filter>luaengine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="explorer_intres.rc" />
