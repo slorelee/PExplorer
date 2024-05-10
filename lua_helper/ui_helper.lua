@@ -288,6 +288,10 @@ function UIWindow:OnShow()
     end
 end
 
+function UIWindow:OnHide()
+  --
+end
+
 function UIWindow:Close()
     sui:close()
 end
