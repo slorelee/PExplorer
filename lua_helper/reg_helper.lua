@@ -91,7 +91,6 @@ function Reg:GetSubKeys(key)
   local keys = k:get_keys()
   k:close()
   if #keys >= 1 then
-    table.remove(keys, 1) -- remove self
     return keys
   end
   return nil
