@@ -580,6 +580,25 @@ static void Shell32DllHacker()
 
 #include <windef.h>
 
+#ifndef _DPI_AWARENESS_CONTEXTS_
+#define _DPI_AWARENESS_CONTEXTS_
+DECLARE_HANDLE(DPI_AWARENESS_CONTEXT);
+
+typedef enum DPI_AWARENESS {
+    DPI_AWARENESS_INVALID = -1,
+    DPI_AWARENESS_UNAWARE = 0,
+    DPI_AWARENESS_SYSTEM_AWARE = 1,
+    DPI_AWARENESS_PER_MONITOR_AWARE = 2
+} DPI_AWARENESS;
+
+#define DPI_AWARENESS_CONTEXT_UNAWARE               ((DPI_AWARENESS_CONTEXT)-1)
+#define DPI_AWARENESS_CONTEXT_SYSTEM_AWARE          ((DPI_AWARENESS_CONTEXT)-2)
+#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE     ((DPI_AWARENESS_CONTEXT)-3)
+#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2  ((DPI_AWARENESS_CONTEXT)-4)
+#define DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED     ((DPI_AWARENESS_CONTEXT)-5)
+
+#endif // !_DPI_AWARENESS_CONTEXTS_
+
 #ifndef ROSSHELL
 void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 {
@@ -588,13 +607,11 @@ void explorer_show_frame(int cmdShow, LPTSTR lpCmdLine)
 
     HMODULE hModule = LoadLibraryA("user32.dll");
     if (hModule) {
-        typedef UINT(*func)(UINT);
+        typedef UINT(*func)(DPI_AWARENESS_CONTEXT);
         func _SetThreadDpiAwarenessContext = (func)GetProcAddress(hModule, "SetThreadDpiAwarenessContext");
         if (_SetThreadDpiAwarenessContext) {
-            // 0x7811  <dpiAware>true</dpiAware>
-            // 0x6010  <dpiAware>false</dpiAware>
             UINT DpiAwareness = 0x7811;
-            _SetThreadDpiAwarenessContext(DpiAwareness);
+            _SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
             FreeLibrary(hModule);
         }
     }
