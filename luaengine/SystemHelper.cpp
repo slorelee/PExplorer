@@ -3,7 +3,7 @@
 #include<winternl.h>
 #include<Shlwapi.h>
 #include "LuaEngine.h"
-
+#include "../utility/DiskHelper.h"
 #pragma comment(lib, "rpcrt4.lib")
 
 extern BOOL IsUEFIMode();
@@ -442,6 +442,10 @@ EXTERN_C {
             AppActivate((HWND)v.iVal);
         } else if (func == "os::info") {
             return lua_os_info(L, top, base);
+        } else if (func == "volume::bitlockerprotection") {
+            v.str = s2w(lua_tostring(L, base + 2));
+            v.iVal = GetBitLockerProtectionStatus(v.str.c_str());
+            PUSH_INT(v);
         } else if (func == "file::exists") {
             return lua_file_exists(L, top, base);
         } else if (func == "file::doverb") {

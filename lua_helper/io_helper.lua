@@ -1,5 +1,14 @@
+Disk = {}
 File = {}
 Folder = {}
+
+function Disk.BitLockerProtection(path)
+  return App.Call('volume::bitlockerprotection', path)
+end
+
+function Disk.IsLocked(path)
+  return Disk.BitLockerProtection(path) == 6
+end
 
 function File.Exists(path)
   return App.Call('file::exists', path) == 1
