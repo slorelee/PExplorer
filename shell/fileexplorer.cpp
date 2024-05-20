@@ -6,6 +6,7 @@
 #include "../resource.h" /* IDI_EXPLORER */
 #include "fileexplorer.h"
 
+#include "../utility/DiskHelper.h"
 #pragma comment(lib, "Dwmapi.lib")
 
 #define CLSID_MyComputerName     TEXT("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
@@ -324,6 +325,20 @@ static int CustomFileDialog(IFileOpenDialog *pfd)
 #define LOGA(txt) _logA_(txt)
 #endif
 
+int isRootDrive(LPOLESTR pwsz)
+{
+    size_t len = wcslen(pwsz);
+    if (len == 0) return 0;
+    if (len == 1) {
+        if (pwsz[0] >= L'A' && pwsz[0] <= L'Z') return 1;
+    } else if (len == 2) {
+        if (pwsz[1] == L':' && pwsz[0] >= L'A' && pwsz[0] <= L'Z') return 1;
+    } else {
+        if (pwsz[len - 2] == L':' && pwsz[len - 1] == L'\\') return 1;
+    }
+    return 0;
+}
+
 IFACEMETHODIMP CFileDialogEventHandler::OnFolderChanging(IFileDialog *pDlg, IShellItem *pItem)
 {
     LPOLESTR pwsz = NULL;
@@ -342,6 +357,11 @@ IFACEMETHODIMP CFileDialogEventHandler::OnFolderChanging(IFileDialog *pDlg, IShe
         if (strcmp(ptr, "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}") == 0 ||
             strcmp(ptr, "::{26EE0668-A00A-44D7-9371-BEB064C98683}") == 0) {
             gLuaCall("wxs_open", TEXT("controlpanel"), TEXT(""));
+        } else {
+            if (isRootDrive(pwsz) && GetDriveEncryptionStatus(pwsz) == Locked) {
+                DoFileVerb(pwsz, TEXT("unlock-bde"));
+                return S_FALSE;
+            }
         }
         CoTaskMemFree(pwsz);
     }

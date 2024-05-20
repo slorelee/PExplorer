@@ -193,6 +193,9 @@
     <ClCompile Include="luaengine\VolumeHelper.cpp">
       <Filter>luaengine</Filter>
     </ClCompile>
+    <ClCompile Include="utility\DiskHelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -340,6 +343,9 @@
     </ClInclude>
     <ClInclude Include="luaengine\WindowCompositionAttribute.h">
       <Filter>luaengine</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\DiskHelper.h">
+      <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
