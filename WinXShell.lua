@@ -60,14 +60,15 @@ end
 
 -- need to update "JS_STARTMENU" : {"start_command": "StartButton:onClick"} in WinXShell.jcfg
 function StartButton:onClick()
-    App:Debug(StartButton:onClick())
-    local cl = Window.Find('CLaunch', 'CLaunchWndClass')
-    App:Debug(cl:IsVisible())
-    if cl:IsVisible() then
+  App:Debug("StartButton:onClick()")
+  local cl = Window.Find('CLaunch', 'CLaunchWndClass')
+  local cl_stat = cl:IsVisible()
+  App:Debug(cl_stat)
+  if cl_stat == true then
       cl:Hide()
-    else
-      App:Run("%ProgramFiles%\\CLaunch\\CLaunch.exe")
-    end
+  else
+      App:Run(App.Path .. "\\..\\CLaunch\\CLaunch.exe", "/n")
+   end
 end
 
 Shell.onHotKey['WIN+S'] = function()
