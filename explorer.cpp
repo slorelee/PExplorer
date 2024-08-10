@@ -688,6 +688,11 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         UpdateSysColor(lpCmdLineOrg);
     }
 
+    if (_tcsstr(ext_options, TEXT("-regist_only"))) {
+        RegistAppPath();
+        return 0;
+    }
+
     if (_tcsstr(ext_options, TEXT("-regist"))) {
         RegistAppPath();
     }
