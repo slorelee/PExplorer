@@ -95,7 +95,7 @@ extern "C" {
 
     int lua_app_version(lua_State* L)
     {
-        lua_pushstring(L, LUA_RELEASE);
+        lua_pushstring(L, PRODUCT_VERSION_STR);
         return 1;
     }
 

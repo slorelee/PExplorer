@@ -2,6 +2,14 @@
 // Microsoft Visual C++ generated include file.
 // Used by explorer_intres.rc
 //
+
+//
+// Version
+//
+#define PRODUCT_VERSION_STR "5.1.3.0"
+#define PRODUCT_COPYRIGHT_STR "(c) 2015-2024 Slore"
+#define RELEASE_DATE 20,24,06,06
+
 #define IDS_TITLE                       1
 #define MANIFEST_RESOURCE_ID            1
 #define IDS_START                       2
