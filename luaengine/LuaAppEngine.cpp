@@ -2,6 +2,9 @@
 #include <precomp.h>
 #include <string>
 #include <Windows.h>
+#include <conio.h>
+#include <io.h>
+#include <fcntl.h>
 #include "../resource.h"
 #include "LuaEngine.h"
 
@@ -68,6 +71,9 @@ extern void _logA_(LPCSTR txt);
 
 #define LOGA(txt) _logA_(txt)
 #endif
+
+HANDLE cmd_out = INVALID_HANDLE_VALUE;
+HANDLE cmd_err = INVALID_HANDLE_VALUE;
 
 extern "C" {
     const void *lua_app_addr = NULL;
@@ -495,6 +501,38 @@ extern "C" {
         return 0;
     }
 
+    int lua_cmd_write(lua_State* L)
+    {
+        int base = 0;
+        size_t len = 0;
+        const char *s = NULL;
+        int top = lua_gettop(L);
+        int stdmode = 0;
+        DWORD dwWrite = 0;
+
+        /* skip app table self */
+        if (lua_app_addr && top >= 1) {
+            if (lua_app_addr == lua_topointer(L, 1)) {
+                base++;
+            }
+        }
+
+        if (lua_isinteger(L, base + 1) == 0) {
+            lua_pop(L, -1);
+            return 0;
+        }
+        stdmode = (int)lua_tointeger(L, base + 1);
+
+        s = luaL_tolstring(L, base + 2, &len);
+
+        if (stdmode == 1 && cmd_out != INVALID_HANDLE_VALUE) {
+            WriteFile(cmd_out, s, strlen(s), &dwWrite, NULL);
+        } else if(stdmode == 2 && cmd_err != INVALID_HANDLE_VALUE) {
+            WriteFile(cmd_err, s, strlen(s), &dwWrite, NULL);
+        }
+        return 0;
+    }
+
     static const luaL_Reg lua_reg_app_funcs[] = {
         { "Version", lua_app_version },
         { "Call", lua_app_call },
@@ -504,6 +542,7 @@ extern "C" {
         { "Print", lua_print },
         { "Alert", lua_alert },
         { "Log", lua_log },
+        { "Write", lua_cmd_write },
 #ifdef _DEBUG
         { "Stack", lua_stack },
 #endif // DEBUG
@@ -669,6 +708,24 @@ int LuaAppEngine::call(const char *funcname, int p1, int p2, int nres)
 int LuaAppEngine::call(const char *funcname, string_t& p1, string_t& p2, int nres)
 {
     return LuaApp.Call(funcname, p1, p2, nres);
+}
+
+int LuaAppEngine::InitOutputStream() {
+        TCHAR output[MAX_PATH + 1] = { 0 };
+        DWORD dwAccess = GENERIC_WRITE;
+        DWORD dw = GetEnvironmentVariable(TEXT("WINXSHELL_STDOUT"), output, MAX_PATH);
+        if (dw == 0) return 1;
+
+        DWORD dwCreate = (dwAccess == GENERIC_WRITE) ? CREATE_ALWAYS :
+            ((dwAccess == (GENERIC_READ | GENERIC_WRITE)) ? OPEN_ALWAYS : OPEN_EXISTING);
+        HANDLE hFile = CreateFile(output, dwAccess, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, dwCreate, 0, NULL);
+        if (hFile == INVALID_HANDLE_VALUE) return 1;
+        if (dwAccess == (GENERIC_READ | GENERIC_WRITE)) {
+            SetFilePointer(hFile, 0, NULL, FILE_END);
+        }
+        cmd_out = hFile;
+        cmd_err = hFile;
+        return 0;
 }
 
 void LuaAppEngine::RunCode(string_t& code)

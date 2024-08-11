@@ -208,3 +208,13 @@ function App:initControlPanel(ver)
 end
 
 --
+
+Cmd = {}
+function Cmd:Echo(s)
+    App.Write(1, s)
+end
+
+function Cmd:Error(s)
+    App.Write(2, s)
+end
+

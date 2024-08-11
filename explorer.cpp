@@ -707,6 +707,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
     if (code_opt) {
         String code = GetParameter(lpCmdLineOrg, code_opt, TRUE);
         if (g_Globals._lua) {
+            if (_tcsstr(ext_options, TEXT("-cmd"))) {
+                g_Globals._lua->InitOutputStream();
+            }
             g_Globals._lua->RunCode(code);
         }
         return g_Globals._exitcode;
@@ -716,6 +719,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         String file = GetParameter(lpCmdLineOrg, TEXT("-script"), TRUE);
         if (PathFileExists(file.c_str())) {
             if (g_Globals._lua) {
+                if (_tcsstr(ext_options, TEXT("-cmd"))) {
+                    g_Globals._lua->InitOutputStream();
+                }
                 g_Globals._lua->LoadFile(file);
             } else {
                 new LuaAppEngine(file);
