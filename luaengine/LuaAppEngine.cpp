@@ -251,7 +251,11 @@ extern "C" {
         strcpy(infoname, name.c_str());
         name = _strlwr(infoname);
 
-        if (name == "cmdline") {
+        if (name == "version") {
+            PUSH_CSTR(PRODUCT_VERSION_STR);
+        }  else if (name == "luaversion") {
+            PUSH_CSTR(LUA_RELEASE);
+        } else if (name == "cmdline") {
             v.str = g_Globals._cmdline;
             PUSH_STR(v);
         } else if (name == "path") {
@@ -534,7 +538,7 @@ extern "C" {
     }
 
     static const luaL_Reg lua_reg_app_funcs[] = {
-        { "Version", lua_app_version },
+        { "Ver", lua_app_version },
         { "Call", lua_app_call },
         { "Info", lua_app_info },
         { "JCfg", lua_app_jcfg },

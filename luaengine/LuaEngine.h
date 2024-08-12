@@ -43,6 +43,7 @@ extern void ShellContextMenuVerb(const TCHAR *file, TCHAR *verb);
 
 
 #define PUSH_STR(v) {lua_pushstring(L, w2s(v.str).c_str());ret++;}
+#define PUSH_CSTR(str) {lua_pushstring(L, str);ret++;}
 #define PUSH_INT(v) {lua_pushinteger(L, v.iVal);ret++;}
 #define PUSH_BOOL(v) {lua_pushboolean(L, v.iVal);ret++;}
 #define PUSH_INTVAL(val) {lua_pushinteger(L, val);ret++;}
