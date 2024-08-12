@@ -50,13 +50,16 @@ int CatPipeFile(TCHAR *file) {
 
     fseek(fp, 0, SEEK_END);
     file_size = ftell(fp);
-    tmp = (char *)malloc(file_size * sizeof(char));
-    memset(tmp, '\0', file_size * sizeof(char));
+    tmp = (char *)malloc(file_size + 1);
+    if (!tmp) return 1;
+    memset(tmp, '\0', file_size + 1);
     fseek(fp, 0, SEEK_SET);
     fread(tmp, sizeof(char), file_size, fp);
     fclose(fp);
 
     printf("%s\n", tmp);
+    fflush(stdout);
+    free(tmp);
     return 0;
 }
 
