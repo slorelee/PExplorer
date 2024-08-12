@@ -7,8 +7,13 @@ int StartWinXShellProcess(int argc, TCHAR *argv[]) {
     TCHAR newcmd[4096] = { 0 };
     TCHAR appname[MAX_PATH] = { 0 };
     LPTSTR cmdline = _tcsdup(GetCommandLine());
-    LPTSTR args = _tcsstr(cmdline, TEXT("WinXShellC.exe"));
+    LPTSTR args = NULL;
+    _tcsncpy_s(appname, cmdline, MAX_PATH); /* lower appname */
+    _tcslwr_s(appname, MAX_PATH);
+    args = _tcsstr(appname, TEXT("winxshellc.exe"));
     if (args != NULL) {
+        args = cmdline + int(args - appname);
+        ZeroMemory(appname, MAX_PATH);
         _tcsncpy_s(appname, cmdline, args - cmdline);
         _tcscat_s(appname, TEXT("WinXShell.exe"));
         args += 14;
