@@ -1,5 +1,129 @@
 # 更新历史记录
 
+## WinXShell RC5.1.4 beta1 (2024.08.08)
+这是一个主要更新。添加和改善了以下内容:
+
+* [App] 添加 ru-RU 俄语信息资源。
+* [App] 增加`-regist_only`选项，仅注册程序路径，执行命令时可省略程序路径(与`-regist -noaction`效果相同)。
+* [Daemon] 增加`"JS_DAEMON":{"disable_showdesktop": boolean}`选项来关闭显示桌面处理行为。
+* [Daemon] 增加连续按下2次 CAPSLOCK 大写字母锁定键响应函数。
+* [wxsUI] 修复UI_Calendar组件内存使用量持续增长的问题。
+* [Shell] 改善 新增 _FileExpRefresh_ 扩展，其他文件管理器也支持自动刷新。
+* [Shell] 新增任务栏透明效果相关设置(需要DWM组件支持)。
+* [FileExplorer] 改善文件资源管理器在高分屏下的显示效果。
+* [FileExplorer] 改善驱动器打开动作。当双击BitLocker加密驱动器时，将自动弹出解锁对话框。
+* [Lua] 增加`App.Version`, `Lua.Version`属性，可查看当前程序版本信息。
+* [Lua] 增加`App:CreateGUID()`方法，可用来生成GUID字符串。
+* [Lua] 增加`System:NetJoin()`方法，可用来加入工作组或域。
+* [Lua] 增加`System:EnableEUDC()`方法，开启用户自定义外字支持。
+* [Lua] 增加`Proc:IsVisable()`方法，可以判断程序窗口是否处于显示或隐藏状态。
+* [Lua] 增加`Proc:Activate()`方法，可以激活程序窗口。
+* [Lua] 增加`Disk.IsLocked()`方法，可以判断磁盘分区是否被BitLocker加密。
+* [Lua] 增加 _WinXShellC.exe_ 控制台程序，执行`-code 代码`或者`-script 脚本文件`时，可通过`Cmd:Echo()`函数输出内容到控制台进行交互。
+
+```bat
+for /f %i in ('WinXShellC.exe -code Cmd:Echo^(App.Version^)') do set Ver=%i
+echo %Ver%
+for /f %i in ('WinXShellC.exe -code Cmd:Echo^(Screen:Get^('X'^)^)') do set ScreenX=%i
+echo %ScreenX%
+```
+
+---
+## WinXShell 5.1.2 (2024.02.02)
+这是一个主要更新。添加和改善了以下内容:
+
+* [Daemon] 修复Explorer.exe高版本显示桌面按钮崩溃问题。
+* [wxsUI] UI_Logon增加用户按钮热键，可通过Alt+A直接登录Admin账户, Alt+S登录SYSTEM账户。
+* [wxsUI] 任务栏在屏幕上方时，UI_WIFI将显示到右上角。
+* [wxsUI] 修复当启动后再创建PPPoE时，UI_WIFI界面显示高度不正确的问题。
+* [Shell] 改善 其他文件管理器也支持自动刷新。
+* [Shell] _WinXShell.lua_ 中可以定义2个热键函数， WinXShell作为外壳时可自定义WIN+S，WIN+F热键动作。
+
+```lua
+Shell.onHotKey['WIN+S'] = function()
+  App:Debug("WIN+S hotkey is pressed.")
+  App:Run('everything.exe')
+end
+
+Shell.onHotKey['WIN+F'] = function()
+  App:Debug("WIN+F hotkey is pressed.")
+  Alert('F')
+end
+```
+
+* [Lua] 增加`App:Pause()`命令，作为启动管理器时，可用此命令维持启动进程。
+* [Lua] 增加`System:CreatePageFile(file, min, max)`方法，可创建页面文件。
+* [Lua] 增加`System::ReloadCursors()`方法，可刷新鼠标指针式样。
+* [Lua] 增加`Reg:GetSubKeys()`方法，可以获取注册表的子项目集合。
+用法参考 LUA_Tests.bat 中的示例。
+
+```lua
+print("GetSubKeys for [HKEY_CLASSES_ROOT\\Folder]:")
+local subkeys = Reg:GetSubKeys([[HKEY_CLASSES_ROOT\Folder]])
+for i, v in ipairs(subkeys ) do
+  print(str.fmt("%d:%s", i, v))
+end
+```
+
+---
+## WinXShell 4.6 (2021.11.11)
+这是一个主要更新。添加和改善了以下内容:
+
+* 修复 亮度调节功能占用256MB内存的问题。
+* 改进 任务栏按钮显示风格。(适配Windows主题，解决Windows 11按钮高亮显示不自然的问题)
+* 新增 任务栏程序快速关闭按钮(可通过配置文件进行设定)。
+* 新增 UI组件
+  * UI_LED        屏幕提示信息(可滚动)。
+  * UI_TrayPanel  显示系统信息，日历，调度调节控件。
+* 改进 UI组件
+  * 当显示设置发生变化时，将调用 ondisplaychanged() 函数，可用来调整窗口位置或更新数据。
+  * UI_Settings   DPI设置新增225%, 250%, 275%, 300%选项。
+  * UI_SystemInfo 适配Windows 11。
+  * UI_Calendar   改善界面，新增亮度调节控件(可通过-brightness=true|false参数控制)。
+* 改进 lua接口
+  * 新增 app:info('FirmwareType') 方法
+  * 新增 app:info('IsUEFIMode') 方法
+  * 新增 sui:title(str) 方法
+  * 新增 sui:info('rect') 方法
+  * 新增 sui:info('wh') 方法
+  * 新增 FolderOptions:Toggle(opt) 方法
+* 其他细节更新
+
+---
+## WinXShell 4.5 (2021.04.04)
+这是一个主要更新。添加和改善了以下内容:
+
+* 新增 任务栏窗口预览功能(thumbnail)。
+* 改进 lua接口
+       可使用Desktop对象，可通过此对象更改壁纸，实时改变桌面图标大小，
+       布局等表示样式，可直接刷新桌面。
+* 改进 UI组件
+  * UI_Settings   支持设置屏幕亮度
+  * UI_SystemInfo 支持读取OEM信息
+  * UI_SystemInfo 修复无法正确显示机器名的问题
+  * UI_SystemInfo 调整界面字体，布局等细节
+  * UI_WIFI       可直接输入回车键进行连接
+  * UI_WIFI      【网络和Internet 设置】可打开【网络连接】页面(更改适配器选项)
+  * UI_WIFI       修复启动窗口闪烁问题
+  * UI_WIFI       修复在外壳启动前运行时，弹出连接窗口会覆盖任务栏的问题
+
+将支持的Lua函数和对象信息书写LUA_TEST.bat测试脚本(UTF-8编码，中文说明)。
+
+---
+## WinXShell 4.4 (2020.10.10)
+这是一个常规更新。添加和改善了以下内容:
+
+* 改善 lua_helper扩展
+    将winapi和lua扩展库编译到应用程序本身。
+    减小程序体积，简化结构，仅应用程序就可支持运行lua代码。
+
+* 强化 UI组件
+  * UI_WIFI      支持连接隐藏网络
+  * UI_WIFI      支持多无线网卡进行网络连接
+  * UI_Calendar  支持显示农历信息
+  * UI_Settings  支持修改显示DPI
+
+---
 ## WinXShell 4.3 (2020.04.04)
 这是一个主要更新。添加和改善了以下内容:
 
@@ -26,3 +150,38 @@
 * 改善 个性化设定界面，增加更多颜色相关设定选项。
 * 改善 声音设定界面滑块移动流畅度提高，提示音不再阻塞。
 * 修复 信息通知栏无法显示的问题。
+
+
+=======================================================================================================================
+
+## WinXShell 4.5 (2021.04.04)
+This is a major update.The following was added and improved:
+
+* Added task thumbnail feature.
+* Improved the lua interface.
+    Add the Desktop object, through which you can change the wallpaper, change the size of the desktop icons, the layout and other presentation styles in real time,
+    and refresh the desktop directly.
+* Improved UI components
+  * UI_Settings    supports setting screen brightness
+  * UI_SystemInfo  supports reading OEM information
+  * UI_SystemInfo  fix the issue that the computer name cannot be displayed correctly
+  * UI_SystemInfo  adjust interface font, layout and other details
+  * UI_WIFI        add the enter key to connect
+  * UI_WIFI        [network and Internet settings] link will open [Network connection] control panel window(change adapter options)
+  * UI_WIFI        fix the flickering problem of the startup window
+  * UI_WIFI        fix the problem that the connection window will cover the taskbar when the this is running before the shell starts.
+
+Write the supported Lua functions and objects into the LUA_TEST.bat test script (UTF-8 encoding, in Chinese).
+
+---
+## WinXShell 4.4 (2020.10.10)
+This is a regular update. The following were updated or improved:
+
+* Improved the lua_helper extension.
+    Compile winapi.dll and lua extension helpers into the application itself.
+    Reduce the size of the program, simplify the structure, and only the application program can support running Lua code.
+* Improved UI components.
+  * UI_WIFI      supports connection to hidden network
+                 supports multiple wireless network adapters for network connection
+  * UI_Calendar  supports display of lunar calendar for Chinese OS
+  * UI_Settings  supports modification and display of DPI
