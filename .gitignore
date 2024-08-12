@@ -27,3 +27,5 @@ wallpaper.jpg
 wxsStub.dll
 wxsStub32.dll
 UI_Debug.bat
+/dist
+/test
