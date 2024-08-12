@@ -70,6 +70,13 @@ alert = Alert
 
 --
 
+App.Version =  App:Info('Version')
+App.Ver = App.Version
+
+Lua = {}
+Lua.Version =  App:Info('LuaVersion')
+Lua.Ver = Lua.Version
+
 App.Path = App:Info('Path')
 App.Name = App:Info('Name')
 App.FullPath = App:Info('FullPath')
