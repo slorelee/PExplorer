@@ -537,6 +537,44 @@ extern "C" {
         return 0;
     }
 
+#ifdef _DEBUG
+    int lua_stack(lua_State* L)
+    {
+        char buff[255] = { 0 };
+        int i;
+        int top = lua_gettop(L);
+
+        sprintf(buff, "\ntotal in stack %d", top);
+        LOGA(buff);
+
+        for (i = 1; i <= top; i++) {  /* repeat for each level */
+            int t = lua_type(L, i);
+            switch (t) {
+            case LUA_TSTRING:  /* strings */
+                LOGA("string: ");
+                LOGA(lua_tostring(L, i));
+                //sprintf_s(buff, "string: '%s'", lua_tostring(L, i));
+                break;
+            case LUA_TBOOLEAN:  /* booleans */
+                sprintf(buff, "boolean %s", lua_toboolean(L, i) ? "true" : "false");
+                break;
+            case LUA_TNUMBER:  /* numbers */
+                sprintf(buff, "number: %g", lua_tonumber(L, i));
+                break;
+            case LUA_TUSERDATA:  /* numbers */
+                sprintf(buff, "number: 0x%x", lua_touserdata(L, i));
+                break;
+            default:  /* other values */
+                sprintf(buff, "%s", lua_typename(L, t));
+                break;
+            }
+            LOGA(buff);
+        }
+        LOGA("\n");  /* end the listing */
+        return 0;
+    }
+#endif
+
     static const luaL_Reg lua_reg_app_funcs[] = {
         { "Ver", lua_app_version },
         { "Call", lua_app_call },
