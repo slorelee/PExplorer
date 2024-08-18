@@ -48,7 +48,7 @@ local v
 -- New for v5.0.0
 
 --[[
-Alert('abc', 123, App:Version())
+Alert('abc', 123, App.Version)
 r = MsgBox('title', 'message', 'yes-no', 'warn')
 print('You clicked the [' .. r .. '] button.')
 ]]
