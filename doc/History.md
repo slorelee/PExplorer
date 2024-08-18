@@ -1,5 +1,10 @@
 # 更新历史记录
 
+[中文](#中文) [English](#English)
+
+## 中文
+=======================================================================================================================
+
 ## WinXShell RC5.1.4 beta1 (2024.08.08)
 这是一个主要更新。添加和改善了以下内容:
 
@@ -53,7 +58,7 @@ end
 
 * [Lua] 增加`App:Pause()`命令，作为启动管理器时，可用此命令维持启动进程。
 * [Lua] 增加`System:CreatePageFile(file, min, max)`方法，可创建页面文件。
-* [Lua] 增加`System::ReloadCursors()`方法，可刷新鼠标指针式样。
+* [Lua] 增加`System:ReloadCursors()`方法，可刷新鼠标指针式样。
 * [Lua] 增加`Reg:GetSubKeys()`方法，可以获取注册表的子项目集合。
 用法参考 LUA_Tests.bat 中的示例。
 
@@ -66,6 +71,43 @@ end
 ```
 
 ---
+
+## WinXShell 5.0 (2022.11.11)
+这是一个主要更新。添加和改善了以下内容:
+
+* 新增 使用说明文档(`WinXShell_Docs`)
+* 重构 Lua 代码接口， `WinXShell.lua` 事件响应函数等
+* 改进 当作为外壳(Shell)时，以下操作可分别定义打开不同的文件资源管理器。
+  * 桌面双击打开文件夹
+  * Windows + E 组合键
+  * 任务栏快速启动栏中点击文件资源管理器图标
+* 改进 UI组件
+  * `UI_WIFI` 支持连接 WPA2/WPA3 密码类型
+  * `UI_WIFI` 添加显示密码按钮
+  * ~~`UI_WIFI` 支持连接同名SSID~~
+  * `UI_WIFI` 修复不显示连接界面时，网络状态指示处理未回收内存的问题
+  * `UI_WIFI` 添加 Windows 11 风格托盘图标
+  * `UI_WIFI` 支持自定义托盘图标
+  * `UI_WIFI` 浅色主题文本框显示效果
+  * `UI_Calendar`, `UI_TrayPanel` 修正农历显示不正确的问题，更新农历数据(~2025 年)
+* 改进 Lua 接口
+  * 新增 `Sui:onClick()` 点击事件支持文本中的URL超链接响应
+  * 新增 `Sui:onHover()` 响应鼠标悬停事件
+  * 新增 `Dialog:Show()` 弹出对话框
+  * 新增 `Dialog:OpenFile()`, `Dialog:SaveFile()` 弹出打开文件/保存文件窗口
+  * 新增 `Dialog:BrowseFolder()` 浏览文件夹窗口
+  * 新增 `File.GetShortPath()` 获取 8.3格式的短路径
+  * 新增 `File.GetFullPath()` 获取 完整路径格式
+* 新增 日志功能(`-log` 选项)
+* 改善 自动识别是否是 Windows PE 环境运行， `-winpe` 选项 已废弃
+* 修复 有时打开菜单时，导致程序无法正常工作的问题
+* 更新 适配 Windows 11 新版本系统
+* 其他细节更新
+
+**本次更新功能增加不多，主要补充了说明文档，对Lua接口进行了重新设计，代码重构。**
+
+---
+
 ## WinXShell 4.6 (2021.11.11)
 这是一个主要更新。添加和改善了以下内容:
 
@@ -90,6 +132,7 @@ end
 * 其他细节更新
 
 ---
+
 ## WinXShell 4.5 (2021.04.04)
 这是一个主要更新。添加和改善了以下内容:
 
@@ -110,6 +153,7 @@ end
 将支持的Lua函数和对象信息书写LUA_TEST.bat测试脚本(UTF-8编码，中文说明)。
 
 ---
+
 ## WinXShell 4.4 (2020.10.10)
 这是一个常规更新。添加和改善了以下内容:
 
@@ -124,6 +168,7 @@ end
   * UI_Settings  支持修改显示DPI
 
 ---
+
 ## WinXShell 4.3 (2020.04.04)
 这是一个主要更新。添加和改善了以下内容:
 
@@ -152,9 +197,24 @@ end
 * 修复 信息通知栏无法显示的问题。
 
 
+## __________
+
+## English
 =======================================================================================================================
 
-## WinXShell 4.5 (2021.04.04)
+## WinXShell 5.0 (2022.11.11) EN
+Not translated yet.
+Please use the translation tool to view this update instructions.
+
+---
+
+## WinXShell 4.6 (2021.11.11) EN
+Not translated yet.
+Please use the translation tool to view this update instructions.
+
+---
+
+## WinXShell 4.5 (2021.04.04) EN
 This is a major update.The following was added and improved:
 
 * Added task thumbnail feature.
@@ -174,7 +234,8 @@ This is a major update.The following was added and improved:
 Write the supported Lua functions and objects into the LUA_TEST.bat test script (UTF-8 encoding, in Chinese).
 
 ---
-## WinXShell 4.4 (2020.10.10)
+
+## WinXShell 4.4 (2020.10.10) EN
 This is a regular update. The following were updated or improved:
 
 * Improved the lua_helper extension.
@@ -182,6 +243,6 @@ This is a regular update. The following were updated or improved:
     Reduce the size of the program, simplify the structure, and only the application program can support running Lua code.
 * Improved UI components.
   * UI_WIFI      supports connection to hidden network
-                 supports multiple wireless network adapters for network connection
+  * UI_WIFI      supports multiple wireless network adapters for network connection
   * UI_Calendar  supports display of lunar calendar for Chinese OS
   * UI_Settings  supports modification and display of DPI
