@@ -5,7 +5,7 @@
 #pragma comment(lib, "propsys.lib")
 #include <tchar.h>
 #include "DiskHelper.h"
-#include "../DUI/Helper.h"
+#include "LogHelper.h"
 
 INT GetVolumeBitLockerProtection(LPCWSTR parsingName)
 {

@@ -39,13 +39,17 @@ void send_wxs_protocol_url(PWSTR pszName)
     }
 }
 
+#ifdef HANDLE_PROTOCOL_URL
 extern int handle_wxs_protocol_url();
+#endif
 int embedding_entry()
 {
     if (JCFG2_DEF("JS_DAEMON", "handle_ms-settings_url", true).ToBool() != FALSE) {
         if (FindWindow(EmbeddinglWindowClass, NULL)) return 0;
         EmbeddinglWindow::Create();
+#ifdef HANDLE_PROTOCOL_URL
         handle_wxs_protocol_url();
+#endif
         return 0;
     }
     return 0;

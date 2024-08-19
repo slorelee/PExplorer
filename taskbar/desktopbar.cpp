@@ -30,7 +30,7 @@
 
 #include "../resource.h"
 
-#include "../DUI/Helper.h"
+// #include "../DUI/Helper.h"
 #include "desktopbar.h"
 #include "taskbar.h"
 #include "startmenu.h"

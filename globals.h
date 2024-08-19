@@ -27,6 +27,9 @@
 // Martin Fuchs, 23.07.2003
 //
 
+#define USE_DUILIB
+#define HANDLE_PROTOCOL_URL
+
 #include "luaengine/LuaAppEngine.h"
 #include "features/reshelper.h"
 

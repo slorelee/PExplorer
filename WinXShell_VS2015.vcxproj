@@ -585,6 +585,7 @@ cscript ResBuilder.vbs
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="utility\FolderOptions.cpp" />
+    <ClCompile Include="utility\LogHelper.cpp" />
     <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
@@ -690,6 +691,7 @@ cscript ResBuilder.vbs
     <ClInclude Include="utility\Dialog.h" />
     <ClInclude Include="utility\DiskHelper.h" />
     <ClInclude Include="utility\FolderOptions.h" />
+    <ClInclude Include="utility\LogHelper.h" />
     <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />
     <ClInclude Include="utility\ResourceHelper.h" />

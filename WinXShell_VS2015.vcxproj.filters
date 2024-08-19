@@ -196,6 +196,9 @@
     <ClCompile Include="utility\DiskHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="utility\LogHelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -345,6 +348,9 @@
       <Filter>luaengine</Filter>
     </ClInclude>
     <ClInclude Include="utility\DiskHelper.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\LogHelper.h">
       <Filter>utility</Filter>
     </ClInclude>
   </ItemGroup>

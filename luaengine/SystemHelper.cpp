@@ -5,6 +5,7 @@
 #include "LuaEngine.h"
 #include "../utility/DiskHelper.h"
 #pragma comment(lib, "rpcrt4.lib")
+#pragma comment(lib, "winmm.lib")
 
 extern BOOL IsUEFIMode();
 

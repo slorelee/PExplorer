@@ -6,7 +6,7 @@
 
 #include "lua.hpp"
 #include "LuaHelper.h"
-#include "../DUI/Helper.h"
+#include "../utility/LogHelper.h"
 
 enum TokenValue {
     TOK_UNSET = 0,

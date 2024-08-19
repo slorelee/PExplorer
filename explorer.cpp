@@ -48,7 +48,12 @@
 #include "services/shellservices.h"
 #include "jconfig/jcfg.h"
 
+#ifdef USE_DUILIB
 #include "DUI/UIManager.h"
+#else
+extern string_t GetParameter(string_t cmdline, string_t key, BOOL hasValue = TRUE);
+#endif
+
 #include "luaengine/LuaAppEngine.h"
 #include "features/features.h"
 
@@ -607,6 +612,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         g_Globals._hDefaultFont = CreateFontIndirect(&(ncm.lfMessageFont));
     }
 
+#ifdef USE_DUILIB
     CUIManager *pUIManager = NULL;
     if (_tcsstr(ext_options, TEXT("-uimgr"))) {
         HWND hwnd = CUIManager::GetUIManager();
@@ -614,6 +620,10 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
             pUIManager = new CUIManager(hInstance, TRUE);
        }
     }
+#else
+    typedef void CUIManager;
+    CUIManager *pUIManager = NULL;
+#endif
 
     if (g_Globals._lua) g_Globals._lua->onLoad();
 
@@ -863,11 +873,13 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
 
 void UIProcess(HINSTANCE hInst, String cmdline) {
 
+#ifdef USE_DUILIB
     HWND hwnd = CUIManager::GetUIManager();
     if (hwnd == NULL) {
         CUIManager::CreateUI(hInst, cmdline);
     } else {
         SendMessage(hwnd, WM_UICREATE, 0, (LPARAM)(cmdline.c_str()));
     }
+#endif
     return;
 }

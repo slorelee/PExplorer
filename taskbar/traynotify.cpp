@@ -34,7 +34,10 @@
 
 #include "traynotify.h"
 
+#ifdef USE_DUILIB
 #include "../DUI/UICreator.h"
+#endif
+
 #define Point UtilPoint
 
 #ifdef USE_NOTIFYHOOK
@@ -214,6 +217,7 @@ typedef struct _TrayNotifyInfo
     HICON hIcon;
 }TrayNotifyInfo;
 
+#ifdef USE_DUILIB
 class CNotifyInfoWindow :
     public CDUIWindow
 {
@@ -317,6 +321,7 @@ void CNotifyInfoWindow::CloseMe()
     m_Height = -1;
     /* delete this */;
 }
+#endif
 
 /*
 #include <list>
@@ -351,6 +356,7 @@ void gc_NotifyInfoWindow()
 
 void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
 {
+#ifdef USE_DUILIB
     static int n = 0;
 
     DWORD dwStyle = UI_WNDSTYLE_EX_DIALOG;
@@ -386,6 +392,7 @@ void CreateNotifyInfoWindow(TrayNotifyInfo *pTrayInfo)
     pFrame->ShowWindow();
     n++;
     if (n >= 999) n = 0;
+#endif
 }
 
 NotifyInfo::NotifyInfo()
