@@ -15,6 +15,7 @@
 ipch/
 Win32/
 x64/
+ARM/
 vendor/
 wxsUI/*.*
 lua_helper/*.bat
