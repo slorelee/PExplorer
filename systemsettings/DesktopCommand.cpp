@@ -1,7 +1,11 @@
 
+
 #include "DesktopCommand.h"
 
+#ifndef _ARM
 #include <atlcomcli.h>
+#endif // !_ARM
+
 #include <Windows.h>
 #include "../globals.h"
 
@@ -38,6 +42,7 @@ DesktopCommand::~DesktopCommand()
 
 void FindDesktopFolderView(REFIID riid, void **ppv)
 {
+#ifndef _ARM
     CComPtr<IShellWindows> spShellWindows;
     spShellWindows.CoCreateInstance(CLSID_ShellWindows);
     CComVariant vtLoc(CSIDL_DESKTOP);
@@ -60,6 +65,7 @@ void FindDesktopFolderView(REFIID riid, void **ppv)
     CComPtr<IShellView> spView;
     spBrowser->QueryActiveShellView(&spView);
     spView->QueryInterface(riid, ppv);
+#endif
 }
 
 void DesktopCommand::Refresh()
@@ -69,7 +75,7 @@ void DesktopCommand::Refresh()
         SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_REFRESH, 0x0);
         return;
     }
-
+#ifndef _ARM
     CComPtr<IShellView> spView;
 
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
@@ -77,6 +83,7 @@ void DesktopCommand::Refresh()
         return;
     }
     spView->Refresh();
+#endif
 }
 
 void DesktopCommand::SetIconSize(int size)
@@ -93,7 +100,7 @@ void DesktopCommand::SetIconSize(int size)
         SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_SETICONSIZE, size);
         return;
     }
-
+#ifndef _ARM
     CComPtr<IFolderView2> spView;
 
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
@@ -101,6 +108,7 @@ void DesktopCommand::SetIconSize(int size)
         return;
     }
     spView->SetViewModeAndIconSize(FVM_ICON, size);
+#endif
 }
 
 void DesktopCommand::SetFolderFlags(DWORD dwMask, int checked)
@@ -119,7 +127,7 @@ void DesktopCommand::SetFolderFlags(DWORD dwMask, int checked)
         SendMessage(desktop, WM_USER + WM_COMMAND, WM_DESKTOP_UNSETFOLDERFLAGS + checked, dwMask);
         return;
     }
-
+#ifndef _ARM
     CComPtr<IFolderView2> spView;
     FindDesktopFolderView(IID_PPV_ARGS(&spView));
     if (NULL == spView) {
@@ -131,6 +139,7 @@ void DesktopCommand::SetFolderFlags(DWORD dwMask, int checked)
     } else {
         spView->SetCurrentFolderFlags(dwMask, 0);
     }
+#endif
 }
 
 void DesktopCommand::AutoArrange(int checked)
