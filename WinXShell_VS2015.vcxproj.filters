@@ -63,41 +63,14 @@
     <ClCompile Include="shell\fileexplorer.cpp">
       <Filter>shell</Filter>
     </ClCompile>
-    <ClCompile Include="DUI\UIManager.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
-    <ClCompile Include="DUI\UICreator.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
     <ClCompile Include="systemsettings\MonitorAdapter.cpp">
       <Filter>systemsettings</Filter>
-    </ClCompile>
-    <ClCompile Include="DUI\UI_WIFI.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
-    <ClCompile Include="systemsettings\WLAN.cpp">
-      <Filter>systemsettings</Filter>
-    </ClCompile>
-    <ClCompile Include="utility\mpool.cpp">
-      <Filter>utility</Filter>
     </ClCompile>
     <ClCompile Include="utility\TrayHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
-    <ClCompile Include="DUI\SUIModule.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
-    <ClCompile Include="DUI\Helper.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
     <ClCompile Include="systemsettings\Volume.cpp">
       <Filter>systemsettings</Filter>
-    </ClCompile>
-    <ClCompile Include="DUI\UI_Volume.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
-    <ClCompile Include="commandverb\ExecuteCommandVerb.cpp">
-      <Filter>commandverb</Filter>
     </ClCompile>
     <ClCompile Include="features\console.cpp">
       <Filter>features</Filter>
@@ -160,9 +133,6 @@
     <ClCompile Include="luaengine\TaskbarHelper.cpp">
       <Filter>luaengine</Filter>
     </ClCompile>
-    <ClCompile Include="DUI\LuaUIEngine.cpp">
-      <Filter>DUI</Filter>
-    </ClCompile>
     <ClCompile Include="luaengine\SessionHelper.cpp">
       <Filter>luaengine</Filter>
     </ClCompile>
@@ -192,6 +162,9 @@
     </ClCompile>
     <ClCompile Include="luaengine\VolumeHelper.cpp">
       <Filter>luaengine</Filter>
+    </ClCompile>
+    <ClCompile Include="features\showdesktop.cpp">
+      <Filter>features</Filter>
     </ClCompile>
     <ClCompile Include="utility\DiskHelper.cpp">
       <Filter>utility</Filter>
@@ -260,44 +233,17 @@
     <ClInclude Include="shell\fileexplorer.h">
       <Filter>shell</Filter>
     </ClInclude>
-    <ClInclude Include="DUI\UICreator.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\UIManager.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
     <ClInclude Include="systemsettings\MonitorAdapter.h">
       <Filter>systemsettings</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\UI_WIFI.h">
-      <Filter>DUI</Filter>
     </ClInclude>
     <ClInclude Include="systemsettings\WLAN.h">
       <Filter>systemsettings</Filter>
     </ClInclude>
-    <ClInclude Include="utility\mpool.h">
-      <Filter>utility</Filter>
-    </ClInclude>
     <ClInclude Include="utility\TrayHelper.h">
       <Filter>utility</Filter>
     </ClInclude>
-    <ClInclude Include="DUI\SUIModule.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\Helper.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
     <ClInclude Include="systemsettings\Volume.h">
       <Filter>systemsettings</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\UI_Volume.h">
-      <Filter>DUI</Filter>
-    </ClInclude>
-    <ClInclude Include="commandverb\ShellHelpers.h">
-      <Filter>commandverb</Filter>
-    </ClInclude>
-    <ClInclude Include="commandverb\VerbHelpers.h">
-      <Filter>commandverb</Filter>
     </ClInclude>
     <ClInclude Include="features\reshelper.h">
       <Filter>features</Filter>
@@ -340,9 +286,6 @@
     </ClInclude>
     <ClInclude Include="luaengine\LuaEngine.h">
       <Filter>luaengine</Filter>
-    </ClInclude>
-    <ClInclude Include="DUI\LuaUIEngine.h">
-      <Filter>DUI</Filter>
     </ClInclude>
     <ClInclude Include="luaengine\WindowCompositionAttribute.h">
       <Filter>luaengine</Filter>
@@ -585,14 +528,8 @@
     <Filter Include="jconfig">
       <UniqueIdentifier>{738faaa0-fce2-4d26-9acb-5e6c2f9169f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DUI">
-      <UniqueIdentifier>{88849217-311a-4746-b089-fd7c92968594}</UniqueIdentifier>
-    </Filter>
     <Filter Include="systemsettings">
       <UniqueIdentifier>{5aaa6406-ca64-4d33-bbc5-068ff26a18a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="commandverb">
-      <UniqueIdentifier>{02871a87-905e-44a5-bec2-e31725a08fe6}</UniqueIdentifier>
     </Filter>
     <Filter Include="features">
       <UniqueIdentifier>{5377e3fb-b9a8-42db-88a9-6e9223ec7f1f}</UniqueIdentifier>

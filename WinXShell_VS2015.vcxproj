@@ -445,14 +445,6 @@ cscript ResBuilder.vbs
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="commandverb\ExecuteCommandVerb.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="customization\powermenu.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -467,35 +459,15 @@ cscript ResBuilder.vbs
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DUI\Helper.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="DUI\LuaUIEngine.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="DUI\SUIModule.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="DUI\UICreator.cpp" />
-    <ClCompile Include="DUI\UIManager.cpp" />
-    <ClCompile Include="DUI\UI_Volume.cpp" />
-    <ClCompile Include="DUI\UI_WIFI.cpp" />
     <ClCompile Include="features\brightnesslayer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="features\showdesktop.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -615,7 +587,6 @@ cscript ResBuilder.vbs
     </ClCompile>
     <ClCompile Include="utility\FolderOptions.cpp" />
     <ClCompile Include="utility\LogHelper.cpp" />
-    <ClCompile Include="utility\mpool.cpp" />
     <ClCompile Include="utility\ProductPolicyEditor.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
@@ -702,17 +673,8 @@ cscript ResBuilder.vbs
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="commandverb\ShellHelpers.h" />
-    <ClInclude Include="commandverb\VerbHelpers.h" />
     <ClInclude Include="customization\powermenu.h" />
     <ClInclude Include="customization\startbutton.h" />
-    <ClInclude Include="DUI\Helper.h" />
-    <ClInclude Include="DUI\LuaUIEngine.h" />
-    <ClInclude Include="DUI\SUIModule.h" />
-    <ClInclude Include="DUI\UICreator.h" />
-    <ClInclude Include="DUI\UIManager.h" />
-    <ClInclude Include="DUI\UI_Volume.h" />
-    <ClInclude Include="DUI\UI_WIFI.h" />
     <ClInclude Include="features\features.h" />
     <ClInclude Include="features\reshelper.h" />
     <ClInclude Include="jconfig\jcfg.h" />
@@ -729,7 +691,6 @@ cscript ResBuilder.vbs
     <ClInclude Include="utility\DiskHelper.h" />
     <ClInclude Include="utility\FolderOptions.h" />
     <ClInclude Include="utility\LogHelper.h" />
-    <ClInclude Include="utility\mpool.h" />
     <ClInclude Include="utility\ProductPolicyEditor.h" />
     <ClInclude Include="utility\ResourceHelper.h" />
     <ClInclude Include="utility\shellbrowserimpl.h" />
