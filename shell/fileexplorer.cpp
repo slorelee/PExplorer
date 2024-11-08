@@ -680,6 +680,8 @@ int explorer_open_frame(int cmdShow, LPTSTR lpCmdLine, int mode)
         explorer_path = JCFG2_DEF("JS_QUICKLAUNCH", "3rd_filename", explorer_path).ToString();
     } else if (mode == EXPLORER_OPEN_HOTKEY) {
         explorer_path = JCFG3_DEF("JS_FILEEXPLORER", "WIN+E", "3rd_filename", explorer_path).ToString();
+    } else if (mode == EXPLORER_OPEN_DIRECT) {
+        explorer_path = TEXT("");
     }
     if (explorer_path.empty()) {
         if (!g_Globals._desktop_mode || !seperate_mode) {

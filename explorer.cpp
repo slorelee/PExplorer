@@ -381,7 +381,7 @@ static void InitInstance(HINSTANCE hInstance)
 
 extern void send_wxs_protocol_url(PWSTR pszName);
 
-int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
+int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, LPCTSTR lpOption, int cmdShow)
 {
     CONTEXT("explorer_main");
     int rc = 0;
@@ -405,15 +405,18 @@ int explorer_main(HINSTANCE hInstance, LPTSTR lpCmdLine, int cmdShow)
 
         // ms-settings:xxxx
         String cmd_str = lpCmdLine;
+        String cmd_opt = lpOption;
+        int mode = EXPLORER_OPEN_NORMAL;
+        if (cmd_opt.find(TEXT("-open")) == 0) mode = EXPLORER_OPEN_DIRECT;
         if (cmd_str.find(TEXT("ms-settings:")) == String::npos) {
-            rc = explorer_open_frame(cmdShow, lpCmdLine, EXPLORER_OPEN_NORMAL);
+            rc = explorer_open_frame(cmdShow, lpCmdLine, mode);
         } else {
             ExplorerCmd cmd;
             if (lpCmdLine) cmd.ParseCmdLine(lpCmdLine);
             if (cmd._path.find(TEXT("ms-settings:")) == 0) {
                 send_wxs_protocol_url((PWSTR)(cmd._path.c_str()));
             } else {
-                rc = explorer_open_frame(cmdShow, lpCmdLine, EXPLORER_OPEN_NORMAL);
+                rc = explorer_open_frame(cmdShow, lpCmdLine, mode);
             }
         }
     }
@@ -849,7 +852,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdL
         return g_Globals._exitcode;
     }
 
-    int ret = explorer_main(hInstance, lpCmdLine, nShowCmd);
+    int ret = explorer_main(hInstance, lpCmdLine, ext_options.c_str(), nShowCmd);
 
 
     // write configuration file
