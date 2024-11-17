@@ -112,7 +112,7 @@ void ExplorerGlobals::getUIFolder()
     }
 }
 
-DWORD ReadFileVersion(const wchar_t *fileName, WORD *wdVers)
+DWORD ReadFileVersion(const wchar_t *fileName, DWORD *wdVers)
 {
     DWORD dwVersion = 0;
     HMODULE hinstDLL = LoadLibraryExW(fileName, NULL, LOAD_LIBRARY_AS_DATAFILE);
@@ -144,7 +144,7 @@ DWORD ReadFileVersion(const wchar_t *fileName, WORD *wdVers)
     return dwVersion;
 }
 
-DWORD PASCAL ReadKernelVersion(WORD *wdVers)
+DWORD PASCAL ReadKernelVersion(DWORD *wdVers)
 {
     return ReadFileVersion(L"kernel32.dll", wdVers);
 }

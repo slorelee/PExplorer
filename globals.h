@@ -86,7 +86,7 @@ extern struct ExplorerGlobals {
 
     String      _cmdline;
     String      _winver;
-    WORD        _winvers[4];
+    DWORD       _winvers[4];
     BOOL        _isDebug;
     BOOL        _isShell;
     BOOL        _isWinPE;
