@@ -83,9 +83,47 @@ EXTERN_C {
     {
         int ret = 0;
         Token v = { TOK_UNSET };
-
+        HWND taskbar = NULL;
         std::string func = funcname;
         if (func == "taskbar::changenotify") {
+            if (g_Globals._winvers[2] >= (DWORD)26100) {
+                taskbar = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+                if (taskbar) {
+                    SendMessage(taskbar, 1464, 0, 0); //HandleDisplayChange
+                    SendMessage(taskbar, 1361, 0, 0); //HandleChangeNotify
+                }
+                /* {
+                    HWND progman = FindWindow(TEXT("ProgMan"), NULL);
+                    if (progman) {
+                        SendMessageTimeout(progman, WM_USER + SPI_SETFONTSMOOTHING, 0, 0, SMTO_NORMAL, 1000, NULL);//0x44B(1099) or try  WM_NCCREATE 
+                    }
+                } */
+
+                /*
+                BOOL isPrim = FALSE;
+                MONITORINFO monitorInfo = {0};
+                monitorInfo.cbSize = sizeof(MONITORINFO);
+                GetMonitorInfo(MonitorFromWindow(NULL, MONITOR_DEFAULTTONEAREST), &monitorInfo);
+                if (monitorInfo.dwFlags == MONITORINFOF_PRIMARY)
+                {
+                    isPrim = TRUE;
+                }
+
+                LOGA("Shell_TrayWnd");
+                HWND hWndTray = FindWindow(TEXT("Shell_TrayWnd"), NULL);
+                if (FALSE == isPrim) {
+                    hWndTray = FindWindow(TEXT("Shell_SecondaryTrayWnd"), NULL);
+                }
+                if (hWndTray && !(::GetWindowLong(hWndTray, GWL_EXSTYLE) & WS_EX_TOPMOST))
+                {
+                    SetWindowPos(hWndTray, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+                }
+                if (hWndStart && !(::GetWindowLong(hWndStart, GWL_EXSTYLE) & WS_EX_TOPMOST))
+                {
+                    SetWindowPos(hWndStart, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+                }
+                */
+            }
             // g_Globals._SHSettingsChanged(0, TEXT("TraySettings"));
             SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, NULL, (LPARAM)(TEXT("TraySettings")));
         } else if (func == "taskbar::autohide") {
