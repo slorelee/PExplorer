@@ -155,18 +155,43 @@ LRESULT DesktopBar::Init(LPCREATESTRUCT pcs)
     SetWindowFont(hwndStart, g_Globals._hDefaultFont, FALSE);
 
     UINT idStartIcon = IDI_STARTMENU_B;
+    string_t sThemeStyle = TASKBAR_THEMESTYLE();
     if (start_icon.compare(TEXT("empty")) == 0) {
         idStartIcon = IDI_EMPTY;
     } else if (start_icon.compare(TEXT("custom")) == 0) {
         idStartIcon = IDI_SM_CUSTOM_1;
+    } else if (start_icon.compare(TEXT("files")) == 0) {
+        idStartIcon = 0;
     } else {
-        if (TASKBAR_THEMESTYLE().compare(TEXT("dark")) == 0) {
+        if (sThemeStyle.compare(TEXT("dark")) == 0) {
             idStartIcon = IDI_STARTMENU_W;
         }
     }
+
+    HICON starticon_normal = NULL, starticon_pushed = NULL;
+    if (idStartIcon == 0) {
+        // load Resources\*.ico
+        const TCHAR *wkPath = NULL;
+        wkPath = JVAR("JVAR_MODULEPATH").ToString().c_str();
+#ifdef _DEBUG
+        wkPath = TEXT(".");
+#endif // _DEBUG
+
+        String sPath = FmtString(TEXT("%s\\Resources\\%s\\Start_Normal.ico"), wkPath, sThemeStyle.c_str());
+        starticon_normal = (HICON)LoadImage(NULL, sPath.c_str(), IMAGE_ICON, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE,
+            LR_DEFAULTCOLOR | LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+
+        sPath = FmtString(TEXT("%s\\Resources\\%s\\Start_Pushed.ico"), wkPath, sThemeStyle.c_str());
+        starticon_pushed = (HICON)LoadImage(NULL, sPath.c_str(), IMAGE_ICON, TASKBAR_ICON_SIZE, TASKBAR_ICON_SIZE,
+            LR_DEFAULTCOLOR | LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    }
     COLORREF clrSWButtonPushed = JValueToColor(JCFG2_DEF("JS_STARTMENU", "start_pushed_bkcolor", (int)RGB(51, 53, 55)));
     HBRUSH hbrSWButtonPushed = CreateSolidBrush(clrSWButtonPushed);
-    new StartButton(hwndStart, idStartIcon, TASKBAR_BRUSH(), hbrSWButtonPushed, TASKBAR_TEXTCOLOR(), true);
+    if (idStartIcon != 0) {
+        new StartButton(hwndStart, idStartIcon, TASKBAR_BRUSH(), hbrSWButtonPushed, TASKBAR_TEXTCOLOR(), true);
+    } else {
+        new StartButton(hwndStart, starticon_normal, starticon_pushed, TASKBAR_BRUSH(), hbrSWButtonPushed, TASKBAR_TEXTCOLOR(), true);
+    }
 
     /* Save the handle to the window, needed for push-state handling */
     _hwndStartButton = hwndStart;
@@ -259,6 +284,12 @@ StartButton::StartButton(HWND hwnd, UINT nid, HBRUSH hbrush, HBRUSH hbrush2,
     COLORREF textcolor, bool flat)
     : PictureButton2(hwnd, SizeIcon(nid, TASKBAR_ICON_SIZE),
         SizeIcon(nid + 1, TASKBAR_ICON_SIZE), hbrush, hbrush2, textcolor, flat)
+{
+}
+
+StartButton::StartButton(HWND hwnd, HICON hIcon, HICON hIcon2, HBRUSH hbrush, HBRUSH hbrush2,
+    COLORREF textcolor, bool flat)
+    : PictureButton2(hwnd, hIcon, hIcon2, hbrush, hbrush2, textcolor, flat)
 {
 }
 

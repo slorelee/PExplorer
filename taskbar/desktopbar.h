@@ -124,6 +124,7 @@ struct StartButton : public PictureButton2 {
     typedef PictureButton2 super;
 
     StartButton(HWND hwnd, UINT nid, HBRUSH hbrush, HBRUSH hbrush2, COLORREF textcolor = -1, bool flat = false);
+    StartButton(HWND hwnd, HICON hicon, HICON hicon2, HBRUSH hbrush, HBRUSH hbrush2, COLORREF textcolor = -1, bool flat = false);
 
 protected:
     LRESULT WndProc(UINT nmsg, WPARAM wparam, LPARAM lparam);
