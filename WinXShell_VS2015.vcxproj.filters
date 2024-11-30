@@ -172,6 +172,9 @@
     <ClCompile Include="utility\LogHelper.cpp">
       <Filter>utility</Filter>
     </ClCompile>
+    <ClCompile Include="dialogs\about.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
