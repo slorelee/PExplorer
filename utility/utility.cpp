@@ -271,7 +271,10 @@ HRESULT CreateShortcut(PTSTR lnk, PTSTR target,
         hResult = pLink->QueryInterface(IID_IPersistFile, (PVOID *)&pFile);
         if (hResult == S_OK) {
             // Shortcut settings
-            if (iShowCmd > SW_SHOWNORMAL) hResult = pLink->SetShowCmd(iShowCmd);
+            if (iShowCmd > SW_SHOWNORMAL) {
+                if (iShowCmd == SW_SHOWMINIMIZED) iShowCmd = SW_SHOWMINNOACTIVE;
+                hResult = pLink->SetShowCmd(iShowCmd);
+            }
 
             hResult = pLink->SetPath(target);
             hResult = pLink->SetArguments(param);
