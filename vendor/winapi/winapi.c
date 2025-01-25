@@ -55,6 +55,11 @@ typedef LPCWSTR WStr;
 #if LUA_VERSION_NUM > 501
 #define lua_objlen lua_rawlen
 #endif
+
+#if LUA_VERSION_NUM > 503
+#define lua_newuserdata(L, sz) lua_newuserdatauv((L), (sz), 0)
+#endif
+
 typedef const char *Str;
 typedef const char *StrNil;
 typedef int Int;
