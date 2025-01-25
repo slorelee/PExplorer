@@ -158,7 +158,6 @@
     <ClCompile Include="..\lua\src\lapi.c" />
     <ClCompile Include="..\lua\src\lauxlib.c" />
     <ClCompile Include="..\lua\src\lbaselib.c" />
-    <ClCompile Include="..\lua\src\lbitlib.c" />
     <ClCompile Include="..\lua\src\lcode.c" />
     <ClCompile Include="..\lua\src\lcorolib.c" />
     <ClCompile Include="..\lua\src\lctype.c" />

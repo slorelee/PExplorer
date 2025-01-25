@@ -27,9 +27,6 @@
     <ClCompile Include="..\lua\src\lbaselib.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\lua\src\lbitlib.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\lua\src\lcode.c">
       <Filter>Source Files</Filter>
     </ClCompile>
