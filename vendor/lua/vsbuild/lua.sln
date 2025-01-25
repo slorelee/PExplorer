@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "lua.vcxproj", "{ACDB15F6-88DE-41C1-83B9-34911E152F50}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-cjson", "lua-cjson\lua-cjson.vcxproj", "{8F1D4CEC-2D01-41E1-8576-399455F81E34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Debug|Win32.Build.0 = Debug|Win32
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Debug|x64.ActiveCfg = Debug|x64
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Debug|x64.Build.0 = Debug|x64
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Release|Win32.ActiveCfg = Release|Win32
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Release|Win32.Build.0 = Release|Win32
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Release|x64.ActiveCfg = Release|x64
+		{ACDB15F6-88DE-41C1-83B9-34911E152F50}.Release|x64.Build.0 = Release|x64
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Debug|Win32.Build.0 = Debug|Win32
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Debug|x64.ActiveCfg = Debug|x64
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Debug|x64.Build.0 = Debug|x64
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Release|Win32.ActiveCfg = Release|Win32
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Release|Win32.Build.0 = Release|Win32
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Release|x64.ActiveCfg = Release|x64
+		{8F1D4CEC-2D01-41E1-8576-399455F81E34}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
